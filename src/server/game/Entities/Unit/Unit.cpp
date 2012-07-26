@@ -7973,12 +7973,12 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         switch (spellProto->SpellFamilyName)
         {
             case  SPELLFAMILY_SHAMAN:
-                // Healing stream from totem (add 6% per tick from hill bonus owner)
+                // Healing stream totem (add 14.67% per tick from owner healing bonus)
                 if (spellProto->SpellFamilyFlags & 0x000000002000LL)
-                    CastingTime = 210;
-                // Earth Shield 30% per charge
+                    CastingTime = 513;
+                // Earth Shield 45% per charge
                 else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
-                    CastingTime = 1050;
+                    CastingTime = 1575;
                 break;
             case  SPELLFAMILY_DRUID:
                 // Lifebloom
@@ -8012,9 +8012,9 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                     CastingTime = 500;
                 break;
             case SPELLFAMILY_PALADIN:
-                // Seal and Judgement of Light
+                // Seal and Judgement of Light (add 15%)
                 if (spellProto->SpellFamilyFlags & 0x100040000LL)
-                    CastingTime = 0;
+                    CastingTime = 525;
                 break;
             case SPELLFAMILY_WARRIOR:
             case SPELLFAMILY_ROGUE:

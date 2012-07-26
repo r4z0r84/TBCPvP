@@ -4108,6 +4108,13 @@ void Spell::EffectSummonClassPet(uint32 i)
         pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
         pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
         pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+        pet->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, pet->GetFollowAngle());
+        pet->GetCharmInfo()->SetCommandState(COMMAND_FOLLOW);
+        pet->GetCharmInfo()->SetIsCommandAttack(false);
+        pet->GetCharmInfo()->SetIsAtStay(false);
+        pet->GetCharmInfo()->SetIsReturning(false);
+        pet->GetCharmInfo()->SetIsFollowing(true);
     }
 }
 

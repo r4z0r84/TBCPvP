@@ -8412,6 +8412,19 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
 {
     if (apply)
     {
+        // Check if we have another spell in this Immunity still active on us so don't remove the actual immunity
+        Unit::AuraList const& ImmunityAuras = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY);
+        if (!ImmunityAuras.empty())
+        {
+            for (AuraList::const_iterator iter = ImmunityAuras.begin(); iter != ImmunityAuras.end(); ++iter)
+            {
+                if ((*iter)->GetId() == spellId)
+                    continue;
+                if ((*iter)->GetMiscValue() == type) // Don't add the immunity when we found ANOTHER spell with this Immunity Type
+                    return;
+            }
+        }
+
         for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(), next; itr != m_spellImmune[op].end(); itr = next)
         {
             next = itr; ++next;

@@ -427,7 +427,7 @@ m_periodicTimer(0), m_amplitude(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISH
         caster->ModSpellCastTime(m_spellProto, m_amplitude, NULL);
 
     m_isRemovedOnShapeLost = (m_caster_guid == m_target->GetGUID() && m_spellProto->Stances &&
-        !(m_spellProto->AttributesEx2 & 0x80000) && !(m_spellProto->Attributes & 0x10000) && (m_spellProto->Id != 12723));
+        !(m_spellProto->AttributesEx2 & 0x80000) && !(m_spellProto->Attributes & 0x10000) && (m_spellProto->Id != 12328));
 
     //  WeakenedSoul       Sweeping Strikes
     if (GetId() == 6788 || GetId() == 12328)

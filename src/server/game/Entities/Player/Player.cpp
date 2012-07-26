@@ -4245,6 +4245,9 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
     }
 
+    // Set Unattackable back to false, just in case it's not getting removed well
+    ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE, false);
+
     // update visibility
     UpdateObjectVisibility();
 

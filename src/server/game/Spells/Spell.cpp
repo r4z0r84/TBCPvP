@@ -1045,9 +1045,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
             m_caster->ToPlayer()->CastedCreatureOrGO(unit->GetEntry(), unit->GetGUID(), m_spellInfo->Id);
     }
 
-    if (!m_caster->IsFriendlyTo(unit) && !IsPositiveSpell(m_spellInfo->Id))
+    if (!m_caster->IsFriendlyTo(unit) && !IsPositiveSpell(m_spellInfo->Id) && IsAggressiveSpell(m_spellInfo, m_IsTriggeredSpell))
     {
-        m_caster->CombatStart(unit, !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO));
+        m_caster->CombatStart(unit);
 
         if (m_customAttr & SPELL_ATTR_CU_AURA_CC)
             if (!unit->IsStandState())

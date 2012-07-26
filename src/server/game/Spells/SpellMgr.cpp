@@ -294,6 +294,27 @@ bool IsPassiveSpell(SpellEntry const * spellInfo)
     return false;
 }
 
+bool IsAggressiveSpell(SpellEntry const* spellInfo, bool triggered)
+{
+    switch (spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_MAGE:
+        {
+            // Arcane Missiles (aura application)
+            if (spellInfo->SpellFamilyFlags & 0x0000000800LL)
+            {
+                if (!triggered)
+                    return false;
+            }
+        }
+    }
+
+    if (spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO)
+        return false;
+
+    return true;
+}
+
 bool IsAutocastableSpell(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);

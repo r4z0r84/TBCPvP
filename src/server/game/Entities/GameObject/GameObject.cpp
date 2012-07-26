@@ -464,7 +464,10 @@ void GameObject::Update(uint32 diff)
 
             if (!m_spawnedByDefault)
             {
+                // Delete GO's that were not spawned by database fields directly from the server's grid, so GM's won't see them anymore
                 m_respawnTime = 0;
+                SetRespawnTime(0);
+                Delete();
                 UpdateObjectVisibility();
                 return;
             }

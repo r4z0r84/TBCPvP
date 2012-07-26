@@ -2440,6 +2440,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 34580:
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
             break;
+        case 33619:
         case 6774:
             spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
             break;

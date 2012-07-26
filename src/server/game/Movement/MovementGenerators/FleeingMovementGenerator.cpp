@@ -25,8 +25,8 @@
 #include "DestinationHolderImp.h"
 #include "ObjectAccessor.h"
 
-#define MIN_QUIET_DISTANCE 28.0f
-#define MAX_QUIET_DISTANCE 43.0f
+#define MIN_QUIET_DISTANCE 22.0f
+#define MAX_QUIET_DISTANCE 27.0f
 
 template<class T>
 void

@@ -489,6 +489,12 @@ inline bool NeedsComboPoints(SpellEntry const* spellInfo)
     return (spellInfo->AttributesEx & (SPELL_ATTR_EX_REQ_COMBO_POINTS1 | SPELL_ATTR_EX_REQ_COMBO_POINTS2));
 }
 
+// spells autocasted by pets
+inline bool isPetSpell(SpellEntry const* spellInfo)
+{
+	return (spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo->SpellFamilyFlags & 0x0000000000001000LL);
+}
+
 inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
 {
     return SpellSchoolMask(spellInfo->SchoolMask);

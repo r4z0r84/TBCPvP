@@ -37,7 +37,7 @@ SystemMgr& SystemMgr::Instance()
 void SystemMgr::LoadScriptTexts()
 {
     sLog->outString("TSCR: Loading Script Texts...");
-    LoadSkyFireStrings(WorldDatabase, "script_texts", TEXT_SOURCE_RANGE, 1+(TEXT_SOURCE_RANGE*2));
+    LoadSkyFireStrings(WorldDatabase, "script_texts", TEXT_SOURCE_RANGE, 1+(TEXT_SOURCE_RANGE*3));
 
     QueryResult_AutoPtr Result = WorldDatabase.Query("SELECT entry, sound, type, language, emote FROM script_texts");
 
@@ -64,7 +64,7 @@ void SystemMgr::LoadScriptTexts()
                 continue;
             }
 
-            if (iId > TEXT_SOURCE_RANGE || iId <= TEXT_SOURCE_RANGE*2)
+            if (iId > TEXT_SOURCE_RANGE || iId <= TEXT_SOURCE_RANGE*3)
             {
                 sLog->outErrorDb("TSCR: Entry %i in table script_texts is out of accepted entry range for table.", iId);
                 continue;

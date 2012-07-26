@@ -2189,7 +2189,7 @@ void Spell::cancel()
 
     // Blizzard, Hellfire and Rain of Fire need global cooldown
     bool needGlobal = ((m_spellInfo->SpellFamilyFlags & 0x80080LL) && m_spellInfo->SpellIconID == 285)
-                        || ((m_spellInfo->SpellFamilyFlags & 0x40LL)    && m_spellInfo->SpellIconID == 937)
+                        || ((m_spellInfo->SpellFamilyFlags & 0x40LL) && m_spellInfo->SpellIconID == 937)
                         || (m_spellInfo->SpellIconID == 547) ? true : false;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER && !needGlobal)
@@ -4589,6 +4589,9 @@ uint8 Spell::CheckRange(bool strict)
             return SPELL_FAILED_OUT_OF_RANGE;
         if (dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
+
+        if (!m_caster->IsWithinLOS(m_targets.m_dstPos.GetPositionX(), m_targets.m_dstPos.GetPositionY(), m_targets.m_dstPos.GetPositionZ()))
+            return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
     return 0;
@@ -5180,7 +5183,7 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
     }
 
     //Do not check LOS for triggered spells
-    if (m_IsTriggeredSpell)
+    if (m_IsTriggeredSpell || m_spellInfo->Id == 33395)
         return true;
 
     //Check targets for LOS visibility (except spells without range limitations)

@@ -987,6 +987,9 @@ class Player : public Unit, public GridObject<Player>
         std::string afkMsg;
         std::string dndMsg;
 
+
+        uint32 m_DamageCustomReduction;
+
         PlayerSocial *GetSocial() { return m_social; }
 
         PlayerTaxi m_taxi;

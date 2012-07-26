@@ -536,6 +536,9 @@ Player::Player (WorldSession *session): Unit()
     m_ControlledByPlayer = true;
     m_isWorldObject = true;
 
+
+    m_DamageCustomReduction = 0; // Used for Damage Reduction spells, such as Blessed Life
+
     m_globalCooldowns.clear();
 }
 

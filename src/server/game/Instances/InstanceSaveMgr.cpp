@@ -297,32 +297,6 @@ void InstanceSaveManager::CleanupInstances()
         while (result->NextRow());
     }
 
-    // characters
-    result = CharacterDatabase.Query("SELECT DISTINCT(instance_id) FROM characters WHERE instance_id <> 0");
-    if (result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            if (InstanceSet.find(fields[0].GetUInt32()) == InstanceSet.end())
-                CharacterDatabase.DirectPExecute("UPDATE characters SET instance_id = '0' WHERE instance_id = '%u'", fields[0].GetUInt32());
-        }
-        while (result->NextRow());
-    }
-
-    // corpse
-    result = CharacterDatabase.Query("SELECT DISTINCT(instance) FROM corpse WHERE instance <> 0");
-    if (result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            if (InstanceSet.find(fields[0].GetUInt32()) == InstanceSet.end())
-                CharacterDatabase.DirectPExecute("UPDATE corpse SET instance = '0' WHERE instance = '%u'", fields[0].GetUInt32());
-        }
-        while (result->NextRow());
-    }
-
     sLog->outString();
     sLog->outString(">> Initialized %u instances", (uint32)InstanceSet.size());
 }

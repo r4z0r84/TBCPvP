@@ -3060,7 +3060,7 @@ void Player::learnSpell(uint32 spell_id)
     GetSession()->SendPacket(&data);
 }
 
-void Player::removeSpell(uint32 spell_id, bool disabled)
+void Player::removeSpell(uint32 spell_id, bool disabled, bool isFromTalent)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
@@ -3086,6 +3086,22 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
     WorldPacket data(SMSG_REMOVED_SPELL, 4);
     data << uint16(spell_id);
     GetSession()->SendPacket(&data);
+
+    if (isFromTalent)
+    {
+        SpellEntry const* spell = sSpellStore.LookupEntry(spell_id);
+
+        for (uint8 eff = 0; eff < MAX_SPELL_EFFECTS; ++eff)
+        {
+            if (spell->Effect[eff] == SPELL_EFFECT_TRIGGER_SPELL)
+            {
+                uint32 triggerSpell = spell->EffectTriggerSpell[eff];
+
+                if (HasAura(triggerSpell, 0))
+                    RemoveAura(triggerSpell, 0, 0);
+            }
+        }
+    }
 
     if (disabled)
     {
@@ -3406,7 +3422,7 @@ bool Player::resetTalents(bool no_cost)
                 // unlearn if first rank is talent or learned by talent
                 if (itrFirstId == talentInfo->RankID[j] || sSpellMgr->IsSpellLearnToSpell(talentInfo->RankID[j], itrFirstId))
                 {
-                    removeSpell(itr->first, !IsPassiveSpell(itr->first));
+                    removeSpell(itr->first, !IsPassiveSpell(itr->first), true);
                     itr = GetSpellMap().begin();
                     continue;
                 }

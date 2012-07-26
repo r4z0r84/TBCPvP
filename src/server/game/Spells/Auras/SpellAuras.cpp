@@ -2550,7 +2550,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             PowerType = POWER_ENERGY;
             break;
         case FORM_TRAVEL:
-            modelid = 632;
+            modelid = 918;
             break;
         case FORM_AQUA:
             if (Player::TeamForRace(m_target->getRace()) == ALLIANCE)

@@ -287,6 +287,7 @@ class Spell
         void EffectEnchantItemTmp(uint32 i);
         void EffectTameCreature(uint32 i);
         void EffectSummonPet(uint32 i);
+        void EffectSummonClassPet(uint32 i);
         void EffectLearnPetSpell(uint32 i);
         void EffectWeaponDmg(uint32 i);
         void EffectForceCast(uint32 i);

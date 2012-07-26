@@ -782,11 +782,11 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
                 {
                     case SPELL_CATEGORY_FOOD:                                // food
                         if (iProto->Stackable > 4)
-                            count = 4;
+                            count = 0;
                         break;
                     case SPELL_CATEGORY_DRINK:                                // drink
                         if (iProto->Stackable > 2)
-                            count = 2;
+                            count = 0;
                         break;
                 }
             }

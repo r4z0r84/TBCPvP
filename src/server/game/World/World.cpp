@@ -1205,6 +1205,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Aggro Spells Definitions...");
     sSpellMgr->LoadSpellThreats();
 
+    sLog->outString("Loading Triggered Spell Delays Definitions...");
+    sSpellMgr->LoadSpellDelays();
+
     sLog->outString("Loading NPC Texts...");
     sObjectMgr->LoadGossipText();
 

@@ -1461,6 +1461,16 @@ void SpellMgr::LoadSpellThreats()
     sLog->outString();
 }
 
+void SpellMgr::LoadSpellDelays()
+{
+    sSpellDelayStore.Free();                               // for reload
+
+    sSpellDelayStore.Load();
+
+    sLog->outString(">> Loaded %u delayed trigger spells", sSpellDelayStore.RecordCount);
+    sLog->outString();
+}
+
 void SpellMgr::LoadSpellEnchantProcData()
 {
     mSpellEnchantProcEventMap.clear();                             // need for reload case

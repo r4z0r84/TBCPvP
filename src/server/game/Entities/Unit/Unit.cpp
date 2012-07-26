@@ -6311,7 +6311,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         }
     }
 
-    if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
+    SpellDelayEntry const *spellDelay = sSpellDelayStore.LookupEntry<SpellDelayEntry>(trigger_spell_id);
+
+    if (cooldown && spellDelay && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasTriggerWithCooldown(trigger_spell_id))
+        return false;
+    else if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(trigger_spell_id))
         return false;
 
     // try detect target manually if not set
@@ -6323,10 +6327,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         return false;
 
     // apply spell cooldown before casting to prevent triggering spells with SPELL_EFFECT_ADD_EXTRA_ATTACKS if spell has hidden cooldown
-    if (cooldown && GetTypeId() == TYPEID_PLAYER)
+    if (!spellDelay && cooldown && GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
 
-    if (basepoints0)
+    if (spellDelay && GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->AddTriggeredSpell(spellDelay->spellId, target, spellDelay->procDelay, triggeredByAura->GetId(), triggeredByAura->GetEffIndex(), cooldown, basepoints0);
+    else if (basepoints0)
         CastCustomSpell(target, trigger_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura);
     else
         CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);

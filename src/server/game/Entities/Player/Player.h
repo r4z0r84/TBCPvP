@@ -833,6 +833,20 @@ class PlayerTaxi
         std::deque<uint32> m_TaxiDestinations;
 };
 
+struct DelayedTrigger
+{
+    DelayedTrigger(uint32 delay, uint32 spellId, uint64 targetGuid, uint32 triggerAuraId, uint8 eff, uint32 cooldown, int32 basepoints)
+        : m_timer(delay), m_spellId(spellId), m_targetGuid(targetGuid), m_triggeredByAuraId(triggerAuraId), m_effectIndex(eff), m_cooldown(cooldown), m_basepoints(basepoints) {}
+
+    uint32    m_timer;
+    uint32    m_spellId;
+    uint64    m_targetGuid;
+    uint32    m_triggeredByAuraId;
+    uint8     m_effectIndex;
+    uint32    m_cooldown;
+    int32     m_basepoints;
+};
+
 class Player;
 
 // Holder for BattleGround data
@@ -2174,7 +2188,14 @@ class Player : public Unit, public GridObject<Player>
         bool HasTitle(CharTitlesEntry const* title) { return HasTitle(title->bit_index); }
         void SetTitle(CharTitlesEntry const* title, bool lost = false);
 
+        void ClearTriggeredSpells() { m_delayedTrigger.clear(); }
+        void AddTriggeredSpell(uint32 spellId, Unit *target, uint32 delay, uint32 auraId, uint8 auraEff, uint32 cooldown, int32 basepoints) { m_delayedTrigger.push_back(DelayedTrigger(delay, spellId, target->GetGUID(), auraId, auraEff, cooldown, basepoints)); }
+        bool HasTriggerWithCooldown(uint32 triggerSpellId);
+
     protected:
+
+        typedef std::list<DelayedTrigger> DelayedTriggers;
+        DelayedTriggers m_delayedTrigger;
 
         uint32 m_contestedPvPTimer;
 

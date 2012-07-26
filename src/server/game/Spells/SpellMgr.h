@@ -37,6 +37,7 @@ class Player;
 class Spell;
 
 extern SQLStorage sSpellThreatStore;
+extern SQLStorage sSpellDelayStore;
 
 enum SpellFailedReason
 {
@@ -1077,6 +1078,7 @@ class SpellMgr
         void LoadSpellProcEvents();
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
+        void LoadSpellDelays();
         void LoadSkillLineAbilityMap();
         void LoadSpellPetAuras();
         void LoadSpellCustomAttr();

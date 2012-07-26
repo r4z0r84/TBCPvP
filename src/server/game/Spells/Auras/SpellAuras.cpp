@@ -48,6 +48,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "VMapFactory.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -5274,7 +5275,20 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 if (!spellInfo || !(spellInfo->Attributes & ((1<<6) | (1<<7))))
                     continue;
                 if (spellInfo->Stances & (1<<form))
+                {
+                    // Add this check here, for all form spells!
+                    if (m_target->GetTypeId() == TYPEID_PLAYER && !m_target->ToPlayer()->isGameMaster() && sWorld.getConfig(CONFIG_VMAP_INDOOR_CHECK) && VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled())
+                    {
+                        if (spellInfo->Attributes & 0x8000)
+                            if(!m_target->GetMap()->IsOutdoors(m_target->GetPositionX(), m_target->GetPositionY(), m_target->GetPositionZ()))
+                                continue;
+
+                        if (spellInfo->Attributes & SPELL_ATTR_INDOORS_ONLY && m_target->GetMap()->IsOutdoors(m_target->GetPositionX(), m_target->GetPositionY(), m_target->GetPositionZ()))
+                            continue;
+                    }
+
                     m_target->CastSpell(m_target, itr->first, true, NULL, this);
+                }
             }
             //LotP
             if (m_target->ToPlayer()->HasSpell(17007))

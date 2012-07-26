@@ -2429,9 +2429,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 41013:     // Parasitic Shadowfiend Passive
             spellInfo->EffectApplyAuraName[0] = 4; // proc debuff, and summon infinite fiends
             break;
-        case 1543: // Flare
-            spellInfo->speed = 0;
-            break;
         case 27892:     // To Anchor 1
         case 27928:     // To Anchor 1
         case 27935:     // To Anchor 1

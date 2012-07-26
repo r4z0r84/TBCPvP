@@ -77,7 +77,9 @@ m_declinedname(NULL), m_owner(owner)
         InitCharmInfo();
     }
 
-    if (type == CLASS_PET)
+    if (type == CLASS_PET && owner->getClass() == CLASS_PRIEST)
+        SetReactState(REACT_AGGRESSIVE);
+    else if (type == CLASS_PET)
         SetReactState(REACT_DEFENSIVE);
 
     m_name = "Pet";

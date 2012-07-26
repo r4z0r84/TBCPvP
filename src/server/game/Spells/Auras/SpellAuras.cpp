@@ -5733,18 +5733,6 @@ void Aura::PeriodicTick()
             sLog->outDebug("PeriodicTick: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
                 GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId(), absorb);
 
-            WorldPacket data(SMSG_PERIODICAURALOG, (21+16));// we guess size
-            data << m_target->GetPackGUID();
-            data.appendPackGUID(GetCasterGUID());
-            data << uint32(GetId());
-            data << uint32(1);
-            data << uint32(m_modifier.m_auraname);
-            data << uint32(pdamage-absorb);
-            data << uint32(GetSpellSchoolMask(GetSpellProto())); // will be mask in 2.4.x
-            data << uint32(absorb);
-            data << uint32(resist);
-            m_target->SendMessageToSet(&data, true);
-
             Unit* target = m_target;                        // aura can be deleted in DealDamage
             SpellEntry const* spellProto = GetSpellProto();
 
@@ -5755,6 +5743,19 @@ void Aura::PeriodicTick()
             pdamage = (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist);
             if (pdamage)
                 procVictim|=PROC_FLAG_TAKEN_ANY_DAMAGE;
+
+            WorldPacket data(SMSG_PERIODICAURALOG, (21+16));// we guess size
+            data << m_target->GetPackGUID();
+            data.appendPackGUID(GetCasterGUID());
+            data << uint32(GetId());
+            data << uint32(1);
+            data << uint32(m_modifier.m_auraname);
+            data << uint32(pdamage);
+            data << uint32(GetSpellSchoolMask(GetSpellProto())); // will be mask in 2.4.x
+            data << uint32(absorb);
+            data << uint32(resist);
+            m_target->SendMessageToSet(&data, true);
+
             pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, pdamage, BASE_ATTACK, spellProto);
 
             pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);

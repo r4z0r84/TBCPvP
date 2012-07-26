@@ -662,6 +662,9 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 31579:                                         // Arcane Empowerment Rank1 talent aura with one positive and one negative (check not needed in wotlk)
         case 31582:                                         // Arcane Empowerment Rank2
         case 31583:                                         // Arcane Empowerment Rank3
+        case 43945:                                         // You're...
+        case 44305:                                         // You're...
+        case 30458:                                         // Nigh invulnerability
             return true;
         case  1852:                                         // Silenced (GM)
         case 46392:                                         // Focused Assault
@@ -675,6 +678,11 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 31719:                                         // Suspension
         case 43501:                                         // Siphon Soul (Hexlord Spell)
         case 30457:                                         // Complete vulnerability
+        case 30500:                                         // Death Coil by Grand Warlock Nethekurse in Shattered Halls
+        case 12292:                                         // Death Wish
+        case 24131:                                         // Wyvern Sting (Rank1)
+        case 24134:                                         // Wyvern Sting (Rank2)
+        case 24135:                                         // Wyvern Sting (Rank3)
             return false;
     }
 

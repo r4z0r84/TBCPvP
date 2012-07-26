@@ -4376,6 +4376,72 @@ bool ChatHandler::HandleMod32Value(const char *args)
     return true;
 }
 
+bool ChatHandler::HandleSpellInfoCommand(const char* args)
+{
+    uint32 spell = extractSpellIdFromLink((char*)args);
+
+    SpellEntry const* m_spellInfo = sSpellStore.LookupEntry(spell);
+    Player* pl = m_session->GetPlayer();
+
+    if (!spell || !m_spellInfo)
+        return false;
+
+    sLog->outError("##########[%u]##########", m_spellInfo->Id);
+    sLog->outError("");
+    sLog->outError("# SpellFamilyName: %u", m_spellInfo->SpellFamilyName);
+    sLog->outError("# SpellFamilyFlags: %u", m_spellInfo->SpellFamilyFlags);
+    sLog->outError("# SpellIconID: %u", m_spellInfo->SpellIconID);
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (m_spellInfo->Effect[i])
+        {
+            sLog->outError("---------------------------------");
+            sLog->outError("# SpellEffect: %u", m_spellInfo->Effect[i]);
+
+            if (m_spellInfo->EffectApplyAuraName[i])
+            {
+                sLog->outError("# SpellAura: %u", m_spellInfo->EffectApplyAuraName[i]);
+
+                Unit::AuraList const& auras = pl->GetAurasByType((AuraType)m_spellInfo->EffectApplyAuraName[i]);
+                for (Unit::AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
+                {
+                    if ((*iter)->GetId() == spell)
+                    {
+                        if ((*iter)->GetModifierValue())
+                            sLog->outError("# [ModValue: %i]", (*iter)->GetModifierValue());
+                        if ((*iter)->GetModifier()->m_miscvalue)
+                            sLog->outError("# [MiscValue: %i]", (*iter)->GetModifier()->m_miscvalue);
+                    }
+                }
+            }
+
+            if (uint32 targetA = sSpellMgr->SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]])
+                sLog->outError("# TargetTypeA: %u, Effect: %i", targetA, i);
+
+            if (uint32 targetB = sSpellMgr->SpellTargetType[m_spellInfo->EffectImplicitTargetB[i]])
+                sLog->outError("# TargetTypeB: %u, Effect: %i", targetB, i);
+
+            sLog->outError("---------------------------------");
+        }
+    }
+
+    if (m_spellInfo->SpellVisual)
+        sLog->outError("# Spell Visual: %u", m_spellInfo->SpellVisual);
+    if (m_spellInfo->AttributesEx)
+        sLog->outError("# Spell (AttributesEx): %u", m_spellInfo->AttributesEx);
+    if (m_spellInfo->AttributesEx2)
+        sLog->outError("# Spell (AttributesEx2): %u", m_spellInfo->AttributesEx2);
+    if (m_spellInfo->AttributesEx3)
+        sLog->outError("# Spell (AttributesEx3): %u", m_spellInfo->AttributesEx3);
+    if (m_spellInfo->AttributesEx4)
+        sLog->outError("# Spell (AttributesEx4): %u", m_spellInfo->AttributesEx4);
+
+    sLog->outError("#######################");
+
+    return true;
+}
+
 bool ChatHandler::HandleAddTeleCommand(const char * args)
 {
     if (!*args)

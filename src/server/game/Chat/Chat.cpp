@@ -240,6 +240,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setvalue",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSetValue,                   "", NULL },
         { "getvalue",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleGetValue,                   "", NULL },
         { "Mod32Value",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMod32Value,                 "", NULL },
+        { "spellinfo",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSpellInfoCommand,           "", NULL },
         { "anim",          SEC_GAMEMASTER,     false, &ChatHandler::HandleAnimCommand,                "", NULL },
         { "lootrecipient", SEC_GAMEMASTER,     false, &ChatHandler::HandleGetLootRecipient,           "", NULL },
         { "arena",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugArenaCommand,          "", NULL },

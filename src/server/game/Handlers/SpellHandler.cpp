@@ -174,6 +174,28 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
                 continue;
             }
 
+            if ((pItem->GetEntry() == 24268 || pItem->GetEntry() == 24269) && (spellInfo->Id == 31367 || spellInfo->Id == 31368))
+            {
+                uint64 selected = pUser->GetSelection();
+                Unit* target = ObjectAccessor::GetUnit(*pUser, selected);
+
+                if (target)
+                {
+                    if (pUser->canAttack(target))
+                        targets.setUnitTarget(target);
+                    else
+                    {
+                        pUser->GetSession()->SendNotification("Invalid target");
+                        continue;
+                    }
+                }
+                else
+                {
+                    pUser->GetSession()->SendNotification("You have no target.");
+                    continue;
+                }
+            }
+
             Spell *spell = new Spell(pUser, spellInfo, (count > 0));
             spell->m_CastItem = pItem;
             spell->m_cast_count = cast_count;               //set count of casts

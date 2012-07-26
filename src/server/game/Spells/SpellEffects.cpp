@@ -2488,12 +2488,8 @@ void Spell::EffectPowerBurn(uint32 i)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
     new_damage = int32(new_damage * multiplier);
-    //m_damage+=new_damage; should not apply spell bonus
 
-    if (m_originalCaster)
-        m_originalCaster->DealDamage(unitTarget, new_damage);
-
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, GetSpellSchoolMask(m_spellInfo), 0, 0, false, 0, false);
+    m_damage += new_damage;
 }
 
 void Spell::EffectHeal(uint32 /*i*/)

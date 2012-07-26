@@ -16,7 +16,6 @@ if ( USE_COREPCH )
 endif()
 
 file(GLOB_RECURSE sources_Accounts Accounts/*.cpp Accounts/*.h)
-file(GLOB_RECURSE sources_Addons Addons/*.cpp Addons/*.h)
 file(GLOB_RECURSE sources_AI AI/*.cpp AI/*.h)
 file(GLOB_RECURSE sources_AuctionHouse AuctionHouse/*.cpp AuctionHouse/*.h)
 file(GLOB_RECURSE sources_Battlegrounds Battlegrounds/*.cpp Battlegrounds/*.h)

@@ -3320,7 +3320,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
         {
             m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x02);
             if (m_target->GetTypeId() == TYPEID_PLAYER)
-                m_target->SetFlag(PLAYER_FIELD_BYTES2, 0x2000);
+                m_target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_STEALTH);
 
             // apply only if not in GM invisibility (and overwrite invisibility state)
             if (m_target->GetVisibility() != VISIBILITY_OFF)
@@ -3349,22 +3349,13 @@ void Aura::HandleModStealth(bool apply, bool Real)
             {
                 m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x00);
                 if (m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
+                    m_target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_STEALTH);
 
                 // restore invisibility if any
                 if (m_target->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
-                {
-                    //m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-                    //m_target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
                     m_target->SetVisibility(VISIBILITY_ON);
-                }
                 else
-                {
                     m_target->SetVisibility(VISIBILITY_ON);
-                    //if (m_target->GetTypeId() == TYPEID_PLAYER)
-                    //    if (OutdoorPvP * pvp = m_target->ToPlayer()->GetOutdoorPvP())
-                    //        pvp->HandlePlayerActivityChanged(m_target->ToPlayer());
-                }
             }
         }
     }
@@ -3395,23 +3386,13 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 
         m_target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_UNATTACKABLE);
 
+        // apply glow vision
         if (Real && m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            // apply glow vision
-            m_target->SetFlag(PLAYER_FIELD_BYTES2, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
-            // remove player from the objective's active player count at invisibility
-            //if (OutdoorPvP * pvp = m_target->ToPlayer()->GetOutdoorPvP())
-            //    pvp->HandlePlayerActivityChanged(m_target->ToPlayer());
-        }
+            m_target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
         // apply only if not in GM invisibility and not stealth
         if (m_target->GetVisibility() == VISIBILITY_ON)
-        {
-            // Aura not added yet but visibility code expect temporary add aura
-            //m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-            //m_target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
             m_target->SetVisibility(VISIBILITY_ON);
-        }
     }
     else
     {
@@ -3426,19 +3407,14 @@ void Aura::HandleInvisibility(bool apply, bool Real)
         {
             // remove glow vision
             if (m_target->GetTypeId() == TYPEID_PLAYER)
-                m_target->RemoveFlag(PLAYER_FIELD_BYTES2, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+                m_target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
             // apply only if not in GM invisibility & not stealthed while invisible
-            if (m_target->GetVisibility() != VISIBILITY_OFF)
+            if (m_target->GetVisibility() == VISIBILITY_ON)
             {
                 // if have stealth aura then already have stealth visibility
                 if (!m_target->HasAuraType(SPELL_AURA_MOD_STEALTH))
-                {
                     m_target->SetVisibility(VISIBILITY_ON);
-                    //if (m_target->GetTypeId() == TYPEID_PLAYER)
-                    //    if (OutdoorPvP * pvp = m_target->ToPlayer()->GetOutdoorPvP())
-                    //        pvp->HandlePlayerActivityChanged(m_target->ToPlayer());
-                }
             }
         }
     }

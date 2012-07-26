@@ -492,6 +492,23 @@ bool ItemUse_item_zezzak_shard(Player* player, Item* _Item, SpellCastTargets con
     return true;
 }
 
+// Arm the Wards item use
+
+bool ItemUse_Mana_Remnants(Player *User, Item* _Item, SpellCastTargets const& targets)
+{
+    Creature *Ward = User->FindNearestCreature(24980, 10.0f, true);
+    if (!Ward)
+    {
+        WorldPacket data(SMSG_CAST_FAILED, (4+2));              // prepare packet error message
+        data << uint32(10699);                                  // itemId
+        data << uint8(SPELL_FAILED_BAD_TARGETS);                // reason
+        User->GetSession()->SendPacket(&data);                  // send message: Bad target
+        User->SendEquipError(EQUIP_ERR_NONE,_Item,NULL);        // break spell
+        return true;
+    }
+
+    return false;
+}
 void AddSC_item_scripts()
 {
     Script *newscript;
@@ -594,6 +611,11 @@ void AddSC_item_scripts()
     newscript = new Script;
     newscript->Name = "item_zezzaks_shard";
     newscript->pItemUse = &ItemUse_item_zezzak_shard;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "item_mana_remnants";
+    newscript->pItemUse = &ItemUse_Mana_Remnants;
     newscript->RegisterSelf();
 }
 

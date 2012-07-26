@@ -73,8 +73,7 @@ struct npc_converted_sentryAI : public ScriptedAI
                     DoScriptText(SAY_CONVERTED_2, me);
 
                 DoCast(me, SPELL_CONVERT_CREDIT);
-                if (me->isPet())
-                    CAST_PET(me)->SetDuration(7500);
+                me->ForcedDespawn();
                 Credit = true;
             } else Timer -= diff;
         }

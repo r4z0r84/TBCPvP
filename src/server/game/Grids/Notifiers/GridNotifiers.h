@@ -1035,6 +1035,20 @@ namespace Trinity
         float fRange;
     };
 
+    class ObjectTypeIdCheck
+    {
+        public:
+            ObjectTypeIdCheck(TypeID typeId, bool equals) : _typeId(typeId), _equals(equals) {}
+            bool operator()(WorldObject* object)
+            {
+                return (object->GetTypeId() == _typeId) == _equals;
+            }
+
+        private:
+            TypeID _typeId;
+            bool _equals;
+    };
+
     // Player checks and do
 
     // Prepare using Builder localized packets with caching and send to player

@@ -1411,9 +1411,11 @@ void Spell::SearchAreaTarget(std::list<Unit*> &TagUnitMap, float radius, const u
     }
 
     Trinity::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, type, TargetType, pos, entry);
-    if ((m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_PLAYERS_ONLY)
-        || TargetType == SPELL_TARGETS_ENTRY && !entry)
+    if ((m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_PLAYERS_ONLY) || TargetType == SPELL_TARGETS_ENTRY && !entry)
+    {
         m_caster->GetMap()->VisitWorld(pos->m_positionX, pos->m_positionY, radius, notifier);
+        TagUnitMap.remove_if(Trinity::ObjectTypeIdCheck(TYPEID_PLAYER, false));
+    }
     else
         m_caster->GetMap()->VisitAll(pos->m_positionX, pos->m_positionY, radius, notifier);
 }

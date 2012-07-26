@@ -42,10 +42,10 @@ EndScriptData */
 struct boss_the_makerAI : public ScriptedAI
 {
     boss_the_makerAI(Creature *c) : ScriptedAI(c)
-	{
-            instance = c->GetInstanceScript();
-            HeroicMode = me->GetMap()->IsHeroic();
-	}
+    {
+        instance = c->GetInstanceScript();
+        HeroicMode = me->GetMap()->IsHeroic();
+    }
 
     ScriptedInstance* instance;
     bool HeroicMode;
@@ -57,8 +57,12 @@ struct boss_the_makerAI : public ScriptedAI
     {
         ExplodingBreaker_Timer = 9000;
         Domination_Timer = 60000;
-        if (instance)
-            instance->SetData(DATA_MAKEREVENT, NOT_STARTED);
+        
+        if (!instance)
+            return;
+
+        instance->SetData(TYPE_THE_MAKER_EVENT, NOT_STARTED);
+        instance->HandleGameObject(instance->GetData64(DATA_DOOR2), true);
     }
 
     void EnterCombat(Unit *who)
@@ -70,8 +74,11 @@ struct boss_the_makerAI : public ScriptedAI
             case 2: DoScriptText(SAY_AGGRO_3, me); break;
         }
 
-        if (instance)
-            instance->SetData(DATA_MAKEREVENT, IN_PROGRESS);
+        if (!instance)
+            return;
+        
+        instance->SetData(TYPE_THE_MAKER_EVENT, IN_PROGRESS);
+        instance->HandleGameObject(instance->GetData64(DATA_DOOR2), false);
     }
 
     void KilledUnit(Unit* victim)
@@ -87,8 +94,12 @@ struct boss_the_makerAI : public ScriptedAI
     {
         DoScriptText(SAY_DIE, me);
 
-        if (instance)
-            instance->SetData(DATA_MAKEREVENT, DONE);
+        if (!instance)
+            return;
+        
+        instance->SetData(TYPE_THE_MAKER_EVENT, DONE);
+        instance->HandleGameObject(instance->GetData64(DATA_DOOR2), true);
+        instance->HandleGameObject(instance->GetData64(DATA_DOOR3), true);
     }
 
     void UpdateAI(const uint32 diff)

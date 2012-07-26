@@ -78,7 +78,8 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
     {
         instance = c->GetInstanceScript();
         HeroicMode = me->GetMap()->IsHeroic();
-        for (int i = 0; i < 5; ++i) Channelers[i] = 0;
+        for (int i = 0; i < 5; ++i)
+            Channelers[i] = 0;
     }
 
     ScriptedInstance* instance;
@@ -103,8 +104,12 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
         addYell = false;
         SummonChannelers();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        if (instance)
-            instance->SetData(DATA_KELIDANEVENT, NOT_STARTED);
+
+        if (!instance)
+            return;
+
+        instance->SetData(TYPE_KELIDAN_THE_BREAKER_EVENT, NOT_STARTED);
+
     }
 
     void EnterCombat(Unit *who)
@@ -113,8 +118,11 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
         if (me->IsNonMeleeSpellCasted(false))
             me->InterruptNonMeleeSpells(true);
         DoStartMovement(who);
-        if (instance)
-            instance->SetData(DATA_KELIDANEVENT, IN_PROGRESS);
+
+        if (!instance)
+            return;
+
+        instance->SetData(TYPE_KELIDAN_THE_BREAKER_EVENT, IN_PROGRESS);
     }
 
     void KilledUnit(Unit* victim)
@@ -196,8 +204,13 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
     void JustDied(Unit* Killer)
     {
         DoScriptText(SAY_DIE, me);
-       if (instance)
-           instance->SetData(DATA_KELIDANEVENT, DONE);
+
+        if (!instance)
+            return;
+
+        instance->SetData(TYPE_KELIDAN_THE_BREAKER_EVENT, DONE);
+        instance->HandleGameObject(instance->GetData64(DATA_DOOR1), true);
+        instance->HandleGameObject(instance->GetData64(DATA_DOOR6), true);
     }
 
     void UpdateAI(const uint32 diff)
@@ -255,7 +268,7 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
             }
 
             if (HeroicMode)
-                DoTeleportAll(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),me->GetOrientation());
+                DoTeleportAll(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
 
             BurningNova_Timer = 20000+rand()%8000;
             Firenova_Timer= 5000;

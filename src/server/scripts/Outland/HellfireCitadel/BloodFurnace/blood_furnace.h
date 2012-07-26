@@ -21,9 +21,17 @@
 #ifndef DEF_BLOOD_FURNACE_H
 #define DEF_BLOOD_FURNACE_H
 
-#define DATA_MAKEREVENT             1
-#define DATA_BROGGOKEVENT           2
-#define DATA_KELIDANEVENT           3
-
+#define DATA_THE_MAKER                  1
+#define DATA_BROGGOK                    2
+#define DATA_KELIDAN_THE_MAKER          3
+#define TYPE_THE_MAKER_EVENT            4
+#define TYPE_BROGGOK_EVENT              5
+#define TYPE_KELIDAN_THE_BREAKER_EVENT  6
+#define DATA_DOOR1                      7
+#define DATA_DOOR2                      8
+#define DATA_DOOR3                      9
+#define DATA_DOOR4                      10
+#define DATA_DOOR5                      11
+#define DATA_DOOR6                      12
 #endif
 

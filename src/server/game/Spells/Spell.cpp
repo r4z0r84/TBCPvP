@@ -2214,13 +2214,21 @@ void Spell::cast(bool skipCheck)
     UpdatePointers();
 
     if (Unit *pTarget = m_targets.getUnitTarget())
+    {
         if (pTarget->isAlive() && (pTarget->HasAuraType(SPELL_AURA_MOD_STEALTH) || pTarget->HasAuraType(SPELL_AURA_MOD_INVISIBILITY)) && !pTarget->IsFriendlyTo(m_caster) && !pTarget->isVisibleForOrDetect(m_caster, true))
         {
             SendCastResult(SPELL_FAILED_BAD_TARGETS);
             finish(false);
             return;
         }
-
+    }
+    if (Player* playerCaster = m_caster->ToPlayer())
+    {
+        if (this->m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_NONE)
+            if (Pet* playerPet = playerCaster->GetPet())
+                if (playerPet->isAlive() && playerPet->isControlled() && (m_targets.m_targetMask & TARGET_FLAG_UNIT))
+                    playerPet->AI()->OwnerAttacked(m_targets.getUnitTarget());
+    }
     SetExecutedCurrently(true);
     uint8 castResult = 0;
 

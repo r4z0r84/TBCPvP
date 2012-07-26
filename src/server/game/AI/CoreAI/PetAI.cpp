@@ -77,6 +77,9 @@ void PetAI::_stopAttack()
 
 void PetAI::UpdateAI(const uint32 diff)
 {
+    if (!me->isAlive())
+        return;
+
     Unit* owner = me->GetCharmerOrOwner();
 
     if (m_updateAlliesTimer <= diff)
@@ -99,10 +102,15 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else if (owner && me->GetCharmInfo()) //no victim
     {
-        Unit *nextTarget = SelectNextTarget();
+        if (me->HasReactState(REACT_AGGRESSIVE))
+        {
+            Unit *nextTarget = SelectNextTarget();
 
-        if (nextTarget)
-            AttackStart(nextTarget);
+            if (nextTarget)
+                AttackStart(nextTarget);
+            else
+                HandleReturnMovement();
+        }
         else
             HandleReturnMovement();
     }
@@ -294,16 +302,51 @@ void PetAI::AttackStart(Unit *target)
     if (!_CanAttack(target))
         return;
 
-    // We can attack, should we chase or not?
-    if (me->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-        DoAttack(target, true); // FOLLOW, attack with chase
-    else
-    {
-        if (me->GetCharmInfo()->IsCommandAttack())
-            DoAttack(target, true); // STAY or FOLLOW, player clicked "attack" so attack with chase
-        else
-            DoAttack(target, false); // STAY, target in range, attack not clicked so attack without chase
-    }
+    if (Unit* owner = me->GetOwner())
+        owner->SetInCombatWith(target);
+
+    DoAttack(target, true);
+}
+
+void PetAI::OwnerDamagedBy(Unit* attacker)
+{
+    // Called when owner takes damage. Allows defensive pets to know
+    //  that their owner might need help
+
+    if (!attacker)
+        return;
+
+    // Passive pets don't do anything
+    if (me->HasReactState(REACT_PASSIVE))
+        return;
+
+    // Prevent pet from disengaging from current target
+    if (me->getVictim() && me->getVictim()->isAlive())
+        return;
+
+    // Continue to evaluate and attack if necessary
+    AttackStart(attacker);
+}
+
+void PetAI::OwnerAttacked(Unit* target)
+{
+    // Called when owner attacks something. Allows defensive pets to know
+    //  that they need to assist
+
+    // Target might be NULL if called from spell with invalid cast targets
+    if (!target)
+        return;
+
+    // Passive pets don't do anything
+    if (me->HasReactState(REACT_PASSIVE))
+        return;
+
+    // Prevent pet from disengaging from current target
+    if (me->getVictim() && me->getVictim()->isAlive())
+        return;
+
+    // Continue to evaluate and attack if necessary
+    AttackStart(target);
 }
 
 Unit *PetAI::SelectNextTarget()
@@ -314,14 +357,24 @@ Unit *PetAI::SelectNextTarget()
     if (me->HasReactState(REACT_PASSIVE))
         return NULL;
 
-    // Check pet's attackers first to prevent dragging mobs back
-    // to owner
-    if (me->getAttackerForHelper())
-        return me->getAttackerForHelper();
+    Unit* target = me->getAttackerForHelper();
 
-    // Check owner's attackers if pet didn't have any
-    if (me->GetCharmerOrOwner()->getAttackerForHelper())
-        return me->GetCharmerOrOwner()->getAttackerForHelper();
+    // Check pet's attackers first to prevent dragging mobs back to owner
+    if (target)
+        return target;
+
+    if (me->GetCharmerOrOwner())
+    {
+        // Check owner's attackers if pet didn't have any
+        target = me->GetCharmerOrOwner()->getAttackerForHelper();
+        if (target)
+            return target;
+
+        // Pets now start attacking their owners target in defensive mode as soon as the player does
+        target = me->GetCharmerOrOwner()->getVictim();
+        if (target)
+            return target;
+    }
 
     // Default
     return NULL;
@@ -410,9 +463,8 @@ void PetAI::MovementInform(uint32 moveType, uint32 data)
                 me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MoveIdle();
             }
+            break;
         }
-        break;
-
         case TARGETED_MOTION_TYPE:
         {
             // If data is owner's GUIDLow then we've reached follow point,
@@ -425,9 +477,8 @@ void PetAI::MovementInform(uint32 moveType, uint32 data)
                 me->GetCharmInfo()->SetIsCommandAttack(false);
                 me->addUnitState(UNIT_STAT_FOLLOW);
             }
+            break;
         }
-        break;
-
         default:
             break;
     }

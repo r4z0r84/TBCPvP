@@ -4016,6 +4016,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' OR friend='%u'", guid, guid);
             CharacterDatabase.PExecute("DELETE FROM mail WHERE receiver = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM mail_items WHERE receiver = '%u'", guid);
+            CharacterDatabase.PExecute("DELETE FROM mail_external WHERE receiver = '%u'",guid);
             CharacterDatabase.PExecute("DELETE FROM character_pet WHERE owner = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM character_pet_declinedname WHERE owner = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE PlayerGuid1 = '%u' OR PlayerGuid2 = '%u'", guid, guid);
@@ -4026,8 +4027,31 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
         }
         // The character gets unlinked from the account, the name gets freed up and appears as deleted ingame
         case CHAR_DELETE_UNLINK:
+        {
+            QueryResult_AutoPtr resultItemText = CharacterDatabase.PQuery("SELECT id, receiver, itemTextId FROM mail WHERE receiver='%u' AND itemTextId <> '0'", guid);
+            if (resultItemText)
+            {
+                do
+                {
+                    Field *fields = resultItemText->Fetch();
+
+                    uint32 mail_id    = fields[0].GetUInt32();
+                    uint32 itemTextId = fields[2].GetUInt32();
+
+                    CharacterDatabase.PExecute("DELETE FROM item_text WHERE id = '%u'", itemTextId);
+                }
+                while (resultItemText->NextRow());
+            }
+
+            CharacterDatabase.PExecute("DELETE FROM gm_tickets WHERE playerGuid = '%u'", guid);
+            CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' OR friend = '%u'", guid, guid);
+            CharacterDatabase.PExecute("DELETE FROM mail WHERE receiver = '%u'", guid);
+            CharacterDatabase.PExecute("DELETE FROM mail_items WHERE receiver = '%u'", guid);
+            CharacterDatabase.PExecute("DELETE FROM mail_external WHERE receiver = '%u'", guid);
+
             CharacterDatabase.PExecute("UPDATE characters SET deleteInfos_Name=name, deleteInfos_Account=account, deleteDate='" UI64FMTD "', name='', account=0 WHERE guid=%u", uint64(time(NULL)), guid);
             break;
+        }
         default:
             sLog->outError("Player::DeleteFromDB: Unsupported delete method: %u.", charDelete_method);
     }

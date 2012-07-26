@@ -2426,6 +2426,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 26679:                       // Deadly Throw
             spellInfo->speed = 0;         // Instant
             break;
+        case 12051:                       // Evocation
+            spellInfo->InterruptFlags = SPELL_INTERRUPT_FLAG_INTERRUPT;
+            break;
         case 41013:     // Parasitic Shadowfiend Passive
             spellInfo->EffectApplyAuraName[0] = 4; // proc debuff, and summon infinite fiends
             break;

@@ -1698,46 +1698,50 @@ CharDelete.KeepDays = 30
 #    NoResetTalentsCost
 #        Enable or disable no cost when reseting talents
 #
-#   ForbiddenMaps
-#       Map ids that users below SEC_GAMEMASTER cannot enter,
+#    ForbiddenMaps
+#        Map ids that users below SEC_GAMEMASTER cannot enter,
 #        with delimiter ','
-#       Default: ""
-#       example: "538,90"
-#       Note that it's HIGHLY DISCOURAGED to forbid starting maps (0,1,530)!
+#        Default: ""
+#        example: "538,90"
+#        Note that it's HIGHLY DISCOURAGED to forbid starting maps (0,1,530)!
 #
-#   ShowKickInWorld
+#    ShowKickInWorld
 #        Determines wether a message is broadcasted to the entire server
-#         when a player gets kicked
+#        when a player gets kicked
 #        Default: 0 = Disable
 #                 1 = Enable
 #
-#   RecordUpdateTimeDiffInterval
+#    RecordUpdateTimeDiffInterval
 #        Record update time diff to the log file
-#         update diff can be used as a criterion of performance
-#         diff < 300: good performance
-#         diff > 600: bad performance, may be caused by high cpu usage
+#        update diff can be used as a criterion of performance
+#        diff < 300: good performance
+#        diff > 600: bad performance, may be caused by high cpu usage
 #        Default: 60000 (diff is written into log every 60000 ms or 1 minute.
 #                 >0 = Interval
 #                 0 = Disable
 #
-#   MinRecordUpdateTimeDiff
+#    MinRecordUpdateTimeDiff
 #        Only record update time diff which is greater than this value
 #        Default: 100
 #
-#   PlayerStart.String
-#       If set to anything other than "", this string will be displayed
+#    PlayerStart.String
+#        If set to anything other than "", this string will be displayed
 #        to players when they login to a newly created character.
-#       Default: "" - send no text
+#        Default: "" - send no text
 #
-#   DuelMod.Enable
-#       Allows players cooldowns/mana/hp to reset before each duel.
-#       Default: 0 (Disabled)
+#    DuelMod.Enable
+#        Allows players cooldowns/mana/hp to reset before each duel.
+#        Default: 0 (Disabled)
 #                1 - Enabled
 #
-#   DuelMod.Cooldowns
-#       Makes the players arena cooldowns reset before each duel.
-#       Default: 0 (Disabled)
+#    DuelMod.Cooldowns
+#        Makes the players arena cooldowns reset before each duel.
+#        Default: 0 (Disabled)
 #                1 - Enabled
+#
+#    Who.Cooldown
+#        Sets a cooldown on WHO use in seconds
+#        Default: 0 (Disabled)
 #
 ###############################################################################
 
@@ -1758,6 +1762,7 @@ MinRecordUpdateTimeDiff = 100
 PlayerStart.String = ""
 DuelMod.Enable = 0
 DuelMod.Cooldowns = 0
+Who.Cooldown = 0
 
 ###############################################################################
 # AUTO BROADCAST

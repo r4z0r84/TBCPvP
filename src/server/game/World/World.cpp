@@ -1067,6 +1067,7 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_AUTOBROADCAST_TIMER] = ConfigMgr::GetIntDefault("AutoBroadcast.Timer", 60000);
     m_configs[CONFIG_AUTOBROADCAST_ENABLED] = ConfigMgr::GetIntDefault("AutoBroadcast.On", 0);
     m_configs[CONFIG_AUTOBROADCAST_CENTER] = ConfigMgr::GetIntDefault("AutoBroadcast.Center", 0);
+    m_configs[CONFIG_WHO_COOLDOWN] = ConfigMgr::GetIntDefault("Who.Cooldown", 0);
 
     std::string forbiddenmaps = ConfigMgr::GetStringDefault("ForbiddenMaps", "");
     char * forbiddenMaps = new char[forbiddenmaps.length() + 1];

@@ -150,6 +150,13 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     sLog->outDebug("WORLD: Recvd CMSG_WHO Message");
     //recv_data.hexlike();
 
+    if (time(NULL)- sWorld->getConfig(CONFIG_WHO_COOLDOWN) < m_lastWhoCommand)
+    {
+        recv_data.rpos(recv_data.wpos());
+        return;
+    }
+    m_lastWhoCommand = time(NULL);
+
     uint32 clientcount = 0;
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;

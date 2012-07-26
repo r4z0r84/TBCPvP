@@ -2187,8 +2187,14 @@ void Spell::cancel()
         } break;
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    // Blizzard, Hellfire and Rain of Fire need global cooldown
+    bool needGlobal = ((m_spellInfo->SpellFamilyFlags & 0x80080LL) && m_spellInfo->SpellIconID == 285)
+                        || ((m_spellInfo->SpellFamilyFlags & 0x40LL)    && m_spellInfo->SpellIconID == 937)
+                        || (m_spellInfo->SpellIconID == 547) ? true : false;
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && !needGlobal)
         m_caster->ToPlayer()->RemoveGlobalCooldown(m_spellInfo);
+
 
     m_caster->RemoveDynObject(m_spellInfo->Id);
     m_caster->RemoveGameObject(m_spellInfo->Id, true);

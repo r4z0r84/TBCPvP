@@ -3058,7 +3058,6 @@ void Unit::SetCurrentCastedSpell(Spell * pSpell)
     // special breakage effects:
     switch (CSpellType)
     {
-        case CURRENT_PET_SPELL:
         case CURRENT_GENERIC_SPELL:
         {
             // generic spells always break channeled not delayed spells

@@ -656,7 +656,7 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
             }
         }
 
-        if (m_originalCaster && damage > 0)
+        if (m_originalCaster && damage > 0 && m_spellInfo->Id != 12723) // exlude sweeping strike from extra damage
             damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
 
         m_damage += damage;

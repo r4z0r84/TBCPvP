@@ -2489,10 +2489,11 @@ void Spell::EffectPowerBurn(uint32 i)
 
     new_damage = int32(new_damage * multiplier);
     //m_damage+=new_damage; should not apply spell bonus
-    //TODO: no log
-    //unitTarget->ModifyHealth(-new_damage);
+
     if (m_originalCaster)
         m_originalCaster->DealDamage(unitTarget, new_damage);
+
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, GetSpellSchoolMask(m_spellInfo), 0, 0, false, 0, false);
 }
 
 void Spell::EffectHeal(uint32 /*i*/)

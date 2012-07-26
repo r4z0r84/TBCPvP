@@ -42,7 +42,6 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-
 #include "TemporarySummon.h"
 #include "Totem.h"
 #include "OutdoorPvPMgr.h"
@@ -1635,7 +1634,7 @@ void WorldObject::AddObjectToRemoveList()
     map->AddObjectToRemoveList(this);
 }
 
-TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropertiesEntry const *properties, uint32 duration, Unit *summoner, SpellEntry const* spellInfo)
+TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropertiesEntry const *properties, uint32 duration, Unit *summoner, uint32 spellId)
 {
     uint32 mask = SUMMON_MASK_SUMMON;
     if (properties)
@@ -1707,23 +1706,8 @@ TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropert
         delete summon;
         return NULL;
     }
-
-    if (mask == SUMMON_MASK_TOTEM && spellInfo)
-    {
-        if (Player* player = summoner->ToPlayer())
-        {
-            if (properties->Slot >= SUMMON_SLOT_TOTEM && properties->Slot < MAX_TOTEM_SLOT)
-            {
-                WorldPacket data(SMSG_TOTEM_CREATED, 1+8+4+4);
-                data << uint8(properties->Slot-1);
-                data << uint64(player->GetGUID());
-                data << uint32(duration);
-                data << uint32(spellInfo->Id);
-                player->SendDirectMessage(&data);
-            }
-        }
-    }
-
+    
+    summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellId);
     summon->SetHomePosition(pos);
 
     summon->InitStats(duration);

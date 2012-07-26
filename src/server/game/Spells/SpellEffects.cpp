@@ -3323,7 +3323,7 @@ void Spell::EffectSummonType(uint32 i)
                 }
                 case SUMMON_TYPE_MINIPET:
                 {
-                    summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
+                    summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, m_spellInfo->Id);
                     if (!summon || !summon->HasSummonMask(SUMMON_MASK_MINION))
                         return;
 
@@ -3369,7 +3369,7 @@ void Spell::EffectSummonType(uint32 i)
             EffectSummonClassPet(i);
             break;
         case SUMMON_CATEGORY_PUPPET:
-            summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster);
+            summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, m_spellInfo->Id);
             break;
 
             uint32 faction = properties->Faction;
@@ -4008,8 +4008,8 @@ void Spell::EffectSummonPet(uint32 i)
 
 void Spell::EffectSummonClassPet(uint32 i)
 {
-    uint32 pet_entry = m_spellInfo->EffectMiscValue[i];
-    if (!pet_entry)
+    uint32 petentry = m_spellInfo->EffectMiscValue[i];
+    if (!petentry)
         return;
 
     Player *caster = NULL;
@@ -4020,8 +4020,6 @@ void Spell::EffectSummonClassPet(uint32 i)
         else if (m_originalCaster->ToCreature()->isTotem())
             caster = m_originalCaster->GetCharmerOrOwnerPlayerOrPlayerItself();
     }
-
-    uint32 petentry = m_spellInfo->EffectMiscValue[i];
 
     if (!caster)
     {

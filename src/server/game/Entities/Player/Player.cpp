@@ -247,6 +247,106 @@ uint32 PlayerTaxi::GetCurrentTaxiPath() const
     return path;
 }
 
+//== TradeData =================================================
+
+TradeData* TradeData::GetTraderData() const
+{
+    return m_trader->GetTradeData();
+}
+
+Item* TradeData::GetItem(TradeSlots slot) const
+{
+    return m_items[slot] ? m_player->GetItemByGuid(m_items[slot]) : NULL;
+}
+
+bool TradeData::HasItem(uint64 item_guid) const
+{
+    for (uint8 i = 0; i < TRADE_SLOT_COUNT; ++i)
+        if (m_items[i] == item_guid)
+            return true;
+
+    return false;
+}
+
+Item* TradeData::GetSpellCastItem() const
+{
+    return m_spellCastItem ? m_player->GetItemByGuid(m_spellCastItem) : NULL;
+}
+
+void TradeData::SetItem(TradeSlots slot, Item* item)
+{
+    uint64 itemGuid = item ? item->GetGUID() : 0;
+
+    if (m_items[slot] == itemGuid)
+        return;
+
+    m_items[slot] = itemGuid;
+
+    SetAccepted(false);
+    GetTraderData()->SetAccepted(false);
+
+    Update();
+
+    // need remove possible trader spell applied to changed item
+    if (slot == TRADE_SLOT_NONTRADED)
+        GetTraderData()->SetSpell(0);
+
+    // need remove possible player spell applied (possible move reagent)
+    SetSpell(0);
+}
+
+void TradeData::SetSpell(uint32 spell_id, Item* castItem /*= NULL*/)
+{
+    uint64 itemGuid = castItem ? castItem->GetGUID() : 0;
+
+    if (m_spell == spell_id && m_spellCastItem == itemGuid)
+        return;
+
+    m_spell = spell_id;
+    m_spellCastItem = itemGuid;
+
+    SetAccepted(false);
+    GetTraderData()->SetAccepted(false);
+
+    Update(true);                                           // send spell info to item owner
+    Update(false);                                          // send spell info to caster self
+}
+
+void TradeData::SetMoney(uint32 money)
+{
+    if (m_money == money)
+        return;
+
+    m_money = money;
+
+    SetAccepted(false);
+    GetTraderData()->SetAccepted(false);
+
+    Update(true);
+}
+
+void TradeData::Update(bool forTarget /*= true*/)
+{
+    if (forTarget)
+        m_trader->GetSession()->SendUpdateTrade(true);      // player state for trader
+    else
+        m_player->GetSession()->SendUpdateTrade(false);     // player state for player
+}
+
+void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
+{
+    m_accepted = state;
+
+    if (!state)
+    {
+        if (crosssend)
+            m_trader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+        else
+            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+    }
+}
+
+
 //== Player ====================================================
 
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
@@ -322,8 +422,7 @@ Player::Player (WorldSession *session): Unit()
     m_bHasBeenAliveAtDelayedTeleport = true;                // overwrite always at setup teleport data, so not used infact
     m_teleport_options = 0;
 
-    pTrader = 0;
-    ClearTrade();
+    m_trade = NULL;
 
     m_cinematic = 0;
 
@@ -9088,7 +9187,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
     for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         Item *pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem->GetEntry() == item)
+        if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
         {
             tempcount += pItem->GetCount();
             if (tempcount >= count)
@@ -9098,7 +9197,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
     for (uint8 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
     {
         Item *pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem && pItem->GetEntry() == item)
+        if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
         {
             tempcount += pItem->GetCount();
             if (tempcount >= count)
@@ -9112,7 +9211,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
             for (uint32 j = 0; j < pBag->GetBagSize(); j++)
             {
                 Item* pItem = GetItemByPos(i, j);
-                if (pItem && pItem->GetEntry() == item)
+                if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
                 {
                     tempcount += pItem->GetCount();
                     if (tempcount >= count)
@@ -9127,7 +9226,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
         for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
         {
             Item *pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-            if (pItem && pItem->GetEntry() == item)
+            if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
             {
                 tempcount += pItem->GetCount();
                 if (tempcount >= count)
@@ -9141,7 +9240,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
                 for (uint32 j = 0; j < pBag->GetBagSize(); j++)
                 {
                     Item* pItem = GetItemByPos(i, j);
-                    if (pItem && pItem->GetEntry() == item)
+                    if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
                     {
                         tempcount += pItem->GetCount();
                         if (tempcount >= count)
@@ -11067,7 +11166,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
     {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
         {
-            if (pItem->GetEntry() == item)
+            if (pItem->GetEntry() == item && !pItem->IsInTrade())
             {
                 if (pItem->GetCount() + remcount <= count)
                 {
@@ -11095,7 +11194,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
     {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
         {
-            if (pItem->GetEntry() == item)
+            if (pItem->GetEntry() == item && !pItem->IsInTrade())
             {
                 if (pItem->GetCount() + remcount <= count)
                 {
@@ -11128,7 +11227,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
             {
                 if (Item* pItem = pBag->GetItemByPos(j))
                 {
-                    if (pItem->GetEntry() == item)
+                    if (pItem->GetEntry() == item && !pItem->IsInTrade())
                     {
                         // all items in bags can be unequipped
                         if (pItem->GetCount() + remcount <= count)
@@ -11159,7 +11258,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
     {
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
         {
-            if (pItem && pItem->GetEntry() == item)
+            if (pItem && pItem->GetEntry() == item && !pItem->IsInTrade())
             {
                 if (pItem->GetCount() + remcount <= count)
                 {
@@ -11883,33 +11982,23 @@ void Player::SendSellError(uint8 msg, Creature* creature, uint64 guid, uint32 pa
     GetSession()->SendPacket(&data);
 }
 
-void Player::ClearTrade()
-{
-    tradeGold = 0;
-    acceptTrade = false;
-    for (int i = 0; i < TRADE_SLOT_COUNT; i++)
-        tradeItems[i] = NULL_SLOT;
-}
-
 void Player::TradeCancel(bool sendback)
 {
-    if (pTrader)
+    if (m_trade)
     {
+        Player* trader = m_trade->GetTrader();
+
         // send yellow "Trade canceled" message to both traders
-        WorldSession* ws;
-        ws = GetSession();
         if (sendback)
-            ws->SendCancelTrade();
-        ws = pTrader->GetSession();
-        if (!ws->PlayerLogout())
-            ws->SendCancelTrade();
+            GetSession()->SendCancelTrade();
+
+        trader->GetSession()->SendCancelTrade();
 
         // cleanup
-        ClearTrade();
-        pTrader->ClearTrade();
-        // prevent loss of reference
-        pTrader->pTrader = NULL;
-        pTrader = NULL;
+        delete m_trade;
+        m_trade = NULL;
+        delete trader->m_trade;
+        trader->m_trade = NULL;
     }
 }
 

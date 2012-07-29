@@ -719,6 +719,8 @@ void World::LoadConfigSettings(bool reload)
         m_configs[CONFIG_START_ARENA_POINTS] = m_configs[CONFIG_MAX_ARENA_POINTS];
     }
 
+    m_configs[CONFIG_START_ORIGINAL_ITEMS] = ConfigMgr::GetBoolDefault("StartOriginalItems", true);
+
     m_configs[CONFIG_ALL_TAXI_PATHS] = ConfigMgr::GetBoolDefault("AllFlightPaths", false);
 
     m_configs[CONFIG_INSTANCE_IGNORE_LEVEL] = ConfigMgr::GetBoolDefault("Instance.IgnoreLevel", false);

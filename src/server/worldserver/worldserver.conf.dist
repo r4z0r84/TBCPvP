@@ -835,6 +835,7 @@ MaxHonorPoints = 75000
 StartHonorPoints = 0
 MaxArenaPoints = 5000
 StartArenaPoints = 0
+StartOriginalItems = 1
 InstantLogout = 1
 DisableWaterBreath = 4
 AllFlightPaths = 0

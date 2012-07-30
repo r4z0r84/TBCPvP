@@ -98,7 +98,7 @@ char const* WorldSession::GetPlayerName() const
 // Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
-    if (!m_Socket)
+    if (!m_Socket || m_Socket->IsClosed())
         return;
 
     #ifdef TRINITY_DEBUG

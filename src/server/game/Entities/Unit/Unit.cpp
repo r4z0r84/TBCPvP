@@ -11418,7 +11418,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura* aura, SpellEntry con
         return false;
 
     // Get EventProcFlag
-    uint32 EventProcFlag;
+    uint32 EventProcFlag = PROC_EX_NONE;
     if (spellProcEvent && spellProcEvent->procFlags) // if exist get custom spellProcEvent->procFlags
         EventProcFlag = spellProcEvent->procFlags;
     else

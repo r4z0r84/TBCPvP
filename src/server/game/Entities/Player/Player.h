@@ -1463,6 +1463,7 @@ class Player : public Unit, public GridObject<Player>
         bool addSpell(uint32 spell_id, bool active, bool learning = true, bool loading = false, bool disabled = false);
         void learnSpell(uint32 spell_id);
         void removeSpell(uint32 spell_id, bool disabled = false, bool isFromTalent = false);
+        void AutoLearnTalentsForLevel();
         void resetSpells();
         void learnDefaultSpells(bool loading = false);
         void learnQuestRewardedSpells();

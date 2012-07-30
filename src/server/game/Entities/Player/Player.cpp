@@ -1547,19 +1547,19 @@ bool Player::BuildCustomEnumData(WorldPacket * p_data)
             switch (slot)
             {
                 case EQUIPMENT_SLOT_CHEST:
-                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_CHEST);
+                    item_id = sWorld->getConfig(CONFIG_VISUAL_CHAR_CHEST);
                     break;
                 case EQUIPMENT_SLOT_BODY:
-                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_BODY);
+                    item_id = sWorld->getConfig(CONFIG_VISUAL_CHAR_BODY);
                     break;
                 case EQUIPMENT_SLOT_HEAD:
-                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_HEAD);
+                    item_id = sWorld->getConfig(CONFIG_VISUAL_CHAR_HEAD);
                     break;
                 case EQUIPMENT_SLOT_LEGS:
-                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_LEGS);
+                    item_id = sWorld->getConfig(CONFIG_VISUAL_CHAR_LEGS);
                     break;
                 case EQUIPMENT_SLOT_FEET:
-                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_FEET);
+                    item_id = sWorld->getConfig(CONFIG_VISUAL_CHAR_FEET);
                     break;
             }
             const ItemPrototype * proto = objmgr.GetItemPrototype(item_id);

@@ -151,6 +151,12 @@ void WorldSession::HandleCharEnum(QueryResult_AutoPtr result)
         while (result->NextRow());
     }
 
+    else if (sWorld->getConfig(CONFIG_VISUAL_CHAR_ENABLED) != 0)
+    {
+        if (Player::BuildCustomEnumData(&data))
+            ++num;
+    }
+
     data.put<uint8>(0, num);
 
     SendPacket(&data);

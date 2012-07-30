@@ -1500,6 +1500,89 @@ void Player::setDeathState(DeathState s)
     }
 }
 
+bool Player::BuildCustomEnumData(WorldPacket * p_data)
+{
+    std::string AB = sWorld.VisualCharName;
+
+    *p_data << uint64(MAKE_NEW_GUID(0, 0, HIGHGUID_PLAYER));
+    *p_data << AB;                                    // name
+    *p_data << uint8(1);                              // race
+    *p_data << uint8(1);                              // class
+    *p_data << uint8(0);                              // gender
+
+    *p_data << uint8(67177218);                       // skin
+    *p_data << uint8(67177218 >> 8);                  // face
+    *p_data << uint8(67177218 >> 16);                 // hair style
+    *p_data << uint8(67177218 >> 24);                 // hair color
+
+    *p_data << uint8(33554440 & 0xFF);                // facial hair
+
+    *p_data << uint8(70);                             // level
+    *p_data << uint32(3703);                          // zone
+    *p_data << uint32(530);                           // map
+
+    *p_data << -9042.32f;                             // x
+    *p_data << -98.6653f;                             // y
+    *p_data << 87.9311f;                              // z
+
+    *p_data << uint32(0);                             // guild id
+
+
+    *p_data << uint32(CHARACTER_FLAG_LOCKED_BY_BILLING);   // character flags
+
+    *p_data << uint8(1);                              // unknown
+
+    // Pets info
+    {
+        *p_data << uint32(0);
+        *p_data << uint32(0);
+        *p_data << uint32(0);
+    }
+
+    for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
+    {
+        if (slot == EQUIPMENT_SLOT_CHEST || slot == EQUIPMENT_SLOT_HEAD || slot == EQUIPMENT_SLOT_FEET || slot == EQUIPMENT_SLOT_BODY || slot == EQUIPMENT_SLOT_LEGS)
+        {
+            uint32 item_id = 0;
+            switch (slot)
+            {
+                case EQUIPMENT_SLOT_CHEST:
+                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_CHEST);
+                    break;
+                case EQUIPMENT_SLOT_BODY:
+                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_BODY);
+                    break;
+                case EQUIPMENT_SLOT_HEAD:
+                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_HEAD);
+                    break;
+                case EQUIPMENT_SLOT_LEGS:
+                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_LEGS);
+                    break;
+                case EQUIPMENT_SLOT_FEET:
+                    item_id = sWorld.getConfig(CONFIG_VISUAL_CHAR_FEET);
+                    break;
+            }
+            const ItemPrototype * proto = objmgr.GetItemPrototype(item_id);
+            
+            *p_data << uint32(proto->DisplayInfoID);
+            *p_data << uint8(proto->InventoryType);
+            *p_data << uint32(0);
+        }
+        else
+        {
+            *p_data << uint32(0);
+            *p_data << uint8(0);
+            *p_data << uint32(0);
+            continue;
+        }
+    }
+    *p_data << uint32(0);                                   // first bag display id
+    *p_data << uint8(0);                                    // first bag inventory type
+    *p_data << uint32(0);                                   // enchant?
+
+    return true;
+}
+
 bool Player::BuildEnumData(QueryResult_AutoPtr result, WorldPacket * p_data)
 {
     Field *fields = result->Fetch();

@@ -1739,6 +1739,15 @@ CharDelete.KeepDays = 30
 #        Default: 0 (Disabled)
 #                1 - Enabled
 #
+#   EnableVisualCharacter 
+#       Enable the Visual / Fake character when the account has no character at all
+#       Default:    0 (Disabled)
+#                   1 - Enabled
+#
+#   VisualCharacterName 
+#       Sets the name of the visual character
+#       Default:    ""
+#
 #    Who.Cooldown
 #        Sets a cooldown on WHO use in seconds
 #        Default: 0 (Disabled)
@@ -1762,6 +1771,13 @@ MinRecordUpdateTimeDiff = 100
 PlayerStart.String = ""
 DuelMod.Enable = 0
 DuelMod.Cooldowns = 0
+EnableVisualCharacter = 0
+VisualCharacterName = ""
+VisualCharacter.Chest = 10036
+VisualCharacter.Shirt = 10034
+VisualCharacter.Head = 19945
+VisualCharacter.Legs = 10035
+VisualCharacter.Feet = 840
 Who.Cooldown = 0
 
 ###############################################################################

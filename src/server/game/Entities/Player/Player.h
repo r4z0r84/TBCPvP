@@ -965,6 +965,7 @@ class Player : public Unit, public GridObject<Player>
         void Update(uint32 time);
 
         static bool BuildEnumData(QueryResult_AutoPtr result, WorldPacket * p_data);
+        static bool BuildCustomEnumData(WorldPacket * p_data);
 
         void SetInWater(bool apply);
 

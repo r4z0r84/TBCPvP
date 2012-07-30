@@ -254,6 +254,13 @@ enum WorldConfigs
     CONFIG_AUTOBROADCAST_TIMER,
     CONFIG_AUTOBROADCAST_ENABLED,
     CONFIG_AUTOBROADCAST_CENTER,
+    CONFIG_VISUAL_CHAR_NAME,
+    CONFIG_VISUAL_CHAR_ENABLED,
+    CONFIG_VISUAL_CHAR_CHEST,
+    CONFIG_VISUAL_CHAR_BODY,
+    CONFIG_VISUAL_CHAR_HEAD,
+    CONFIG_VISUAL_CHAR_LEGS,
+    CONFIG_VISUAL_CHAR_FEET,
     CONFIG_WHO_COOLDOWN,
     CONFIG_WARDEN_ENABLED,
     CONFIG_WARDEN_KICK,
@@ -598,6 +605,8 @@ class World
         void UpdateRealmCharCount(uint32 accid);
 
         void UpdateAllowedSecurity();
+
+        std::string VisualCharName;
 
         LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const { if (m_availableDbcLocaleMask & (1 << locale)) return locale; else return m_defaultDbcLocale; }
 

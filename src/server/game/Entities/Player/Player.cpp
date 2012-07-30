@@ -4416,8 +4416,12 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                 while (resultItemText->NextRow());
             }
 
+            CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' OR friend='%u'",guid,guid);
             CharacterDatabase.PExecute("DELETE FROM gm_tickets WHERE playerGuid = '%u'", guid);
-            CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' OR friend = '%u'", guid, guid);
+            CharacterDatabase.PExecute("DELETE FROM group_instance WHERE leaderGuid = '%u'",guid);
+            CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE PlayerGuid = '%u'",guid);
+            CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE PlayerGuid1 = '%u' OR PlayerGuid2='%u'",guid,guid);
+            CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'",guid);
             CharacterDatabase.PExecute("DELETE FROM mail WHERE receiver = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM mail_items WHERE receiver = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM mail_external WHERE receiver = '%u'", guid);

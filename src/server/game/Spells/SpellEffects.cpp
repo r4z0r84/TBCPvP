@@ -2817,6 +2817,10 @@ void Spell::EffectEnergize(uint32 i)
     unitTarget->ModifyPower(power, damage);
     m_caster->SendEnergizeSpellLog(unitTarget, m_spellInfo->Id, damage, power);
 
+    // Add a check for m_spellInfo here, randomly getting removed for some reason.
+    if (!m_spellInfo)
+        return;
+
     // Mad Alchemist's Potion
     if (m_spellInfo->Id == 45051)
     {

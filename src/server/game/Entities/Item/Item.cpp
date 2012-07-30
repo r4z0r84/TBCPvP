@@ -421,6 +421,9 @@ void Item::DeleteFromInventoryDB()
 
 ItemPrototype const *Item::GetProto() const
 {
+    if (!GetEntry())
+        return false;
+
     return sObjectMgr->GetItemPrototype(GetEntry());
 }
 

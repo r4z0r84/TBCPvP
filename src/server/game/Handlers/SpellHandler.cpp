@@ -157,7 +157,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
         for (int i = 0; i < 5; ++i)
         {
-            _Spell const& spellData = pItem->GetProto()->Spells[i];
+            _Spell const& spellData = proto->Spells[i];
 
             // no spell
             if (!spellData.SpellId)

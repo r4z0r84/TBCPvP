@@ -1550,6 +1550,8 @@ bool Player::BuildEnumData(QueryResult_AutoPtr result, WorldPacket * p_data)
         char_flags |= CHARACTER_FLAG_GHOST;
     if (atLoginFlags & AT_LOGIN_RENAME)
         char_flags |= CHARACTER_FLAG_RENAME;
+    if (atLoginFlags & AT_LOGIN_BANNED)
+        char_flags |= CHARACTER_FLAG_LOCKED_BY_BILLING;
     if (sWorld->getConfig(CONFIG_DECLINED_NAMES_USED))
     {
         if (!fields[20].GetCppString().empty())

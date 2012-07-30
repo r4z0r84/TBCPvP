@@ -3088,6 +3088,60 @@ bool ChatHandler::HandleCharacterRenameCommand(const char* args)
     return true;
 }
 
+// Lock the character
+bool ChatHandler::HandleCharacterLockCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    char *character_name_str = strtok((char*)args," ");
+    if (!character_name_str)
+        return false;
+
+    std::string character_name = character_name_str;
+    if (!normalizePlayerName(character_name))
+        return false;
+
+    uint64 character_guid;
+    Player *player = sObjectMgr->GetPlayer(character_name.c_str());
+    if (player)
+    {
+        player->SetAtLoginFlag(AT_LOGIN_BANNED);
+        player->GetSession()->KickPlayer();
+    }
+    else
+    {
+        character_guid = sObjectMgr->GetPlayerGUIDByName(character_name);
+        if (!character_guid)
+        {
+            PSendSysMessage(LANG_NO_PLAYER,character_name.c_str());
+            SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint32 at_login = 0;
+        QueryResult_AutoPtr ResultChar = CharacterDatabase.PQuery("SELECT at_login FROM characters WHERE guid = '%u'", GUID_LOPART(character_guid));
+        if (ResultChar)
+        {
+            Field *fields = ResultChar->Fetch();
+            at_login = fields[0].GetUInt32();
+        }
+        if (at_login & AT_LOGIN_BANNED) // Character banned, let's unban it
+        {
+            at_login &= ~ AT_LOGIN_BANNED;
+            PSendSysMessage(LANG_UNBAN_CHAR, character_name.c_str());
+        }
+        else
+        {
+            at_login |= AT_LOGIN_BANNED;
+            PSendSysMessage(LANG_BAN_CHAR, character_name.c_str());
+        }
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = '%u' WHERE guid = '%u'", at_login, GUID_LOPART(character_guid));
+
+    }
+    return true;
+}
+
 bool ChatHandler::HandleLookupFactionCommand(const char* args)
 {
     if (!*args)

@@ -466,8 +466,9 @@ namespace VMAP
 
     bool WorldModel::IntersectPoint(const G3D::Vector3 &p, const G3D::Vector3 &down, float &dist, AreaInfo &info) const
     {
-        if (!groupModels.size())
+        if (groupModels.empty())
             return false;
+
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
         if (callback.hit != groupModels.end())
@@ -484,8 +485,9 @@ namespace VMAP
 
     bool WorldModel::GetLocationInfo(const G3D::Vector3 &p, const G3D::Vector3 &down, float &dist, LocationInfo &info) const
     {
-        if (!groupModels.size())
+        if (groupModels.empty())
             return false;
+
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
         if (callback.hit != groupModels.end())

@@ -1067,6 +1067,13 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_AUTOBROADCAST_TIMER] = ConfigMgr::GetIntDefault("AutoBroadcast.Timer", 60000);
     m_configs[CONFIG_AUTOBROADCAST_ENABLED] = ConfigMgr::GetIntDefault("AutoBroadcast.On", 0);
     m_configs[CONFIG_AUTOBROADCAST_CENTER] = ConfigMgr::GetIntDefault("AutoBroadcast.Center", 0);
+    VisualCharName = ConfigMgr::GetStringDefault("VisualCharacterName", "Config not correctly set.");
+    m_configs[CONFIG_VISUAL_CHAR_ENABLED] = ConfigMgr::GetBoolDefault("EnableVisualCharacter", false);
+    m_configs[CONFIG_VISUAL_CHAR_CHEST] = ConfigMgr::GetIntDefault("VisualCharacter.Chest", 10036);
+    m_configs[CONFIG_VISUAL_CHAR_BODY] = ConfigMgr::GetIntDefault("VisualCharacter.Shirt", 10034);
+    m_configs[CONFIG_VISUAL_CHAR_HEAD] = ConfigMgr::GetIntDefault("VisualCharacter.Head", 19945);
+    m_configs[CONFIG_VISUAL_CHAR_LEGS] = ConfigMgr::GetIntDefault("VisualCharacter.Legs", 10035);
+    m_configs[CONFIG_VISUAL_CHAR_FEET] = ConfigMgr::GetIntDefault("VisualCharacter.Feet", 840);
     m_configs[CONFIG_WHO_COOLDOWN] = ConfigMgr::GetIntDefault("Who.Cooldown", 0);
 
     std::string forbiddenmaps = ConfigMgr::GetStringDefault("ForbiddenMaps", "");

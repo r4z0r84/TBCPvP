@@ -395,6 +395,8 @@ bool AuthSocket::_HandleLogonChallenge()
             else
                 sLog->outStaticDebug("[AuthChallenge] Account '%s' is not locked to ip", _login.c_str());
 
+            LoginDatabase.Execute("UPDATE account_banned SET active = '0' WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate <> bandate");
+
             if (!locked)
             {
                 //set expired bans to inactive

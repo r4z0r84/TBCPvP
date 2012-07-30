@@ -790,25 +790,6 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
         security = fields[1].GetInt32();
     }
 
-    // Re-check account ban (same check as in realmd)
-    QueryResult_AutoPtr banresult = LoginDatabase.PQuery ("SELECT "
-                                "bandate, "
-                                "unbandate "
-                                "FROM account_banned "
-                                "WHERE id = '%u' "
-                                "AND active = 1",
-                                id);
-
-    if (banresult) // if account banned
-    {
-        packet.Initialize (SMSG_AUTH_RESPONSE, 1);
-        packet << uint8 (AUTH_BANNED);
-        SendPacket (packet);
-
-        sLog->outError ("WorldSocket::HandleAuthSession: Sent Auth Response (Account banned).");
-        return -1;
-    }
-
     // Check locked state for server
     sWorld->UpdateAllowedSecurity();
     AccountTypes allowedAccountType = sWorld->GetPlayerSecurityLimit ();

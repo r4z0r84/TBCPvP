@@ -1502,7 +1502,7 @@ void Player::setDeathState(DeathState s)
 
 bool Player::BuildCustomEnumData(WorldPacket * p_data)
 {
-    std::string AB = sWorld.VisualCharName;
+    std::string AB = sWorld->VisualCharName;
 
     *p_data << uint64(MAKE_NEW_GUID(0, 0, HIGHGUID_PLAYER));
     *p_data << AB;                                    // name

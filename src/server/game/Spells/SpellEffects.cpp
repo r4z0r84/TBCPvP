@@ -2295,6 +2295,9 @@ void Spell::EffectApplyAura(uint32 i)
     // TODO Make a way so it works for every related spell!
     if (unitTarget->GetTypeId() == TYPEID_PLAYER ||(unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->isPet()))              // Negative buff should only be applied on players
     {
+        if (!m_spellInfo)
+            return;
+
         uint32 spellId = 0;
         if (m_spellInfo->CasterAuraStateNot == AURA_STATE_WEAKENED_SOUL || m_spellInfo->TargetAuraStateNot == AURA_STATE_WEAKENED_SOUL)
             spellId = 6788;                                 // Weakened Soul

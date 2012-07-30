@@ -1562,7 +1562,7 @@ bool Player::BuildCustomEnumData(WorldPacket * p_data)
                     item_id = sWorld->getConfig(CONFIG_VISUAL_CHAR_FEET);
                     break;
             }
-            const ItemPrototype * proto = objmgr.GetItemPrototype(item_id);
+            const ItemPrototype * proto = sObjectMgr->GetItemPrototype(item_id);
             
             *p_data << uint32(proto->DisplayInfoID);
             *p_data << uint8(proto->InventoryType);

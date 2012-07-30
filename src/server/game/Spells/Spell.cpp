@@ -2954,6 +2954,10 @@ void Spell::SendSpellGo()
 
     sLog->outDebug("Sending SMSG_SPELL_GO id=%u", m_spellInfo->Id);
 
+    // Some spell mods are Used alreay upon cast, such as Precense of Mind, remove them here already as it may cause abuse.
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->ToPlayer()->RemoveSpellMods(this);
+
     Unit *target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
 
     uint32 castFlags = CAST_FLAG_UNKNOWN3;

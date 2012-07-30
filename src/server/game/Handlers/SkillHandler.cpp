@@ -136,6 +136,9 @@ void WorldSession::HandleLearnTalentOpcode(WorldPacket & recv_data)
 
     // update free talent points
     GetPlayer()->SetFreeTalentPoints(CurTalentPoints - 1);
+
+    // look for higher ranks
+    GetPlayer()->AutoLearnTalentsForLevel();
 }
 
 void WorldSession::HandleTalentWipeOpcode(WorldPacket & recv_data)

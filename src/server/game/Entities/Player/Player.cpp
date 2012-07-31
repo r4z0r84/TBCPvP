@@ -7269,7 +7269,7 @@ void Player::UpdateZone(uint32 newZone)
     }
 
     pvpInfo.inNoPvPArea = false;
-    if (zone->flags & AREA_FLAG_SANCTUARY)                   // in sanctuary
+    if (zone->flags & AREA_FLAG_SANCTUARY || GetAreaId() == 72) // in sanctuary and starting area
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
         pvpInfo.inNoPvPArea = true;

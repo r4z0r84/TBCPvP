@@ -31,7 +31,7 @@ struct Realm
     std::string address;
     std::string name;
     uint8 icon;
-    uint8 color;
+    uint8 flag;
     uint8 timezone;
     uint32 m_ID;
     AccountTypes allowedSecurityLevel;
@@ -60,7 +60,7 @@ public:
 
 private:
     void UpdateRealms(bool init = false);
-    void UpdateRealm(uint32 ID, const std::string& name, const std::string& address, uint32 port, uint8 icon, uint8 color, uint8 timezone, AccountTypes allowedSecurityLevel, float popu, uint32 build);
+    void UpdateRealm(uint32 ID, const std::string& name, const std::string& address, uint32 port, uint8 icon, uint8 flag, uint8 timezone, AccountTypes allowedSecurityLevel, float popu, uint32 build);
 
     RealmMap m_realms;                                  ///< Internal map of realms
     uint32   m_UpdateInterval;

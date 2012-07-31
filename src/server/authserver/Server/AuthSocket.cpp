@@ -856,7 +856,7 @@ bool AuthSocket::_HandleRealmList()
         pkt << i->second.icon;                                       // realm type
         if (_expversion & (POST_BC_EXP_FLAG | POST_WOTLK_EXP_FLAG))  // 2.x, 3.x, and 4.x clients
             pkt << lock;                                             // if 1, then realm locked
-        pkt << i->second.color;                                      // if 2, then realm is offline
+        pkt << i->second.flag;                                       // if 2, then realm is offline
         pkt << i->first;
         pkt << i->second.address;
         pkt << i->second.populationLevel;

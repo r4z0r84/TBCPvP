@@ -675,6 +675,21 @@ void WorldSession::HandleBattleGroundArenaJoin(WorldPacket & recv_data)
 
     recv_data >> guid >> arenaslot >> asGroup >> isRated;
 
+    if (sWorld->getConfig(CONFIG_ARENA_RATED_DISABLED))
+    {
+        if (isRated)
+        {
+            switch (arenaslot)
+            {
+                case 0:
+                case 1:
+                case 2:
+                    ChatHandler(_player).PSendSysMessage("Rated arena has been temporarily disabled.");
+                    return;
+            }
+        }
+    }
+
     if (arenaslot == 2 && isRated)
     {
         ChatHandler(_player).PSendSysMessage("5v5 rated arena is disabled.");

@@ -1511,6 +1511,11 @@ Battleground.LeaveWrathMode = 0
 ###############################################################################
 # ARENA CONFIG
 #
+#    Arena.RatedDisabled
+#        Disable rated arena queues.
+#        Default: 0 (disabled)
+#                 1 (enabled)
+#
 #    Arena.MaxRatingDifference
 #        The maximum rating difference between two groups in rated matches
 #        Default: 150 (enable, recommended)
@@ -1537,6 +1542,7 @@ Battleground.LeaveWrathMode = 0
 #
 ###############################################################################
 
+Arena.RatedDisabled = 0
 Arena.MaxRatingDifference = 150
 Arena.RatingDiscardTimer = 600000
 Arena.AutoDistributePoints = 0

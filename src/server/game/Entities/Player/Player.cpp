@@ -3450,6 +3450,15 @@ void Player::AutoLearnSpellsForLevel()
 
     uint8 pRace = getRace();
 
+    // Heroism/Bloodlust
+    if (getLevel() == 70 && getClass() == CLASS_SHAMAN)
+    {
+        if (pRace == RACE_TAUREN || pRace == RACE_TROLL || pRace == RACE_ORC)
+            learnSpell(2825);
+        else
+            learnSpell(32182);
+    }
+
     // Seal of Blood
     if (pRace == RACE_BLOODELF && getLevel() == 64 && getClass() == CLASS_PALADIN)
         learnSpell(31892);

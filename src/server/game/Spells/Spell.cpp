@@ -5276,8 +5276,8 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
             return false;
     }
 
-    //Do not check LOS for triggered spells
-    if (m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS || m_spellInfo->Id == 33395)
+    //Do not check LOS for triggered spells or spells with ignore los attr
+    if (m_IsTriggeredSpell || m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS)
         return true;
 
     //Check targets for LOS visibility (except spells without range limitations)

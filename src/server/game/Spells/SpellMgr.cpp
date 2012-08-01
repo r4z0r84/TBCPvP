@@ -2387,6 +2387,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 6774:
             spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
             break;
+        case 33395:
+            spellInfo->AttributesEx2 |= SPELL_ATTR_EX2_IGNORE_LOS;
+            break;
         case 29200: // Purify Helboar Meat
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             break;

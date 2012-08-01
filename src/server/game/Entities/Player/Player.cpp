@@ -2625,7 +2625,8 @@ void Player::GiveLevel(uint32 level)
 
     UpdateAllStats();
 
-    // Learn latest rank of talent if available
+    // Automatically learn player new spells and next talent ranks that are available after levelup
+    AutoLearnSpellsForLevel();
     AutoLearnTalentsForLevel();
 
     if (sWorld->getConfig(CONFIG_ALWAYS_MAXSKILL)) // Max weapon skill when leveling up
@@ -3442,8 +3443,71 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool isFromTalent)
         removeSpell(itr2->second.spell, disabled);
 }
 
+void Player::AutoLearnSpellsForLevel()
+{
+    if (!IsInWorld())
+        return;
+
+    uint8 pRace = getRace();
+
+    // Seal of Blood
+    if (pRace == RACE_BLOODELF && getLevel() == 64 && getClass() == CLASS_PALADIN)
+        learnSpell(31892);
+
+    //                                                         1        2
+    QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT `Spell`, `flags` FROM `player_learnspells` WHERE `class` = %u AND `level` = %u", getClass(), getLevel());
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 spell_id = fields[0].GetUInt32();
+            uint32 flags    = fields[1].GetUInt32();
+
+            if (pRace == 1)
+                learnSpell(spell_id);
+            else if (flags == 5)
+            {
+                if (pRace == RACE_NIGHTELF)
+                    learnSpell(spell_id);
+            }
+            else if (flags == 6)
+            {
+                if (pRace == RACE_DWARF || pRace == RACE_DRAENEI)
+                    learnSpell(spell_id);
+            }
+            else if (flags == 7)
+            {
+                if (pRace == RACE_HUMAN)
+                    learnSpell(spell_id);
+            }
+            else if (flags == 8)
+            {
+                if (pRace == RACE_UNDEAD_PLAYER)
+                    learnSpell(spell_id);
+            }
+            else if (flags == 9)
+            {
+                if (pRace == RACE_BLOODELF)
+                    learnSpell(spell_id);
+            }
+            else if (flags == 10)
+            {
+                if (pRace == RACE_TROLL)
+                    learnSpell(spell_id);
+            }
+        }
+        while (result->NextRow());
+    }
+}
+
 void Player::AutoLearnTalentsForLevel()
 {
+    if (!IsInWorld())
+        return;
+
     uint8 pLevel = getLevel();
 
     switch (getClass())

@@ -5277,7 +5277,7 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
     }
 
     //Do not check LOS for triggered spells or spells with ignore los attr
-    if (m_IsTriggeredSpell || m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS)
+    if (m_IsTriggeredSpell || m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS || CanTargetNotInLOS(m_spellInfo, eff))
         return true;
 
     //Check targets for LOS visibility (except spells without range limitations)
@@ -5562,6 +5562,32 @@ bool Spell::IsValidSingleTargetSpell(Unit const* target) const
     }
     return true;
 }
+
+bool Spell::CanTargetNotInLOS(SpellEntry const *spellInfo, uint32 eff)
+{
+    if (spellInfo->EffectImplicitTargetA[eff] == TARGET_UNIT_PARTY_CASTER ||
+        spellInfo->EffectImplicitTargetA[eff] == TARGET_UNIT_AREA_PARTY_DST ||
+        spellInfo->EffectImplicitTargetB[eff] == TARGET_UNIT_PARTY_CASTER ||
+        spellInfo->EffectImplicitTargetB[eff] == TARGET_UNIT_AREA_PARTY_DST)
+        return true;
+
+    switch (spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_SHAMAN:
+        {
+            switch (spellInfo->Id)
+            {
+                case 2825:
+                case 32182:
+                    return true;
+                break;
+            }
+        }
+    }
+
+    return false;
+}
+
 
 void Spell::CalculateDamageDoneForAllTargets()
 {

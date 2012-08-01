@@ -581,6 +581,7 @@ class Spell
         WorldObject* SearchNearbyTarget(float range, SpellTargets TargetType);
         bool IsValidSingleTargetEffect(Unit const* target, Targets type) const;
         bool IsValidSingleTargetSpell(Unit const* target) const;
+        bool CanTargetNotInLOS(SpellEntry const *spellInfo, uint32 eff);
         void CalculateDamageDoneForAllTargets();
         int32 CalculateDamageDone(Unit *unit, const uint32 effectMask, float *multiplier);
         void SpellDamageSchoolDmg(uint32 i);

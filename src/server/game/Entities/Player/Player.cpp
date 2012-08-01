@@ -3449,6 +3449,8 @@ void Player::AutoLearnSpellsForLevel()
         return;
 
     uint8 pRace = getRace();
+    if (!pRace)
+        return;
 
     // Heroism/Bloodlust
     if (getLevel() == 70 && getClass() == CLASS_SHAMAN)
@@ -3475,7 +3477,7 @@ void Player::AutoLearnSpellsForLevel()
             uint32 spell_id = fields[0].GetUInt32();
             uint32 flags    = fields[1].GetUInt32();
 
-            if (pRace == 1)
+            if (flags == 1)
                 learnSpell(spell_id);
             else if (flags == 5)
             {

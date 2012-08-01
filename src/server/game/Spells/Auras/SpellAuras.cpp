@@ -917,8 +917,7 @@ void Aura::_AddAura()
 
     // passive auras (except totem auras) do not get placed in the slots
     // area auras with SPELL_AURA_NONE are not shown on target
-    if ((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && caster->ToCreature()->isTotem())) &&
-        (m_spellProto->Effect[GetEffIndex()] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY || m_target != caster))
+    if ((!m_isPassive && m_spellProto->Effect[GetEffIndex()] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY) || m_target != caster)
     {
         if (!secondaura)                                     // new slot need
         {

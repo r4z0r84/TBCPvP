@@ -916,6 +916,9 @@ int ChatHandler::ParseCommands(const char* text)
 
     std::string fullcmd = text;
 
+    if (m_session && m_session->GetSecurity() == SEC_PLAYER && !sWorld->getConfig(CONFIG_ALLOW_PLAYER_COMMANDS))
+        return 0;
+
     // chat case (.command or !command format)
     if (m_session)
     {

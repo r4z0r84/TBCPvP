@@ -1048,6 +1048,11 @@ ListenRange.Yell = 300
 ###############################################################################
 # CHAT SETTINGS
 #
+#    AllowPlayerCommands
+#        Allow players to use commands.
+#        Default: 1 (enable)
+#                 0 (disable)
+#
 #    ChatFakeMessagePreventing
 #        Chat protection from creating fake messages using a lot spaces
 #         (other invisible symbols),
@@ -1099,6 +1104,7 @@ ListenRange.Yell = 300
 #
 ###############################################################################
 
+AllowPlayerCommands = 1
 ChatFakeMessagePreventing = 0
 ChatStrictLinkChecking.Severity = 0
 ChatStrictLinkChecking.Kick = 0

@@ -142,7 +142,7 @@ class Pet : public Guardian
         bool isTemporarySummoned() const { return m_duration > 0; }
 
         bool IsPermanentPetFor(Player* owner);              // pet have tab in character windows and set UNIT_FIELD_PETNUMBER
-        bool isWaterElemental(Player* owner);               // for water elemental spellbook
+        bool isWaterElemental() const { return getPetType() == CLASS_PET && GetEntry() == 510; } // for water elemental spellbook
 
         bool Create (uint32 guidlow, Map *map, uint32 Entry, uint32 pet_number);
         bool CreateBaseAtCreature(Creature* creature);

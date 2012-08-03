@@ -2074,7 +2074,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
     //Prevent casting at cast another spell (ServerSide check)
-    if (!m_IsTriggeredSpell && m_caster->IsNonMeleeSpellCasted(false, true) && m_cast_count)
+    if (m_caster->IsNonMeleeSpellCasted(false, true) && m_cast_count)
     {
         SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
         finish(false);
@@ -4442,7 +4442,7 @@ int16 Spell::PetCanCast(Unit* target)
     if (!m_caster->isAlive())
         return SPELL_FAILED_CASTER_DEAD;
 
-    if (m_caster->IsNonMeleeSpellCasted(false, false, false, !isPetSpell(m_spellInfo)) && !m_IsTriggeredSpell) //prevent spellcast interruption by another spellcast
+    if (m_caster->IsNonMeleeSpellCasted(false) && !m_IsTriggeredSpell)  //prevent spellcast interruption by another spellcast
         return SPELL_FAILED_SPELL_IN_PROGRESS;
     if (m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_AFFECTING_COMBAT;
@@ -5235,8 +5235,6 @@ CurrentSpellTypes Spell::GetCurrentContainer()
         return(CURRENT_AUTOREPEAT_SPELL);
     else if (IsChanneledSpell(m_spellInfo))
         return(CURRENT_CHANNELED_SPELL);
-    else if (isPetSpell(m_spellInfo))
-        return (CURRENT_PET_SPELL);
     else
         return(CURRENT_GENERIC_SPELL);
 }

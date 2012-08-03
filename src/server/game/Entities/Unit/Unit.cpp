@@ -986,17 +986,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                                 spell->Delayed();
                         }
                     }
-                    if (Spell* spell = pVictim->m_currentSpells[CURRENT_PET_SPELL])
-                    {
-                        if (spell->getState() == SPELL_STATE_PREPARING)
-                        {
-                            uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
-                            if (interruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE)
-                                pVictim->InterruptNonMeleeSpells(false);
-                            else if (interruptFlags & SPELL_INTERRUPT_FLAG_PUSH_BACK)
-                                spell->Delayed();
-                        }
-                    }
                 }
 
                 if (Spell* spell = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL])
@@ -3093,7 +3082,6 @@ void Unit::SetCurrentCastedSpell(Spell * pSpell)
         {
             // channel spells always break generic non-delayed and any channeled spells
             InterruptSpell(CURRENT_GENERIC_SPELL, false);
-            InterruptSpell(CURRENT_PET_SPELL, false);
             InterruptSpell(CURRENT_CHANNELED_SPELL);
 
             // it also does break autorepeat if not Auto Shot
@@ -3110,7 +3098,6 @@ void Unit::SetCurrentCastedSpell(Spell * pSpell)
             {
                 // generic autorepeats break generic non-delayed and channeled non-delayed spells
                 InterruptSpell(CURRENT_GENERIC_SPELL, false);
-                InterruptSpell(CURRENT_PET_SPELL, false);
                 InterruptSpell(CURRENT_CHANNELED_SPELL, false);
             }
             // special action: set first cast flag
@@ -3174,7 +3161,7 @@ void Unit::FinishSpell(CurrentSpellTypes spellType, bool ok /*= true*/)
     spell->finish(ok);
 }
 
-bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skipAutorepeat, bool skipPetAutoSecSlot) const
+bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skipAutorepeat) const
 {
     // We don't do loop here to explicitly show that melee spell is excluded.
     // Maybe later some special spells will be excluded too.
@@ -3183,12 +3170,6 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
     if (m_currentSpells[CURRENT_GENERIC_SPELL] &&
         (m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_FINISHED) &&
         (withDelayed || m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_DELAYED))
-        return(true);
-
-    // pet spells
-    if (!skipPetAutoSecSlot && m_currentSpells[CURRENT_PET_SPELL] &&
-        (m_currentSpells[CURRENT_PET_SPELL]->getState() != SPELL_STATE_FINISHED) &&
-        (withDelayed || m_currentSpells[CURRENT_PET_SPELL]->getState() != SPELL_STATE_DELAYED))
         return(true);
 
     // channeled spells may be delayed, but they are still considered casted
@@ -3208,10 +3189,6 @@ void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id, bool withI
     // generic spells are interrupted if they are not finished or delayed
     if (m_currentSpells[CURRENT_GENERIC_SPELL] && (!spell_id || m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id == spell_id))
         InterruptSpell(CURRENT_GENERIC_SPELL, withDelayed, withInstant);
-
-    // CURRENT_PET_SPELL are generic spells used by pets in secondary slot
-    if (m_currentSpells[CURRENT_PET_SPELL] && (!spell_id || m_currentSpells[CURRENT_PET_SPELL]->m_spellInfo->Id == spell_id))
-        InterruptSpell(CURRENT_PET_SPELL, withDelayed, withInstant);
 
     // autorepeat spells are interrupted if they are not finished or delayed
     if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] && (!spell_id || m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == spell_id))

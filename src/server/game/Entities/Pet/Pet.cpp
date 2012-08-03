@@ -1721,18 +1721,6 @@ bool Pet::IsPermanentPetFor(Player* owner)
     }
 }
 
-bool Pet::isWaterElemental(Player* owner)
-{
-    switch (getPetType())
-    {
-        case CLASS_PET:
-            if (owner->getClass() == CLASS_MAGE)
-                return true;
-        default:
-            return false;
-    }
-}
-
 bool Pet::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 pet_number)
 {
     ASSERT(map);

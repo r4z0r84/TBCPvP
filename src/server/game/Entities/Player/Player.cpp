@@ -18056,7 +18056,7 @@ void Player::PetSpellInitialize()
     uint8 addlist = 0;
     data << uint8(addlist);                                 // placeholder
 
-    if (pet->IsPermanentPetFor(this) || pet->isWaterElemental(this))
+    if (pet->IsPermanentPetFor(this) || pet->isWaterElemental())
     {
         // spells loop
         for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)

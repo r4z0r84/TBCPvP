@@ -687,7 +687,8 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     recvPacket >> targets.ReadForCaster(caster);
 
-    caster->clearUnitState(UNIT_STAT_FOLLOW);
+    if (spellInfo->Id != 33395)
+        caster->clearUnitState(UNIT_STAT_FOLLOW);
 
     Spell *spell = new Spell(caster, spellInfo, false);
     spell->m_targets = targets;

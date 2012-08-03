@@ -4457,6 +4457,9 @@ int16 Spell::PetCanCast(Unit* target)
 
         if (dist > max_range)
             return SPELL_FAILED_OUT_OF_RANGE;
+
+        if (!m_caster->IsWithinLOS(m_targets.m_dstPos.GetPositionX(), m_targets.m_dstPos.GetPositionY(), m_targets.m_dstPos.GetPositionZ()))
+            return SPELL_FAILED_LINE_OF_SIGHT;
     }
                                                             //dead owner (pets still alive when owners ressed?)
         if (Unit *owner = m_caster->GetCharmerOrOwner())

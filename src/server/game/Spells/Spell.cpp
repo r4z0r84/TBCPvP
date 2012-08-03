@@ -2240,7 +2240,8 @@ void Spell::cast(bool skipCheck)
     {
         if (this->m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_NONE)
             if (Pet* playerPet = playerCaster->GetPet())
-                if (playerPet->isAlive() && playerPet->isControlled() && (m_targets.m_targetMask & TARGET_FLAG_UNIT))
+                if (playerPet->isAlive() && (m_targets.m_targetMask & TARGET_FLAG_UNIT) &&
+                    (playerPet->isControlled() || playerPet->getPetType() == CLASS_PET))
                     playerPet->AI()->OwnerAttacked(m_targets.getUnitTarget());
     }
     SetExecutedCurrently(true);
@@ -4447,6 +4448,16 @@ int16 Spell::PetCanCast(Unit* target)
     if (m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_AFFECTING_COMBAT;
 
+    // For Water Elemental freeze
+    if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_dstPos.GetPositionX() != 0 && m_targets.m_dstPos.GetPositionY() != 0 && m_targets.m_dstPos.GetPositionZ() != 0)
+    {
+        SpellRangeEntry const* s_range = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+        float max_range = GetSpellMaxRange(s_range);
+        float dist = m_caster->GetDistance(m_targets.m_dstPos);
+
+        if (dist > max_range)
+            return SPELL_FAILED_OUT_OF_RANGE;
+    }
                                                             //dead owner (pets still alive when owners ressed?)
         if (Unit *owner = m_caster->GetCharmerOrOwner())
             if (!owner->isAlive())

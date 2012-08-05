@@ -9582,6 +9582,15 @@ Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
     return NULL;
 }
 
+Bag* Player::GetBagByPos(uint8 bag) const
+{
+    if ((bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END)
+        || (bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END))
+        if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, bag))
+            return item->ToBag();
+    return NULL;
+}
+
 Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool useable) const
 {
     uint16 slot;
@@ -11508,7 +11517,10 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
         SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * MAX_VISIBLE_ITEM_OFFSET), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
 
         int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
-        SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
+        if (pItem->GetFakeEntry())
+            SetUInt32Value(VisibleBase + 0, pItem->GetFakeEntry());
+        else
+            SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
 
         for (int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
@@ -11632,6 +11644,7 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
 {
     if (Item* it = GetItemByPos(bag, slot))
     {
+        it->DeleteFakeFromDB(it->GetGUIDLow());
         ItemRemovedQuestCheck(it->GetEntry(), it->GetCount());
         RemoveItem(bag, slot, update);
         it->RemoveFromUpdateQueueOf(this);
@@ -21404,5 +21417,63 @@ void Player::SetMap(Map * map)
 {
     Unit::SetMap(map);
     m_mapRef.link(map, this);
+}
+
+uint32 Player::SuitableForTransmogrification(Item* oldItem, Item* newItem)
+{
+    // not possibly the best structure here, but atleast I got my head around this
+    if (!newItem->HasGoodFakeQuality())
+        return ERR_FAKE_NEW_BAD_QUALITY;
+
+    if (!oldItem->HasGoodFakeQuality())
+        return ERR_FAKE_OLD_BAD_QUALITY;
+
+    if (oldItem->GetProto()->DisplayInfoID == newItem->GetProto()->DisplayInfoID)
+        return ERR_FAKE_SAME_DISPLAY;
+
+    if (oldItem->GetFakeEntry())
+        if (const ItemPrototype* fakeItemTemplate = sObjectMgr->GetItemPrototype(oldItem->GetFakeEntry()))
+            if (fakeItemTemplate->DisplayInfoID == newItem->GetProto()->DisplayInfoID)
+                return ERR_FAKE_SAME_DISPLAY_FAKE;
+
+    if (CanUseItem(newItem, false) != EQUIP_ERR_OK)
+        return ERR_FAKE_CANT_USE;
+
+    uint32 newClass = newItem->GetProto()->Class;
+    uint32 oldClass = oldItem->GetProto()->Class;
+    uint32 newSubClass = newItem->GetProto()->SubClass;
+    uint32 oldSubClass = oldItem->GetProto()->SubClass;
+    uint32 newInventorytype = newItem->GetProto()->InventoryType;
+    uint32 oldInventorytype = oldItem->GetProto()->InventoryType;
+
+    if (newClass != oldClass)
+        return ERR_FAKE_NOT_SAME_CLASS;
+
+    if (newClass == ITEM_CLASS_WEAPON && newSubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE && oldSubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+    {
+        if (newSubClass == oldSubClass || ((newSubClass == ITEM_SUBCLASS_WEAPON_BOW || newSubClass == ITEM_SUBCLASS_WEAPON_GUN || newSubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW) && (oldSubClass == ITEM_SUBCLASS_WEAPON_BOW || oldSubClass == ITEM_SUBCLASS_WEAPON_GUN || oldSubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW)))
+        {
+            if (newInventorytype == oldInventorytype || (newInventorytype == INVTYPE_WEAPON && (oldInventorytype == INVTYPE_WEAPONMAINHAND || oldInventorytype == INVTYPE_WEAPONOFFHAND)))
+                return ERR_FAKE_OK;
+            else
+                return ERR_FAKE_BAD_INVENTORYTYPE;
+        }
+        else
+            return ERR_FAKE_BAD_SUBLCASS;
+    }
+    else if (newClass == ITEM_CLASS_ARMOR)
+    {
+        if (newSubClass == oldSubClass)
+        {
+            if (newInventorytype == oldInventorytype || (newInventorytype == INVTYPE_CHEST && oldInventorytype == INVTYPE_ROBE) || (newInventorytype == INVTYPE_ROBE && oldInventorytype == INVTYPE_CHEST))
+                return ERR_FAKE_OK;
+            else
+                return ERR_FAKE_BAD_INVENTORYTYPE;
+        }
+        else
+            return ERR_FAKE_BAD_SUBLCASS;
+    }
+
+    return ERR_FAKE_BAD_CLASS;
 }
 

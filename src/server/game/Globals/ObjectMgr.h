@@ -757,6 +757,7 @@ class ObjectMgr
         void LoadGameobjectRespawnTimes();
         void LoadItemPrototypes();
         void LoadItemLocales();
+        void LoadTransmogrifications();
         void LoadQuestLocales();
         void LoadNpcTextLocales();
         void LoadPageTextLocales();
@@ -796,6 +797,8 @@ class ObjectMgr
 
         void LoadVendors();
         void LoadTrainerSpell();
+
+        ItemFakeEntryContainer _itemFakeEntryStore;
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level);

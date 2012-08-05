@@ -219,6 +219,9 @@ class Item : public Object
         virtual void DeleteFromDB();
         void DeleteFromInventoryDB();
 
+        Bag* ToBag() { if (IsBag()) return reinterpret_cast<Bag*>(this); else return NULL; }
+        const Bag* ToBag() const { if (IsBag()) return reinterpret_cast<const Bag*>(this); else return NULL; }
+
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded() const;
@@ -292,6 +295,12 @@ class Item : public Object
         bool hasInvolvedQuest(uint32 /*quest_id*/) const { return false; }
 
         void BuildUpdate(UpdateDataMapType& );
+
+        uint32 GetFakeEntry();
+        bool DeleteFakeEntry();
+        static void DeleteFakeFromDB(uint32 lowGUID);
+        void SetFakeEntry(uint32 entry);
+        bool HasGoodFakeQuality();
 
     private:
         uint8 m_slot;

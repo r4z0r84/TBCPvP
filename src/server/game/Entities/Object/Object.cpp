@@ -1794,9 +1794,6 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     pet->SetCreatorGUID(GetGUID());
     pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, getFaction());
 
-    // this enables pet details window (Shift+P)
-    pet->GetCharmInfo()->SetPetNumber(pet_number, false);
-
     pet->setPowerType(POWER_MANA);
     pet->SetUInt32Value(UNIT_NPC_FLAGS , 0);
     pet->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
@@ -1807,13 +1804,22 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     switch (petType)
     {
         case CLASS_PET:
+            pet->GetCharmInfo()->SetPetNumber(pet_number, false);
+            pet->SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
+            pet->SetHealth(pet->GetMaxHealth());
+            pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
+            pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
+            break;
         case SUMMON_PET:
+            pet->GetCharmInfo()->SetPetNumber(pet_number, true);
             pet->SetUInt32Value(UNIT_FIELD_BYTES_0, 2048);
             pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
             pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
             pet->SetHealth(pet->GetMaxHealth());
             pet->SetPower(POWER_MANA, pet->GetMaxPower(POWER_MANA));
-            pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
+            pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
+            break;
+        default:
             break;
     }
 
@@ -1826,6 +1832,8 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
             pet->InitPetCreateSpells();
             pet->SavePetToDB(PET_SAVE_AS_CURRENT);
             PetSpellInitialize();
+            break;
+        default:
             break;
     }
 

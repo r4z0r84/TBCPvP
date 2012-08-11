@@ -5455,7 +5455,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         return false;
 
                     // heal amount
-                    basepoints0 = triggeredByAura->GetModifierValue()*std::min(damage, GetMaxHealth() - GetHealth())/100;
+                    basepoints0 = damage * 0.1; // 10% of the healing amount
                     target = this;
 
                     if (basepoints0)

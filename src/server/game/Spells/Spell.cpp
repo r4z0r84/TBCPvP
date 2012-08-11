@@ -952,6 +952,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     if (m_healing > 0)
     {
         bool crit = caster->isSpellCrit(NULL, m_spellInfo, m_spellSchoolMask);
+        procEx |= PROC_EX_HEALING; // Healing Proc
+
         uint32 addhealth = m_healing;
         if (crit)
         {

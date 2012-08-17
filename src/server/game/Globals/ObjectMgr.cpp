@@ -2644,51 +2644,60 @@ void ObjectMgr::LoadArenaTeams()
 
 void ObjectMgr::LoadGroups()
 {
-    // -- loading groups --
-    Group *group = NULL;
-    uint64 leaderGuid = 0;
-    uint32 count = 0;
-    //                                                           0         1              2           3           4              5      6      7      8      9      10     11     12     13      14          15
-    QueryResult_AutoPtr result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, difficulty, leaderGuid FROM groups");
-
-    if (!result)
     {
-        sLog->outString();
-        sLog->outString(">> Loaded %u group definitions", count);
-        return;
-    }
+        // -- loading groups --
+        //                                                           0         1              2           3           4              5      6      7      8      9      10     11     12     13      14          15
+        QueryResult_AutoPtr result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, difficulty, leaderGuid FROM groups");
 
-    do
-    {
-        Field *fields = result->Fetch();
-        ++count;
-        leaderGuid = MAKE_NEW_GUID(fields[15].GetUInt32(), 0, HIGHGUID_PLAYER);
-
-        group = new Group;
-        if (!group->LoadGroupFromDB(leaderGuid, result, false))
+        if (!result)
         {
-            group->Disband();
-            delete group;
-            continue;
+            sLog->outString();
+            sLog->outString(">> Loaded 0 group definitions, DB table `groups` is empty!");
+            return;
         }
-        AddGroup(group);
-    }while (result->NextRow());
 
-    sLog->outString();
-    sLog->outString(">> Loaded %u group definitions", count);
-
-    // -- loading members --
-    count = 0;
-    group = NULL;
-    leaderGuid = 0;
-    //                                        0           1          2         3
-    result = CharacterDatabase.Query("SELECT memberGuid, assistant, subgroup, leaderGuid FROM group_member ORDER BY leaderGuid");
-    if (!result)
-    {
+        Group *group = NULL;
+        uint64 leaderGuid = 0;
+        uint32 count = 0;
         do
         {
             Field *fields = result->Fetch();
-            count++;
+            leaderGuid = MAKE_NEW_GUID(fields[15].GetUInt32(), 0, HIGHGUID_PLAYER);
+            group = new Group;
+            if (!group->LoadGroupFromDB(leaderGuid, result, false))
+            {
+                group->Disband();
+                delete group;
+                continue;
+            }
+
+            AddGroup(group);
+            ++count;
+        }
+        while (result->NextRow());
+
+        sLog->outString(">> Loaded %u group definitions", count);
+    }
+
+    // -- loading members --
+    sLog->outString();
+    sLog->outString("Loading group members...");
+    {
+        //                                        0           1          2         3
+        QueryResult_AutoPtr result = CharacterDatabase.Query("SELECT memberGuid, assistant, subgroup, leaderGuid FROM group_member ORDER BY leaderGuid");
+        if (!result)
+        {
+            sLog->outString();
+            sLog->outString(">> Loaded 0 group members, DB table `group_member` is empty!");
+            return;
+        }
+
+        uint32 count = 0;
+        Group* group = NULL;
+        uint64 leaderGuid = 0;
+        do
+        {
+            Field *fields = result->Fetch();
             leaderGuid = MAKE_NEW_GUID(fields[3].GetUInt32(), 0, HIGHGUID_PLAYER);
             if (!group || group->GetLeaderGUID() != leaderGuid)
             {
@@ -2706,7 +2715,12 @@ void ObjectMgr::LoadGroups()
                 sLog->outErrorDb("Incorrect entry in group_member table : member %d cannot be added to player %d's group!", fields[0].GetUInt32(), fields[3].GetUInt32());
                 CharacterDatabase.PExecute("DELETE FROM group_member WHERE memberGuid = '%d'", fields[0].GetUInt32());
             }
-        }while (result->NextRow());
+
+            ++count;
+        }
+        while (result->NextRow());
+
+        sLog->outString(">> Loaded %u group members total", count);
     }
 
     // clean groups
@@ -2724,23 +2738,28 @@ void ObjectMgr::LoadGroups()
     }
 
     // -- loading instances --
-    count = 0;
-    group = NULL;
-    leaderGuid = 0;
-    result = CharacterDatabase.Query(
-        //      0           1    2         3          4           5
-        "SELECT leaderGuid, map, instance, permanent, difficulty, resettime, "
-        // 6
-        "(SELECT COUNT(*) FROM character_instance WHERE guid = leaderGuid AND instance = group_instance.instance AND permanent = 1 LIMIT 1) "
-        "FROM group_instance LEFT JOIN instance ON instance = id ORDER BY leaderGuid"
-);
-
-    if (!result)
+    sLog->outString();
+    sLog->outString("Loading group instance saves...");
     {
+        QueryResult_AutoPtr result = CharacterDatabase.Query(
+            //      0           1    2         3          4           5
+            "SELECT leaderGuid, map, instance, permanent, difficulty, resettime, "
+            // 6
+            "(SELECT COUNT(*) FROM character_instance WHERE guid = leaderGuid AND instance = group_instance.instance AND permanent = 1 LIMIT 1) "
+            "FROM group_instance LEFT JOIN instance ON instance = id ORDER BY leaderGuid");
+
+        if (!result)
+        {
+            sLog->outString(">> Loaded 0 group-instance saves. DB table `group_instance` is empty!");
+            return;
+        }
+
+        uint32 count = 0;
+        Group* group = NULL;
+        uint64 leaderGuid = 0;
         do
         {
             Field *fields = result->Fetch();
-            count++;
             leaderGuid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
             if (!group || group->GetLeaderGUID() != leaderGuid)
             {
@@ -2761,14 +2780,13 @@ void ObjectMgr::LoadGroups()
 
             InstanceSave *save = sInstanceSaveMgr->AddInstanceSave(mapEntry->MapID, fields[2].GetUInt32(), fields[4].GetUInt8(), (time_t)fields[5].GetUInt64(), (fields[6].GetUInt32() == 0), true);
             group->BindToInstance(save, fields[3].GetBool(), true);
-        }while (result->NextRow());
+
+            ++count;
+        }
+        while (result->NextRow());
+
+        sLog->outString(">> Loaded %u group-instance binds total", count);
     }
-
-    sLog->outString();
-    sLog->outString(">> Loaded %u group-instance binds total", count);
-
-    sLog->outString();
-    sLog->outString(">> Loaded %u group members total", count);
 }
 
 void ObjectMgr::LoadQuests()

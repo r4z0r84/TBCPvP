@@ -203,6 +203,9 @@ void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket & recv_data)
     if (!at)
         return;
 
+    if (_player->InBattleGroundQueue())
+        return;
+
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(_player->GetMapId()))
         if (mapEntry->IsBattleArena())
             return;
@@ -238,7 +241,7 @@ void WorldSession::HandleArenaTeamDisbandOpcode(WorldPacket & recv_data)
     uint32 ArenaTeamId;                                     // arena team id
     recv_data >> ArenaTeamId;
 
-    if (GetPlayer()->InArena())
+    if (GetPlayer()->InArena() || GetPlayer()->InBattleGroundQueue())
         return;
 
     if (ArenaTeam *at = sObjectMgr->GetArenaTeamById(ArenaTeamId))

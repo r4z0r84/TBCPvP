@@ -203,6 +203,10 @@ void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket & recv_data)
     if (!at)
         return;
 
+    if (MapEntry const* mapEntry = sMapStore.LookupEntry(_player->GetMapId()))
+        if (mapEntry->IsBattleArena())
+            return;
+
     if (_player->GetGUID() == at->GetCaptain() && at->GetMembersSize() > 1)
     {
         // check for correctness

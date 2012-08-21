@@ -338,6 +338,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     if (owner->GetGroup())
         owner->SetGroupUpdateFlag(GROUP_UPDATE_PET);
 
+    // Save pet for resummoning at resurrection in BGs
+    if (owner->GetTypeId() == TYPEID_PLAYER)
+        if (isControlled() && !isTemporarySummoned() && summon_spell_id)
+            owner->SetOldPetSpell(summon_spell_id);
+
     if (getPetType() == HUNTER_PET)
     {
         result = CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_pet_declinedname WHERE owner = '%u' AND id = '%u'", owner->GetGUIDLow(), GetCharmInfo()->GetPetNumber());

@@ -30,6 +30,7 @@
 #include "World.h"
 #include "Util.h"
 #include "GridNotifiersImpl.h"
+#include "SpellMgr.h"
 
 namespace Trinity
 {
@@ -343,6 +344,14 @@ void BattleGround::Update(time_t diff)
             if (!plr)
                 continue;
             plr->ResurrectPlayer(1.0f);
+
+            if (plr->GetOldPetSpell() && plr->isAlive())
+            {
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(plr->GetOldPetSpell());
+                if (spellInfo && GetSpellDuration(spellInfo) <= 0)
+                    plr->CastSpell(plr, plr->GetOldPetSpell(), true);
+            }
+
             plr->CastSpell(plr, SPELL_SPIRIT_HEAL_MANA, true);
             sObjectAccessor->ConvertCorpseForPlayer(*itr);
         }

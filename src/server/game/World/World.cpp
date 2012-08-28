@@ -1312,14 +1312,14 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Spell target coordinates...");
     sSpellMgr->LoadSpellTargetPositions();
 
-    sLog->outString("Loading SpellAffect definitions...");
-    sSpellMgr->LoadSpellAffects();
-
     sLog->outString("Loading spell pet auras...");
     sSpellMgr->LoadSpellPetAuras();
 
     sLog->outString("Loading spell extra attributes...");
     sSpellMgr->LoadSpellCustomAttr();
+
+    sLog->outString("Loading SpellAffect definitions...");
+    sSpellMgr->LoadSpellAffects();
 
     sLog->outString("Loading linked spells...");
     sSpellMgr->LoadSpellLinked();

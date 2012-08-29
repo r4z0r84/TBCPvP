@@ -2268,6 +2268,9 @@ void SpellMgr::LoadSpellCustomAttr()
             }
         }
 
+        if (spellInfo->SpellFamilyFlags & 0x00000000200LL && spellInfo->Attributes == 0x49010000)
+            spellInfo->InterruptFlags &= ~SPELL_INTERRUPT_FLAG_MOVEMENT;
+
         if (spellInfo->SpellVisual == 3879)
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_CONE_BACK;
 

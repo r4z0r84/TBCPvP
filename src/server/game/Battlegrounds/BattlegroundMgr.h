@@ -74,7 +74,7 @@ class BattleGroundQueue
 
         GroupQueueInfo * AddGroup(Player * leader, uint32 BgTypeId, uint8 ArenaType, bool isRated, uint32 ArenaRating, uint32 ArenaTeamId = 0);
         void AddPlayer(Player *plr, GroupQueueInfo *ginfo);
-        void RemovePlayer(uint64 guid, bool decreaseInvitedCount);
+        void RemovePlayer(uint64 guid, bool decreaseInvitedCount, uint32 bgTypeId);
         void DecreaseGroupLength(uint32 queueId, uint32 AsGroup);
         void BGEndedRemoveInvites(BattleGround * bg);
 

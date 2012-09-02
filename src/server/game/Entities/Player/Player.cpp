@@ -20245,20 +20245,15 @@ uint32 Player::GetMaxLevelForBattleGroundQueueId(uint32 queue_id)
 }
 
 //TODO make this more generic - current implementation is wrong
-uint32 Player::GetBattleGroundQueueIdFromLevel() const
+uint32 Player::GetBattleGroundQueueIdFromLevel(uint32 bgTypeId) const
 {
+    // returned to hardcoded version of this function, cause there's no way to code it dynamic
     uint32 level = getLevel();
-    if (level <= 19)
-        return 0;
-    else if (level > 69)
-        return 6;
-    else
-        return level/10 - 1;                                // 20..29 -> 1, 30-39 -> 2, ...
-    /*
-    ASSERT(bgTypeId < MAX_BATTLEGROUND_TYPES);
-    BattleGround *bg = sBattleGroundMgr->GetBattleGroundTemplate(bgTypeId);
-    ASSERT(bg);
-    return (getLevel() - bg->GetMinLevel()) / 10;*/
+    if (bgTypeId == BATTLEGROUND_AV)
+        level--;
+
+    uint32 queueId = (level/10 - 1);
+    return (queueId < 6 ) ? queueId : 6;
 }
 
 float Player::GetReputationPriceDiscount(Creature const* creature) const

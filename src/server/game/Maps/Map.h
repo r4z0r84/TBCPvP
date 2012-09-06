@@ -270,7 +270,7 @@ class Map : public GridRefManager<NGridType>
         template<class T> void Add(T *);
         template<class T> void Remove(T *, bool);
 
-        virtual void Update(const uint32);
+        virtual void Update(const uint32&);
 
         /*
         void MessageBroadcast(Player *, WorldPacket *, bool to_self);
@@ -467,7 +467,7 @@ class Map : public GridRefManager<NGridType>
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
 
-        void UpdateActiveCells(const float &x, const float &y, const uint32 t_diff);
+        void UpdateActiveCells(const float &x, const float &y, const uint32 &t_diff);
     protected:
         void SetUnloadReferenceLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
 
@@ -510,7 +510,7 @@ class Map : public GridRefManager<NGridType>
 
         //these functions used to process player/mob aggro reactions and
         //visibility calculations. Highly optimized for massive calculations
-        void ProcessRelocationNotifies(const uint32 diff);
+        void ProcessRelocationNotifies(const uint32 &diff);
 
         bool i_scriptLock;
         std::set<WorldObject *> i_objectsToRemove;
@@ -569,7 +569,7 @@ class InstanceMap : public Map
         ~InstanceMap();
         bool Add(Player *);
         void Remove(Player *, bool);
-        void Update(const uint32);
+        void Update(const uint32&);
         void CreateInstanceData(bool load);
         bool Reset(uint8 method);
         uint32 GetScriptId() { return i_script_id; }

@@ -2038,7 +2038,16 @@ class Player : public Unit, public GridObject<Player>
         /***               FLOOD FILTER SYSTEM                 ***/
         /*********************************************************/
 
-        void UpdateSpeakTime();
+        std::set<std::string> MessageCache;         // The message cache for the messages will be cleared every x seconds
+        uint32 RepeatIT;                            // Repeating messages in specific time
+        uint32 RepeatTO;                            // Repeat time out
+        uint32 SpeakTimer;                          // The time we last spoken
+        uint32 SpeakCount;                          // The total messages
+
+        bool DoSpamCheck(std::string message);
+        bool SpamCheckForType(uint32 Type, uint32 Lang);
+
+        void UpdateSpeakTime(bool Emote = false);
         bool CanSpeak() const;
         void ChangeSpeakTime(int utime);
 
@@ -2312,8 +2321,6 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 m_team;
         uint32 m_nextSave;
-        time_t m_speakTime;
-        uint32 m_speakCount;
         uint32 m_dungeonDifficulty;
 
         uint32 m_atLoginFlags;

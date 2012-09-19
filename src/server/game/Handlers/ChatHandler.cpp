@@ -169,7 +169,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             return;
         }
 
-        if (type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
+        if (type != CHAT_MSG_AFK && type != CHAT_MSG_DND && type != CHAT_MSG_RAID)
             GetPlayer()->UpdateSpeakTime();
     }
 
@@ -205,6 +205,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
+            if (GetPlayer()->SpamCheckForType(type, lang))
+                if (!GetPlayer()->DoSpamCheck(msg))
+                    return;
+
             if (type == CHAT_MSG_SAY)
                 GetPlayer()->Say(msg, lang);
             else if (type == CHAT_MSG_EMOTE)
@@ -230,6 +234,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 SendPlayerNotFoundNotice(to);
                 break;
             }
+
+            if (GetPlayer()->SpamCheckForType(type, lang))
+                if (!GetPlayer()->DoSpamCheck(msg))
+                    return;
 
             Player* player = sObjectMgr->GetPlayer(to.c_str());
             uint32 tSecurity = GetSecurity();
@@ -277,6 +285,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
+            if (GetPlayer()->SpamCheckForType(type, lang))
+                if (!GetPlayer()->DoSpamCheck(msg))
+                    return;
+
             // if player is in battleground, he cannot say to battleground members by /p
             Group *group = GetPlayer()->GetOriginalGroup();
             // so if player hasn't OriginalGroup and his player->GetGroup() is BG raid, then return
@@ -308,6 +320,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
             if (msg.empty())
                 break;
+
+            if (GetPlayer()->SpamCheckForType(type, lang))
+                if (!GetPlayer()->DoSpamCheck(msg))
+                    return;
 
             if (GetPlayer()->GetGuildId())
             {
@@ -455,6 +471,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
+            if (GetPlayer()->SpamCheckForType(type, lang))
+                if (!GetPlayer()->DoSpamCheck(msg))
+                    return;
+
             //battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
             Group *group = GetPlayer()->GetGroup();
             if (!group || !group->isBGGroup())
@@ -505,6 +525,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
             if (msg.empty())
                 break;
+
+            if (GetPlayer()->SpamCheckForType(type, lang))
+                if (!GetPlayer()->DoSpamCheck(msg))
+                    return;
 
             if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
             {
@@ -596,6 +620,8 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recv_data)
         SendNotification(GetSkyFireString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
         return;
     }
+
+    GetPlayer()->UpdateSpeakTime(true);
 
     uint32 text_emote, emoteNum;
     uint64 guid;

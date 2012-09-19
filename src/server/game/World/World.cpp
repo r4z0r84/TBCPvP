@@ -866,7 +866,7 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_CHATFLOOD_MESSAGE_DELAY] = ConfigMgr::GetIntDefault("ChatFlood.MessageDelay", 1);
     m_configs[CONFIG_CHATFLOOD_MUTE_TIME]     = ConfigMgr::GetIntDefault("ChatFlood.MuteTime", 10);
     m_configs[CONFIG_CHATFLOOD_CAPS_LENGTH] = ConfigMgr::GetIntDefault("ChatFlood.CMessageLength", 100);
-    m_configs[CONFIG_CHATFLOOD_CAPS_PCT] = sConfig.GetFloatDefault("ChatFlood.CMessagePct", 70);
+    m_configs[CONFIG_CHATFLOOD_CAPS_PCT] = ConfigMgr::GetFloatDefault("ChatFlood.CMessagePct", 70);
     m_configs[CONFIG_CHATFLOOD_REPEAT_MESSAGES] = ConfigMgr::GetIntDefault("ChatFlood.RepeatMessages", 5);
     m_configs[CONFIG_CHATFLOOD_REPEAT_TIMEOUT] = ConfigMgr::GetIntDefault("ChatFlood.RepeatTimeOut", 10);
     m_configs[CONFIG_CHATFLOOD_REPEAT_MUTE] = ConfigMgr::GetIntDefault("ChatFlood.RepeatMute", 20);

@@ -17561,7 +17561,7 @@ void Player::UpdateSpeakTime(bool Emote)
     time_t current = time (NULL);
     if (SpeakTimer > current)
     {
-        uint32 max_count = (Emote ? sWorld->getConfig(CONFIG_CHATFLOOD_EMOTE_COUNT) : sWorld->getConfig(CONFIG_CHATFLOOD_MESSAGE_COUNT);
+        uint32 max_count = (Emote ? sWorld->getConfig(CONFIG_CHATFLOOD_EMOTE_COUNT) : sWorld->getConfig(CONFIG_CHATFLOOD_MESSAGE_COUNT));
         if (!max_count)
             return;
 
@@ -17579,7 +17579,7 @@ void Player::UpdateSpeakTime(bool Emote)
     else
        SpeakCount = 0;
 
-    SpeakTime = current + (Emote ? sWorld->getConfig(CONFIG_CHATFLOOD_EMOTE_DELAY) : sWorld->getConfig(CONFIG_CHATFLOOD_MESSAGE_DELAY);
+    SpeakTimer = current + (Emote ? sWorld->getConfig(CONFIG_CHATFLOOD_EMOTE_DELAY) : sWorld->getConfig(CONFIG_CHATFLOOD_MESSAGE_DELAY));
 }
 
 bool Player::CanSpeak() const
@@ -17640,7 +17640,7 @@ bool Player::DoSpamCheck(std::string message)
         {
             time_t mutetime = time(NULL) + sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MUTE);
             GetSession()->m_muteTime = mutetime;
-            ChatHandler(this).PSendSysMessage("Yor chat has been blocked for %u Seconds because you repeated youself for over %u times in a time of %u seconds.\n\n", sWorld->getConfig(CONFIG_HATFLOOD_REPEAT_MESSAGES),sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES), sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT));
+            ChatHandler(this).PSendSysMessage("Yor chat has been blocked for %u Seconds because you repeated youself for over %u times in a time of %u seconds.\n\n", sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES), sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES), sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT));
             return false; 
         }
        

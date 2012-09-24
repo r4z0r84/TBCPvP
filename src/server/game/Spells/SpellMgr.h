@@ -403,7 +403,7 @@ inline bool IsDeathPersistentSpell(SpellEntry const *spellInfo)
 
 inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
 {
-    return (spellInfo->Attributes & SPELL_ATTR_CANT_USED_IN_COMBAT) != 0;
+    return (((spellInfo->Attributes & SPELL_ATTR_CANT_USED_IN_COMBAT) != 0) || ((spellInfo->AttributesEx6 & SPELL_ATTR_EX6_SUMMON_MOUNT) != 0));
 }
 
 bool IsPositiveSpell(uint32 spellId);

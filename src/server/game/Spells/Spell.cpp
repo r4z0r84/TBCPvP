@@ -3524,6 +3524,9 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_NOT_READY;
     }
 
+    if (m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
+        return SPELL_FAILED_INTERRUPTED_COMBAT;
+
     // only allow triggered spells if at an ended battleground
     if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
         if (BattleGround * bg = m_caster->ToPlayer()->GetBattleGround())

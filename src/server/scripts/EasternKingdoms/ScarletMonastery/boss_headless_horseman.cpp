@@ -128,7 +128,7 @@ static const char* Text[]=
     "Now, know demise!"
 };
 
-#define EMOTE_LAUGHS    "Headless Horseman laughs"
+#define EMOTE_LAUGHS    "laughs."
 
 struct mob_wisp_invisAI : public ScriptedAI
 {
@@ -225,7 +225,7 @@ struct mob_headAI : public ScriptedAI
         die = false;
         withbody = true;
         wait = 1000;
-        laugh = urand(15000, 30000);
+        laugh = urand(20000, 35000);
     }
 
     void EnterCombat(Unit * /*who*/) {}
@@ -414,7 +414,8 @@ struct boss_headless_horsemanAI : public ScriptedAI
         me->SetVisibility(VISIBILITY_OFF);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         me->AddUnitMovementFlag(MOVEFLAG_ONTRANSPORT | MOVEFLAG_LEVITATING);
-        me->SetSpeed(MOVE_WALK, 5.0f, true);
+        me->SetSpeed(MOVE_WALK, 1.0f, true);
+        me->SetSpeed(MOVE_RUN, 3.0f, true);
         wp_reached = false;
         count = 0;
         say_timer = 3000;
@@ -455,8 +456,10 @@ struct boss_headless_horsemanAI : public ScriptedAI
                 wp_reached = false;
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 SaySound(SAY_ENTRANCE);
-                if (Unit *plr = Unit::GetUnit((*me),PlayerGUID))
-                    DoStartMovement(plr);
+                me->GetMotionMaster()->Clear(false);
+                if (Player *plr = SelectRandomPlayer(100.0f, false))
+                    me->CombatStart(plr, true);
+                me->SetSpeed(MOVE_RUN, 1.0f, true);
                 break;
             }
         }
@@ -490,7 +493,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
     void SaySound(int32 textEntry, Unit *pTarget = 0)
     {
         DoScriptText(textEntry, me, pTarget);
-        laugh += 4000;
+        laugh += 8000;
     }
 
     Player* SelectRandomPlayer(float range = 0.0f, bool checkLoS = true)
@@ -536,6 +539,8 @@ struct boss_headless_horsemanAI : public ScriptedAI
             CAST_AI(mob_wisp_invisAI, wisp->AI())->SetType(4);
         if (instance)
             instance->SetData(DATA_HORSEMAN_EVENT, DONE);
+
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     void SpellHit(Unit *caster, const SpellEntry* spell)
@@ -557,7 +562,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
             DoCast(me, SPELL_HEAD);
             caster->GetMotionMaster()->Clear(false);
             caster->GetMotionMaster()->MoveFollow(me, 6, urand(0, 5));
-            //DoResetThreat();//not sure if need
+            //DoResetThreat(); // not sure if need
             std::list<HostileReference*>::const_iterator itr;
             for (itr = caster->getThreatManager().getThreatList().begin(); itr != caster->getThreatManager().getThreatList().end(); ++itr)
             {
@@ -674,7 +679,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
 
             if (laugh <= diff)
             {
-                laugh = urand(11000, 22000);
+                laugh = urand(17000, 28000);
                 me->MonsterTextEmote(EMOTE_LAUGHS, NULL);
                 DoPlaySoundToSet(me, RandomLaugh[rand()%3]);
             } else laugh -= diff;
@@ -685,7 +690,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
                 if (cleave <= diff)
                 {
                     DoCast(me->getVictim(), SPELL_CLEAVE);
-                    cleave = urand(2000, 6000);       //1 cleave per 2.0-6.0sec
+                    cleave = urand(2000, 6000);       // 1 cleave per 2.0-6.0sec
                 } else cleave -= diff;
             }
         }
@@ -693,7 +698,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
         {
             if (regen <= diff)
             {
-                regen = 1000;                   //"body calls head"
+                regen = 1000;                   // "body calls head"
                 if (me->GetHealth()/me->GetMaxHealth() == 1 && !returned)
                 {
                     if (Phase > 1)

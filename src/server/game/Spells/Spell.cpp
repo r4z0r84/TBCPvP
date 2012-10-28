@@ -3993,6 +3993,9 @@ uint8 Spell::CanCast(bool strict)
             }
             case SPELL_EFFECT_CHARGE:
             {
+                if (Unit* target = m_targets.getUnitTarget())
+                    if (!target->isAlive())
+                        return SPELL_FAILED_BAD_TARGETS;
                 if (m_caster->hasUnitState(UNIT_STAT_ROOT))
                     return SPELL_FAILED_ROOTED;
 

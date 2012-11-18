@@ -169,7 +169,7 @@ bool Database::Initialize(const char* infoString)
     }
     else
     {
-        sLog->outError("Could not connect to MySQL database at %s: %s\n", host.c_str(), mysql_error(mysqlInit));
+        sLog->outError("Could not connect to MySQL database at %s\n", host.c_str());
         mysql_close(mysqlInit);
         return false;
     }

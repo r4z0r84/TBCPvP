@@ -3876,7 +3876,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
                 iter->second->SetStackAmount(iter->second->GetStackAmount() - 1);
                 iter->second->ApplyModifier(true, true);
 
-                iter->second->UpdateSlotCounterAndDuration();
+                iter->second->UpdateSlotCounter();
                 ++iter;
             }
             else
@@ -3944,7 +3944,7 @@ void Unit::RemoveSingleAuraFromStackByDispel(uint32 spellId)
                 iter->second->SetStackAmount(iter->second->GetStackAmount()-1);
                 iter->second->ApplyModifier(true, true);
 
-                iter->second->UpdateSlotCounterAndDuration();
+                iter->second->UpdateSlotCounter();
                 return; // not remove aura if stack amount > 1
             }
             else
@@ -3967,7 +3967,7 @@ void Unit::RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex)
             iter->second->SetStackAmount(iter->second->GetStackAmount()-1);
             iter->second->ApplyModifier(true, true);
 
-            iter->second->UpdateSlotCounterAndDuration();
+            iter->second->UpdateSlotCounter();
             return; // not remove aura if stack amount > 1
         }
         RemoveAura(iter);

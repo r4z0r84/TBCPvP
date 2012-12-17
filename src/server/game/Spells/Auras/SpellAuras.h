@@ -244,7 +244,7 @@ class Aura
         bool IsExpired() const { return !GetAuraDuration() && !(IsPermanent() || IsPassive()); }
         void UpdateAuraDuration();
         void SendAuraDurationForCaster(Player* caster);
-        void UpdateSlotCounterAndDuration();
+        void UpdateSlotCounter();
         uint32 GetTickNumber() const { return m_tickNumber; }
 
         uint64 const& GetCasterGUID() const { return m_caster_guid; }

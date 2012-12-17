@@ -911,16 +911,16 @@ void Aura::_AddAura()
             break;
     }
 
-    // register aura
-    if (getDiminishGroup() != DIMINISHING_NONE)
-        m_target->ApplyDiminishingAura(getDiminishGroup(), true);
-
     // passive auras (except totem auras) do not get placed in the slots
     // area auras with SPELL_AURA_NONE are not shown on target
     if ((!m_isPassive && m_spellProto->Effect[GetEffIndex()] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY) || m_target != caster)
     {
         if (!secondaura)                                     // new slot need
         {
+            // register aura
+            if (getDiminishGroup() != DIMINISHING_NONE)
+                m_target->ApplyDiminishingAura(getDiminishGroup(), true);
+
             if (IsPositive())                               // empty positive slot
             {
                 for (uint8 i = 0; i < MAX_POSITIVE_AURAS; i++)
@@ -961,9 +961,21 @@ void Aura::_AddAura()
         else                                                // use found slot
         {
             SetAuraSlot(slot);
+            UpdateAuraCharges();
         }
 
-        UpdateSlotCounterAndDuration();
+        UpdateSlotCounter();
+
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        {
+            if (GetSpellProto()->EffectApplyAuraName[i])
+            {
+                // This is the first aura applied, so refresh duration
+                if (GetEffIndex() == i)
+                    UpdateAuraDuration();
+                break;
+            }
+        }
 
         // Update Seals information
         if (IsSealSpell(GetSpellProto()))
@@ -991,10 +1003,6 @@ void Aura::_RemoveAura()
         if (dynObj)
             dynObj->RemoveAffected(m_target);
     }
-
-    // unregister aura
-    if (getDiminishGroup() != DIMINISHING_NONE)
-        m_target->ApplyDiminishingAura(getDiminishGroup(), false);
 
     //passive auras do not get put in slots
     // Note: but totem can be not accessible for aura target in time remove (to far for find in grid)
@@ -1030,6 +1038,10 @@ void Aura::_RemoveAura()
     // only remove icon when the last aura of the spell is removed (current aura already removed from list)
     if (!samespell)
     {
+        // unregister aura
+        if (getDiminishGroup() != DIMINISHING_NONE)
+            m_target->ApplyDiminishingAura(getDiminishGroup(), false);
+
         SetAura(slot, true);
         SetAuraFlag(slot, false);
         SetAuraLevel(slot, caster ? caster->getLevel() : sWorld->getConfig(CONFIG_MAX_PLAYER_LEVEL));
@@ -1110,7 +1122,7 @@ void Aura::SetAuraApplication(uint32 slot, int8 count)
     m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index, val);
 }
 
-void Aura::UpdateSlotCounterAndDuration()
+void Aura::UpdateSlotCounter()
 {
     uint8 slot = GetAuraSlot();
     if (slot >= MAX_AURAS)
@@ -1122,8 +1134,6 @@ void Aura::UpdateSlotCounterAndDuration()
     // Charge > 1; Stack = 0
     if (m_procCharges < 2)
         SetAuraApplication(slot, m_stackAmount-1);
-
-    UpdateAuraDuration();
 }
 
 /*********************************************************/

@@ -2057,7 +2057,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool ex
         return;
 
     CombatStart(pVictim);
-    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ATTACK);
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MELEE_ATTACK);
 
     uint32 hitInfo;
     if (attType == BASE_ATTACK)

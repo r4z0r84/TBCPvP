@@ -2389,6 +2389,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 33395:
             spellInfo->AttributesEx2 |= SPELL_ATTR_EX2_IGNORE_LOS;
             break;
+        case 12051:
+            spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+            break;
         case 29200: // Purify Helboar Meat
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             break;

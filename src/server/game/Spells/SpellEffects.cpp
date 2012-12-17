@@ -2011,6 +2011,12 @@ void Spell::EffectTriggerSpell(uint32 i)
                     // ignore positive and passive auras
                     && !iter->second->IsPositive() && !iter->second->IsPassive())
                 {
+                    if (spell->SpellFamilyName == SPELLFAMILY_WARRIOR)
+                        if (spell->SpellFamilyFlags & 0x0000002000020000LL)
+                            continue;
+                    if (spell->SpellFamilyName == SPELLFAMILY_DRUID)
+                        if (spell->SpellFamilyFlags & 0x0000000000000008LL)
+                            continue;
                     m_caster->RemoveAurasDueToSpell(spell->Id);
                     iter = Auras.begin();
                 }

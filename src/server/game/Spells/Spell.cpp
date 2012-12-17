@@ -2851,6 +2851,15 @@ void Spell::finish(bool ok)
 
 void Spell::SendCastResult(uint8 result)
 {
+     // Send failture to others
+    if (result != 0)
+    {
+        WorldPacket data(SMSG_SPELL_FAILED_OTHER, (8+4));
+        data << m_caster->GetPackGUID();
+        data << m_spellInfo->Id;
+        m_caster->SendMessageToSet(&data, false);
+    }
+
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 

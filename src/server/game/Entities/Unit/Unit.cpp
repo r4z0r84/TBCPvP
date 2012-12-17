@@ -7956,10 +7956,24 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             {
                 // Flash of Light
                 if ((spellProto->SpellFamilyFlags & 0x0000000040000000LL) && (*i)->GetEffIndex() == 1)
-                    AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+                    AdvertisedBenefit += 7 * (*i)->GetModifier()->m_amount / 3;
                 // Holy Light
                 else if ((spellProto->SpellFamilyFlags & 0x0000000080000000LL) && (*i)->GetEffIndex() == 0)
+                    AdvertisedBenefit += 7 * (*i)->GetModifier()->m_amount / 5;
+            }
+            // Libram of the Lightbringer
+            else if ((*i)->GetSpellProto()->Id == 34231)
+            {
+                // Holy Light
+                if ((spellProto->SpellFamilyFlags & 0x0000000080000000LL))
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+            }
+            // Blessed Book of Nagrand || Libram of Light || Libram of Divinity
+            else if ((*i)->GetSpellProto()->Id == 32403 || (*i)->GetSpellProto()->Id == 28851 || (*i)->GetSpellProto()->Id == 28853)
+            {
+                // Flash of Light
+                if ((spellProto->SpellFamilyFlags & 0x0000000040000000LL))
+                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
             }
         }
     }

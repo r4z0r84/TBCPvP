@@ -2389,11 +2389,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 35460: // Fury of the Dreghood Elders
             spellInfo->EffectImplicitTargetA[1] = TARGET_TYPE_UNIT_TARGET;
             break;
-        case 28851: // Libram of Light
-        case 28853: // Libram of Divinity
-        case 32403: // Blessed Book of Nagrand
-            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_ADD_FLAT_MODIFIER;
-            break;
         default:
             break;
         }

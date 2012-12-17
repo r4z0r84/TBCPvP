@@ -4662,16 +4662,14 @@ bool Spell::CanAutoCast(Unit* target)
 
 uint8 Spell::CheckRange(bool strict)
 {
-    //float range_mod;
+    float range_mod = 0.f;
 
     // self cast doesn't need range checking -- also for Starshards fix
     if (m_spellInfo->rangeIndex == 1) return 0;
 
-    // i do not know why we need this
-    /*if (strict)                                             //add radius of caster
-        range_mod = 1.25;
-    else                                                    //add radius of caster and ~5 yds "give"
-        range_mod = 6.25;*/
+    // add radius of caster and ~5 yds "give"
+    if (!strict)
+        range_mod = 5.0f;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
     float max_range = GetSpellMaxRange(srange); // + range_mod;
@@ -4691,7 +4689,7 @@ uint8 Spell::CheckRange(bool strict)
             if (!m_caster->IsWithinMeleeRange(target, max_range/* - 2*MIN_MELEE_REACH*/))
                 return SPELL_FAILED_OUT_OF_RANGE;
         }
-        else if (!m_caster->IsWithinCombatRange(target, max_range))
+        else if (!m_caster->IsWithinCombatRange(target, max_range + range_mod))
             return SPELL_FAILED_OUT_OF_RANGE;               //0x5A;
 
         if (range_type == SPELL_RANGE_RANGED)

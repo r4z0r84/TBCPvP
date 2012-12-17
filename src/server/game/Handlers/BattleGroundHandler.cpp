@@ -690,10 +690,17 @@ void WorldSession::HandleBattleGroundArenaJoin(WorldPacket & recv_data)
         }
     }
 
-    if (arenaslot == 2 && isRated)
+    if (isRated)
     {
-        ChatHandler(_player).PSendSysMessage("5v5 rated arena is disabled.");
-        return;
+        switch (arenaslot)
+        {
+            case 1:
+                ChatHandler(_player).PSendSysMessage("3v3 rated arena is disabled.");
+                break;
+            case 2:
+                ChatHandler(_player).PSendSysMessage("5v5 rated arena is disabled.");
+                break;
+        }
     }
 
     // ignore if we already in BG or BG queue

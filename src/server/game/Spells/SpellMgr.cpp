@@ -2220,9 +2220,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_AURA_HOT;
                     break;
                 case SPELL_AURA_MOD_ROOT:
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_AURA_CC;
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_MOVEMENT_IMPAIR;
-                    break;
                 case SPELL_AURA_MOD_DECREASE_SPEED:
                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_MOVEMENT_IMPAIR;
                     break;
@@ -2267,9 +2264,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
             }
         }
-
-        if (spellInfo->SpellFamilyFlags & 0x00000000200LL && spellInfo->Attributes == 0x49010000)
-            spellInfo->InterruptFlags &= ~SPELL_INTERRUPT_FLAG_MOVEMENT;
 
         if (spellInfo->SpellVisual == 3879)
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_CONE_BACK;
@@ -2406,15 +2400,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
         switch (spellInfo->SpellFamilyName)
         {
-            case SPELLFAMILY_WARRIOR:
-                // Shout
-                if (spellInfo->SpellFamilyFlags & 0x0000000000020000LL)
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_AURA_CC;
-                break;
             case SPELLFAMILY_DRUID:
-                // Roar
-                if (spellInfo->SpellFamilyFlags & 0x0000000800000000LL)
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_AURA_CC;
+                if (spellInfo->SpellFamilyFlags & 0x00000000200LL)
+                    spellInfo->InterruptFlags &= ~SPELL_INTERRUPT_FLAG_MOVEMENT;
                 else if (spellInfo->SpellFamilyFlags & 0x1000LL)
                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
                 break;

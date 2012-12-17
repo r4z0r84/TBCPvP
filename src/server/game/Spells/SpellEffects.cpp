@@ -2326,6 +2326,20 @@ void Spell::EffectApplyAura(uint32 i)
         }
     }
 
+    switch (m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_WARRIOR:
+            // Demoralizing Shout, Piercing Howl
+            if (m_spellInfo->SpellFamilyFlags & 0x0000002000020000LL)
+                unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            break;
+        case SPELLFAMILY_DRUID:
+            // Demoralizing Roar, Faerie Fire
+            if (m_spellInfo->SpellFamilyFlags & 0x0000000000000408LL)
+                unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            break;
+    }
+
     // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && (m_spellInfo->SpellFamilyFlags & 0x00002000000000LL))
         m_caster->CastSpell(unitTarget, 41637, true, NULL, Aur, m_originalCasterGUID);

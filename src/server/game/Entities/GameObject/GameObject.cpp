@@ -1386,6 +1386,13 @@ void GameObject::Use(Unit* user)
 
 void GameObject::CastSpell(Unit* target, uint32 spell)
 {
+    if (spell == 34709)
+    {
+        if (target)
+            target->CastSpell(target, 34709, true);
+        return;
+    }
+
     //summon world trigger
     Creature *trigger = SummonTrigger(GetPositionX(), GetPositionY(), GetPositionZ(), 0, 1);
     if (!trigger) return;

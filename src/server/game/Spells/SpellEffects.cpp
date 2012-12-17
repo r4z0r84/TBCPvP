@@ -2328,6 +2328,11 @@ void Spell::EffectApplyAura(uint32 i)
 
     switch (m_spellInfo->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+            // Shadow Sight
+            if (m_spellInfo->Id == 34709)
+                unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            break;
         case SPELLFAMILY_WARRIOR:
             // Demoralizing Shout, Piercing Howl
             if (m_spellInfo->SpellFamilyFlags & 0x0000002000020000LL)

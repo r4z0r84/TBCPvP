@@ -682,6 +682,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 24131:                                         // Wyvern Sting (Rank1)
         case 24134:                                         // Wyvern Sting (Rank2)
         case 24135:                                         // Wyvern Sting (Rank3)
+        case 34709:                                         // Shadow Sight
             return false;
     }
 

@@ -439,6 +439,7 @@ class Creature : public Unit, public GridObject<Creature>
         bool isPet() const      { return m_summonMask & SUMMON_MASK_PET; }
         bool isHunterPet() const{ return m_summonMask & SUMMON_MASK_HUNTER_PET; }
         bool isTotem() const    { return m_summonMask & SUMMON_MASK_TOTEM; }
+        bool isShadowfiend() const { return GetCreatureTemplate()->Entry == 19668; }
 
         Pet* ToPet(){ if (isPet()) return reinterpret_cast<Pet*>(this); else return NULL; }
 

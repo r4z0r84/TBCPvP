@@ -356,11 +356,12 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     sLog->outDebug("WORLD: Recvd CMSG_SPEED_CHANGE_ACK");
     /* extract packet */
     ObjectGuid guid;
+    uint32 unk1;
     MovementInfo movementInfo;
     float newspeed;
 
     recv_data >> guid;
-    recv_data >> Unused<uint32>();                          // counter or moveEvent
+    recv_data >> unk1;                            // counter or moveEvent
     recv_data >> movementInfo;
     recv_data >> newspeed;
 
@@ -430,7 +431,7 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket &recv_data)
     uint64 old_mover_guid;
     MovementInfo mi;
 
-    old_mover_guid = recv_data.readPackGUID();
+    recv_data.readPackGUID(old_mover_guid);
     recv_data >> mi;
 
     if (!old_mover_guid)
@@ -457,9 +458,10 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket & recv_data)
 
     MovementInfo movementInfo;
     uint64 guid;
+    uint32 unk1;
 
     recv_data >> guid;                                      // guid
-    recv_data >> Unused<uint32>();                          // unk
+    recv_data >> unk1;                                      // unk
     recv_data >> movementInfo;
 
     if (GetPlayer()->GetGUID() != guid)
@@ -489,24 +491,30 @@ void WorldSession::HandleMoveHoverAck(WorldPacket& recv_data)
 {
     sLog->outDebug("CMSG_MOVE_HOVER_ACK");
 
-    MovementInfo movementInfo;
+    uint64 guid;
+    recv_data.readPackGUID(guid);
 
-    recv_data >> Unused<uint64>();                          // guid
-    recv_data >> Unused<uint32>();                          // unk
+    recv_data.read_skip<uint32>();
+
+    MovementInfo movementInfo;
     recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk2
+
+    recv_data.read_skip<uint32>();
 }
 
 void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
     sLog->outDebug("CMSG_MOVE_WATER_WALK_ACK");
 
-    MovementInfo movementInfo;
+    uint64 guid;
+    recv_data.readPackGUID(guid);
 
-    recv_data >> Unused<uint64>();                          // guid
-    recv_data >> Unused<uint32>();                          // unk
+    recv_data.read_skip<uint32>();
+
+    MovementInfo movementInfo;
     recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk2
+
+    recv_data.read_skip<uint32>();
 }
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)

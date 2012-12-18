@@ -30,48 +30,51 @@
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
-    recvPacket >> Unused<uint64>();                         // guid
+    uint64 guid;
+    Player* player;
+    Player* plTarget;
+
+    recvPacket >> guid;
 
     if (!GetPlayer()->duel)                                  // ignore accept from duel-sender
         return;
 
-    Player *pl       = GetPlayer();
-    Player *plTarget = pl->duel->opponent;
+    player = GetPlayer();
+    plTarget = player->duel->opponent;
 
-    if (pl == pl->duel->initiator || !plTarget || pl == plTarget || pl->duel->startTime != 0 || plTarget->duel->startTime != 0)
+    if (player == player->duel->initiator || !plTarget || player == plTarget || player->duel->startTime != 0 || plTarget->duel->startTime != 0)
         return;
 
     //sLog->outDebug("WORLD: received CMSG_DUEL_ACCEPTED");
-    sLog->outDebug("Player 1 is: %u (%s)", pl->GetGUIDLow(), pl->GetName());
+    sLog->outDebug("Player 1 is: %u (%s)", player->GetGUIDLow(), player->GetName());
     sLog->outDebug("Player 2 is: %u (%s)", plTarget->GetGUIDLow(), plTarget->GetName());
 
     time_t now = time(NULL);
-    pl->duel->startTimer = now;
+    player->duel->startTimer = now;
     plTarget->duel->startTimer = now;
 
     if (sWorld->getConfig(CONFIG_DUEL_MOD))
     {
-        pl->ResetAllPowers();
+        player->ResetAllPowers();
         plTarget->ResetAllPowers();
 
-        if (sWorld->getConfig(CONFIG_DUEL_CD_RESET) && !pl->GetMap()->IsDungeon())
-            pl->RemoveArenaSpellCooldowns();
+        if (sWorld->getConfig(CONFIG_DUEL_CD_RESET) && !player->GetMap()->IsDungeon())
+            player->RemoveArenaSpellCooldowns();
 
         if (sWorld->getConfig(CONFIG_DUEL_CD_RESET) && !plTarget->GetMap()->IsDungeon())
             plTarget->RemoveArenaSpellCooldowns();
     }
 
-    WorldPacket data(SMSG_DUEL_COUNTDOWN, 4);
-    data << (uint32)3000;                                   // 3 seconds
-    pl->GetSession()->SendPacket(&data);
-    plTarget->GetSession()->SendPacket(&data);
+    player->SendDuelCountdown(3000);
+    plTarget->SendDuelCountdown(3000);
 }
 
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
-    //sLog->outDebug("WORLD: received CMSG_DUEL_CANCELLED");
+    sLog->outDebug("WORLD: received CMSG_DUEL_CANCELLED");
 
-    recvPacket >> Unused<uint64>();                         // guid
+    uint64 guid;
+    recvPacket >> guid;
 
     // no duel requested
     if (!GetPlayer()->duel)

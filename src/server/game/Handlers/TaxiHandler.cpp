@@ -190,7 +190,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recv_data)
     MovementInfo movementInfo;                              // used only for proper packet read
 
     recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk
+    recv_data.read_skip<uint32>();                          // unk
 
     // in taxi flight packet received in 2 case:
     // 1) end taxi path in far (multi-node) flight

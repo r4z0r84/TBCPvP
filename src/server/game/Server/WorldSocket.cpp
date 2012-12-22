@@ -55,38 +55,8 @@
 
 struct ServerPktHeader
 {
-    /**
-     * size is the length of the payload _plus_ the length of the opcode
-     */
-
-    ServerPktHeader(uint32 size, uint16 cmd) : size(size)
-    {
-        uint8 headerIndex = 0;
-        if (isLargePacket())
-        {
-            sLog->outDebug("initializing large server to client packet. Size: %u, cmd: %u", size, cmd);
-            header[headerIndex++] = 0x80 | (0xFF &(size >> 16));
-        }
-        header[headerIndex++] = 0xFF &(size >> 8);
-        header[headerIndex++] = 0xFF &size;
-
-        header[headerIndex++] = 0xFF & cmd;
-        header[headerIndex++] = 0xFF & (cmd >> 8);
-    }
-
-    uint8 getHeaderLength()
-    {
-        // cmd = 2 bytes, size= 2||3bytes
-        return 2+(isLargePacket()?3:2);
-    }
-
-    bool isLargePacket()
-    {
-        return size > 0x7FFF;
-    }
-
-    const uint32 size;
-    uint8 header[5];
+    uint16 size;
+    uint16 cmd;
 };
 
 struct ClientPktHeader
@@ -189,12 +159,11 @@ int WorldSocket::SendPacket (const WorldPacket& pct)
         sWorldLog->outLog("\n");
     }
 
-    // don't try to send the packet if there are packets on the queue
-    if (!m_PacketQueue.is_empty() || iSendPacket(pct) == -1)
+    if (iSendPacket (pct) == -1)
     {
         WorldPacket* npct;
 
-        ACE_NEW_RETURN(npct, WorldPacket (pct), -1);
+        ACE_NEW_RETURN (npct, WorldPacket (pct), -1);
 
         // NOTE maybe check of the size of the queue can be good ?
         // to make it bounded instead of unbounded
@@ -204,12 +173,6 @@ int WorldSocket::SendPacket (const WorldPacket& pct)
             sLog->outError ("WorldSocket::SendPacket: m_PacketQueue.enqueue_tail failed");
             return -1;
         }
-
-        // iSendPacket may fail if the packet is larger than the buffer (even in the buffer is empty)
-        // So we must try to flush so the packet may be sent partially
-        // don't cancel_wakeup_output here
-        if (iFlushPacketQueue())
-            return schedule_wakeup_output(Guard);
     }
 
     return 0;
@@ -322,22 +285,17 @@ int WorldSocket::handle_input (ACE_HANDLE)
     ACE_NOTREACHED(return -1);
 }
 
-int WorldSocket::handle_output(ACE_HANDLE)
+int WorldSocket::handle_output (ACE_HANDLE)
 {
     ACE_GUARD_RETURN (LockType, Guard, m_OutBufferLock, -1);
 
     if (closing_)
         return -1;
 
-    size_t send_len = m_OutBuffer->length();
+    const size_t send_len = m_OutBuffer->length ();
 
     if (send_len == 0)
-    {
-        if (!iFlushPacketQueue())
-            return cancel_wakeup_output(Guard);
-
-        send_len = m_OutBuffer->length();
-    }
+        return cancel_wakeup_output (Guard);
 
 #ifdef MSG_NOSIGNAL
     ssize_t n = peer().send (m_OutBuffer->rd_ptr(), send_len, MSG_NOSIGNAL);
@@ -973,97 +931,47 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
     return SendPacket (packet);
 }
 
-int WorldSocket::iSendPacket(const WorldPacket& pct)
+int WorldSocket::iSendPacket (const WorldPacket& pct)
 {
-    ServerPktHeader header(pct.size()+2, pct.GetOpcode());
-    if (m_OutBuffer->space() < pct.size() + header.getHeaderLength())
+    if (m_OutBuffer->space () < pct.size () + sizeof (ServerPktHeader))
     {
         errno = ENOBUFS;
         return -1;
     }
 
-    m_Crypt.EncryptSend(header.header, header.getHeaderLength());
+    ServerPktHeader header;
 
-    if (m_OutBuffer->copy((char*)header.header, header.getHeaderLength()) == -1)
+    header.cmd = pct.GetOpcode ();
+    EndianConvert(header.cmd);
+
+    header.size = (uint16) pct.size () + 2;
+    EndianConvertReverse(header.size);
+
+    m_Crypt.EncryptSend ((uint8*) & header, sizeof (header));
+
+    if (m_OutBuffer->copy ((char*) & header, sizeof (header)) == -1)
         ACE_ASSERT (false);
 
-    if (!pct.empty())
-        if (m_OutBuffer->copy((char*)pct.contents(), pct.size()) == -1)
+    if (!pct.empty ())
+        if (m_OutBuffer->copy ((char*) pct.contents (), pct.size ()) == -1)
             ACE_ASSERT (false);
 
     return 0;
 }
 
-/// Return 1 if some bytes written and packet completed
-/// Return 0 if no byte written, but still remaining data
-/// Return -1 if some bytes written and still remaining data
-int WorldSocket::iSendPartialPacket(WorldPacket& pct)
-{
-    size_t remainingLen = pct.size() - pct.rpos();
-
-    if (pct.rpos() == 0) // nothing sent yet => send header
-    {
-        ServerPktHeader header(pct.size()+2, pct.GetOpcode());
-
-        if (m_OutBuffer->space() < pct.size() + header.getHeaderLength())
-        {
-            // be sure to send big packet (otherwise, they would stay in the queue)
-            // So for packet larger than 1K, just check if there are some useful space
-            if (pct.size() > 1024 && m_OutBuffer->space() < header.getHeaderLength() + 1024)
-            {
-                return 0; // nothing written, still remaining data => 0
-            }
-        }
-
-        m_Crypt.EncryptSend(header.header, header.getHeaderLength());
-
-        if (m_OutBuffer->copy((char*) header.header, header.getHeaderLength()) == -1)
-            ACE_ASSERT (false);
-
-        if (remainingLen == 0)
-        {
-            return 1; // header written, nothing else => 1
-        }
-    }
-
-    if ((m_OutBuffer->space()) < remainingLen)
-    {
-        size_t len = m_OutBuffer->space();
-
-        if (m_OutBuffer->copy ((char*) (pct.contents() + pct.rpos()), len) == -1)
-            ACE_ASSERT (false);
-
-        pct.read_skip(len);
-        return -1; // packet will be pushed back on the queue
-    }
-
-    if (m_OutBuffer->copy ((char*) (pct.contents() + pct.rpos()), remainingLen) == -1)
-        ACE_ASSERT (false);
-
-    return 1; // some byte written and packet completed
-}
-
-bool WorldSocket::iFlushPacketQueue()
+bool WorldSocket::iFlushPacketQueue ()
 {
     WorldPacket *pct;
     bool haveone = false;
 
-    while (m_PacketQueue.dequeue_head(pct) == 0)
+    while (m_PacketQueue.dequeue_head (pct) == 0)
     {
-        int result = iSendPartialPacket(*pct);
-
-        if (result != 0)
+        if (iSendPacket (*pct) == -1)
         {
-            // some bytes were written
-            haveone = true;
-        }
-
-        if (result <= 0)
-        {
-            if (m_PacketQueue.enqueue_head(pct) == -1)
+            if (m_PacketQueue.enqueue_head (pct) == -1)
             {
                 delete pct;
-                sLog->outError("WorldSocket::iFlushPacketQueue m_PacketQueue->enqueue_head");
+                sLog->outError ("WorldSocket::iFlushPacketQueue m_PacketQueue->enqueue_head");
                 return false;
             }
 
@@ -1071,7 +979,7 @@ bool WorldSocket::iFlushPacketQueue()
         }
         else
         {
-            // packet completed
+            haveone = true;
             delete pct;
         }
     }

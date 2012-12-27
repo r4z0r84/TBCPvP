@@ -366,6 +366,16 @@ struct GameObjectInfo
     };
     uint32 ScriptId;
 
+    bool IsDespawnAtAction() const
+    {
+        switch (type)
+        {
+            case GAMEOBJECT_TYPE_CHEST:  return chest.consumable;
+            case GAMEOBJECT_TYPE_GOOBER: return goober.consumable;
+            default: return false;
+        }
+    }
+
     uint32 GetCharges() const                               // despawn at uses amount
     {
         switch (type)
@@ -659,13 +669,14 @@ class GameObject : public WorldObject, public GridObject<GameObject>
         std::list<uint32> m_SkillupList;
 
         Player* m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
-        std::set<uint32> m_unique_users;
+        std::set<uint64> m_unique_users;
         uint32 m_usetimes;
 
         uint32 m_DBTableGuid;                               // For new or temporary gameobjects is 0 for saved it is lowguid
         GameObjectInfo const* m_goInfo;
         GameObjectData const* m_goData;
     private:
+        void RemoveFromOwner();
         void SwitchDoorOrButton(bool activate, bool alternative = false);
 };
 #endif

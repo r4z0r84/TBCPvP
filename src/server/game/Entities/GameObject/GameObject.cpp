@@ -25,6 +25,7 @@
 #include "PoolMgr.h"
 #include "SpellMgr.h"
 #include "Spell.h"
+#include "ScriptMgr.h"
 #include "UpdateMask.h"
 #include "Opcodes.h"
 #include "WorldPacket.h"
@@ -74,26 +75,31 @@ void GameObject::CleanupsBeforeDelete()
         RemoveFromWorld();
 
     if (m_uint32Values)                                      // field array can be not exist if GameOBject not loaded
-    {
-        // Possible crash at access to deleted GO in Unit::m_gameobj
-        if (uint64 owner_guid = GetOwnerGUID())
-        {
-            Unit* owner = ObjectAccessor::GetUnit(*this, owner_guid);
-            if (owner)
-                owner->RemoveGameObject(this, false);
-            else
-            {
-                const char * ownerType = "creature";
-                if (IS_PLAYER_GUID(owner_guid))
-                    ownerType = "player";
-                else if (IS_PET_GUID(owner_guid))
-                    ownerType = "pet";
+        RemoveFromOwner();
+}
 
-                sLog->outError("Delete GameObject (GUID: %u Entry: %u SpellId %u LinkedGO %u) that lost references to owner (GUID %u Type '%s') GO list. Crash possible later.",
-                    GetGUIDLow(), GetGOInfo()->id, m_spellId, GetLinkedGameObjectEntry(), GUID_LOPART(owner_guid), ownerType);
-            }
-        }
+void GameObject::RemoveFromOwner()
+{
+    uint64 ownerGUID = GetOwnerGUID();
+    if (!ownerGUID)
+        return;
+
+    if (Unit* owner = ObjectAccessor::GetUnit(*this, ownerGUID))
+    {
+        owner->RemoveGameObject(this, false);
+        ASSERT(!GetOwnerGUID());
+        return;
     }
+
+    const char * ownerType = "creature";
+    if (IS_PLAYER_GUID(ownerGUID))
+        ownerType = "player";
+    else if (IS_PET_GUID(ownerGUID))
+        ownerType = "pet";
+
+    sLog->outError("Delete GameObject (GUID: %u Entry: %u SpellId %u LinkedGO %u) that lost references to owner (GUID %u Type '%s') GO list. Crash possible later.",
+        GetGUIDLow(), GetGOInfo()->id, m_spellId, GetLinkedGameObjectEntry(), GUID_LOPART(ownerGUID), ownerType);
+    SetOwnerGUID(0);
 }
 
 void GameObject::AddToWorld()
@@ -394,6 +400,15 @@ void GameObject::Update(uint32 diff)
                     if (GetAutoCloseTime() && (m_cooldownTime < time(NULL)))
                         ResetDoorOrButton();
                     break;
+                case GAMEOBJECT_TYPE_GOOBER:
+                    if (m_cooldownTime < time(NULL))
+                    {
+                        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+
+                        SetLootState(GO_JUST_DEACTIVATED);
+                        m_cooldownTime = 0;
+                    }
+                    break;
                 case GAMEOBJECT_TYPE_CHEST:
                     if (m_groupLootTimer && lootingGroupLeaderGUID)
                     {
@@ -423,37 +438,44 @@ void GameObject::Update(uint32 diff)
 
                 if (spellId)
                 {
-                    std::set<uint32>::iterator it = m_unique_users.begin();
-                    std::set<uint32>::iterator end = m_unique_users.end();
-                    for (; it != end; ++it)
-                    {
-                        if (Unit* owner = Unit::GetUnit(*this, uint64(*it)))
+                    for (std::set<uint64>::const_iterator it = m_unique_users.begin(); it != m_unique_users.end(); ++it)
+                        if (Player* owner = ObjectAccessor::GetPlayer(*this, *it))
                             owner->CastSpell(owner, spellId, false);
-                    }
 
                     m_unique_users.clear();
                     m_usetimes = 0;
                 }
+
+                SetGoState(GO_STATE_READY);
+
                 //any return here in case battleground traps
+                if (GetGOInfo()->flags & GO_FLAG_NODESPAWN)
+                    return;
             }
 
-            if (GetOwnerGUID())
+            if (GetSpellId() || GetOwnerGUID())
             {
                 if (Unit* owner = GetOwner())
-                {
                     owner->RemoveGameObject(this, false);
-                    SetRespawnTime(0);
-                    Delete();
-                }
+
+                SetRespawnTime(0);
+                Delete();
                 return;
             }
 
             //burning flags in some battlegrounds, if you find better condition, just add it
-            if (GetGoAnimProgress() > 0)
+            if (GetGOInfo()->IsDespawnAtAction() || GetGoAnimProgress() > 0)
             {
                 SendObjectDeSpawnAnim(GetGUID());
+
                 //reset flags
-                SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
+                if (GetMap()->Instanceable())
+                {
+                    uint32 currentLockOrInteractFlags = GetUInt32Value(GAMEOBJECT_FLAGS) & (GO_FLAG_LOCKED | GO_FLAG_UNK1);
+                    SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags & ~(GO_FLAG_LOCKED | GO_FLAG_UNK1) | currentLockOrInteractFlags);
+                }
+                else
+                    SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
             }
 
             loot.clear();
@@ -466,8 +488,6 @@ void GameObject::Update(uint32 diff)
             {
                 // Delete GO's that were not spawned by database fields directly from the server's grid, so GM's won't see them anymore
                 m_respawnTime = 0;
-                SetRespawnTime(0);
-                Delete();
                 UpdateObjectVisibility();
                 return;
             }
@@ -505,6 +525,9 @@ void GameObject::AddUniqueUse(Player* player)
 
 void GameObject::Delete()
 {
+    SetLootState(GO_NOT_READY);
+    RemoveFromOwner();
+
     SendObjectDeSpawnAnim(GetGUID());
 
     SetGoState(GO_STATE_READY);
@@ -1040,7 +1063,7 @@ void GameObject::Use(Unit* user)
                     data << GetGUID();
                     player->GetSession()->SendPacket(&data);
                 }
-                else if (info->questgiver.gossipID)
+                else if (info->goober.gossipID)
                 {
                     player->PrepareGossipMenu(this, info->goober.gossipID);
                     player->SendPreparedGossip(this);
@@ -1050,9 +1073,29 @@ void GameObject::Use(Unit* user)
                     GetMap()->ScriptsStart(sEventScripts, info->goober.eventId, player, this);
 
                 // possible quest objective for active quests
+                if (info->goober.questId && sObjectMgr->GetQuestTemplate(info->goober.questId))
+                {
+                    // quest require to be active for GO using
+                    if (player->GetQuestStatus(info->goober.questId) != QUEST_STATUS_INCOMPLETE)
+                        break;
+                }
+
+                sScriptMgr->GOHello(player, this);
+                AddUniqueUse(player);
+
                 player->CastedCreatureOrGO(info->id, GetGUID(), 0);
             }
 
+            GetMap()->ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), user, this);
+
+            if (uint32 trapEntry = info->goober.linkedTrapId)
+                TriggeringLinkedGameObject(trapEntry, user);
+
+            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+            SetLootState(GO_ACTIVATED);
+            SetGoState(GO_STATE_ACTIVE);
+
+            m_cooldownTime = time(NULL) + GetAutoCloseTime();
             // cast this spell later if provided
             spellId = info->goober.spellId;
 

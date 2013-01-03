@@ -64,38 +64,6 @@ enum PartyResult
     PARTY_RESULT_INVITE_RESTRICTED    = 13
 };
 
-class PacketFilter
-{
-    public:
-        explicit PacketFilter(WorldSession* pSession) : m_pSession(pSession) {}
-        virtual ~PacketFilter() {}
-
-        virtual bool Process(WorldPacket* /*packet*/) { return true; }
-        bool ProcessLogout() const { return true; }
-
-    protected:
-        WorldSession* const m_pSession;
-};
-
-class MapSessionFilter : public PacketFilter
-{
-    public:
-        explicit MapSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
-        ~MapSessionFilter() {}
-
-        bool Process(WorldPacket* packet);
-        bool ProcessLogout() const { return false; }
-};
-
-class WorldSessionFilter : public PacketFilter
-{
-    public:
-        explicit WorldSessionFilter(WorldSession * pSession) : PacketFilter(pSession) {}
-        ~WorldSessionFilter() {}
-
-        virtual bool Process(WorldPacket* packet);
-};
-
 // Player session in the World
 class WorldSession
 {
@@ -152,7 +120,7 @@ class WorldSession
         void KickPlayer();
 
         void QueuePacket(WorldPacket* new_packet);
-        bool Update(PacketFilter& updater);
+        bool Update(uint32 diff);
 
         // Handle the authentication waiting queue (to be completed)
         void SendAuthWaitQue(uint32 position);

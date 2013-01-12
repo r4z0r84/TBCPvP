@@ -346,6 +346,26 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         if (plMover->isMovingOrTurning())
             plMover->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
+        // Extra protection against flyhackers in arena
+        float over;
+        if (plMover->InBattleGround())
+        {
+            if (plMover->GetMapId() == 562)      // Blade's Edge Arena
+                over  =  20.0f;
+            else if (plMover->GetMapId() == 559) // Nagrand Arena 
+                over  =  20.0f;
+            else if (plMover->GetMapId() == 572) // Ruins of Lordaeron
+                over  =  45.0f;
+        }
+
+        if ((plMover->GetMapId() == 562 || plMover->GetMapId() == 559 || plMover->GetMapId() == 572) 
+            && movementInfo.GetPos()->GetPositionZ() > over && GetSecurity() < SEC_GAMEMASTER)
+        {
+            LoginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, 'Server', 'AUTO SUSPENSION: Player was above normal possible height in arena map, most likely hacking.', '1')", GetAccountId(), 86400); // suspend for 1 day
+            sLog->outError("ARENA: Player %s, GUID: %i above normal height in map: %i. (possible hacking)", plMover->GetName(), plMover->GetGUID(), plMover->GetMapId());
+            KickPlayer();
+        }
+
         if (movementInfo.GetPos()->GetPositionZ() < -500.0f)
             plMover->HandleFallUnderMap();
     }

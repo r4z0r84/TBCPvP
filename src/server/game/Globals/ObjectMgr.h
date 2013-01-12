@@ -554,8 +554,6 @@ class ObjectMgr
 
         typedef std::vector<std::string> ScriptNameMap;
 
-        UNORDERED_MAP<uint32, uint32> TransportEventMap;
-
         Player* GetPlayer(const char* name) const { return sObjectAccessor->FindPlayerByName(name);}
         Player* GetPlayer(uint64 guid) const { return ObjectAccessor::FindPlayer(guid); }
 
@@ -734,8 +732,6 @@ class ObjectMgr
         void LoadSpellScripts();
         void LoadGossipScripts();
         void LoadWaypointScripts();
-
-        void LoadTransportEvents();
 
         bool LoadSkyFireStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value);
         bool LoadSkyFireStrings() { return LoadSkyFireStrings(WorldDatabase, "skyfire_string", MIN_SKYFIRE_STRING_ID, MAX_SKYFIRE_STRING_ID); }

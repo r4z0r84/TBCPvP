@@ -359,7 +359,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         }
 
         if ((plMover->GetMapId() == 562 || plMover->GetMapId() == 559 || plMover->GetMapId() == 572) 
-            && movementInfo.GetPos()->GetPositionZ() > over && GetSecurity() < SEC_GAMEMASTER)
+            && movementInfo.GetPos()->GetPositionZ() > over && GetSecurity() < SEC_MODERATOR)
         {
             LoginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, 'Server', 'AUTO SUSPENSION: Player was above normal possible height in arena map, most likely hacking.', '1')", GetAccountId(), 86400); // suspend for 1 day
             sLog->outError("ARENA: Player %s, GUID: %i above normal height in map: %i. (possible hacking)", plMover->GetName(), plMover->GetGUID(), plMover->GetMapId());

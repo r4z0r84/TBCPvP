@@ -127,6 +127,9 @@ class InstanceScript : public ZoneScript
         //Respawns a GO having negative spawntimesecs in gameobject-table
         void DoRespawnGameObject(uint64 uiGuid, uint32 uiTimeToDespawn = MINUTE);
 
+        //sends world state update to all players in instance
+        void DoUpdateWorldState(uint32 worldstateId, uint32 worldstateValue);
+
         virtual bool SetBossState(uint32 id, EncounterState state);
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }

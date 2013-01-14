@@ -250,3 +250,16 @@ void InstanceScript::DoRespawnGameObject(uint64 uiGuid, uint32 uiTimeToDespawn)
     }
 }
 
+void InstanceScript::DoUpdateWorldState(uint32 uiStateId, uint32 uiStateData)
+{
+    Map::PlayerList const& lPlayers = instance->GetPlayers();
+
+    if (!lPlayers.isEmpty())
+    {
+        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+            if (Player* player = itr->getSource())
+                player->SendUpdateWorldState(uiStateId, uiStateData);
+    }
+    else
+        sLog->outDebug("DoUpdateWorldState attempt send data but no players in map.");
+}

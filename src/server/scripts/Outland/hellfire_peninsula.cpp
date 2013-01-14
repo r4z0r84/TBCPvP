@@ -1752,6 +1752,31 @@ CreatureAI* GetAI_npc_pathaleon_image(Creature* creature)
     return new npc_pathaleon_imageAI(creature);
 }
 
+struct npc_q_10129_triggerAI : public ScriptedAI
+{
+    npc_q_10129_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void SpellHit(Unit* caster, const SpellEntry* spell)
+    {
+        if (caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (Player* player = caster->ToPlayer())
+            {
+                if (me->GetEntry() == 19291 && spell->Id == 33655)
+                    player->KilledMonster(me->GetCreatureTemplate(), me->GetGUID());
+                else
+                    player->KilledMonster(me->GetCreatureTemplate(), me->GetGUID());
+            }
+        }
+    }
+
+};
+
+CreatureAI* GetAI_npc_q_10129_trigger(Creature* creature)
+{
+    return new npc_q_10129_triggerAI(creature);
+}
+
 void AddSC_hellfire_peninsula()
 {
     Script *newscript;
@@ -1870,5 +1895,10 @@ void AddSC_hellfire_peninsula()
     newscript = new Script;
     newscript->Name = "npc_pathaleon_image";
     newscript->GetAI = &GetAI_npc_pathaleon_image;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_q_10129_trigger";
+    newscript->GetAI = &GetAI_npc_q_10129_trigger;
     newscript->RegisterSelf();
 }

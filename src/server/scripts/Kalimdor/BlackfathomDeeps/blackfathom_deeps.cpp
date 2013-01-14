@@ -49,7 +49,7 @@ bool GoHello_blackfathom_fire(Player * /*player*/, GameObject* pGo)
     if (instance)
     {
         pGo->SetGoState(GO_STATE_ACTIVE);
-        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
         instance->SetData(DATA_FIRE, instance->GetData(DATA_FIRE) + 1);
         return true;
     }

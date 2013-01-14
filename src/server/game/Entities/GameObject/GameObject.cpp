@@ -471,8 +471,8 @@ void GameObject::Update(uint32 diff)
                 //reset flags
                 if (GetMap()->Instanceable())
                 {
-                    uint32 currentLockOrInteractFlags = GetUInt32Value(GAMEOBJECT_FLAGS) & (GO_FLAG_LOCKED | GO_FLAG_UNK1);
-                    SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags & ~(GO_FLAG_LOCKED | GO_FLAG_UNK1) | currentLockOrInteractFlags);
+                    uint32 currentLockOrInteractFlags = GetUInt32Value(GAMEOBJECT_FLAGS) & (GO_FLAG_LOCKED | GO_FLAG_NO_INTERACT);
+                    SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags & ~(GO_FLAG_LOCKED | GO_FLAG_NO_INTERACT) | currentLockOrInteractFlags);
                 }
                 else
                     SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);

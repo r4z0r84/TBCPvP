@@ -19,7 +19,7 @@ struct npc_naturalistAI : public ScriptedAI
 {
     npc_naturalistAI(Creature *c) : ScriptedAI(c)
     {
-        instance = c->GetInstanceData();
+        instance = c->GetInstanceScript();
         HasYelled = false;
         HasSummoned = false;
     }
@@ -87,7 +87,7 @@ struct npc_naturalistAI : public ScriptedAI
 
 bool GossipHello_npc_naturalist(Player *player, Creature *creature)
 {
-    ScriptedInstance* instance = creature->GetInstanceData();
+    ScriptedInstance* instance = creature->GetInstanceScript();
 
     if (!instance)
         return false;
@@ -106,7 +106,7 @@ bool GossipHello_npc_naturalist(Player *player, Creature *creature)
 
 bool GossipSelect_npc_naturalist(Player *player, Creature *creature, uint32 sender, uint32 action)
 {
-    ScriptedInstance* instance = creature->GetInstanceData();
+    ScriptedInstance* instance = creature->GetInstanceScript();
 
     switch (action)
     {

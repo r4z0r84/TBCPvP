@@ -166,7 +166,7 @@ struct instance_slave_pens : public ScriptedInstance
     }
 };
 
-InstanceData* GetInstanceData_instance_slave_pens(Map* map)
+InstanceScript* GetInstanceData_instance_slave_pens(Map* map)
 {
     return new instance_slave_pens(map);
 }
@@ -177,6 +177,6 @@ void AddSC_instance_slave_pens()
 
     newscript = new Script;
     newscript->Name = "instance_slave_pens";
-    newscript->GetInstanceData = &GetInstanceData_instance_slave_pens;
+    newscript->GetInstanceScript = &GetInstanceData_instance_slave_pens;
     newscript->RegisterSelf();
 }

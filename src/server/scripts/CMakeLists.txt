@@ -65,6 +65,7 @@ file(GLOB_RECURSE scripts_O_BlackTemple Outland/BlackTemple/*.cpp Outland/BlackT
 file(GLOB_RECURSE scripts_O_SerpentShrine Outland/CoilfangReservoir/SerpentShrine/*.cpp Outland/CoilfangReservoir/SerpentShrine/*.h)
 file(GLOB_RECURSE scripts_O_SteamVault Outland/CoilfangReservoir/SteamVault/*.cpp Outland/CoilfangReservoir/SteamVault/*.h)
 file(GLOB_RECURSE scripts_O_Underbog Outland/CoilfangReservoir/Underbog/*.cpp Outland/CoilfangReservoir/Underbog/*.h)
+file(GLOB_RECURSE scripts_O_SlavePens Outland/CoilfangReservoir/SlavePens/*.cpp Outland/CoilfangReservoir/SlavePens/*.h)
 file(GLOB_RECURSE scripts_O_GruulsLair Outland/GruulsLair/*.cpp Outland/GruulsLair/*.h)
 file(GLOB_RECURSE scripts_O_BloodFurnace Outland/HellfireCitadel/BloodFurnace/*.cpp Outland/HellfireCitadel/BloodFurnace/*.h)
 file(GLOB_RECURSE scripts_O_HellfireRamparts Outland/HellfireCitadel/HellfireRamparts/*.cpp Outland/HellfireCitadel/HellfireRamparts/*.h)
@@ -125,6 +126,7 @@ source_group("Outland\\BlackTemple"                                   FILES ${sc
 source_group("Outland\\CoilfangReservoir\\SerpentShrine"              FILES ${scripts_O_SerpentShrine})
 source_group("Outland\\CoilfangReservoir\\SteamVault"                 FILES ${scripts_O_SteamVault})
 source_group("Outland\\CoilfangReservoir\\Underbog"                   FILES ${scripts_O_Underbog})
+source_group("Outland\\CoilfangReservoir\\SlavePens"                  FILES ${scripts_O_SlavePens})
 source_group("Outland\\GruulsLair"                                    FILES ${scripts_O_GruulsLair})
 source_group("Outland\\HellfireCitadel\\BloodFurnace"                 FILES ${scripts_O_BloodFurnace})
 source_group("Outland\\HellfireCitadel\\HellfireRamparts"             FILES ${scripts_O_HellfireRamparts})
@@ -202,6 +204,7 @@ if (SCRIPTS)
     ${scripts_O_SerpentShrine}
     ${scripts_O_SteamVault}
     ${scripts_O_Underbog}
+    ${scripts_O_SlavePens}
     ${scripts_O_GruulsLair}
     ${scripts_O_BloodFurnace}
     ${scripts_O_HellfireRamparts}

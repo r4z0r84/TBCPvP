@@ -3,6 +3,7 @@
   * Copyright (C) 2010-2012 Oregon <http://www.oregoncore.com/>
   * Copyright (C) 2006-2008 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
   * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+  * Copyright (C) 2012 Hufsa <isak.mortzell@gmail.com>
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License as published by the
@@ -20,8 +21,8 @@
 
 /* ScriptData
 SDName: Boss_Luetenant_Drake
-SD%Complete: 70
-SDComment: Missing proper code for patrolling area after being spawned. Script for GO (barrels) quest 10283
+SD%Complete: 95
+SDComment: Script for GO (barrels) quest 10283
 SDCategory: Caverns of Time, Old Hillsbrad Foothills
 EndScriptData */
 
@@ -33,9 +34,9 @@ EndScriptData */
 ## go_barrel_old_hillsbrad
 ######*/
 
-bool GOHello_go_barrel_old_hillsbrad(Player* player, GameObject* _GO)
+bool GOHello_go_barrel_old_hillsbrad(Player* player, GameObject* go)
 {
-    ScriptedInstance* instance = _GO->GetInstanceScript();
+    ScriptedInstance* instance = go->GetInstanceScript();
 
     if (!instance)
         return false;
@@ -44,6 +45,7 @@ bool GOHello_go_barrel_old_hillsbrad(Player* player, GameObject* _GO)
         return false;
 
     instance->SetData(TYPE_BARREL_DIVERSION, IN_PROGRESS);
+    go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
     return false;
 }
@@ -65,43 +67,15 @@ bool GOHello_go_barrel_old_hillsbrad(Player* player, GameObject* _GO)
 #define SPELL_MORTAL_STRIKE     31911
 #define SPELL_FRIGHTENING_SHOUT 33789
 
-struct Location
-{
-    uint32 wpId;
-    float x;
-    float y;
-    float z;
-};
-
-static Location DrakeWP[]=
-{
-    {0, 2125.84f, 88.2535f, 54.8830f},
-    {1, 2111.01f, 93.8022f, 52.6356f},
-    {2, 2106.70f, 114.753f, 53.1965f},
-    {3, 2107.76f, 138.746f, 52.5109f},
-    {4, 2114.83f, 160.142f, 52.4738f},
-    {5, 2125.24f, 178.909f, 52.7283f},
-    {6, 2151.02f, 208.901f, 53.1551f},
-    {7, 2177.00f, 233.069f, 52.4409f},
-    {8, 2190.71f, 227.831f, 53.2742f},
-    {9, 2178.14f, 214.219f, 53.0779f},
-    {10, 2154.99f, 202.795f, 52.6446f},
-    {11, 2132.00f, 191.834f, 52.5709f},
-    {12, 2117.59f, 166.708f, 52.7686f},
-    {13, 2093.61f, 139.441f, 52.7616f},
-    {14, 2086.29f, 104.950f, 52.9246f},
-    {15, 2094.23f, 81.2788f, 52.6946f},
-    {16, 2108.70f, 85.3075f, 53.3294f},
-    {17, 2125.50f, 88.9481f, 54.7953f},
-    {18, 2128.20f, 70.9763f, 64.4221f}
-};
 
 struct boss_lieutenant_drakeAI : public ScriptedAI
 {
-    boss_lieutenant_drakeAI(Creature *c) : ScriptedAI(c) {}
+    boss_lieutenant_drakeAI(Creature *c) : ScriptedAI(c)
+    {
+        instance = c->GetInstanceScript();
+    }
 
-    bool CanPatrol;
-    uint32 wpId;
+    ScriptedInstance* instance;
 
     uint32 Whirlwind_Timer;
     uint32 Fear_Timer;
@@ -110,13 +84,11 @@ struct boss_lieutenant_drakeAI : public ScriptedAI
 
     void Reset()
     {
-        CanPatrol = true;
-        wpId = 0;
-
         Whirlwind_Timer = 20000;
         Fear_Timer = 30000;
         MortalStrike_Timer = 45000;
         ExplodingShout_Timer = 25000;
+        me->GetMotionMaster()->MovePath(70000, true);
     }
 
     void EnterCombat(Unit *who)
@@ -136,17 +108,13 @@ struct boss_lieutenant_drakeAI : public ScriptedAI
     void JustDied(Unit *victim)
     {
         DoScriptText(SAY_DEATH, me);
+
+        if (instance)
+            instance->SetData(TYPE_DRAKE_EVENT, DONE);
     }
 
     void UpdateAI(const uint32 diff)
     {
-        //TODO: make this work
-        if (CanPatrol && wpId == 0)
-        {
-            me->GetMotionMaster()->MovePoint(DrakeWP[0].wpId, DrakeWP[0].x, DrakeWP[0].y, DrakeWP[0].z);
-            wpId++;
-        }
-
         //Return since we have no target
         if (!UpdateVictim())
             return;

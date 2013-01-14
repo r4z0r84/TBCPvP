@@ -3,6 +3,7 @@
   * Copyright (C) 2010-2012 Oregon <http://www.oregoncore.com/>
   * Copyright (C) 2006-2008 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
   * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+  * Copyright (C) 2012 Hufsa <isak.mortzell@gmail.com>
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License as published by the
@@ -21,15 +22,21 @@
 #ifndef DEF_OLD_HILLSBRAD_H
 #define DEF_OLD_HILLSBRAD_H
 
-#define TYPE_BARREL_DIVERSION 1
-#define TYPE_THRALL_EVENT     2
-#define TYPE_THRALL_PART1     3
-#define TYPE_THRALL_PART2     4
-#define TYPE_THRALL_PART3     5
-#define TYPE_THRALL_PART4     6
-#define DATA_THRALL           7
-#define DATA_TARETHA          8
-#define DATA_EPOCH          9
-#define WORLD_STATE_OH        2436
+#define TYPE_BARREL_DIVERSION   1
+#define TYPE_THRALL_EVENT       2
+#define TYPE_THRALL_PART1       3
+#define TYPE_THRALL_PART2       4
+#define TYPE_THRALL_PART3       5
+#define TYPE_THRALL_PART4       6
+#define TYPE_DRAKE_EVENT        7
+#define TYPE_SKARLOC_EVENT      8
+#define DATA_THRALL             9
+#define DATA_TARETHA            10
+#define DATA_EPOCH              11
+#define DATA_THRALL_DOOR        12
+
+#define QUEST_ENTRY_DIVERSION   10283
+#define LODGE_QUEST_TRIGGER     20155
+#define WORLD_STATE_OH          2436
 #endif
 

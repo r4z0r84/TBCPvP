@@ -3,6 +3,7 @@
   * Copyright (C) 2010-2012 Oregon <http://www.oregoncore.com/>
   * Copyright (C) 2006-2008 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
   * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+  * Copyright (C) 2012 Hufsa <isak.mortzell@gmail.com>
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License as published by the
@@ -46,10 +47,10 @@ struct boss_captain_skarlocAI : public ScriptedAI
 {
     boss_captain_skarlocAI(Creature *c) : ScriptedAI(c)
     {
-        instance = c->GetInstanceScript();
+        pInstance = c->GetInstanceScript();
     }
 
-    ScriptedInstance *instance;
+    ScriptedInstance *pInstance;
 
     uint32 Holy_Light_Timer;
     uint32 Cleanse_Timer;
@@ -66,13 +67,31 @@ struct boss_captain_skarlocAI : public ScriptedAI
         HolyShield_Timer = 240000;
         DevotionAura_Timer = 3000;
         Consecration_Timer = 8000;
+
+        // TODO: Move this to DB.
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, 31966);
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, 218169346);
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO+1, 781);
+
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 11559);
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO+2, 234948100);
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO+3, 1038);
+
+        if (!pInstance)
+            return;
+        me->Mount(18223);
+        me->SetSpeed(MOVE_RUN, 1.6f);
     }
 
     void EnterCombat(Unit *who)
     {
         //This is not correct. Should taunt Thrall before engage in combat
-        DoScriptText(SAY_TAUNT1, me);
-        DoScriptText(SAY_TAUNT2, me);
+        DoScriptText(RAND(SAY_TAUNT1, SAY_TAUNT2), me);
+
+        if (!pInstance)
+            return;
+        me->Unmount();
+        me->SetSpeed(MOVE_RUN, 1.2f);
     }
 
     void KilledUnit(Unit *victim)
@@ -88,8 +107,17 @@ struct boss_captain_skarlocAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, me);
 
-        if (instance && instance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
-            instance->SetData(TYPE_THRALL_PART1, DONE);
+        if (pInstance)
+        {
+            if (pInstance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
+                pInstance->SetData(TYPE_THRALL_PART1, DONE);
+
+            if (pInstance->GetData(TYPE_SKARLOC_EVENT) == DONE)
+                me->SetLootRecipient(NULL);
+            else
+                pInstance->SetData(TYPE_SKARLOC_EVENT, DONE);
+        }
+
     }
 
     void UpdateAI(const uint32 diff)
@@ -133,12 +161,12 @@ struct boss_captain_skarlocAI : public ScriptedAI
             DevotionAura_Timer = 60000;
         } else DevotionAura_Timer -= diff;
 
-        //Consecration
-        if (Consecration_Timer <= diff)
+        //Consecration (don't know why this is commented out, but best leave it that way)
+        /*if (Consecration_Timer <= diff)
         {
-            //DoCast(me->getVictim(), SPELL_CONSECRATION);
+            DoCast(me->getVictim(), SPELL_CONSECRATION);
             Consecration_Timer = 8000;
-        } else Consecration_Timer -= diff;
+        } else Consecration_Timer -= diff;*/
 
         DoMeleeAttackIfReady();
     }

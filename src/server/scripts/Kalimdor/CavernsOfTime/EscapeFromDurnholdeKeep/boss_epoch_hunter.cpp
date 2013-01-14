@@ -3,6 +3,7 @@
   * Copyright (C) 2010-2012 Oregon <http://www.oregoncore.com/>
   * Copyright (C) 2006-2008 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
   * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+  * Copyright (C) 2012 Hufsa <isak.mortzell@gmail.com>
   *
   * This program is free software; you can redistribute it and/or modify it
   * under the terms of the GNU General Public License as published by the
@@ -48,10 +49,10 @@ struct boss_epoch_hunterAI : public ScriptedAI
 {
     boss_epoch_hunterAI(Creature *c) : ScriptedAI(c)
     {
-        instance = c->GetInstanceScript();
+        pInstance = c->GetInstanceScript();
     }
 
-    ScriptedInstance *instance;
+    ScriptedInstance *pInstance;
 
     uint32 SandBreath_Timer;
     uint32 ImpendingDeath_Timer;
@@ -88,8 +89,8 @@ struct boss_epoch_hunterAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, me);
 
-        if (instance && instance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
-            instance->SetData(TYPE_THRALL_PART4, DONE);
+        if (pInstance && pInstance->GetData(TYPE_THRALL_EVENT) == IN_PROGRESS)
+            pInstance->SetData(TYPE_THRALL_PART4, DONE);
     }
 
     void UpdateAI(const uint32 diff)

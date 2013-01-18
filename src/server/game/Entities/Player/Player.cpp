@@ -12713,7 +12713,15 @@ void Player::RemoveAllEnchantments(EnchantmentSlot slot, bool arena)
     {
         Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
         if (pItem && pItem->GetEnchantmentId(slot))
+        {
+            if (arena)
+            {
+                SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(pItem->GetEnchantmentId(slot));
+                if (pEnchant && pEnchant->aura_id == ITEM_ENCHANTMENT_AURAID_POISON)
+                    continue;
+            }
             pItem->ClearEnchantment(slot);
+        }
     }
 
     // in inventory bags
@@ -12726,7 +12734,15 @@ void Player::RemoveAllEnchantments(EnchantmentSlot slot, bool arena)
             {
                 Item* pItem = pBag->GetItemByPos(j);
                 if (pItem && pItem->GetEnchantmentId(slot))
+                {
+                    if (arena)
+                    {
+                        SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(pItem->GetEnchantmentId(slot));
+                        if (pEnchant && pEnchant->aura_id == ITEM_ENCHANTMENT_AURAID_POISON)
+                            continue;
+                    }
                     pItem->ClearEnchantment(slot);
+                }
             }
         }
     }

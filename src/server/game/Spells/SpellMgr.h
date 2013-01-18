@@ -373,6 +373,14 @@ inline bool IsSealSpell(SpellEntry const *spellInfo)
         (spellInfo->SpellFamilyFlags & 0x4000A000200LL);
 }
 
+inline bool IsNoAbsorbProcSpell(SpellEntry const *spellInfo)
+{
+    if (spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && 
+        (spellInfo->SpellFamilyFlags == 0x2 || spellInfo->SpellFamilyFlags == 0x2000000000))
+        return true;
+    return false;
+}
+
 inline bool IsElementalShield(SpellEntry const *spellInfo)
 {
     // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus

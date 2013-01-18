@@ -10685,6 +10685,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
         if (!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, active, spellProcEvent))
            continue;
 
+        SpellEntry const *spellProto = itr->second->GetSpellProto();
+        if (isVictim && (procExtra & PROC_EX_ABSORB && IsNoAbsorbProcSpell(spellProto)))
+            continue;
+
         procTriggered.push_back(ProcTriggeredData(spellProcEvent, itr->second));
     }
     // Handle effects proceed this time

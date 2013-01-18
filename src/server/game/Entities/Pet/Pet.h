@@ -228,6 +228,16 @@ class Pet : public Guardian
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
 
         Player *GetOwner() { return m_owner; }
+
+        // pets are also interruptable
+        uint32 GetSpellCooldownDelay(uint32 spell_id) const
+        {
+            CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
+            time_t t = time(NULL);
+            return itr != m_CreatureSpellCooldowns.end() && itr->second > t ? itr->second - t : 0;
+        }
+        void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs);
+
     protected:
         Player *m_owner;
         uint32  m_regenTimer;

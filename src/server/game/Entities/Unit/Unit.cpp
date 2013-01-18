@@ -8136,6 +8136,26 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             heal = heal * (100 + pctMod) / 100;
     }
 
+    // Do not use heal modifiers at apply time
+    switch (spellProto->SpellFamilyName)
+    {
+        case SPELLFAMILY_PRIEST:
+            // Prayer of Mending
+            if (spellProto->SpellFamilyFlags & 0x2000000000LL && damagetype != DOT)
+                return uint32(heal);
+            break;
+        case SPELLFAMILY_DRUID:
+            // Lifebloom final tick
+            if (spellProto->SpellFamilyFlags & 0x1000000000LL && damagetype != DOT)
+                return uint32(heal);
+            break;
+            // Earth Shield proc
+        case SPELLFAMILY_SHAMAN:
+            if (spellProto->SpellFamilyFlags & 0x40000000000LL && damagetype != DOT)
+                return uint32(heal);
+            break;
+    }
+
     heal *= TotalHealPct;
 
     return heal < 0 ? 0 : uint32(heal);

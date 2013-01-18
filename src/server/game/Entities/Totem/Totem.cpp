@@ -118,6 +118,22 @@ void Totem::InitSummon()
 
     if (m_type == TOTEM_PASSIVE)
         CastSpell(this, GetSpell(), true);
+
+    // First tick when dropped
+    switch (GetEntry())
+    {
+        case 2630: CastSpell(this, 3600, true); break; // Earthbind
+        case 5913: CastSpell(this, 8146, true); break; // Tremor
+        case 5923: CastSpell(this, 8168, true); break; // Poison Cleansing
+        case 5924: CastSpell(this, 8171, true); break; // Disease Cleansing
+        case 6112: CastSpell(this, 8514, true); break; // Windfury I
+        case 7483: CastSpell(this, 10607, true); break; // Windfury II
+        case 7484: CastSpell(this, 10611, true); break; // Windfury III
+        case 15496: CastSpell(this, 25581, true); break; // Windfury IV
+        case 15497: CastSpell(this, 25580, true); break; // Windfury V
+        default:
+            break;
+    }
 }
 
 void Totem::UnSummon()

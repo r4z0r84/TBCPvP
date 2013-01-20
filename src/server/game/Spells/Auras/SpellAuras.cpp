@@ -6235,7 +6235,13 @@ void Aura::PeriodicDummyTick()
                         // default case - not in arena
                         m_isPeriodic = false;
                         if (m_tickNumber == 1)
-                            (*i)->GetModifier()->m_amount = m_modifier.m_amount;
+                        {
+                            if (m_target->ToPlayer()->getPowerType() != POWER_MANA)
+                                (*i)->GetModifier()->m_amount = 0;
+                            else
+                                (*i)->GetModifier()->m_amount = m_modifier.m_amount;
+                        }
+
                         m_target->ToPlayer()->UpdateManaRegen();
                         return;
                     }
@@ -6265,6 +6271,10 @@ void Aura::PeriodicDummyTick()
                             (*i)->GetModifier()->m_amount = m_modifier.m_amount;
                             break;
                     }
+
+                    if (m_target->ToPlayer()->getPowerType() != POWER_MANA)
+                        (*i)->GetModifier()->m_amount = 0;
+
                     m_target->ToPlayer()->UpdateManaRegen();
                     return;
                 }

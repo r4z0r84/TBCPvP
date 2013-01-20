@@ -2179,7 +2179,10 @@ void Player::RegenerateAll()
 
     Regenerate(POWER_MANA);
 
-    m_regenTimer = regenDelay;
+    if (IsPolymorphed())
+        m_regenTimer = 1000;
+    else
+        m_regenTimer = regenDelay;
 }
 
 void Player::Regenerate(Powers power)
@@ -2257,7 +2260,7 @@ void Player::RegenerateHealth()
 
     // polymorphed case
     if (IsPolymorphed())
-        addvalue = GetMaxHealth()/3;
+        addvalue = maxValue/10;
     // normal regen case (maybe partly in combat case)
     else if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
     {

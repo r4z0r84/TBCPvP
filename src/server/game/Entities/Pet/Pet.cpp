@@ -38,7 +38,7 @@ char const* petTypeSuffix[MAX_PET_TYPE] =
     "'s Minion",                                           // SUMMON_PET
     "'s Pet",                                              // HUNTER_PET
     "'s Guardian",                                         // GUARDIAN_PET
-    "'s Companion"                                          // MINI_PET
+    "'s Companion"                                         // MINI_PET
 };
 
 //numbers represent minutes * 100 while happy (you get 100 loyalty points per min while happy)
@@ -76,6 +76,8 @@ m_declinedname(NULL), m_owner(owner)
         m_summonMask |= SUMMON_MASK_CONTROLABLE_GUARDIAN;
         InitCharmInfo();
     }
+    else if (type == MINI_PET)
+        SetReactState(REACT_PASSIVE);
 
     if (type == CLASS_PET && owner->getClass() == CLASS_PRIEST)
         SetReactState(REACT_AGGRESSIVE);
@@ -912,6 +914,11 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         return false;
     }
 
+    if (cinfo->type == CREATURE_TYPE_CRITTER)
+    {
+        setPetType(MINI_PET);
+        return true;
+    }
     SetDisplayId(creature->GetDisplayId());
     SetNativeDisplayId(creature->GetNativeDisplayId());
     SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
@@ -1746,6 +1753,9 @@ bool Pet::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 pet_number)
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY | UNIT_BYTE2_FLAG_AURAS);
 
     InitPetAuras(Entry);
+
+    if (getPetType() == MINI_PET)
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
     return true;
 }

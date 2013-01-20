@@ -1068,6 +1068,9 @@ class Player : public Unit, public GridObject<Player>
         Pet* GetPet() const;
         Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 despwtime);
         void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
+        Pet* GetMiniPet();
+        void SetMiniPet(Pet* pet) { m_miniPet = pet->GetGUID(); }
+        void RemoveMiniPet();
 
         void Say(const std::string& text, const uint32 language);
         void Yell(const std::string& text, const uint32 language);
@@ -2154,6 +2157,8 @@ class Player : public Unit, public GridObject<Player>
         void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
         uint32 GetOldPetSpell() const { return m_oldpetspell; }
         void SetOldPetSpell(uint32 petspell) { m_oldpetspell = petspell; }
+
+        uint64 m_miniPet;
 
         void SendCinematicStart(uint32 CinematicSequenceId);
 

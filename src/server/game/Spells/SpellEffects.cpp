@@ -160,7 +160,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSelfResurrect,                            // 94 SPELL_EFFECT_SELF_RESURRECT
     &Spell::EffectSkinning,                                 // 95 SPELL_EFFECT_SKINNING
     &Spell::EffectUnused,                                   // 96 SPELL_EFFECT_CHARGE
-    &Spell::EffectUnused,                                   // 97 SPELL_EFFECT_97 (old SPELL_EFFECT_SUMMON_CRITTER)
+    &Spell::EffectSummonCritter,                            // 97 SPELL_EFFECT_97_SUMMON_CRITTER
     &Spell::EffectKnockBack,                                // 98 SPELL_EFFECT_KNOCK_BACK
     &Spell::EffectDisEnchant,                               // 99 SPELL_EFFECT_DISENCHANT
     &Spell::EffectInebriate,                                //100 SPELL_EFFECT_INEBRIATE
@@ -3323,16 +3323,22 @@ void Spell::EffectSummonType(uint32 i)
                 }
                 case SUMMON_TYPE_MINIPET:
                 {
-                    summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, m_spellInfo->Id);
-                    if (!summon || !summon->HasSummonMask(SUMMON_MASK_MINION))
-                        return;
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                        EffectSummonCritter(i);
+                    else
+                    {
+                        // just in case
+                        summon = m_caster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, m_spellInfo->Id);
+                        if (!summon || !summon->HasSummonMask(SUMMON_MASK_MINION))
+                            return;
 
-                    summon->SelectLevel(summon->GetCreatureTemplate());       // some summoned creaters have different from 1 DB data for level/hp
-                    summon->SetUInt32Value(UNIT_NPC_FLAGS, summon->GetCreatureTemplate()->npcflag);
+                        summon->SelectLevel(summon->GetCreatureTemplate());       // some summoned creaters have different from 1 DB data for level/hp
+                        summon->SetUInt32Value(UNIT_NPC_FLAGS, summon->GetCreatureTemplate()->npcflag);
 
-                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
+                        summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_PASSIVE);
 
-                    summon->AI()->EnterEvadeMode();
+                        summon->AI()->EnterEvadeMode();
+                    }
                     break;
                 }
                 default:
@@ -4105,6 +4111,78 @@ void Spell::EffectSummonClassPet(uint32 i)
         pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
         pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
     }
+}
+
+void Spell::EffectSummonCritter(uint32 i)
+{
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player* player = m_caster->ToPlayer();
+
+    uint32 pet_entry = m_spellInfo->EffectMiscValue[i];
+    if (!pet_entry)
+        return;
+
+    Pet* old_critter = player->GetMiniPet();
+
+    if (old_critter && old_critter->GetEntry() == pet_entry)
+    {
+        player->RemoveMiniPet();
+        return;
+    }
+
+    if (old_critter)
+        player->RemoveMiniPet();
+
+    Pet* critter = new Pet(player, MINI_PET);
+
+    Map* map = m_caster->GetMap();
+    uint32 pet_number = sObjectMgr->GeneratePetNumber();
+    if (!critter->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_PET), map, pet_entry, pet_number))
+    {
+        sLog->outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->Id, pet_entry);
+        delete critter;
+        return;
+    }
+
+    float px, py, pz;
+    // If dest location if present
+    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        m_targets.m_dstPos.GetPosition(px, py, pz);
+    else
+        m_caster->GetClosePoint(px, py, pz, critter->GetObjectSize());
+
+    critter->Relocate(px, py, pz, m_caster->GetOrientation());
+
+    if (!critter->IsPositionValid())
+    {
+        sLog->outError("Pet (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %f Y: %f)",
+            critter->GetGUIDLow(), critter->GetEntry(), critter->GetPositionX(), critter->GetPositionY());
+        delete critter;
+        return;
+    }
+
+    critter->SetOwnerGUID(m_caster->GetGUID());
+    critter->SetCreatorGUID(m_caster->GetGUID());
+    critter->setFaction(m_caster->getFaction());
+    critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+    critter->AIM_Initialize();
+    critter->InitPetCreateSpells();                         // e.g. disgusting oozeling has a create spell as critter...
+    critter->SelectLevel(critter->GetCreatureTemplate());
+
+    // set timer for unsummon
+    int32 duration = GetSpellDuration(m_spellInfo);
+    if (duration > 0)
+        critter->SetDuration(duration);
+
+    std::string name = player->GetName();
+    name.append(petTypeSuffix[critter->getPetType()]);
+    critter->SetName(name);
+    player->SetMiniPet(critter);
+
+    map->Add(critter->ToCreature());
 }
 
 void Spell::EffectLearnPetSpell(uint32 i)

@@ -530,6 +530,7 @@ Player::Player (WorldSession *session): Unit()
 
     m_seer = this;
 
+    m_miniPet = 0;
     m_contestedPvPTimer = 0;
 
     m_declinedname = NULL;
@@ -1486,6 +1487,8 @@ void Player::setDeathState(DeathState s)
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
         RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
 
+        RemoveMiniPet();
+
         // save value before aura remove in Unit::setDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
 
@@ -2101,6 +2104,7 @@ void Player::RemoveFromWorld()
         // Release charmed creatures, unsummon totems and remove pets/guardians
         StopCastingCharm();
         StopCastingBindSight();
+        RemoveMiniPet();
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
     }
 
@@ -18053,6 +18057,9 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
         }
     }
 
+    if (pet->getPetType() == MINI_PET)
+        m_miniPet = 0;
+
     // only if current pet in slot
     pet->SavePetToDB(mode);
 
@@ -18070,6 +18077,23 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
         if (GetGroup())
             SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
+}
+
+void Player::RemoveMiniPet()
+{
+    if (Pet* pet = GetMiniPet())
+    {
+        pet->Remove(PET_SAVE_AS_DELETED);
+        m_miniPet = 0;
+    }
+}
+
+Pet* Player::GetMiniPet()
+{
+    if (!m_miniPet)
+        return NULL;
+
+    return ObjectAccessor::GetPet(*this, m_miniPet);
 }
 
 void Player::StopCastingCharm()

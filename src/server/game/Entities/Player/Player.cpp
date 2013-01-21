@@ -1786,13 +1786,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return false;
 
     // 449 - Champions' Hall (Alliance) // 450 - Hall of Legends (Horde)
-    if (mapid == 449 && GetTeam() == HORDE || !isGameMaster())
+    if (mapid == 449 && GetTeam() == HORDE)
     {
         GetSession()->SendNotification(LANG_NO_ENTER_CHAMPIONS_HALL);
         return false;
     }
 
-    if (mapid == 450 && GetTeam() == ALLIANCE || !isGameMaster())
+    if (mapid == 450 && GetTeam() == ALLIANCE)
     {
         GetSession()->SendNotification(LANG_NO_ENTER_HALL_OF_LEGENDS);
         return false;

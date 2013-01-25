@@ -667,6 +667,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 30458:                                         // Nigh invulnerability
             return true;
         case  1852:                                         // Silenced (GM)
+        case 14621:                                         // Polymorph (Six Demon Bag)
         case 46392:                                         // Focused Assault
         case 46393:                                         // Brutal Assault
         case 43437:                                         // Paralyzed

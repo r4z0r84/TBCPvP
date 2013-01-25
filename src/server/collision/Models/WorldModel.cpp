@@ -360,7 +360,7 @@ namespace VMAP
 
     bool GroupModel::IntersectRay(const G3D::Ray &ray, float &distance, bool stopAtFirstHit) const
     {
-        if (!triangles.size())
+        if (triangles.empty())
             return false;
         GModelRayCallback callback(triangles, vertices);
         meshTree.intersectRay(ray, callback, distance, stopAtFirstHit);
@@ -369,7 +369,7 @@ namespace VMAP
 
     bool GroupModel::IsInsideObject(const Vector3 &pos, const Vector3 &down, float &z_dist) const
     {
-        if (!triangles.size() || !iBound.contains(pos))
+        if (triangles.empty() || !iBound.contains(pos))
             return false;
         GModelRayCallback callback(triangles, vertices);
         Vector3 rPos = pos - 0.1f * down;

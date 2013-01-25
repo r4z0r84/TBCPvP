@@ -588,6 +588,7 @@ class Spell
         void SpellDamageWeaponDmg(uint32 i);
         void SpellDamageHeal(uint32 i);
 
+        void GetTotemPosition(uint32 i, Position &pos);
         void GetSummonPosition(uint32 i, Position &pos, float radius = 0.0f, uint32 count = 0);
         void SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *properties);
         // -------------------------------------------

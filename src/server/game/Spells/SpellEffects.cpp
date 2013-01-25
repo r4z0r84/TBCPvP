@@ -6629,12 +6629,47 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
     }
 }
 
+void Spell::GetTotemPosition(uint32 i, Position &pos)
+{
+    uint8 slot = 0;
+    switch (m_spellInfo->EffectMiscValueB[i])
+    {
+        case 63:  slot = 0;   break;
+        case 81:  slot = 1;   break;
+        case 82:  slot = 2;   break;
+        case 83:  slot = 3;   break;
+        // Battle standard case
+        case 121: slot = 254; break;
+        // jewelery statue case, like totem without slot
+        case 61:  slot = 255; break;
+        default:
+            sLog->outError("GetTotemPosition: unhandled case for spell ID: %u", m_spellInfo->Id);
+            return;
+    }
+
+    float angle = slot < 4 ? M_PI/4 - (slot * 2 * M_PI/4) : 0;
+
+    m_caster->GetPosition(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    m_caster->GetClosePoint(pos.m_positionX, pos.m_positionY, pos.m_positionZ, DEFAULT_WORLD_OBJECT_SIZE, 2.0f, angle);
+    m_caster->GetFirstCollisionPosition(pos, 4.0f, angle);
+    pos.Relocate(pos.m_positionX, pos.m_positionY, pos.m_positionZ, m_caster->GetOrientation());  
+}
+
 void Spell::GetSummonPosition(uint32 i, Position &pos, float radius, uint32 count)
 {
     pos.SetOrientation(m_caster->GetOrientation());
 
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
+        switch (m_spellInfo->EffectImplicitTargetA[i])
+        {
+            case TARGET_DEST_CASTER_FRONT_LEFT:
+            case TARGET_DEST_CASTER_BACK_LEFT:
+            case TARGET_DEST_CASTER_BACK_RIGHT:
+            case TARGET_DEST_CASTER_FRONT_RIGHT:
+                GetTotemPosition(i, pos);
+                return;
+        }
         // Summon 1 unit in dest location
         if (count == 0)
         {

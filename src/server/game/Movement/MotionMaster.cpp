@@ -427,9 +427,17 @@ MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
 {
     if (i_owner->GetTypeId() == TYPEID_PLAYER)
     {
-        sLog->outDebug("Player (GUID: %u) taxi to (Path %u node %u)", i_owner->GetGUIDLow(), path, pathnode);
-        FlightPathMovementGenerator* mgen = new FlightPathMovementGenerator(path, pathnode);
-        Mutate(mgen, MOTION_SLOT_CONTROLLED);
+        if (path < sTaxiPathNodesByPath.size())
+        {
+            sLog->outDebug("%s taxi to (Path %u node %u)", i_owner->GetName(), path, pathnode);
+            FlightPathMovementGenerator* mgen = new FlightPathMovementGenerator(sTaxiPathNodesByPath[path], pathnode);
+            Mutate(mgen, MOTION_SLOT_CONTROLLED);
+        }
+        else
+        {
+            sLog->outError("%s attempt taxi to (not existed Path %u node %u)",
+                i_owner->GetName(), path, pathnode);
+        }
     }
     else
     {

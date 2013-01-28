@@ -492,6 +492,31 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 M
         SendMessageToSet(&data, true);
 }
 
+bool Unit::CanMakePathTo(float x, float y, float z, float maxLen) const
+{
+    if (!IsInMap(this))
+        return true;
+
+    PathInfo path(this, x, y, z, false);
+
+    if (path.getPathType() & PATHFIND_NORMAL)
+    {
+        PointPath pointPath = path.getFullPath();
+
+        if (maxLen > 0.0f && pointPath.GetTotalLength() > maxLen)
+            return false;
+
+        return true;
+    }
+    else if (path.getPathType() & PATHFIND_INCOMPLETE)
+        return false;
+    else if(path.getPathType() & PATHFIND_NOPATH)
+        return false;
+
+    //NavMesh may not be working..
+    return true;
+}
+
 template<typename Elem, typename Node>
 void Unit::SendMonsterMoveByPath(Path<Elem, Node> const& path, uint32 start, uint32 end, uint32 traveltime)
 {

@@ -3561,6 +3561,12 @@ uint8 Spell::CanCast(bool strict)
 
     if (target)
     {
+        if (!m_IsTriggeredSpell && IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_CHARGE))
+        {
+            if (!m_caster->CanMakePathTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 50.0f))
+                return SPELL_FAILED_NOPATH;
+        }
+
         // target state requirements (not allowed state), apply to self also
         if (m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
             return SPELL_FAILED_TARGET_AURASTATE;

@@ -1124,6 +1124,7 @@ class Unit : public WorldObject
         void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 Time, Player* player = NULL);
         void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint32 MoveFlags, uint32 time, float speedZ, Player* player = NULL);
 
+        bool CanMakePathTo(float x, float y, float z, float maxLen) const;
         void MonsterMoveByPath(float x, float y, float z, uint32 speed, bool forceDest = false);
         template<typename PathElem, typename PathNode>
         void MonsterMoveByPath(Path<PathElem, PathNode> const& path, uint32 start, uint32 end, uint32 transitTime = 0);

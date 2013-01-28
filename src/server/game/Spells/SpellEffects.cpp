@@ -5971,7 +5971,10 @@ void Spell::EffectCharge(uint32 /*i*/)
     Position pos;
     target->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     target->GetFirstCollisionPosition(pos, target->GetObjectSize(), angle);
-    m_caster->MonsterMoveByPath(pos.m_positionX, pos.m_positionY, pos.m_positionZ, SPEED_CHARGE, true);
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->MonsterMoveByPath(pos.m_positionX, pos.m_positionY, pos.m_positionZ, SPEED_CHARGE, true);
+    else
+        m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ + target->GetObjectSize());
 
     // not all charge effects used in negative spells
     if (!IsPositiveSpell(m_spellInfo->Id) && m_caster->GetTypeId() == TYPEID_PLAYER)

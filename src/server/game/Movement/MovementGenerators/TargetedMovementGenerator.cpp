@@ -163,7 +163,11 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
     else
     {
         // to at i_offset distance from target and i_angle from target facing
-        i_target->GetClosePoint(x, y, z, owner.GetObjectSize(), i_offset, i_angle);
+        Position pos;
+        i_target->GetFirstCollisionPosition(pos, i_offset + owner.GetObjectSize(), i_angle); // +GetObjectSize to maintain the old distance
+        x = pos.m_positionX;
+        y = pos.m_positionY;
+        z = pos.m_positionZ;
     }
 
     /*

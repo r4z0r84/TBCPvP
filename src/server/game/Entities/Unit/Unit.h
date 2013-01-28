@@ -1648,7 +1648,6 @@ inline void Unit::SendMonsterMoveByPath(Path<Elem, Node> const& path, uint32 sta
     uint32 pathSize = end - start;
     WorldPacket data(SMSG_MONSTER_MOVE, (GetPackGUID().size()+4+4+4+4+1+4+4+4+pathSize*4*3));
     data << GetPackGUID();
-    data << uint8(0);
     data << GetPositionX();
     data << GetPositionY();
     data << GetPositionZ();

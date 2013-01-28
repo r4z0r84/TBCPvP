@@ -444,6 +444,7 @@ void PathInfo::BuildPointPath(const float *startPoint, const float *endPoint)
                 m_pointPathLimit);    // maximum number of points
     }
 
+    // this could be commented out if pets are stuck at corners (needs testing)
     if (pointCount < 2 || dtResult != DT_SUCCESS)
     {
         // only happens if pass bad data to findStraightPath or navmesh is broken
@@ -605,7 +606,7 @@ uint32 PathInfo::fixupCorridor(dtPolyRef* path, uint32 npath, uint32 maxPath,
     // Adjust beginning of the buffer to include the visited.
     uint32 req = nvisited - furthestVisited;
     uint32 orig = uint32(furthestPath+1) < npath ? furthestPath+1 : npath;
-    uint32 size = npath-orig > 0 ? npath-orig : 0;
+    uint32 size = npath > orig ? npath-orig : 0;
     if (req+size > maxPath)
         size = maxPath-req;
 

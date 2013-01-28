@@ -41,10 +41,7 @@ class TargetedMovementGenerator
 : public MovementGeneratorMedium< T, TargetedMovementGenerator<T> >, public TargetedMovementGeneratorBase
 {
     public:
-
-        TargetedMovementGenerator(Unit &target)
-            : TargetedMovementGeneratorBase(target), i_offset(0), i_angle(0), i_recalculateTravel(false) {}
-        TargetedMovementGenerator(Unit &target, float offset, float angle);
+        TargetedMovementGenerator(Unit &target, float offset = 0, float angle = 0, bool _usePathfinding = true);
         ~TargetedMovementGenerator() { delete i_path; }
 
         void Initialize(T &);
@@ -59,7 +56,9 @@ class TargetedMovementGenerator
 
         bool GetDestination(float &x, float &y, float &z) const
         {
-            if (i_destinationHolder.HasArrived()) return false;
+            if (i_destinationHolder.HasArrived() || !i_destinationHolder.HasDestination())
+                return false;
+
             i_destinationHolder.GetDestination(x, y, z);
             return true;
         }
@@ -69,7 +68,7 @@ class TargetedMovementGenerator
             return (i_path) ? (i_path->getPathType() & PATHFIND_NORMAL) : true;
         }
         void unitSpeedChanged() { i_recalculateTravel=true; }
-    protected:
+    private:
 
         bool _setTargetLocation(T &);
 
@@ -79,7 +78,8 @@ class TargetedMovementGenerator
         bool i_recalculateTravel;
         float i_targetX, i_targetY, i_targetZ;
 
-        PathInfo* i_path;
+        bool m_usePathfinding;
+        PathInfo *i_path;
         uint32 m_pathPointsSent;
 };
 #endif

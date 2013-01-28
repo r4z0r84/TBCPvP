@@ -45,6 +45,7 @@
 #include "TemporarySummon.h"
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
+#include "MoveMap.h"
 #include "GameEventMgr.h"
 #include "PoolMgr.h"
 #include "DatabaseImpl.h"
@@ -123,6 +124,7 @@ World::~World()
         delete command;
 
     VMAP::VMapFactory::clear();
+    MMAP::MMapFactory::clear();
 
     delete m_resultQueue;
 
@@ -1119,6 +1121,12 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_WARDEN_NUM_CHECKS] = ConfigMgr::GetIntDefault("Warden.NumChecks", 3);
     m_configs[CONFIG_WARDEN_CLIENT_CHECK_HOLDOFF] = ConfigMgr::GetIntDefault("Warden.ClientCheckHoldOff", 30);
     m_configs[CONFIG_WARDEN_CLIENT_RESPONSE_DELAY] = ConfigMgr::GetIntDefault("Warden.ClientResponseDelay", 15);
+
+    // mmaps
+    m_configs[CONFIG_BOOL_MMAP_ENABLED] = ConfigMgr::GetBoolDefault("mmap.enable", true);
+    std::string ignoreMMapIds = ConfigMgr::GetStringDefault("mmap.ignoreMapIds", "");
+    MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMMapIds.c_str());
+    sLog->outString("WORLD: Pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 }
 
 // Initialize the World
@@ -1126,6 +1134,9 @@ void World::SetInitialWorldSettings()
 {
     // Initialize the random number generator
     srand((unsigned int)time(NULL));
+
+    // Initialize detour memory management
+    dtAllocSetCustom(dtCustomAlloc, dtCustomFree);
 
     // Initialize config settings
     LoadConfigSettings();

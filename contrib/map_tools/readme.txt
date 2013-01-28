@@ -1,0 +1,1 @@
+These will be used until I have implemented extractor source based on MaNGOS.

@@ -37,6 +37,7 @@ file(GLOB_RECURSE sources_Maps Maps/*.cpp Maps/*.h)
 file(GLOB_RECURSE sources_Miscellaneous Miscellaneous/*.cpp Miscellaneous/*.h)
 file(GLOB_RECURSE sources_Movement Movement/*.cpp Movement/*.h)
 file(GLOB_RECURSE sources_OutdoorPvP OutdoorPvP/*.cpp OutdoorPvP/*.h)
+file(GLOB_RECURSE sources_Pathfinding Pathfinding/*.cpp Pathfinding/*.h)
 file(GLOB_RECURSE sources_Pools Pools/*.cpp Pools/*.h)
 file(GLOB_RECURSE sources_Quests Quests/*.cpp Quests/*.h)
 file(GLOB_RECURSE sources_Scripting Scripting/*.cpp Scripting/*.h)
@@ -120,6 +121,7 @@ set(game_STAT_SRCS
   ${sources_Miscellaneous}
   ${sources_Movement}
   ${sources_OutdoorPvP}
+  ${sources_Pathfinding}
   ${sources_Pools}
   ${sources_Quests}
   ${sources_Scripting}
@@ -136,6 +138,8 @@ set(game_STAT_SRCS
 include_directories(
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/dep/mersennetwister
+  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
+  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Recast
   ${CMAKE_SOURCE_DIR}/dep/SFMT
   ${CMAKE_SOURCE_DIR}/dep/zlib
   ${CMAKE_SOURCE_DIR}/src/server/collision
@@ -199,7 +203,8 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Movement/MovementGenerators
   ${CMAKE_CURRENT_SOURCE_DIR}/Movement/Waypoints
   ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
-  ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP/Zones  
+  ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP/Zones
+  ${CMAKE_CURRENT_SOURCE_DIR}/Pathfinding
   ${CMAKE_CURRENT_SOURCE_DIR}/Pools
   ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${CMAKE_CURRENT_SOURCE_DIR}/Quests

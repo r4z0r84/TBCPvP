@@ -266,7 +266,7 @@ namespace VMAP
                                         fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
 
         READ_OR_RETURN(&ident, 8);
-        CMP_OR_RETURN(ident, "VMAP003");
+        CMP_OR_RETURN(ident, RAW_VMAP_MAGIC);
 
         // we have to read one int. This is needed during the export and we have to skip it here
         uint32 tempNVectors;
@@ -372,7 +372,7 @@ namespace VMAP
                                         fclose(rf); printf("cmpfail, %s!=%s\n", V, S);return(false); }
 
         READ_OR_RETURN(&ident, 8);
-        CMP_OR_RETURN(ident, "VMAP003");
+        CMP_OR_RETURN(ident, RAW_VMAP_MAGIC);
 
         // we have to read one int. This is needed during the export and we have to skip it here
         uint32 tempNVectors;

@@ -135,7 +135,7 @@ PlayerTaxi::PlayerTaxi()
 
 void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 level)
 {
-    // capital and taxi hub masks
+    // race specific initial known nodes: capital and taxi hub masks
     switch (race)
     {
         case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human

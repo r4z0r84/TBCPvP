@@ -144,8 +144,8 @@ DBCStorage <TaxiPathEntry>                      sTaxiPathStore(TaxiPathEntryfmt)
 
 // DBC used only for initialization sTaxiPathSetBySource at startup.
 TaxiPathNodesByPath sTaxiPathNodesByPath;
-
 static DBCStorage <TaxiPathNodeEntry>           sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
+
 DBCStorage <TotemCategoryEntry>                 sTotemCategoryStore(TotemCategoryEntryfmt);
 DBCStorage <WMOAreaTableEntry>                  sWMOAreaTableStore(WMOAreaTableEntryfmt);
 DBCStorage <WorldMapAreaEntry>                  sWorldMapAreaStore(WorldMapAreaEntryfmt);
@@ -429,18 +429,6 @@ void LoadDBCStores(const std::string& dataPath)
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sTaxiNodesStore,           dbcPath, "TaxiNodes.dbc");
 
-    // Initialize global taxinodes mask
-    memset(sTaxiNodesMask, 0, sizeof(sTaxiNodesMask));
-    for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
-    {
-        if (sTaxiNodesStore.LookupEntry(i))
-        {
-            uint8  field   = (uint8)((i - 1) / 32);
-            uint32 submask = 1<<((i-1)%32);
-            sTaxiNodesMask[field] |= submask;
-        }
-    }
-
     LoadDBC(availableDbcLocales, bad_dbc_files, sTaxiPathStore,            dbcPath, "TaxiPath.dbc");
     for (uint32 i = 1; i < sTaxiPathStore.GetNumRows(); ++i)
         if (TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
@@ -454,7 +442,10 @@ void LoadDBCStores(const std::string& dataPath)
     pathLength.resize(pathCount);                           // 0 and some other indexes not used
     for (uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
-            ++pathLength[entry->path];
+        {
+            if (pathLength[entry->path] < entry->index + 1)
+                pathLength[entry->path] = entry->index + 1;
+        }
     // Set path length
     sTaxiPathNodesByPath.resize(pathCount);                 // 0 and some other indexes not used
     for (uint32 i = 1; i < sTaxiPathNodesByPath.size(); ++i)
@@ -463,6 +454,47 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
             sTaxiPathNodesByPath[entry->path].set(entry->index, entry);
+
+    // Initialize global taxinodes mask
+    // include existing nodes that have at least single not spell base (scripted) path
+    {
+        std::set<uint32> spellPaths;
+        for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
+            if (SpellEntry const* sInfo = sSpellStore.LookupEntry(i))
+                for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
+                    if (sInfo->Effect[j] == 123 /*SPELL_EFFECT_SEND_TAXI*/)
+                        spellPaths.insert(sInfo->EffectMiscValue[j]);
+
+        memset(sTaxiNodesMask, 0, sizeof(sTaxiNodesMask));
+        for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
+        {
+            TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
+            if (!node)
+                continue;
+
+            TaxiPathSetBySource::const_iterator src_i = sTaxiPathSetBySource.find(i);
+            if (src_i != sTaxiPathSetBySource.end() && !src_i->second.empty())
+            {
+                bool ok = false;
+                for (TaxiPathSetForSource::const_iterator dest_i = src_i->second.begin(); dest_i != src_i->second.end(); ++dest_i)
+                {
+                    // not spell path
+                    if (spellPaths.find(dest_i->second.ID) == spellPaths.end())
+                    {
+                        ok = true;
+                        break;
+                    }
+                }
+
+                if (!ok)
+                    continue;
+            }
+
+            uint8  field   = (uint8)((i - 1) / 32);
+            uint32 submask = 1<<((i-1)%32);
+            sTaxiNodesMask[field] |= submask;
+        }
+    }
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sTotemCategoryStore,       dbcPath, "TotemCategory.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sWMOAreaTableStore,        dbcPath, "WMOAreaTable.dbc");

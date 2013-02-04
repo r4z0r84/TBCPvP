@@ -79,7 +79,7 @@ struct mob_water_elementalAI : public ScriptedAI
         if (uiResetTimer <= diff)
         {
             if (Creature *pBalinda = Unit::GetCreature(*me, uiBalindaGUID))
-                if (me->GetDistance2d(pBalinda->GetHomePosition().GetPositionX(), pBalinda->GetHomePosition().GetPositionY()) > 50)
+                if (me->GetDistance2d(pBalinda->GetHomePosition().GetPositionX(), pBalinda->GetHomePosition().GetPositionY()) > 25)
                     EnterEvadeMode();
                 uiResetTimer = 5*IN_MILLISECONDS;
         } else uiResetTimer -= diff;

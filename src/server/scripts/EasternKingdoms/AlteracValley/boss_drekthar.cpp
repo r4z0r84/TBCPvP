@@ -120,7 +120,7 @@ struct boss_drektharAI : public ScriptedAI
         // check if creature is not outside of building
         if (uiResetTimer <= diff)
         {
-            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 50)
+            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 25)
             {
                 EnterEvadeMode();
                 DoScriptText(YELL_EVADE, me);

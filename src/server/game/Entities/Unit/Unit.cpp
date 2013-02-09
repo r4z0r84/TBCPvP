@@ -2462,6 +2462,13 @@ float Unit::MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType, 
     else
         HitChance = 95.0f + skillDiff * 0.1f;
 
+   // If attacker is dual-wielding and not ranged + not special attack
+   if (haveOffhandWeapon() && attType != RANGED_ATTACK && !spellId)
+   {
+      // -19% hit penalty for dual wield
+      HitChance  -= 19.0f;
+   }
+
     // Hit chance depends from victim auras
     if (attType == RANGED_ATTACK)
         HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);

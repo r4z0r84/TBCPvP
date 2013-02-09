@@ -81,7 +81,7 @@ struct mob_water_elementalAI : public ScriptedAI
             if (Creature *pBalinda = Unit::GetCreature(*me, uiBalindaGUID))
                 if (me->GetDistance2d(pBalinda->GetHomePosition().GetPositionX(), pBalinda->GetHomePosition().GetPositionY()) > 25)
                     EnterEvadeMode();
-                uiResetTimer = 5*IN_MILLISECONDS;
+                uiResetTimer = 1*IN_MILLISECONDS;
         } else uiResetTimer -= diff;
 
         DoMeleeAttackIfReady();
@@ -107,7 +107,7 @@ struct boss_balindaAI : public ScriptedAI
         uiConeOfColdTimer           = 8*IN_MILLISECONDS;
         uiFireBoltTimer             = 1*IN_MILLISECONDS;
         uiFrostboltTimer            = 4*IN_MILLISECONDS;
-        uiResetTimer                = 5*IN_MILLISECONDS;
+        uiResetTimer                = 1*IN_MILLISECONDS;
         uiWaterElementalTimer       = 0;
 
         Summons.DespawnAll();

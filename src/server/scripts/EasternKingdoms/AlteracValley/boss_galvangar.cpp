@@ -59,7 +59,7 @@ struct boss_galvangarAI : public ScriptedAI
         uiWhirlwind1Timer                 = urand(1*IN_MILLISECONDS, 13*IN_MILLISECONDS);
         uiWhirlwind2Timer                 = urand(5*IN_MILLISECONDS, 20*IN_MILLISECONDS);
         uiMortalStrikeTimer               = urand(5*IN_MILLISECONDS, 20*IN_MILLISECONDS);
-        uiResetTimer                      = 5*IN_MILLISECONDS;
+        uiResetTimer                      = 1*IN_MILLISECONDS;
     }
 
     void EnterCombat(Unit * /*who*/)
@@ -110,7 +110,7 @@ struct boss_galvangarAI : public ScriptedAI
         // check if creature is not outside of building
         if (uiResetTimer <= diff)
         {
-            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 25)
+            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
             {
                 EnterEvadeMode();
                 DoScriptText(YELL_EVADE, me);

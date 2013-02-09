@@ -110,12 +110,12 @@ struct boss_vanndarAI : public ScriptedAI
         // check if creature is not outside of building
         if (uiResetTimer <= diff)
         {
-            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 25)
+            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
             {
                 EnterEvadeMode();
                 DoScriptText(YELL_EVADE, me);
             }
-            uiResetTimer = 5*IN_MILLISECONDS;
+            uiResetTimer = 1*IN_MILLISECONDS;
         } else uiResetTimer -= diff;
 
         DoMeleeAttackIfReady();

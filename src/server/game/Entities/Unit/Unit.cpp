@@ -8508,8 +8508,19 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                         continue;
                     }
 
-                    // effect 0 have expected value but in negative state
-                    TakenTotalMod *= (-eff0->GetModifier()->m_amount+100.0f)/100.0f;
+                    // only apply damage mod to special attacks
+                    bool isNormal = false;
+                    for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+                    {
+                        if (m_currentSpells[i] && (GetSpellSchoolMask(m_currentSpells[i]->m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL))
+                        {
+                            isNormal = true;
+                            break;
+                        }
+                    }
+
+                    if (isNormal)
+                        TakenTotalMod *= (-eff0->GetModifier()->m_amount+100.0f)/100.0f;
                 }
                 break;
         }

@@ -8390,6 +8390,27 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
             go->SetLootState(GO_ACTIVATED);
         }
+
+        if (go->getLootState() == GO_ACTIVATED)
+        {
+            if (Group* group = GetGroup())
+            {
+                switch (group->GetLootMethod())
+                {
+                    case MASTER_LOOT:
+                        permission = MASTER_PERMISSION;
+                        break;
+                    case FREE_FOR_ALL:
+                        permission = ALL_PERMISSION;
+                        break;
+                    default:
+                        permission = GROUP_PERMISSION;
+                        break;
+                }
+            }
+            else
+                permission = ALL_PERMISSION;
+        }
     }
     else if (IS_ITEM_GUID(guid))
     {

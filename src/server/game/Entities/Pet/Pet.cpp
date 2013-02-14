@@ -1061,6 +1061,18 @@ bool Guardian::InitStatsForLevel(uint32 petlevel)
 
                         SetBonusDamage(int32 (val * 0.15f));
                         //bonusAP += val * 0.57;
+
+                        // increase the Felguards base weapon damage to ~240-329 when strength is added
+                        if (GetEntry() == 17252)
+                        {
+                            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel*2.3) - (petlevel / 4)));
+                            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel*2.9) + (petlevel / 4)));
+                        }
+                        else
+                        {
+                            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                        }
                         break;
                     }
                     case CLASS_MAGE:

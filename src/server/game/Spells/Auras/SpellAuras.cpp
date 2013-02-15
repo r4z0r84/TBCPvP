@@ -5914,12 +5914,19 @@ void Aura::PeriodicTick()
             uint32 amount = GetModifierValuePerStack() > 0 ? GetModifierValuePerStack() : 0;
 
             uint32 pdamage;
+            float EffectModifier = 1.0f;
 
             if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
+            {
                 pdamage = uint32(m_target->GetMaxHealth() * amount / 100);
+                float negativeMod = m_target->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+                if (negativeMod)
+                    EffectModifier *= (100.0f + negativeMod) / 100.0f;
+            }
             else
                 pdamage = pCaster->SpellHealingBonus(GetSpellProto(), amount, DOT, m_target);
 
+            pdamage *= EffectModifier;
             pdamage *= GetStackAmount();
 
             //pdamage = pCaster->SpellHealingBonus(GetSpellProto(), pdamage, DOT, m_target);

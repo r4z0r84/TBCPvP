@@ -2391,6 +2391,17 @@ void SpellMgr::LoadSpellCustomAttr()
         case 35460: // Fury of the Dreghood Elders
             spellInfo->EffectImplicitTargetA[1] = TARGET_TYPE_UNIT_TARGET;
             break;
+        case 25228: // Soul Link (fix pet + dmg)
+            spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA_PET;
+            break;
+        case 30242: // Demonic Tactics rank 1
+        case 30245: // Demonic Tactics rank 2
+        case 30246: // Demonic Tactics rank 3
+        case 30247: // Demonic Tactics rank 4
+        case 30248: // Demonic Tactics rank 5
+            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_CRIT_PERCENT;
+            spellInfo->EffectApplyAuraName[2] = SPELL_AURA_MOD_SPELL_CRIT_CHANCE;
+            break;
         default:
             break;
         }

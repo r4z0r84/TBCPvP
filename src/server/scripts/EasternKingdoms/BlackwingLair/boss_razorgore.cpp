@@ -29,15 +29,31 @@ EndScriptData */
 
 //Razorgore Phase 2 Script
 
-#define SAY_EGGS_BROKEN1        -1469022
-#define SAY_EGGS_BROKEN2        -1469023
-#define SAY_EGGS_BROKEN3        -1469024
-#define SAY_DEATH               -1469025
+enum Texts
+{
+    SAY_EGGS_BROKEN1    = -1469022,
+    SAY_EGGS_BROKEN2    = -1469023,
+    SAY_EGGS_BROKEN3    = -1469024,
+    SAY_DEATH           = -1469025,
+    SAY_GREK_AGGRO      = -1469032,
+    SAY_GREK_CONTROL    = -1469033
+};
 
-#define SPELL_CLEAVE            22540
-#define SPELL_WARSTOMP          24375
-#define SPELL_FIREBALLVOLLEY    22425
-#define SPELL_CONFLAGRATION     23023
+enum Spells
+{
+    // Razorgore
+    SPELL_CLEAVE          = 22540,
+    SPELL_WARSTOMP        = 24375,
+    SPELL_FIREBALLVOLLEY  = 22425,
+    SPELL_CONFLAGRATION   = 23023,
+
+    // Grethok
+    SPELL_BLUE_BEAM       = 40225,
+    SPELL_MISSILES        = 22273,
+    SPELL_DOMINATE        = 14515,
+    SPELL_POLYMORPH       = 22274
+    
+};
 
 struct boss_razorgoreAI : public ScriptedAI
 {
@@ -71,28 +87,28 @@ struct boss_razorgoreAI : public ScriptedAI
         if (!UpdateVictim())
             return;
 
-        //Cleave_Timer
+        // Cleave_Timer
         if (Cleave_Timer <= diff)
         {
             DoCast(me->getVictim(), SPELL_CLEAVE);
             Cleave_Timer = urand(7000, 10000);
         } else Cleave_Timer -= diff;
 
-        //WarStomp_Timer
+        // WarStomp_Timer
         if (WarStomp_Timer <= diff)
         {
             DoCast(me->getVictim(), SPELL_WARSTOMP);
             WarStomp_Timer = urand(15000, 25000);
         } else WarStomp_Timer -= diff;
 
-        //FireballVolley_Timer
+        // FireballVolley_Timer
         if (FireballVolley_Timer <= diff)
         {
             DoCast(me->getVictim(), SPELL_FIREBALLVOLLEY);
             FireballVolley_Timer = urand(12000, 15000);
         } else FireballVolley_Timer -= diff;
 
-        //Conflagration_Timer
+        // Conflagration_Timer
         if (Conflagration_Timer <= diff)
         {
             DoCast(me->getVictim(), SPELL_CONFLAGRATION);
@@ -113,9 +129,73 @@ struct boss_razorgoreAI : public ScriptedAI
     }
 };
 
+struct npc_grethokAI : public ScriptedAI
+{
+    npc_grethokAI(Creature *c) : ScriptedAI(c) {}
+
+    uint32 Missiles_Timer;
+    uint32 Polymorph_Timer;
+    uint32 Dominate_Timer;
+
+    void Reset()
+    {
+        Missiles_Timer = 3*IN_MILLISECONDS;
+        Polymorph_Timer = 10*IN_MILLISECONDS;
+        Dominate_Timer = 15*IN_MILLISECONDS;
+
+        DoCast(me, SPELL_BLUE_BEAM); // visual until can get to cast to Razorgore
+    }
+
+    void EnterCombat(Unit * /*who*/)
+    {
+        me->InterruptNonMeleeSpells(true);
+        DoZoneInCombat();
+        DoScriptText(SAY_GREK_AGGRO, me);
+    }
+
+    void JustDied(Unit* /*Killer*/)
+    {
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (!UpdateVictim())
+            return;
+
+        // Missiles_Timer
+        if (Missiles_Timer <= diff)
+        {
+            DoCast(me->getVictim(), SPELL_MISSILES);
+            Missiles_Timer = urand(7000, 10000);
+        } else Missiles_Timer -= diff;
+
+        // Polymorph_Timer
+        if (Polymorph_Timer <= diff)
+        {
+            DoCast(me->getVictim(), SPELL_POLYMORPH);
+            Polymorph_Timer = urand(15000, 25000);
+        } else Polymorph_Timer -= diff;
+
+        // Dominate_Timer
+        if (Dominate_Timer <= diff)
+        {
+            DoScriptText(SAY_GREK_CONTROL, me);
+            DoCast(me->getVictim(), SPELL_DOMINATE);
+            Dominate_Timer = urand(15000, 25000);
+        } else Dominate_Timer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
 CreatureAI* GetAI_boss_razorgore(Creature* creature)
 {
     return new boss_razorgoreAI (creature);
+}
+
+CreatureAI* GetAI_npc_grethok(Creature* creature)
+{
+    return new npc_grethokAI (creature);
 }
 
 void AddSC_boss_razorgore()
@@ -125,5 +205,9 @@ void AddSC_boss_razorgore()
     newscript->Name = "boss_razorgore";
     newscript->GetAI = &GetAI_boss_razorgore;
     newscript->RegisterSelf();
-}
 
+    newscript = new Script;
+    newscript->Name = "npc_grethok";
+    newscript->GetAI = &GetAI_npc_grethok;
+    newscript->RegisterSelf();
+}

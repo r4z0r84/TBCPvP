@@ -1065,19 +1065,25 @@ bool Guardian::InitStatsForLevel(uint32 petlevel)
                         // increase the Felguards base weapon damage to ~240-329 when strength is added
                         if (GetEntry() == 17252)
                         {
-                            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel*2.3) - (petlevel / 4)));
-                            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel*2.9) + (petlevel / 4)));
+                            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel*2.35) - (petlevel / 4)));
+                            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel*2.94) + (petlevel / 4)));
                         }
                         else
                         {
                             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                         }
+
+                        //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
                         break;
                     }
                     case CLASS_MAGE:
                     {
-                        //40% damage bonus of mage's frost damage
+                        // Mage pet has melee damage
+                        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+
+                        // 40% damage bonus of mage's frost damage
                         float val = m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST) * 0.4;
                         if (val < 0)
                             val = 0;
@@ -1086,12 +1092,19 @@ bool Guardian::InitStatsForLevel(uint32 petlevel)
                         break;
                     }
                     default:
+                    {
+                        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
                         break;
+                    }
+                        
                 }
             }
-
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+            else
+            {            
+                SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+            }
 
             //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
             break;

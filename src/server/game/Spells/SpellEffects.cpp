@@ -1886,6 +1886,13 @@ void Spell::EffectTriggerRitualOfSummoning(uint32 i)
 
     finish();
 
+    // do not allow summoning in donor malls
+    if (m_caster->GetMapId() == 13 || m_caster->GetMapId() == 598)
+    {
+        SendCastResult(SPELL_FAILED_NOT_HERE);
+        return;
+    }
+
     Spell *spell = new Spell(m_caster, spellInfo, true);
     SpellCastTargets targets;
     targets.setUnitTarget(unitTarget);

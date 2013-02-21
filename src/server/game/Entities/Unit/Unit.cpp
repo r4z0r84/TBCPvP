@@ -856,7 +856,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         if (!damage)
         {
             if ((damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL) && pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->getPowerType() == POWER_RAGE))
-                pVictim->ToPlayer()->RewardRage(cleanDamage->damage, 0, false);
+                pVictim->ToPlayer()->RewardRage(damage, 0, false);
             return 0;
         }
     }
@@ -1013,7 +1013,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if (this != pVictim && pVictim->getPowerType() == POWER_RAGE)
             {
                 uint32 rage_damage = damage + (cleanDamage ? cleanDamage->damage : 0);
-                pVictim->ToPlayer()->RewardRage(rage_damage, 0, false);
+                pVictim->ToPlayer()->RewardRage(damage, 0, false);
             }
 
             // random durability for items (HIT TAKEN)

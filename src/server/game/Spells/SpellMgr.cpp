@@ -2402,6 +2402,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_CRIT_PERCENT;
             spellInfo->EffectApplyAuraName[2] = SPELL_AURA_MOD_SPELL_CRIT_CHANCE;
             break;
+        case 31233: // Find Weakness rank 1
+        case 31239: // Find Weakness rank 2
+        case 31240: // Find Weakness rank 3
+        case 31241: // Find Weakness rank 4
+        case 31242: // Find Weakness rank 5
+            spellInfo->procFlags = 87376;
+            break;
         default:
             break;
         }

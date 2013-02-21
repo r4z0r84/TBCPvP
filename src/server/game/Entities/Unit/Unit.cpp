@@ -6317,6 +6317,28 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 return false;
             break;
         }
+        // Molten Armor / Molten Shields
+        case 30482:
+        {
+            // Always proc on standard melee attack
+            if (procFlags & (PROC_FLAG_TAKEN_MELEE_HIT | PROC_FLAG_TAKEN_MELEE_SPELL_HIT))
+                break;
+            else if (ToPlayer()->HasSpell(11094))
+            {
+                // 50% chance to proc
+                if (rand()%2)
+                    break;
+                return false;
+                break;
+            }
+            else if (ToPlayer()->HasSpell(13043))
+                break;
+            else
+            {
+                return false;
+                break;
+            }
+        }
     }
 
     // Costum basepoints/target for exist spell

@@ -360,7 +360,7 @@ Spell::Spell(Unit* Caster, SpellEntry const *info, bool triggered, uint64 origin
 
     if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
         && !IsAreaOfEffectSpell(m_spellInfo)
-        && (m_spellInfo->AttributesEx2 & SPELL_ATTR_EX_CANT_BE_REFLECTED) == 0)
+        && (m_spellInfo->AttributesEx & SPELL_ATTR_EX_CANT_BE_REFLECTED) == 0)  // Do not reflect melee based spells
     {
         for (int j = 0; j < MAX_SPELL_EFFECTS; j++)
         {

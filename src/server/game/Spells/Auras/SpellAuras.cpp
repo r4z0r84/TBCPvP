@@ -2695,6 +2695,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                         m_target->SetPower(POWER_ENERGY, 0);
                         if (urand(1, 100) <= FurorChance)
                             m_target->CastSpell(m_target, 17099, true, NULL, this);
+                            m_target->CastCustomSpell(m_target, 5225, NULL, NULL, NULL, true, NULL, this); // Track Humanoids
                     }
                     else
                     {

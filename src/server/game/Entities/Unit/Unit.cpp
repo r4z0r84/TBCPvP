@@ -999,6 +999,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             //Maim?
             //if (!spellProto || !(spellProto->AuraInterruptFlags&AURA_INTERRUPT_FLAG_DIRECT_DAMAGE))
                 pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
+
         }
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
@@ -5344,13 +5345,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         return false;
 
                     target = this;
-                    break;
-                }
-                // Maim Interrupt
-                case 44835:
-                {
-                    // Deadly Interrupt Effect
-                    triggered_spell_id = 32747;
                     break;
                 }
             }

@@ -4247,6 +4247,13 @@ void Spell::EffectTaunt(uint32 /*i*/)
 
 void Spell::EffectWeaponDmg(uint32 /*i*/)
 {
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
+        if (m_spellInfo->Id == 22570)    // Maim
+        {
+            // Maim set bonus stun needs to be handled ahead of the stun impact
+            if (m_caster->HasAura(44835, 0))    // Feral PvP glove bonus
+                unitTarget->CastCustomSpell(unitTarget, 32747, NULL, NULL, NULL, true, NULL, NULL);	
+        }
 }
 
 void Spell::SpellDamageWeaponDmg(uint32 i)

@@ -2940,8 +2940,8 @@ void Spell::SendSpellGo()
 
     sLog->outDebug("Sending SMSG_SPELL_GO id=%u", m_spellInfo->Id);
 
-    // Some spell mods are Used alreay upon cast, such as Precense of Mind, remove them here already as it may cause abuse.
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    // Some spell mods are used already upon cast, such as Presence of Mind, remove them here already as it may cause abuse
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && !m_caster->HasAura(16166, 0) && !m_caster->HasAura(14751, 0)) // Elemental Mastery and Inner Focus must not be removed on cast
         m_caster->ToPlayer()->RemoveSpellMods(this);
 
     Unit *target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;

@@ -6336,6 +6336,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 break;
             }
         }
+        case 45054: // Timbal's Focusing Crystal
+        {
+            // Prohibit proc from Health Funnel
+            if (procSpell->AttributesEx2 & SPELL_ATTR_EX2_HEALTH_FUNNEL)
+                return false;
+            break;
+        }
     }
 
     // Costum basepoints/target for exist spell

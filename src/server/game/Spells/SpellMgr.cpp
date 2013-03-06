@@ -2409,15 +2409,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 31242: // Find Weakness rank 5
             spellInfo->procFlags = 87376;
             break;
-        case 2652:  // Touch of Weakness (Stop blackout proc off self buff)
-        case 19261: 
-        case 19262:
-        case 19264:
-        case 19265:
-        case 19266:
-        case 25461: 
-            spellInfo->SpellFamilyFlags = 0;
-            break;
         default:
             break;
         }

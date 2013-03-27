@@ -2224,7 +2224,17 @@ void SpellMgr::LoadSpellCustomAttr()
                 case SPELL_AURA_MOD_ROOT:
                 case SPELL_AURA_MOD_DECREASE_SPEED:
                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_MOVEMENT_IMPAIR;
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
                     break;
+                case SPELL_AURA_MOD_SILENCE:
+                case SPELL_AURA_MOD_PACIFY:
+                case SPELL_AURA_MOD_PACIFY_SILENCE:
+                case SPELL_AURA_MOD_FEAR:
+                case SPELL_AURA_MOD_CASTING_SPEED:
+                case SPELL_AURA_MELEE_SLOW:
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
+                    break;
+                
                 default:
                     break;
             }
@@ -2249,7 +2259,30 @@ void SpellMgr::LoadSpellCustomAttr()
                         spellInfo->Targets & (TARGET_FLAG_SOURCE_LOCATION|TARGET_FLAG_DEST_LOCATION))
                         spellInfo->Effect[j] = SPELL_EFFECT_TRIGGER_MISSILE;
                     break;
+                case SPELL_EFFECT_INTERRUPT_CAST:   //EarthShock/Counterspell etc
+                case SPELL_EFFECT_DISPEL:
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
+                    break;
             }
+
+            switch (spellInfo->Mechanic)    //These are single effect binary spells (CC)
+            {
+                case MECHANIC_FEAR:
+                case MECHANIC_CHARM:
+                case MECHANIC_SLEEP:
+                case MECHANIC_SHACKLE:
+                case MECHANIC_SNARE:
+                case MECHANIC_FREEZE:
+                case MECHANIC_ROOT:
+                case MECHANIC_POLYMORPH:
+                case MECHANIC_INTERRUPT:
+                case MECHANIC_SILENCE:
+                case MECHANIC_BANISH:
+                case MECHANIC_STUN:
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
+                    break;
+            }
+
         }
 
         for (uint8 j = 0; j < 3; ++j)
@@ -2269,6 +2302,8 @@ void SpellMgr::LoadSpellCustomAttr()
 
         if (spellInfo->SpellVisual == 3879)
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_CONE_BACK;
+        if (spellInfo->activeIconID== 548)
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
 
         switch (i)
         {
@@ -2408,6 +2443,23 @@ void SpellMgr::LoadSpellCustomAttr()
         case 31241: // Find Weakness rank 4
         case 31242: // Find Weakness rank 5
             spellInfo->procFlags = 87376;
+            break;
+        case 5760:  // Mind Numbing Poison rank 1
+        case 8692:  // Mind Numbing Poison rank 2
+        case 11398: // Mind Numbing Poison rank 3
+        case 13218: // Wound Poison rank 1
+        case 13222: // Wound Poison rank 2
+        case 13223: // Wound Poison rank 3
+        case 13224: // Wound Poison rank 4
+        case 27189: // Wound Poison rank 5
+        case 15407: // Mind Flay rank 1
+        case 17311: // Mind Flay rank 2
+        case 17312: // Mind Flay rank 3
+        case 17313: // Mind Flay rank 4
+        case 17314: // Mind Flay rank 5
+        case 18807: // Mind Flay rank 6
+        case 25387: // Mind Flay rank 7
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
             break;
         default:
             break;

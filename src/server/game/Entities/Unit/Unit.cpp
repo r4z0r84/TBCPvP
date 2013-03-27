@@ -1402,7 +1402,10 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo, int32 dama
     // Calculate absorb resist
     if (damage > 0)
     {
-        CalcAbsorbResist(pVictim, damageSchoolMask, SPELL_DIRECT_DAMAGE, damage, &damageInfo->absorb, &damageInfo->resist);
+        bool isBinary = false;
+        if (sSpellMgr->GetSpellCustomAttr(spellInfo->Id) & SPELL_ATTR_CU_BINARY)
+            isBinary = true;
+        CalcAbsorbResist(pVictim, damageSchoolMask, SPELL_DIRECT_DAMAGE, damage, &damageInfo->absorb, &damageInfo->resist, isBinary);
         damage-= damageInfo->absorb + damageInfo->resist;
     }
     else
@@ -1655,7 +1658,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
     {
         damageInfo->procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
         // Calculate absorb & resists
-        CalcAbsorbResist(damageInfo->target, SpellSchoolMask(damageInfo->damageSchoolMask), DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist);
+        CalcAbsorbResist(damageInfo->target, SpellSchoolMask(damageInfo->damageSchoolMask), DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, false);
         damageInfo->damage -= damageInfo->absorb + damageInfo->resist;
 
         // Calculate custom damage reduction.
@@ -1862,42 +1865,42 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     return (newdamage > 1) ? newdamage : 1;
 }
 
-void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist)
+void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, bool isBinary)
 {
     if (!pVictim || !pVictim->isAlive() || !damage)
         return;
 
     // Magic damage, check for resists
-    if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0)
+    if ((((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0) & ((schoolMask & SPELL_SCHOOL_MASK_HOLY) == 0)) & !isBinary)
     {
-        // Get base victim resistance for school
-        float tmpvalue2 = (float)pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
-        // Ignore resistance by self SPELL_AURA_MOD_TARGET_RESISTANCE aura
-        tmpvalue2 += (float)GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask);
+            // Get base victim resistance for school
+            float tmpvalue2 = (float)pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
+            // Ignore resistance by self SPELL_AURA_MOD_TARGET_RESISTANCE aura
+            tmpvalue2 += (float)GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask);
 
-        tmpvalue2 *= (float)(0.15f / getLevel());
-        if (tmpvalue2 < 0.0f)
-            tmpvalue2 = 0.0f;
-        if (tmpvalue2 > 0.75f)
-            tmpvalue2 = 0.75f;
-        uint32 ran = urand(0, 100);
-        uint32 faq[4] = {24, 6, 4, 6};
-        uint8 m = 0;
-        float Binom = 0.0f;
-        for (uint8 i = 0; i < 4; i++)
-        {
-            Binom += 2400 *(powf(tmpvalue2, i) * powf((1-tmpvalue2), (4-i)))/faq[i];
-            if (ran > Binom)
-                ++m;
+            tmpvalue2 *= (float)(0.15f / getLevel());
+            if (tmpvalue2 < 0.0f)
+                tmpvalue2 = 0.0f;
+            if (tmpvalue2 > 0.75f)
+                tmpvalue2 = 0.75f;
+            uint32 ran = urand(0, 100);
+            uint32 faq[4] = {24, 6, 4, 6};
+            uint8 m = 0;
+            float Binom = 0.0f;
+            for (uint8 i = 0; i < 4; i++)
+            {
+                Binom += 2400 *(powf(tmpvalue2, i) * powf((1-tmpvalue2), (4-i)))/faq[i];
+                if (ran > Binom)
+                    ++m;
+                else
+                    break;
+            }
+            if (damagetype == DOT && m == 4)
+                *resist += uint32(damage - 1);
             else
-                break;
-        }
-        if (damagetype == DOT && m == 4)
-            *resist += uint32(damage - 1);
-        else
-            *resist += uint32(damage * m / 4);
-        if (*resist > damage)
-            *resist = damage;
+                *resist += uint32(damage * m / 4);
+            if (*resist > damage)
+                *resist = damage;
     }
     else
         *resist = 0;
@@ -2652,6 +2655,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
 }
 
 // TODO need use unit spell resistances in calculations
+// Initial Binary Spell Check here
 SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
 {
     // Can`t miss on dead target (on skinning for example)
@@ -2705,6 +2709,35 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     uint32 rand = urand(0, 10000);
     if (rand > HitChance)
         return SPELL_MISS_RESIST;
+    else if (sSpellMgr->GetSpellCustomAttr(spell->Id) & SPELL_ATTR_CU_BINARY)  //Binary Spell Resistance is handled here
+    {
+        // Magic damage, check for resists
+        if (((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0) & ((schoolMask & SPELL_SCHOOL_MASK_HOLY) == 0))
+        {
+        
+            // Get base victim resistance for school
+            float totalResistance = (float)pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
+            // Ignore resistance by self SPELL_AURA_MOD_TARGET_RESISTANCE aura
+            totalResistance += (float)GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask);
+
+            float damage_reduction = (float)(0.15f / getLevel())*totalResistance;
+
+            if (damage_reduction < 0.0f)
+                damage_reduction = 0.0f;
+            if (damage_reduction > 0.75f) //Damage reduction percentage cap is 75%
+                damage_reduction = 0.75f;
+
+            uint32 tmpRg = uint32(damage_reduction*100.0f);
+            if (urand(0, 100) >= tmpRg)
+                return SPELL_MISS_NONE;
+            else
+                return SPELL_MISS_RESIST;
+            
+        }
+        return SPELL_MISS_NONE;
+        
+    }
+    else
     return SPELL_MISS_NONE;
 }
 

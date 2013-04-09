@@ -372,11 +372,11 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
         return;
-
+    /*
     // not allow remove non positive spells and spells with attr SPELL_ATTR_CANT_CANCEL
     if (!IsPositiveSpell(spellId) || (spellInfo->Attributes & SPELL_ATTR_CANT_CANCEL))
         return;
-
+    */
     // channeled spell case (it currently casted then)
     if (IsChanneledSpell(spellInfo))
     {
@@ -389,6 +389,9 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
         }
         return;
     }
+
+    if (!IsPositiveSpell(spellId) || IsPassiveSpell(spellId) || spellInfo->Attributes & SPELL_ATTR_CANT_CANCEL)
+       return;
 
     // non channeled case
     _player->RemoveAurasDueToSpellByCancel(spellId);

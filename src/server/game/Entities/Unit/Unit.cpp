@@ -2931,6 +2931,10 @@ float Unit::GetUnitParryChance() const
             chance = 5.0f;
             chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         }
+        else if (GetEntry() == 17252)   // Felguard Pet can parry (due to weapon)
+        {
+            chance = 8.62f;
+        }
     }
 
     return chance > 0.0f ? chance : 0.0f;

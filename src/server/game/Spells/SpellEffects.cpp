@@ -761,13 +761,28 @@ void Spell::EffectDummy(uint32 i)
                         return;
 
                     float damage;
-                    // DW should benefit of attack power, damage percent mods etc.
-                    // TODO: check if using offhand damage is correct and if it should be divided by 2
                     if (m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK))
-                        damage = (m_caster->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE))/2;
+                    {
+                       float base_value  = m_caster->GetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, BASE_VALUE) + ((m_caster->GetTotalAttackPowerValue(BASE_ATTACK)/14.0f) * (m_caster->GetAttackTime(OFF_ATTACK)/1000.0f));
+                       float base_pct    = m_caster->GetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, BASE_PCT);
+                       damage = ((m_caster->GetWeaponDamageRange(OFF_ATTACK, MINDAMAGE) + base_value)  + (m_caster->GetWeaponDamageRange(OFF_ATTACK, MAXDAMAGE) + base_value))/2;
+                       damage *= base_pct;
+                    }
                     else
-                        damage = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE))/2;
+                    {
+                       float base_value  = m_caster->GetModifierValue(UNIT_MOD_DAMAGE_MAINHAND, BASE_VALUE) + ((m_caster->GetTotalAttackPowerValue(BASE_ATTACK)/14.0f) * (m_caster->GetAttackTime(BASE_ATTACK)/1000.0f));
+                       float base_pct    = m_caster->GetModifierValue(UNIT_MOD_DAMAGE_MAINHAND, BASE_PCT);
+                       damage = ((m_caster->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + base_value)  + (m_caster->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE) + base_value))/2;
+                       damage *= base_pct;
+                    }
 
+                    // Two handed Weapon Specialisation (needs hardcoded)
+                    Item *item = m_caster->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                    if (item && item->GetProto()->InventoryType == INVTYPE_2HWEAPON)
+                    {
+                        damage *= m_caster->HasSpell(12714) ? 1.05f : m_caster->HasSpell(12713) ? 1.04f : m_caster->HasSpell(12712) ? 1.03f
+                        : m_caster->HasSpell(12711) ? 1.02f : m_caster->HasSpell(12163) ? 1.01f : 1.0f;
+                    }
                     switch (m_spellInfo->Id)
                     {
                         case 12162: damage *= 0.2f; break; // Rank 1

@@ -745,7 +745,7 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
     // Calculate hit result
     if (m_originalCaster)
     {
-        bool canMiss = (m_triggeredByAuraSpell || !m_IsTriggeredSpell);
+        bool canMiss = (m_triggeredByAuraSpell || !m_IsTriggeredSpell || m_spellInfo->Id == 75);
         target.missCondition = m_originalCaster->SpellHitResult(pVictim, m_spellInfo, m_canReflect, canMiss);
         if (m_skipCheck && target.missCondition != SPELL_MISS_IMMUNE)
             target.missCondition = SPELL_MISS_NONE;
@@ -2941,7 +2941,8 @@ void Spell::SendSpellGo()
     sLog->outDebug("Sending SMSG_SPELL_GO id=%u", m_spellInfo->Id);
 
     // Some spell mods are used already upon cast, such as Presence of Mind, remove them here already as it may cause abuse
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && !m_caster->HasAura(16166, 0) && !m_caster->HasAura(14751, 0)) // Elemental Mastery and Inner Focus must not be removed on cast
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && !m_caster->HasAura(16166, 0) && !m_caster->HasAura(14751, 0) 
+        && !m_caster->HasAura(23920, 0) && !m_caster->HasAura(8178, 0)) // Elemental Mastery/Inner Focus/Spell Reflect/Grounding Effect must not be removed on cast
         m_caster->ToPlayer()->RemoveSpellMods(this);
 
     Unit *target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;

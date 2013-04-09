@@ -1254,9 +1254,9 @@ void Player::Update(uint32 p_time)
 
             if (isAttackReady(BASE_ATTACK))
             {
-                if (!IsWithinMeleeRange(pVictim))
+                if (!IsWithinMeleeRange(pVictim, 0.60f))
                 {
-                    setAttackTimer(BASE_ATTACK, 100);
+                    setAttackTimer(BASE_ATTACK, (3*(GetAttackTime(BASE_ATTACK))/4 + 50));
                     if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
                     {
                         SendAttackSwingNotInRange();
@@ -1291,8 +1291,8 @@ void Player::Update(uint32 p_time)
 
             if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
-                if (!IsWithinMeleeRange(pVictim))
-                    setAttackTimer(OFF_ATTACK, 100);
+                if (!IsWithinMeleeRange(pVictim, 0.60f))
+                    setAttackTimer(OFF_ATTACK, (3*(GetAttackTime(BASE_ATTACK))/4 + 50));
                 else if (!HasInArc(2*M_PI/3, pVictim))
                     setAttackTimer(OFF_ATTACK, 100);
                 else
@@ -2139,7 +2139,7 @@ void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacke
 
         // Berserker Rage effect
         if (HasAura(18499, 0))
-            addRage *= 2.0;
+            addRage *= 1.5;
     }
 
     addRage *= sWorld->getRate(RATE_POWER_RAGE_INCOME);
@@ -5348,31 +5348,31 @@ float Player::GetDodgeFromAgility()
 {
     // Table for base dodge values
     float dodge_base[MAX_CLASSES] = {
-         0.0075f,   // Warrior
-         0.00652f,  // Paladin
+         0.00748f,  // Warrior
+         0.006518f, // Paladin
         -0.0545f,   // Hunter
-        -0.0059f,   // Rogue
+        -0.00589f,  // Rogue
          0.03183f,  // Priest
          0.0114f,   // DK
          0.0167f,   // Shaman
          0.034575f, // Mage
          0.02011f,  // Warlock
          0.0f,      // ??
-        -0.0187f    // Druid
+        -0.01874f   // Druid
     };
     // Crit/agility to dodge/agility coefficient multipliers
     float crit_to_dodge[MAX_CLASSES] = {
-         1.1f,      // Warrior
-         1.0f,      // Paladin
+         1.09f,     // Warrior
+         1.01f,     // Paladin
          1.6f,      // Hunter
-         2.0f,      // Rogue
+         1.98f,     // Rogue
          1.0f,      // Priest
          1.0f,      // DK?
-         1.0f,      // Shaman
+         1.05f,     // Shaman
          1.0f,      // Mage
          1.0f,      // Warlock
          0.0f,      // ??
-         1.7f       // Druid
+         1.75f      // Druid
     };
 
     uint32 level = getLevel();

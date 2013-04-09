@@ -1841,6 +1841,8 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     float length = pVictim->GetDistance(m_homePosition);
     float AttackDist = GetAttackDistance(pVictim);
     uint32 ThreatRadius = sWorld->getConfig(CONFIG_THREAT_RADIUS);
+    if (isWorldBoss())
+        ThreatRadius *= 3.0f;
 
     //Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
     return (length > (ThreatRadius > AttackDist ? ThreatRadius : AttackDist));

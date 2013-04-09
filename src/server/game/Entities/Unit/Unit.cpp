@@ -4736,6 +4736,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         return false;
 
                     triggered_spell_id = 12723;
+
+                    float TakenTotalMod = 1.0f;
+                    AuraList const& mModDamagePercentTaken = target->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+                    for (AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
+                    if ((*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask())
+                    TakenTotalMod *= ((*i)->GetModifierValue() + 100.0f) / 100.0f;
+
+                    damage = damage * TakenTotalMod;
                     basepoints0 = damage;
                     break;
                 }

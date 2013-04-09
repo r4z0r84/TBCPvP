@@ -2304,6 +2304,10 @@ void SpellMgr::LoadSpellCustomAttr()
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_CONE_BACK;
         if (spellInfo->activeIconID== 548)
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
+        if (spellInfo->AttributesEx2 & SPELL_ATTR_EX2_HEALTH_FUNNEL && spellInfo->SpellIconID == 153)    // Fix Health Funnel
+        {
+            spellInfo->SpellVisual = 9219;
+        }
 
         switch (i)
         {

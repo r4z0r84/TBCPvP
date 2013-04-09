@@ -2927,7 +2927,7 @@ float Unit::GetUnitParryChance() const
     }
     else if (GetTypeId() == TYPEID_UNIT)
     {
-        if (GetCreatureType() == CREATURE_TYPE_HUMANOID)
+        if (GetCreatureType() == CREATURE_TYPE_HUMANOID || CREATURE_TYPE_DRAGONKIN || CREATURE_TYPE_ELEMENTAL || CREATURE_TYPE_GIANT  || CREATURE_TYPE_GIANT)
         {
             chance = 5.0f;
             chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
@@ -3593,9 +3593,34 @@ bool Unit::AddAura(Aura *Aur)
                             continue;
                         }
                     }
-
                     RemoveAura(i2, AURA_REMOVE_BY_STACK);
                     i2 = m_Auras.lower_bound(spair);
+                    continue;
+                }
+            }
+            else if (aur2->GetCasterGUID() != Aur->GetCasterGUID() && aurSpellInfo->StackAmount > 1 && aur2->GetSpellProto()->StackAmount > 1) // Auras belong to different casters, try merge into one stack (breaks non-stacking auras)
+            {
+                if (!stackModified) //A ura stacks such as scorch
+                {
+                    // replace aura if next will > spell StackAmount
+                    if (aurSpellInfo->StackAmount)
+                    {
+
+                        if (Aur->GetId() == aur2->GetId())
+                        {   
+                                stackModified=true;
+                                Aur->SetStackAmount(aur2->GetStackAmount());  
+                                if (Aur->GetStackAmount() < aurSpellInfo->StackAmount) 
+                                   Aur->SetStackAmount(Aur->GetStackAmount()+1);
+                        }
+                    }
+                    Unit *caster = aur2->GetCaster();   // Need to update the original aura owner
+                    RemoveAura(i2, AURA_REMOVE_BY_STACK);
+                    i2 = m_Auras.lower_bound(spair);
+                    
+                    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+                        Aur->SendAuraDurationForCaster((Player*)caster);    // The problem with this is it removes the duration tracking for the other player (is this retail like?)
+
                     continue;
                 }
             }
@@ -3611,8 +3636,14 @@ bool Unit::AddAura(Aura *Aur)
                 case SPELL_AURA_POWER_BURN_MANA:
                 case SPELL_AURA_OBS_MOD_MANA:
                 case SPELL_AURA_OBS_MOD_HEALTH:
+                case SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE:  
                     ++i2;
                     continue;
+            }
+            if ((aurSpellInfo->SpellFamilyFlags & 0x800000LL) && aurSpellInfo->SpellIconID == 548)  // Special Case: Mindflay
+            {
+                ++i2;
+                continue;
             }
             RemoveAura(i2, AURA_REMOVE_BY_STACK);
             i2=m_Auras.lower_bound(spair);
@@ -3755,7 +3786,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
         uint32 i_spellId = i_spellProto->Id;
 
-        if (spellId == i_spellId)
+        if (spellId == i_spellId)   
             continue;
 
         if (IsPassiveSpell(i_spellId))
@@ -7643,10 +7674,15 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 return pdamage;
             }
-            // Ice Lance
+            // Cone of Cold - 13.57% of Frost Damage
+            else if ((spellProto->SpellFamilyFlags & 1573376) && spellProto->SpellIconID == 35)
+            {
+                CastingTime = 474;
+            }
+            // Ice Lance - 14.29% of Frost Damage
             else if ((spellProto->SpellFamilyFlags & 0x20000LL) && spellProto->SpellIconID == 186)
             {
-                CastingTime /= 3;                           // applied 1/3 bonuses in case generic target
+                CastingTime = 500;                           // base bonus is 14.29%
                 if (pVictim->isFrozen())                     // and compensate this for frozen target.
                     TakenTotalMod *= 3.0f;
             }
@@ -9679,6 +9715,17 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, uint8 effect_in
     int32 minduration = GetSpellDuration(spellProto);
     int32 maxduration = GetSpellMaxDuration(spellProto);
 
+    // Special Cast PvP duration spells
+    if (target->GetTypeId() == TYPEID_PLAYER && maxduration > 10000)   // Special Cast Spells must be handled in the core
+    {
+        if (GetDiminishingReturnsGroupForSpell(spellProto, true) == DIMINISHING_LIMITONLY && 
+        (spellProto->EffectApplyAuraName[0] == SPELL_AURA_MOD_DECREASE_SPEED || spellProto->EffectApplyAuraName[1] == SPELL_AURA_MOD_DECREASE_SPEED))
+        {
+            minduration = minduration > 10000 ? minduration = 10000 : minduration;
+            maxduration = maxduration > 10000 ? maxduration = 10000 : maxduration;
+        }
+    }
+
     int32 duration;
 
     if (minduration != -1 && minduration != maxduration)
@@ -9691,10 +9738,11 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, uint8 effect_in
         int32 mechanic = GetEffectMechanic(spellProto, effect_index);
         // Find total mod value (negative bonus)
         int32 durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, mechanic);
+        int32 durationMod = 0;
+
         // Find max mod (negative bonus)
         int32 durationMod_not_stack = target->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK, mechanic);
 
-        int32 durationMod = 0;
         // Select strongest negative mod
         if (durationMod_always > durationMod_not_stack)
             durationMod = durationMod_not_stack;
@@ -11744,6 +11792,7 @@ bool Unit::HandleMendingAuraProc(Aura* triggeredByAura)
                 caster->AddSpellMod(mod, true);
                 CastCustomSpell(target, spellProto->Id, &heal, NULL, NULL, true, NULL, triggeredByAura, caster->GetGUID());
                 caster->AddSpellMod(mod, false);
+
             }
             heal = caster->SpellHealingBonus(spellProto, heal, HEAL, this);
         }

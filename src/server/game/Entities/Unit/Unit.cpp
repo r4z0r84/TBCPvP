@@ -7723,16 +7723,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 DotFactor = 0.9524f;
                 CastingTime = 3500;
             }
-            // Seal of Righteousness - 10.2%/9.8% (based on weapon type) of Holy Damage, multiplied by weapon speed
+            // Seal of Righteousness - 10.8%/9.2% (based on weapon type) of Holy Damage, multiplied by weapon speed
             else if ((spellProto->SpellFamilyFlags & 0x8000000LL) && spellProto->SpellIconID == 25)
             {
                 Item *item = ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                 float wspeed = GetAttackTime(BASE_ATTACK)/1000.0f;
 
                 if (item && item->GetProto()->InventoryType == INVTYPE_2HWEAPON)
-                   CastingTime = uint32(wspeed*3500*0.102f);
+                   CastingTime = uint32(wspeed*3500*0.108f);
                 else
-                   CastingTime = uint32(wspeed*3500*0.098f);
+                   CastingTime = uint32(wspeed*3500*0.092f);
             }
             // Judgement of Righteousness - 71.43%
             else if ((spellProto->SpellFamilyFlags & 1024) && spellProto->SpellIconID == 25)
@@ -7814,6 +7814,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 CastingTime = 560;
             }
             break;
+            // Shadow Word: Pain - 110%
+            else if ((spellProto->SpellFamilyFlags & 0x00008000) && spellProto->SpellIconID == 234)
+            {
+                DotFactor = 1.10f;
+            }
         case SPELLFAMILY_DRUID:
             // Hurricane triggered spell
             if ((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 220)
@@ -7821,6 +7826,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 CastingTime = 500;
             }
             break;
+        
         case SPELLFAMILY_WARRIOR:
         case SPELLFAMILY_HUNTER:
         case SPELLFAMILY_ROGUE:

@@ -1256,7 +1256,7 @@ void Player::Update(uint32 p_time)
             {
                 if (!IsWithinMeleeRange(pVictim, 0.60f))
                 {
-                    setAttackTimer(BASE_ATTACK, (3*(GetAttackTime(BASE_ATTACK))/4 + 50));
+                    setAttackTimer(BASE_ATTACK, (2*(GetAttackTime(BASE_ATTACK))/3 + 50));
                     if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
                     {
                         SendAttackSwingNotInRange();
@@ -1292,7 +1292,7 @@ void Player::Update(uint32 p_time)
             if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
                 if (!IsWithinMeleeRange(pVictim, 0.60f))
-                    setAttackTimer(OFF_ATTACK, (3*(GetAttackTime(BASE_ATTACK))/4 + 50));
+                    setAttackTimer(OFF_ATTACK, (2*(GetAttackTime(OFF_ATTACK))/3 + 50));
                 else if (!HasInArc(2*M_PI/3, pVictim))
                     setAttackTimer(OFF_ATTACK, 100);
                 else
@@ -1316,6 +1316,10 @@ void Player::Update(uint32 p_time)
                 RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
             }*/
         }
+    }
+    else if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))    //Short delay for first swing when entering melee combat    
+    {
+        setAttackTimer(BASE_ATTACK, (GetAttackTime(BASE_ATTACK)/2 + 50));
     }
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))

@@ -29,7 +29,7 @@ template<class T>
 void
 ConfusedMovementGenerator<T>::Initialize(T &unit)
 {
-    const float wander_distance = 11;
+    const float wander_distance = 6;
     float x, y, z;
     x = unit.GetPositionX();
     y = unit.GetPositionY();
@@ -142,7 +142,7 @@ bool ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
                 unit.clearUnitState(UNIT_STAT_MOVE);
 
                 i_nextMove = urand(1, MAX_CONF_WAYPOINTS);
-                i_nextMoveTime.Reset(urand(0, 1500-1));     // TODO: check the minimum reset time, should be probably higher
+                i_nextMoveTime.Reset(urand(100, 1000));     // TODO: check the minimum reset time, should be probably higher
             }
         }
     }

@@ -7862,12 +7862,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 CastingTime = 560;
             }
-            break;
             // Shadow Word: Pain - 110%
             else if ((spellProto->SpellFamilyFlags & 0x00008000) && spellProto->SpellIconID == 234)
             {
                 DotFactor = 1.10f;
             }
+            break;
         case SPELLFAMILY_DRUID:
             // Hurricane triggered spell
             if ((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 220)

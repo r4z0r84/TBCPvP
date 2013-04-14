@@ -5588,6 +5588,15 @@ bool Spell::CanTargetNotInLOS(SpellEntry const *spellInfo, uint32 eff)
                 break;
             }
         }
+        case SPELLFAMILY_HUNTER:
+        {
+            switch (spellInfo->Id)
+            {
+                case 19574:
+                    return true;
+                break;
+            }
+        }
     }
 
     return false;

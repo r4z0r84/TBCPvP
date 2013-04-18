@@ -2243,6 +2243,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         }
     }
 
+
     // parry & block chances
     // check if attack comes from behind, nobody can parry or block if attacker is behind
     if (!pVictim->HasInArc(M_PI, this))
@@ -2494,14 +2495,6 @@ float Unit::MeleeSpellMissChance(const Unit *pVictim, WeaponAttackType attType, 
         miss_chance -= m_modRangedHitChance;
     else
         miss_chance -= m_modMeleeHitChance;
-
-    // bonus from skills is 0.04%
-    //miss_chance -= skillDiff * 0.04f;
-    int32 diff = -skillDiff;
-    if (pVictim->GetTypeId() == TYPEID_PLAYER)
-        miss_chance += diff > 0 ? diff * 0.04 : diff * 0.02;
-    else
-        miss_chance += diff > 10 ? 2 + (diff - 10) * 0.4 : diff * 0.1;
 
     // Limit miss chance from 0 to 60%
     if (miss_chance < 0.0f)

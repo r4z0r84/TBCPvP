@@ -1840,20 +1840,20 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
 uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
 {
     uint32 newdamage = 0;
-    float armor = pVictim->GetArmor();
+    float armor = (float)pVictim->GetArmor();
 
     // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
     armor += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, SPELL_SCHOOL_MASK_NORMAL);
 
-    if (armor<0.0f) armor=0.0f;
+    if (armor < 0.0f)
+        armor = 0.0f;
 
-    float tmpvalue = 0.0f;
-    if (getLevel() <= 59)                                    //Level 1-59
-        tmpvalue = armor / (armor + 400.0f + 85.0f * getLevel());
-    else if (getLevel() < 70)                                //Level 60-69
-        tmpvalue = armor / (armor - 22167.5f + 467.5f * getLevel());
-    else                                                    //Level 70+
-        tmpvalue = armor / (armor + 10557.5f);
+    float levelModifier = (float)getLevel();
+    if (levelModifier > 59)
+        levelModifier = levelModifier + (4.5f * (levelModifier - 59));
+
+    float tmpvalue = 0.1f * armor / (8.5f * levelModifier + 40);
+    tmpvalue = tmpvalue / (1.0f + tmpvalue);
 
     if (tmpvalue < 0.0f)
         tmpvalue = 0.0f;
@@ -2201,6 +2201,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     sLog->outDebug ("RollMeleeOutcomeAgainst: rolled %d, miss %d, dodge %d, parry %d, block %d, crit %d",
         roll, miss_chance, dodge_chance, parry_chance, block_chance, crit_chance);
 
+
     tmp = miss_chance;
 
     if (tmp > 0 && roll < (sum += tmp))
@@ -2215,7 +2216,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         sLog->outDebug ("RollMeleeOutcomeAgainst: CRIT (sitting victim)");
         return MELEE_HIT_CRIT;
     }
-
     // Dodge chance
 
     // only players can't dodge if attacker is behind
@@ -2244,7 +2244,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // parry & block chances
-
     // check if attack comes from behind, nobody can parry or block if attacker is behind
     if (!pVictim->HasInArc(M_PI, this))
     {

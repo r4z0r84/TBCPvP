@@ -2929,6 +2929,8 @@ float Unit::GetUnitParryChance() const
             chance = 8.62f;
         }
     }
+    if (getLevel() > 71) // bosses and high level elites have a much higher chance to parry
+        chance += (getLevel() - 70) * 0.5f; 
 
     return chance > 0.0f ? chance : 0.0f;
 }
@@ -11460,7 +11462,12 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply)
     if (val > 0)
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, val, !apply);
     else
-        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, -val, apply);
+    {
+        if (getLevel() < 73) // bosses never suffer cast speed slows
+        {
+           ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED, -val, apply);
+        }
+    }
 }
 
 uint32 Unit::GetCastingTimeForBonus(SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime)

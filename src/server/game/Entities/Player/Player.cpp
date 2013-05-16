@@ -1145,6 +1145,16 @@ void Player::Update(uint32 p_time)
     if (!IsInWorld())
         return;
 
+    // Neutral Dueling Zone
+    if (GetTypeId() == TYPEID_PLAYER && GetZoneId() == 2037 && !(ToPlayer()->isGameMaster()))
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 1077); // Shattered Sun Offensive, friendly to horde and alliance
+    else if (GetTypeId() == TYPEID_PLAYER && !(ToPlayer()->isGameMaster()))
+    {
+        ToPlayer()->getFactionTemplateEntry();
+        ToPlayer()->getFactionForRace(ToPlayer()->getRace());
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, (ToPlayer()->getFactionForRace(ToPlayer()->getRace())));
+    }
+
     // undelivered mail
     if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
     {
@@ -7389,16 +7399,6 @@ void Player::UpdateZone(uint32 newZone)
                 SetRestType(REST_TYPE_NO);
             }
         }
-    }
-
-    // Neutral Dueling Zone
-    if (GetTypeId() == TYPEID_PLAYER && GetZoneId() == 2037 && !(ToPlayer()->isGameMaster()))
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 1077); // Shattered Sun Offensive, friendly to horde and alliance
-    else if (GetTypeId() == TYPEID_PLAYER && !(ToPlayer()->isGameMaster()))
-    {
-        ToPlayer()->getFactionTemplateEntry();
-        ToPlayer()->getFactionForRace(ToPlayer()->getRace());
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, (ToPlayer()->getFactionForRace(ToPlayer()->getRace())));
     }
 
     UpdatePvPState();

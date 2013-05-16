@@ -2919,7 +2919,7 @@ float Unit::GetUnitParryChance() const
     }
     else if (GetTypeId() == TYPEID_UNIT)
     {
-        if (GetCreatureType() == CREATURE_TYPE_HUMANOID || CREATURE_TYPE_DRAGONKIN || CREATURE_TYPE_ELEMENTAL || CREATURE_TYPE_GIANT  || CREATURE_TYPE_GIANT)
+        if (GetCreatureType() == CREATURE_TYPE_HUMANOID || CREATURE_TYPE_DRAGONKIN || CREATURE_TYPE_ELEMENTAL || CREATURE_TYPE_GIANT  || CREATURE_TYPE_GIANT || CREATURE_TYPE_DEMON)
         {
             chance = 5.0f;
             chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);

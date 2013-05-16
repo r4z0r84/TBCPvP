@@ -2576,7 +2576,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
         return SPELL_MISS_NONE;
 
     // Check for attack from behind
-    if (!pVictim->HasInArc(M_PI, this))
+    if (!pVictim->HasInArc(M_PI, this) || ((spell->AttributesEx2 == 0x100000 && (spell->AttributesEx & 0x200) == 0x200) && !pVictim->HasInArc(M_PI*0.25f, this)))
     {
         // Can`t dodge from behind in PvP (but its possible in PvE)
         if (pVictim->GetTypeId() == TYPEID_PLAYER)

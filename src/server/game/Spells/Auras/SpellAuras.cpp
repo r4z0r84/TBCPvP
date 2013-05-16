@@ -219,7 +219,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraPowerBurn,                             //162 SPELL_AURA_POWER_BURN_MANA
     &Aura::HandleNoImmediateEffect,                         //163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS_MELEE
     &Aura::HandleUnused,                                    //164 useless, only one test spell
-    &Aura::HandleNoImmediateEffect,                         //165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS implemented in Unit::MeleeDamageBonus
+    &Aura::HandleAuraAttackPowerAttacker,                   //165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS implemented in Unit::MeleeDamageBonus
     &Aura::HandleAuraModAttackPowerPercent,                 //166 SPELL_AURA_MOD_ATTACK_POWER_PCT
     &Aura::HandleAuraModRangedAttackPowerPercent,           //167 SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT
     &Aura::HandleNoImmediateEffect,                         //168 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS            implemented in Unit::SpellDamageBonus, Unit::MeleeDamageBonus
@@ -4100,7 +4100,22 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     // For prevent double apply bonuses
     bool loading = (m_target->GetTypeId() == TYPEID_PLAYER && m_target->ToPlayer()->GetSession()->PlayerLoading());
 
-    Unit *caster = GetCaster();
+    if (loading)
+        return;
+
+    Unit* caster = GetCaster();
+    if (!caster)
+        return;
+
+    // Take into account damage modifiers for bleeds
+    if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
+    {
+        if (m_spellProto->DmgClass != SPELL_DAMAGE_CLASS_NONE || m_spellProto->DmgClass != SPELL_DAMAGE_CLASS_MAGIC)
+        {
+            WeaponAttackType attackType = GetWeaponAttackType(GetSpellProto());
+            caster->MeleeDamageBonus(m_target, (uint32*)&m_modifier.m_amount, attackType, GetSpellProto(), DOT);
+        }
+    }
 
     switch (m_spellProto->SpellFamilyName)
     {
@@ -4210,7 +4225,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             if (m_spellProto->SpellFamilyFlags & 0x000000000000100000LL)
             {
                 // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
-                if (apply && !loading && caster && caster->GetTypeId() == TYPEID_PLAYER)
+                if (apply && !loading && caster)
                 {
                     uint8 cp = caster->ToPlayer()->GetComboPoints();
                     if (cp > 3) cp = 3;
@@ -4956,6 +4971,37 @@ void Aura::HandleAuraModRangedAttackPower(bool apply, bool /*Real*/)
         return;
 
     m_target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(GetModifierValue()), apply);
+}
+
+void Aura::HandleAuraAttackPowerAttacker(bool apply, bool Real)
+{
+	// spells required only Real aura add/remove
+	if (!Real)
+	    return;
+	Unit *caster = GetCaster();
+	
+	if (!caster)
+	    return;
+	
+	// Hunter's Mark
+	if (m_spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellProto->SpellFamilyFlags & 0x0000000000000400LL)
+	{
+	    // Check Improved Hunter's Mark bonus on caster
+	    Unit::AuraList const& mOverrideClassScript = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+	    for(Unit::AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+	    {
+	        Modifier* mod = (*i)->GetModifier();
+	        // improved Hunter's Mark script from 5236 to 5240
+	        if (mod->m_miscvalue >= 5236 && mod->m_miscvalue <= 5240)
+	        {
+	            int32 ranged_bonus = caster->CalculateSpellDamage(m_spellProto, 1, m_spellProto->EffectBasePoints[1], m_target);
+	            m_modifier.m_amount = mod->m_amount * ranged_bonus / 100;
+	            m_currentBasePoints = m_modifier.m_amount;
+	            break;
+	        }
+	    }
+	    return;
+	}
 }
 
 void Aura::HandleAuraModAttackPowerPercent(bool apply, bool /*Real*/)

@@ -8501,18 +8501,20 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
     int32 DoneFlatBenefit = 0;
     int32 TakenFlatBenefit = 0;
 
-    // ..done (for creature type by mask) in taken
-    AuraList const& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
-    for (AuraList::const_iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
-        if (creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-            DoneFlatBenefit += (*i)->GetModifierValue();
+    if (damagetype != DOT)  //DOTs are calculated in a different fuction
+    {
+        // ..done (for creature type by mask) in taken
+        AuraList const& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
+        for (AuraList::const_iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
+            if (creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+                DoneFlatBenefit += (*i)->GetModifierValue();
 
-    // ..done
-    // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
+        // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
+    }
+
 
     // ..done (base at attack power for marked target and base at attack power for creature type)
     int32 APbonus = 0;
-
     if (attType == RANGED_ATTACK)
     {
         APbonus += pVictim->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);

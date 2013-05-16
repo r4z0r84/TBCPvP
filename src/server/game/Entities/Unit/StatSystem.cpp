@@ -931,11 +931,11 @@ void Guardian::UpdateMaxHealth()
     float multiplicator = 10.0f;
     switch (GetEntry())
     {
-        case ENTRY_IMP:         multiplicator = 8.9f;   break;
-        case ENTRY_VOIDWALKER:  multiplicator = 11.0f;  break;
-        case ENTRY_SUCCUBUS:    multiplicator = 9.3f;   break;
-        case ENTRY_FELHUNTER:   multiplicator = 10.0f;   break;
-        case ENTRY_FELGUARD:    multiplicator = 11.0f;  break;
+        case ENTRY_IMP:         multiplicator = 8.8f;   break;
+        case ENTRY_VOIDWALKER:  multiplicator = 11.5f;  break;
+        case ENTRY_SUCCUBUS:    multiplicator = 9.4f;   break;
+        case ENTRY_FELHUNTER:   multiplicator = 10.25f; break;
+        case ENTRY_FELGUARD:    multiplicator = 11.25f; break;
         default:                multiplicator = 10.0f;  break;
     }
 
@@ -954,15 +954,6 @@ void Guardian::UpdateMaxPower(Powers power)
     float addValue = (power == POWER_MANA) ? GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT) : 0.0f;
 
     float multiplicator = 15.0f;
-    switch (GetEntry())
-    {
-        case ENTRY_IMP:         multiplicator = 5.95f;  break;
-        case ENTRY_VOIDWALKER:
-        case ENTRY_SUCCUBUS:
-        case ENTRY_FELGUARD:    multiplicator = 11.5f;  break;
-        case ENTRY_FELHUNTER:   multiplicator = 13.5f;  break;
-        default:                multiplicator = 15.0f;  break;
-    }
 
     float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
     value *= GetModifierValue(unitMod, BASE_PCT);
@@ -982,9 +973,9 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     UnitMods unitMod = UNIT_MOD_ATTACK_POWER;
 
     if (GetEntry() == ENTRY_IMP)                               // imp's attack power
-        val = GetStat(STAT_STRENGTH) - 10.0f;
+        val = GetStat(STAT_STRENGTH) + getLevel() - 10.0f;
     else
-        val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
+        val = 2 * GetStat(STAT_STRENGTH) + (getLevel()*1.5) - 20.0f;
 
     Unit* owner = GetOwner();
     if (owner && owner->GetTypeId() == TYPEID_PLAYER)
@@ -1053,7 +1044,7 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
         {
             int32 spellDmg = int32(m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
             if (spellDmg > 0)
-                bonusDamage = spellDmg * 0.4f;
+                bonusDamage = spellDmg * 0.176f;
         }
         // shadowfiend 65.7% per 10 hits so 6.57 per hit
         else if (GetEntry() == ENTRY_SHADOWFIEND)

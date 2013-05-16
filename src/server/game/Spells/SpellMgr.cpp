@@ -2415,10 +2415,23 @@ void SpellMgr::LoadSpellCustomAttr()
         case 24905: // Moonkin form -> elune's touch
             spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_CASTER;
             break;
+        case 20252: //Intercept
+        case 20616:
+        case 20617:
+        case 25272:
+        case 25275:
+            spellInfo->speed = 300.0f;
+            spellInfo->Attributes |= SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK;
         case 7922:                        // Charge stun
         case 25274:                       // Intercept stun
         case 2094:                        // Blind
-            spellInfo->speed = 590.0f;    // Minor delay
+            spellInfo->speed = 690.0f;    // Minor delay
+            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE; 
+            break;
+        case 11297:                       //Sap  
+        case 2070:
+        case 6770:
+            spellInfo->speed = 430.0f;   // Tiny delay
             break;
         case 1833:                        // Cheap Shot
             spellInfo->speed = 1230.0f;   // Tiny delay

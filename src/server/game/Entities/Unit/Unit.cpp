@@ -6712,6 +6712,10 @@ bool Unit::IsHostileTo(Unit const* unit) const
         if (pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
             return false;
 
+        // Neutral Dueling Zone
+        if (pTester->GetZoneId() == 2037 && pTarget->GetZoneId() == 2037)
+            return false;
+        
         // PvP FFA state
         if (pTester->IsFFAPvP() && pTarget->IsFFAPvP())
             return true;
@@ -6819,6 +6823,10 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 
         // Sanctuary
         if (pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+            return true;
+
+        // Neutral Dueling Zone
+        if (pTester->GetZoneId() == 2037 && pTarget->GetZoneId() == 2037)
             return true;
 
         // PvP FFA state

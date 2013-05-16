@@ -366,6 +366,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
             KickPlayer();
         }
 
+        if (plMover->GetAreaId() == 214 && !(plMover->isGameMaster()))
+            plMover->TeleportTo(0, 4273.06f, -2774.95f, 5.65f, 4.41f);
+
         if (movementInfo.GetPos()->GetPositionZ() < -500.0f)
             plMover->HandleFallUnderMap();
     }

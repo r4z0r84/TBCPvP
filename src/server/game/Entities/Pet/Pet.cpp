@@ -363,6 +363,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         }
     }
 
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, owner->getFaction()); // Shattered Sun Offensive, friendly to horde and alliance
+
     return true;
 }
 
@@ -519,6 +521,11 @@ void Pet::Update(uint32 diff)
 {
     if (m_removed)                                           // pet already removed, just wait in remove queue, no updates
         return;
+
+    // Neutral Dueling Zone
+    Player* owner = GetOwner();
+    if (owner)
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, owner->getFaction()); // Shattered Sun Offensive, friendly to horde and alliance
 
     switch (m_deathState)
     {

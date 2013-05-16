@@ -8214,6 +8214,13 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         // Exception
         switch (spellProto->SpellFamilyName)
         {
+            case SPELLFAMILY_GENERIC:
+                // Aegis of Preservation: Heal = 5%
+                if (spellProto->Id == 23781)
+                {
+                    CastingTime = 175;
+                }
+                break;
             case  SPELLFAMILY_SHAMAN:
                 // Healing stream totem (add 6% per tick from owner healing bonus)
                 if (spellProto->SpellFamilyFlags & 0x000000002000LL)

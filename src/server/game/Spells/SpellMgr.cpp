@@ -2868,9 +2868,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Fear
             //else if (spellproto->SpellFamilyFlags & 0x40840000000LL)
             //    return DIMINISHING_WARLOCK_FEAR;
-            // Curses/etc
-            else if (spellproto->SpellFamilyFlags & 0x00080000000LL)
-                return DIMINISHING_LIMITONLY;
             // Unstable affliction dispel silence
             else if (spellproto->Id == 31117)
                 return DIMINISHING_UNSTABLE_AFFLICTION;

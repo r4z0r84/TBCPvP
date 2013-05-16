@@ -1255,18 +1255,24 @@ void Player::Update(uint32 p_time)
         }
     }
 
-    if (hasUnitState(UNIT_STAT_MELEE_ATTACKING) && !hasUnitState(UNIT_STAT_CASTING))
+    if (hasUnitState(UNIT_STAT_CANNOT_AUTOATTACK) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) // better auto attack system
+    {
+        uint32 base_attack = getAttackTimer(BASE_ATTACK);
+        base_attack = GetAttackTime(BASE_ATTACK)- base_attack;
+        setAttackTimer(BASE_ATTACK, (base_attack/3 + GetAttackTime(BASE_ATTACK)/6));
+    }
+
+    if (hasUnitState(UNIT_STAT_MELEE_ATTACKING) && !hasUnitState(UNIT_STAT_CASTING) && !hasUnitState(UNIT_STAT_CHARGING))
     {
         if (Unit *pVictim = getVictim())
         {
             // default combat reach 10
             // TODO add weapon, skill check
-
             if (isAttackReady(BASE_ATTACK))
             {
-                if (!IsWithinMeleeRange(pVictim, 0.60f))
+                if (!IsWithinMeleeRange(pVictim, 0.5f)) // actual auto-attack range calc:
                 {
-                    setAttackTimer(BASE_ATTACK, (2*(GetAttackTime(BASE_ATTACK))/3 + 50));
+                    setAttackTimer(BASE_ATTACK, (100 + GetAttackTime(BASE_ATTACK)/12));
                     if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
                     {
                         SendAttackSwingNotInRange();
@@ -1301,8 +1307,8 @@ void Player::Update(uint32 p_time)
 
             if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
-                if (!IsWithinMeleeRange(pVictim, 0.60f))
-                    setAttackTimer(OFF_ATTACK, (2*(GetAttackTime(OFF_ATTACK))/3 + 50));
+                if (!IsWithinMeleeRange(pVictim, 0.50f))
+                    setAttackTimer(OFF_ATTACK, (100 + GetAttackTime(OFF_ATTACK)/12));
                 else if (!HasInArc(2*M_PI/3, pVictim))
                     setAttackTimer(OFF_ATTACK, 100);
                 else
@@ -1329,7 +1335,13 @@ void Player::Update(uint32 p_time)
     }
     else if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))    //Short delay for first swing when entering melee combat    
     {
-        setAttackTimer(BASE_ATTACK, (GetAttackTime(BASE_ATTACK)/2 + 50));
+        setAttackTimer(BASE_ATTACK, (GetAttackTime(BASE_ATTACK)/8 + 50));
+    }
+    else if (hasUnitState(UNIT_STAT_CHARGING))  // stops erroneous white attacks happening while charging
+    {
+        uint32 base_attack_timer = getAttackTimer(BASE_ATTACK);
+        uint32 base_attack = GetAttackTime(BASE_ATTACK)- base_attack_timer;
+        setAttackTimer(BASE_ATTACK, base_attack_timer + (base_attack/5)+ (GetAttackTime(BASE_ATTACK)/8));
     }
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))

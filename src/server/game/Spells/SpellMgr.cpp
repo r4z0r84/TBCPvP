@@ -2420,13 +2420,24 @@ void SpellMgr::LoadSpellCustomAttr()
         case 20617:
         case 25272:
         case 25275:
+        case 100:   //Charge
+        case 6178:
+        case 11578:
             spellInfo->speed = 300.0f;
-            spellInfo->Attributes |= SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
+            spellInfo->AttributesEx |= SPELL_ATTR_EX_CANT_BE_REFLECTED; 
+            break;
         case 7922:                        // Charge stun
-        case 25274:                       // Intercept stun
+        case 25273:                       // Intercept stun  
+        case 20615:
+        case 25274:                       
+            spellInfo->speed = 690.0f;    // Minor delay
+            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
+            spellInfo->Attributes |= SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+            spellInfo->AttributesEx |= SPELL_ATTR_EX_CANT_BE_REFLECTED;
+            break;
         case 2094:                        // Blind
             spellInfo->speed = 690.0f;    // Minor delay
-            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE; 
             break;
         case 11297:                       //Sap  
         case 2070:

@@ -9761,7 +9761,7 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, uint8 effect_in
             minduration = minduration > 10000 ? minduration = 10000 : minduration;
             maxduration = maxduration > 10000 ? maxduration = 10000 : maxduration;
         }
-        if (spellProto->SpellFamilyFlags & 0x00080000000LL) // Curse of Tongues is 12s in pvp
+        if (spellProto->SpellFamilyFlags & 0x00080000000LL && spellProto->SpellIconID == 692) // Curse of Tongues is 12s in pvp
         {
             minduration = minduration > 12000 ? minduration = 12000 : minduration;
             maxduration = maxduration > 12000 ? maxduration = 12000 : maxduration;

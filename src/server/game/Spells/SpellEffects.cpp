@@ -463,9 +463,9 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
                 // Ferocious Bite
                 if ((m_spellInfo->SpellFamilyFlags & 0x000800000) && m_spellInfo->SpellVisual == 6587)
                 {
-                    // converts each extra point of energy into ($f1+$AP/630) additional damage
+                    // converts each extra point of energy into ($f1+$AP/6100) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) + MeleeAPbonus;
-                    float multiple = m_spellInfo->DmgMultiplier[effect_idx] + ap/630;
+                    float multiple = m_spellInfo->DmgMultiplier[effect_idx] + ap/6100;
                     damage += int32(m_caster->GetPower(POWER_ENERGY) * multiple);
                     damage += ap * 0.1526f;
                     m_caster->SetPower(POWER_ENERGY, 0);

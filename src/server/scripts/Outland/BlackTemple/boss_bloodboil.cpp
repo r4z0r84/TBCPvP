@@ -270,8 +270,8 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI
                 FelGeyserTimer = 30000;
             } else FelGeyserTimer -= diff;
 
-            if (me->getVictim()->IsImmunedToDamage(SPELL_SCHOOL_MASK_ALL, true))
-                me->getThreatManager().modifyThreatPercent(me->getVictim(),-100);
+            //if (me->getVictim()->IsImmunedToDamage(SPELL_SCHOOL_MASK_ALL, true))
+            //    me->getThreatManager().modifyThreatPercent(me->getVictim(),-100);
         }
 
         if (PhaseChangeTimer <= diff)

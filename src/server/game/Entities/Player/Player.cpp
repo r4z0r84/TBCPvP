@@ -7548,6 +7548,9 @@ void Player::DuelComplete(DuelCompleteType type)
     if (uint32 amount = sWorld->getConfig(CONFIG_HONOR_AFTER_DUEL))
         duel->opponent->RewardHonor(NULL, 1, amount);
 
+    if (duel->opponent->GetAreaId() == 2037)
+            duel->opponent->RemoveArenaSpellCooldowns();
+
     //cleanups
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);

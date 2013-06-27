@@ -1081,6 +1081,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
             he->CastSpell(he, 7267, true);                  // beg
             he->DuelComplete(DUEL_WON);
+            if (he->GetAreaId() == 2037)
+                he->RemoveArenaSpellCooldowns();
         }
     }
 

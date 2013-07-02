@@ -1542,6 +1542,11 @@ Death.Bones.BattlegroundOrArena = 1
 #        Default: 0 (disable)
 #                 1 (enable)
 #
+#    Battleground.InvitationType
+#        Set Battleground invitation type
+#        Default: 0 (normal - invite as much players to bg as possible, don't bother with ballance)
+#                 1 (Experimental - don't allow to invite much more players of one faction)
+#
 #    Battleground.PrematureReward
 #        Reward players in case of prematurely finished BG
 #        Default: 1 (enable)
@@ -1563,6 +1568,7 @@ Death.Bones.BattlegroundOrArena = 1
 Battleground.CastDeserter = 1
 Battleground.QueueAnnouncer.Enable = 0
 Battleground.QueueAnnouncer.PlayerOnly = 0
+Battleground.InvitationType = 0
 Battleground.PrematureReward = 1
 BattleGround.PrematureFinishTimer = 300000
 Battleground.LeaveWrathMode = 0

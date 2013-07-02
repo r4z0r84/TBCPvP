@@ -931,6 +931,7 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE]       = ConfigMgr::GetBoolDefault("Battleground.QueueAnnouncer.Enable", false);
     m_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY]   = ConfigMgr::GetBoolDefault("Battleground.QueueAnnouncer.PlayerOnly", false);
     m_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ONSTART]      = ConfigMgr::GetBoolDefault("Battleground.QueueAnnouncer.OnStart", false);
+    m_configs[CONFIG_BATTLEGROUND_INVITATION_TYPE]              = ConfigMgr::GetBoolDefault("Battleground.InvitationType", false);
     m_configs[CONFIG_BATTLEGROUND_PREMATURE_REWARD]             = ConfigMgr::GetBoolDefault("Battleground.PrematureReward", true);
     m_configs[CONFIG_BATTLEGROUND_PREMATURE_FINISH_TIMER]       = ConfigMgr::GetIntDefault("BattleGround.PrematureFinishTimer", 5 * MINUTE * IN_MILLISECONDS);
     m_configs[CONFIG_BATTLEGROUND_WRATH_LEAVE_MODE]             = ConfigMgr::GetBoolDefault("Battleground.LeaveWrathMode", false);

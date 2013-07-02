@@ -1313,10 +1313,37 @@ void BattleGround::RemoveFromBGFreeSlotQueue()
 // works in similar way that HasFreeSlotsForTeam did, but this is needed for join as group
 uint32 BattleGround::GetFreeSlotsForTeam(uint32 Team) const
 {
-    //if BG is starting ... invite anyone
+    // if BG is already started .. do not allow to join too much players of one faction
     if (GetStatus() == STATUS_WAIT_JOIN)
-        return (GetInvitedCount(Team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(Team) : 0;
-    //if BG is already started .. do not allow to join too much players of one faction
+    {
+        if (sWorld->getConfig(CONFIG_BATTLEGROUND_INVITATION_TYPE))
+        {
+            if (isArena())
+                return (GetInvitedCount(Team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(Team) : 0;
+            // always allow atleast MinPlayersperTeam to join
+            if (GetInvitedCount(Team) < GetMinPlayersPerTeam())
+                return (GetMinPlayersPerTeam() - GetInvitedCount(Team));
+            uint32 otherTeam;
+            uint32 total =  0;
+            uint32 freeSlots = 0;
+            uint32 threshold = 1;
+            if (Team == ALLIANCE)
+                otherTeam = HORDE;
+            else
+                otherTeam = ALLIANCE;
+
+            if (GetInvitedCount(Team) <= (GetInvitedCount(otherTeam) + threshold))
+                freeSlots = (GetInvitedCount(otherTeam) + threshold) - GetInvitedCount(Team);
+
+            // if the number of freeSlots will cause more players the max limit to enter the BG, trim it down to match.
+            total = freeSlots + GetInvitedCount(Team);
+            return (total > GetMaxPlayersPerTeam()) ? (freeSlots - (total - GetMaxPlayersPerTeam())) : freeSlots;
+        }
+        else // regular invite system
+            if (GetStatus() == STATUS_WAIT_JOIN)
+                return (GetInvitedCount(Team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(Team) : 0;
+    }
+
     uint32 otherTeam;
     uint32 otherIn;
     if (Team == ALLIANCE)

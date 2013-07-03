@@ -1491,8 +1491,8 @@ uint32 ObjectMgr::GetPlayerAccountIdByPlayerName(const std::string& name) const
 
 void ObjectMgr::LoadTransmogrifications()
 {
-    sLog->outString("Deleting non-existing transmogrification entries...");
-    CharacterDatabase.Execute("DELETE FROM custom_transmogrification WHERE NOT EXISTS (SELECT 1 FROM item_instance WHERE item_instance.guid = custom_transmogrification.GUID)");
+    //sLog->outString("Deleting non-existing transmogrification entries...");
+    //CharacterDatabase.Execute("DELETE FROM custom_transmogrification WHERE NOT EXISTS (SELECT 1 FROM item_instance WHERE item_instance.guid = custom_transmogrification.GUID)");
 
     uint32 oldMSTime = getMSTime();
     _itemFakeEntryStore.clear();

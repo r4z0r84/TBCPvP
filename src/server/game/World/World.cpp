@@ -211,7 +211,7 @@ World::AddSession_ (WorldSession* s)
         if (old != m_sessions.end())
         {
             // prevent decrease sessions count if session queued
-            if (RemoveQueuedPlayer(old->second))
+            if (RemoveQueuedSession(old->second))
                 decrease_session = false;
             // not remove replaced session form queue if listed
             delete old->second;
@@ -308,7 +308,7 @@ void World::AddQueuedPlayer(WorldSession* sess)
     //sess->SendAuthWaitQue (GetQueuePos (sess));
 }
 
-bool World::RemoveQueuedPlayer(WorldSession* sess)
+bool World::RemoveQueuedSession(WorldSession* sess)
 {
     // sessions count including queued to remove (if removed_session set)
     uint32 sessions = GetActiveSessionCount();
@@ -1485,8 +1485,6 @@ void World::SetInitialWorldSettings()
         realmID, uint64(m_startTime), isoDate, _FULLVERSION);       // One-time query
 
     m_timers[WUPDATE_AUTOBROADCAST].SetInterval(m_configs[CONFIG_AUTOBROADCAST_TIMER]);
-    m_timers[WUPDATE_OBJECTS].SetInterval(IN_MILLISECONDS/2);
-    m_timers[WUPDATE_SESSIONS].SetInterval(0);
     m_timers[WUPDATE_WEATHERS].SetInterval(IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(m_configs[CONFIG_UPTIME_UPDATE]*MINUTE*IN_MILLISECONDS);
@@ -2278,16 +2276,15 @@ void World::UpdateSessions(time_t diff)
         next = itr;
         ++next;
 
-        if (!itr->second)
-            continue;
-
         // and remove not active sessions from the list
-        if (!itr->second->Update(diff))                      // As interval = 0
+        WorldSession* pSession = itr->second;
+        WorldSessionFilter updater(pSession);
+
+        if (!pSession->Update(updater))
         {
-            if (!RemoveQueuedPlayer(itr->second) && itr->second && getConfig(CONFIG_INTERVAL_DISCONNECT_TOLERANCE))
-                m_disconnects[itr->second->GetAccountId()] = time(NULL);
-            delete itr->second;
+            RemoveQueuedSession(pSession);
             m_sessions.erase(itr);
+            delete pSession;
         }
     }
 }

@@ -40,6 +40,46 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 
+// select opcodes appropriate for processing in Map::Update context for current session state
+static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)
+{
+    // we do not process thread-unsafe packets
+    if (opHandle.packetProcessing == PROCESS_THREADUNSAFE)
+        return false;
+
+    // we do not process not loggined player packets
+    Player* plr = session->GetPlayer();
+    if (!plr)
+        return false;
+
+    // in Map::Update() we do not process packets where player is not in world!
+    return plr->IsInWorld();
+}
+
+
+bool MapSessionFilter::Process(WorldPacket* packet)
+{
+    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    if (opHandle.packetProcessing == PROCESS_INPLACE)
+        return true;
+
+    // let's check if our opcode can be really processed in Map::Update()
+    return MapSessionFilterHelper(m_pSession, opHandle);
+}
+
+// we should process ALL packets when player is not in world/logged in
+// OR packet handler is not thread-safe!
+bool WorldSessionFilter::Process(WorldPacket* packet)
+{
+    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    // check if packet handler is supposed to be safe
+    if (opHandle.packetProcessing == PROCESS_INPLACE)
+        return true;
+
+    // let's check if our opcode can't be processed in Map::Update()
+    return !MapSessionFilterHelper(m_pSession, opHandle);
+}
+
 // WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
 LookingForGroup_auto_join(false), LookingForGroup_auto_add(false), m_muteTime(mute_time),
@@ -166,20 +206,12 @@ void WorldSession::LogUnprocessedTail(WorldPacket *packet)
 }
 
 // Update the WorldSession (triggered by World update)
-bool WorldSession::Update(uint32 diff)
+bool WorldSession::Update(PacketFilter& updater)
 {
-    /// Update Timeout timer.
-    UpdateTimeOutTime(diff);
-
-    ///- Before we process anything:
-    /// If necessary, kick the player from the character select screen
-    if (IsConnectionIdle())
-        m_Socket->CloseSocket();
-
     // Retrieve packets from the receive queue and call the appropriate handlers
     // not proccess packets if socket already closed
-    WorldPacket* packet;
-    while (m_Socket && !m_Socket->IsClosed() && _recvQueue.next(packet))
+    WorldPacket* packet = NULL;
+    while (m_Socket && !m_Socket->IsClosed() && _recvQueue.next(packet, updater))
     {
         /*#if 1
         sLog->outError("MOEP: %s (0x%.4X)",
@@ -187,80 +219,74 @@ bool WorldSession::Update(uint32 diff)
                         packet->GetOpcode());
         #endif*/
 
-        if (packet->GetOpcode() >= NUM_MSG_TYPES)
+        OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+        try
         {
-            sLog->outError("SESSION: received invalid opcode %s (0x%.4X)",
-                LookupOpcodeName(packet->GetOpcode()),
-                packet->GetOpcode());
-        }
-        else
-        {
-            OpcodeHandler& opHandle = opcodeTable[packet->GetOpcode()];
-            try
+            switch (opHandle.status)
             {
-                switch (opHandle.status)
-                {
-                    case STATUS_LOGGEDIN:
-                        if (!_player)
-                        {
-                            // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
-                            if (!m_playerRecentlyLogout)
-                                LogUnexpectedOpcode(packet, "the player has not logged in yet");
-                        }
-                        else if (_player->IsInWorld())
-                            ExecuteOpcode(opHandle, packet);
-
-                        // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
-                        break;
-                    case STATUS_TRANSFER_PENDING:
-                        if (!_player)
+                case STATUS_LOGGEDIN:
+                    if (!_player)
+                    {
+                        // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
+                        if (!m_playerRecentlyLogout)
                             LogUnexpectedOpcode(packet, "the player has not logged in yet");
-                        else if (_player->IsInWorld())
-                            LogUnexpectedOpcode(packet, "the player is still in world");
-                        else
-                            ExecuteOpcode(opHandle, packet);
-                        break;
-                    case STATUS_AUTHED:
-                        // prevent cheating with skip queue wait
-                        if (m_inQueue)
-                        {
-                            LogUnexpectedOpcode(packet, "the player not pass queue yet");
-                            break;
-                        }
-
-                        m_playerRecentlyLogout = false;
-
+                    }
+                    else if (_player->IsInWorld())
                         ExecuteOpcode(opHandle, packet);
+
+                    // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
+                    break;
+                case STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT:
+                    if (!_player && !m_playerRecentlyLogout)
+                        LogUnexpectedOpcode(packet, "the player has not logged in yet and not recently logged out");
+                    else
+                        ExecuteOpcode(opHandle, packet);
+                    break;
+                case STATUS_TRANSFER_PENDING:
+                    if (!_player)
+                        LogUnexpectedOpcode(packet, "the player has not logged in yet");
+                    else if (_player->IsInWorld())
+                        LogUnexpectedOpcode(packet, "the player is still in world");
+                    else
+                        ExecuteOpcode(opHandle, packet);
+                    break;
+                case STATUS_AUTHED:
+                    // prevent cheating with skip queue wait
+                    if (m_inQueue)
+                    {
+                        LogUnexpectedOpcode(packet, "the player not pass queue yet");
                         break;
-                    case STATUS_NEVER:
-                        sLog->outError("SESSION: received not allowed opcode %s (0x%.4X)",
-                            LookupOpcodeName(packet->GetOpcode()),
-                            packet->GetOpcode());
-                        break;
-                }
+                    }
+
+                    m_playerRecentlyLogout = false;
+
+                    ExecuteOpcode(opHandle, packet);
+                    break;
+                case STATUS_NEVER:
+                    sLog->outError("SESSION: received not allowed opcode %s (0x%.4X)",
+                        LookupOpcodeName(packet->GetOpcode()),
+                        packet->GetOpcode());
+                    break;
+                case STATUS_UNHANDLED:
+                    sLog->outDebug("SESSION: recieved not handled opcode %s (0x%.4X)",
+                        LookupOpcodeName(packet->GetOpcode()),
+                        packet->GetOpcode());
+                    break;
             }
-            catch(ByteBufferException &)
+        }
+        catch (ByteBufferException&)
+        {
+            sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
+                    packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
+            if (sLog->IsOutDebug())
             {
-                sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
-                        packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
-                if (sLog->IsOutDebug())
-                {
-                    sLog->outDebug("Dumping error causing packet:");
-                    packet->hexlike();
-                }
+                sLog->outDebug("Dumping error causing packet:");
+                packet->hexlike();
             }
         }
 
         delete packet;
     }
-
-    if (m_Socket && !m_Socket->IsClosed() && m_Warden)
-        m_Warden->Update();
-
-    ///- If necessary, log the player out
-    time_t currTime = time(NULL);
-    if (ShouldLogOut(currTime) && !m_playerLoading)
-        LogoutPlayer(true);
 
     // Cleanup socket pointer if need
     if (m_Socket && m_Socket->IsClosed())
@@ -269,8 +295,19 @@ bool WorldSession::Update(uint32 diff)
         m_Socket = NULL;
     }
 
-    if (!m_Socket)
-        return false;                                       //Will remove this session from the world session map
+    if (m_Socket && !m_Socket->IsClosed() && m_Warden)
+        m_Warden->Update();
+
+    if (updater.ProcessLogout())
+    {
+        ///- If necessary, log the player out
+        time_t currTime = time(NULL);
+        if (!m_Socket || ShouldLogOut(currTime) && !m_playerLoading)
+            LogoutPlayer(true);
+
+        if (!m_Socket)
+            return false;                                       //Will remove this session from the world session map
+    }
 
     return true;
 }

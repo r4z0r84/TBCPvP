@@ -55,7 +55,6 @@ struct boss_vanndarAI : public ScriptedAI
     uint32 uiAvatarTimer;
     uint32 uiThunderclapTimer;
     uint32 uiStormboltTimer;
-    uint32 uiResetTimer;
     uint32 uiYellTimer;
 
     void Reset()
@@ -63,7 +62,6 @@ struct boss_vanndarAI : public ScriptedAI
         uiAvatarTimer = 3*IN_MILLISECONDS;
         uiThunderclapTimer = 4*IN_MILLISECONDS;
         uiStormboltTimer = 6*IN_MILLISECONDS;
-        uiResetTimer = 5*IN_MILLISECONDS;
         uiYellTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS);
     }
 
@@ -108,15 +106,11 @@ struct boss_vanndarAI : public ScriptedAI
         } else uiYellTimer -= diff;
 
         // check if creature is not outside of building
-        if (uiResetTimer <= diff)
+        if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
         {
-            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
-            {
-                EnterEvadeMode();
-                DoScriptText(YELL_EVADE, me);
-            }
-            uiResetTimer = 1*IN_MILLISECONDS;
-        } else uiResetTimer -= diff;
+            EnterEvadeMode();
+            DoScriptText(YELL_EVADE, me);
+        }
 
         DoMeleeAttackIfReady();
     }

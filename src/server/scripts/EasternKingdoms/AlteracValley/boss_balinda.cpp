@@ -56,12 +56,10 @@ struct mob_water_elementalAI : public ScriptedAI
 
     uint32 uiWaterBoltTimer;
     uint64 uiBalindaGUID;
-    uint32 uiResetTimer;
 
     void Reset()
     {
         uiWaterBoltTimer            = 3*IN_MILLISECONDS;
-        uiResetTimer                = 5*IN_MILLISECONDS;
     }
 
     void UpdateAI(const uint32 diff)
@@ -76,13 +74,9 @@ struct mob_water_elementalAI : public ScriptedAI
         } else uiWaterBoltTimer -= diff;
 
         // check if creature is not outside of building
-        if (uiResetTimer <= diff)
-        {
-            if (Creature *pBalinda = Unit::GetCreature(*me, uiBalindaGUID))
-                if (me->GetDistance2d(pBalinda->GetHomePosition().GetPositionX(), pBalinda->GetHomePosition().GetPositionY()) > 25)
-                    EnterEvadeMode();
-                uiResetTimer = 1*IN_MILLISECONDS;
-        } else uiResetTimer -= diff;
+        if (Creature *pBalinda = Unit::GetCreature(*me, uiBalindaGUID))
+            if (me->GetDistance2d(pBalinda->GetHomePosition().GetPositionX(), pBalinda->GetHomePosition().GetPositionY()) > 25)
+                EnterEvadeMode();
 
         DoMeleeAttackIfReady();
     }
@@ -96,7 +90,6 @@ struct boss_balindaAI : public ScriptedAI
     uint32 uiConeOfColdTimer;
     uint32 uiFireBoltTimer;
     uint32 uiFrostboltTimer;
-    uint32 uiResetTimer;
     uint32 uiWaterElementalTimer;
 
     SummonList Summons;
@@ -107,7 +100,6 @@ struct boss_balindaAI : public ScriptedAI
         uiConeOfColdTimer           = 8*IN_MILLISECONDS;
         uiFireBoltTimer             = 1*IN_MILLISECONDS;
         uiFrostboltTimer            = 4*IN_MILLISECONDS;
-        uiResetTimer                = 1*IN_MILLISECONDS;
         uiWaterElementalTimer       = 0;
 
         Summons.DespawnAll();
@@ -173,15 +165,11 @@ struct boss_balindaAI : public ScriptedAI
         } else uiFrostboltTimer -= diff;
 
         // check if creature is not outside of building
-        if (uiResetTimer <= diff)
+        if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 25)
         {
-            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 25)
-            {
-                EnterEvadeMode();
-                DoScriptText(YELL_EVADE, me);
-            }
-            uiResetTimer = 5*IN_MILLISECONDS;
-        } else uiResetTimer -= diff;
+            EnterEvadeMode();
+            DoScriptText(YELL_EVADE, me);
+        }
 
         DoMeleeAttackIfReady();
     }

@@ -59,7 +59,6 @@ struct boss_drektharAI : public ScriptedAI
     uint32 uiKnockdownTimer;
     uint32 uiFrenzyTimer;
     uint32 uiYellTimer;
-    uint32 uiResetTimer;
 
     void Reset()
     {
@@ -67,7 +66,6 @@ struct boss_drektharAI : public ScriptedAI
         uiWhirlwind2Timer = urand(1*IN_MILLISECONDS, 20*IN_MILLISECONDS);
         uiKnockdownTimer = 12*IN_MILLISECONDS;
         uiFrenzyTimer = 6*IN_MILLISECONDS;
-        uiResetTimer = 1*IN_MILLISECONDS;
         uiYellTimer = urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS); //20 to 30 seconds
     }
 
@@ -118,15 +116,11 @@ struct boss_drektharAI : public ScriptedAI
         } else uiYellTimer -= diff;
 
         // check if creature is not outside of building
-        if (uiResetTimer <= diff)
+        if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
         {
-            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
-            {
-                EnterEvadeMode();
-                DoScriptText(YELL_EVADE, me);
-            }
-            uiResetTimer = 5*IN_MILLISECONDS;
-        } else uiResetTimer -= diff;
+            EnterEvadeMode();
+            DoScriptText(YELL_EVADE, me);
+        }
 
         DoMeleeAttackIfReady();
     }

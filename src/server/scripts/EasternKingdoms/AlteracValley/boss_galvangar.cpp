@@ -50,7 +50,6 @@ struct boss_galvangarAI : public ScriptedAI
     uint32 uiWhirlwind1Timer;
     uint32 uiWhirlwind2Timer;
     uint32 uiMortalStrikeTimer;
-    uint32 uiResetTimer;
 
     void Reset()
     {
@@ -59,7 +58,6 @@ struct boss_galvangarAI : public ScriptedAI
         uiWhirlwind1Timer                 = urand(1*IN_MILLISECONDS, 13*IN_MILLISECONDS);
         uiWhirlwind2Timer                 = urand(5*IN_MILLISECONDS, 20*IN_MILLISECONDS);
         uiMortalStrikeTimer               = urand(5*IN_MILLISECONDS, 20*IN_MILLISECONDS);
-        uiResetTimer                      = 1*IN_MILLISECONDS;
     }
 
     void EnterCombat(Unit * /*who*/)
@@ -108,15 +106,11 @@ struct boss_galvangarAI : public ScriptedAI
         } else uiMortalStrikeTimer -= diff;
 
         // check if creature is not outside of building
-        if (uiResetTimer <= diff)
+        if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
         {
-            if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
-            {
-                EnterEvadeMode();
-                DoScriptText(YELL_EVADE, me);
-            }
-            uiResetTimer = 5*IN_MILLISECONDS;
-        } else uiResetTimer -= diff;
+            EnterEvadeMode();
+            DoScriptText(YELL_EVADE, me);
+        }
 
         DoMeleeAttackIfReady();
     }

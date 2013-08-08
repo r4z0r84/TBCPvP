@@ -22,8 +22,8 @@
 #define TRINITY_SHAREDDEFINES_H
 
 #include "Define.h"
-#include "DetourNavMesh.h"
 #include <cassert>
+#include "DetourNavMesh.h"
 
 enum Gender
 {
@@ -2339,7 +2339,9 @@ enum TradeStatus
 #define EXPECTED_TRINITY_CLIENT_BUILD        {8606, 0}
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
+
 #define MMAP_VERSION 3
+
 
 struct MmapTileHeader
 {

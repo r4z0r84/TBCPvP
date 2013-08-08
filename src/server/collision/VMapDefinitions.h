@@ -26,7 +26,7 @@
 
 namespace VMAP
 {
-    const char VMAP_MAGIC[] = "VMAP_3.0";
+    const char VMAP_MAGIC[] = "VMAPs3.0";
     const char RAW_VMAP_MAGIC[] = "VMAPs03";                // used in extracted vmap files with raw data
 
     // defined in TileAssembler.cpp currently...

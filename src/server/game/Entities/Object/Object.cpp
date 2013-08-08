@@ -1192,16 +1192,6 @@ float WorldObject::GetDistanceZ(const WorldObject* obj) const
     return (dist > 0 ? dist : 0);
 }
 
-float WorldObject::GetDistanceSqr(float x, float y, float z) const
-{
-    float dx = GetPositionX() - x;
-    float dy = GetPositionY() - y;
-    float dz = GetPositionZ() - z;
-    float sizefactor = GetObjectSize();
-    float dist = dx*dx+dy*dy+dz*dz-sizefactor;
-    return (dist > 0 ? dist : 0);
-}
-
 bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
@@ -1217,6 +1207,19 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
 
     return distsq < maxdist * maxdist;
 }
+
+float WorldObject::GetDistanceSqr(float x, float y, float z) const
+{
+    float dx = GetPositionX() - x;
+    float dy = GetPositionY() - y;
+    float dz = GetPositionZ() - z;
+    float sizefactor = GetObjectSize();
+
+    float dist = dx*dx+dy*dy+dz*dz-sizefactor;
+
+    return (dist > 0 ? dist : 0);
+}
+
 
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 {
@@ -1340,39 +1343,6 @@ float Position::GetAngle(const float x, const float y) const
     return ang;
 }
 
-bool WorldObject::HasInArc(const float arcangle, const float x, const float y) const
-{
-    // always have self in arc
-    if (x == m_positionX && y == m_positionY)
-        return true;
-
-    float arc = arcangle;
-
-    // move arc to range 0.. 2*pi
-    while (arc >= 2.0f * M_PI)
-        arc -= 2.0f * M_PI;
-    while (arc < 0)
-        arc += 2.0f * M_PI;
-
-    float angle = GetAngle(x, y);
-    angle -= m_orientation;
-
-    // move angle to range -pi ... +pi
-    while (angle > M_PI)
-        angle -= 2.0f * M_PI;
-    while (angle < -M_PI)
-        angle += 2.0f * M_PI;
-
-    float lborder = -1 * (arc / 2.0f);                        // in range -pi..0
-    float rborder = (arc / 2.0f);                             // in range 0..pi
-    return ((angle >= lborder) && (angle <= rborder));
-}
-
-bool WorldObject::HasInArc(float arc, const Position *obj) const
-{
-    return this->HasInArc(arc, obj->GetPositionX(), obj->GetPositionY());
-}
-
 bool Position::HasInArc(float arc, const Position *obj) const
 {
     // always have self in arc
@@ -1394,6 +1364,43 @@ bool Position::HasInArc(float arc, const Position *obj) const
     float rborder = (arc/2.0f);                             // in range 0..pi
     return ((angle >= lborder) && (angle <= rborder));
 }
+
+bool WorldObject::HasInArc(const float arcangle, const float x, const float y) const
+{
+    // always have self in arc
+    if (x == m_positionX && y == m_positionY)
+        return true;
+
+    float arc = arcangle;
+    // move arc to range 0.. 2*pi
+    while (arc >= 2.0f * M_PI)
+        arc -= 2.0f * M_PI;
+
+    while (arc < 0)
+        arc += 2.0f * M_PI;
+
+    float angle = GetAngle(x, y);
+    angle -= m_orientation;
+
+    // move angle to range -pi ... +pi
+    while (angle > M_PI)
+        angle -= 2.0f * M_PI;
+
+    while (angle < -M_PI)
+        angle += 2.0f * M_PI;
+
+    float lborder = -1 * (arc / 2.0f);                        // in range -pi..0
+    float rborder = (arc / 2.0f);                             // in range 0..pi
+
+    return ((angle >= lborder) && (angle <= rborder));
+}
+
+
+bool WorldObject::HasInArc(float arc, const Position *obj) const
+{
+    return this->HasInArc(arc, obj->GetPositionX(), obj->GetPositionY());
+}
+
 
 void WorldObject::GetRandomPoint(const Position &pos, float distance, float &rand_x, float &rand_y, float &rand_z) const
 {

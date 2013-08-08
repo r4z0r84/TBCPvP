@@ -25,8 +25,8 @@
 #include <vector>
 #include "SharedDefines.h"
 
-class Unit;
 class MovementGenerator;
+class Unit;
 
 // Creature Entry ID used for waypoints show, visible only for GMs
 #define VISUAL_WAYPOINT 1

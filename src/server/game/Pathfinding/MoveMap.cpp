@@ -28,9 +28,13 @@ namespace MMAP
     // ######################## MMapFactory ########################
     // our global singelton copy
     MMapManager *g_MMapManager = NULL;
-
+    /*
     // stores list of mapids which do not use pathfinding
     std::set<uint32>* g_mmapDisabledIds = NULL;
+    */
+    //MMAP-Changes
+    // stors list of mapids which will use pathfinding
+    std::set<uint32>* g_mmapEnabledIds = NULL;
 
     MMapManager* MMapFactory::createOrGetMMapManager()
     {
@@ -39,7 +43,7 @@ namespace MMAP
 
         return g_MMapManager;
     }
-
+    /*
     void MMapFactory::preventPathfindingOnMaps(const char* ignoreMapIds)
     {
         if(!g_mmapDisabledIds)
@@ -58,19 +62,53 @@ namespace MMAP
 
         delete[] mapList;
     }
+    */
+    
+    //MMAP-Changes
+    void MMapFactory::implementPathFindingOnMaps(const char* implementMapIds)
+    {
+        if(!g_mmapEnabledIds)
+            g_mmapEnabledIds = new std::set<uint32>();
+
+        uint32 strLenght = strlen(implementMapIds)+1;
+        char* mapList = new char[strLenght];
+        memcpy(mapList, implementMapIds, sizeof(char)*strLenght);
+
+        char* idstr = strtok(mapList, ",");
+        while (idstr)
+        {
+            g_mmapEnabledIds->insert(uint32(atoi(idstr)));
+            idstr = strtok(NULL, ",");
+        }
+
+        delete[] mapList;
+    }
 
     bool MMapFactory::IsPathfindingEnabled(uint32 mapId)
     {
+        /*
         return sWorld->getConfig(CONFIG_BOOL_MMAP_ENABLED)
             && g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
+            */
+        //MMAP-Changes
+        return sWorld->getConfig(CONFIG_BOOL_MMAP_ENABLED)
+            && g_mmapEnabledIds->find(mapId) != g_mmapEnabledIds->end();
     }
 
     void MMapFactory::clear()
     {
+        //MMAP-Changes
+        /*
         if(g_mmapDisabledIds)
         {
             delete g_mmapDisabledIds;
             g_mmapDisabledIds = NULL;
+        }
+        */
+        if (g_mmapEnabledIds)
+        {
+            delete g_mmapEnabledIds;
+            g_mmapEnabledIds = NULL;
         }
 
         if(g_MMapManager)

@@ -57,7 +57,7 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
             // prevent redundant micro-movement
             if (!i_offset)
             {
-                if (i_target->IsWithinMeleeRange(&owner))
+                if (i_target->IsWithinMeleeRange(&owner, 0.5f)) //Units should always try to get closer to the target than Melee Range
                     return false;
             }
             else if (!i_angle && !owner.hasUnitState(UNIT_STAT_FOLLOW))
@@ -75,7 +75,7 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
         {
             bool stop = false;
             if (!i_offset)
-            {
+            {   //MMAPS Changes
                 if (i_target->IsWithinMeleeRange(&owner, 0.0f))
                     stop = true;
             }
@@ -103,7 +103,7 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
                     // nothing we can do here ...
                     if (i_path->getPathType() & PATHFIND_NOPATH)
                         return true;
-
+                    
                     PointPath pointPath = i_path->getFullPath();
 
                     if (i_destinationHolder.HasArrived() && m_pathPointsSent)
@@ -152,8 +152,8 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
 
     if (!i_offset)
     {
-        // to nearest random contact position
-        i_target->GetRandomContactPoint(&owner, x, y, z, 0, MELEE_RANGE - 0.5f);
+        // to nearest random contact position   //MMAPS Changes
+        i_target->GetRandomContactPoint(&owner, x, y, z, 0, MELEE_RANGE - 0.5);   
     }
     else if (!i_angle && !owner.hasUnitState(UNIT_STAT_FOLLOW))
     {
@@ -163,11 +163,7 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
     else
     {
         // to at i_offset distance from target and i_angle from target facing
-        Position pos;
-        i_target->GetFirstCollisionPosition(pos, i_offset + owner.GetObjectSize(), i_angle); // +GetObjectSize to maintain the old distance
-        x = pos.m_positionX;
-        y = pos.m_positionY;
-        z = pos.m_positionZ;
+        i_target->GetClosePoint(x, y, z, owner.GetObjectSize(), i_offset, i_angle);
     }
 
     /*
@@ -190,11 +186,6 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
     if (m_usePathfinding)
     {
         bool forceDest = false;
-        // allow pets to cheat while generating paths as they should ALWAYS be able to reach thier target.
-        if (owner.GetTypeId() == TYPEID_UNIT
-            && owner.ToCreature()
-            && owner.ToCreature()->isPet())
-            forceDest = true;
 
         bool newPathCalculated = true;
         if (!i_path)
@@ -202,10 +193,52 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
         else
             newPathCalculated = i_path->Update(x, y, z, forceDest);
 
-        // nothing we can do here ...
+        //if (i_path->getPathType() & (PATHFIND_NOPATH | PATHFIND_INCOMPLETE))
+        //These functions force extra redundancy in the case of player pets/creatures
+        //Sometimes the pathwill break, particularly around game objects.  These functions try to force destination in such an event.
         if (i_path->getPathType() & PATHFIND_NOPATH)
-            return true;
+        {
+            //sLog->outError("Path build failed, PATHFIND_NOPATH, using forceDest active /n");
+            if (owner.GetTypeId() == TYPEID_UNIT
+            && owner.ToCreature())
+            {
+                if (owner.ToCreature()->getVictim())
+                {
+                    forceDest = true;
+                    bool newPathCalculated = true;
+                    
+                    if (!i_path)
+                        i_path = new PathInfo(&owner, owner.ToCreature()->getVictim()->GetPositionX(), owner.ToCreature()->getVictim()->GetPositionY(), owner.ToCreature()->getVictim()->GetPositionZ(), forceDest);
+                    else
+                        newPathCalculated = i_path->Update(owner.ToCreature()->getVictim()->GetPositionX(), owner.ToCreature()->getVictim()->GetPositionY(), owner.ToCreature()->getVictim()->GetPositionZ(), forceDest);
+                    //return true;
+                }
+                else if ((owner.ToCreature()->isPet()) && owner.ToCreature()->GetOwner())
+                {
+                    forceDest = true;
+                    bool newPathCalculated = true;
+                    if (!i_path)
+                        i_path = new PathInfo(&owner, owner.ToCreature()->GetOwner()->GetPositionX(), owner.ToCreature()->GetOwner()->GetPositionY(), owner.ToCreature()->GetOwner()->GetPositionZ(), forceDest);
+                    else
+                        newPathCalculated = i_path->Update(owner.ToCreature()->GetOwner()->GetPositionX(), owner.ToCreature()->GetOwner()->GetPositionY(), owner.ToCreature()->GetOwner()->GetPositionZ(), forceDest);
+                    //return true;
 
+                }
+                else
+                    return true;
+            }
+        } //Following condition needs more testing
+        else if ((i_path->getPathType() & PATHFIND_INCOMPLETE) & owner.IsStopped()) //Path incomplete and creature progress halted (assume stuck)
+        {
+            //sLog->outError("++++ Path build INCOMPLETE or owner.IsStopped(), PATHFIND_INCOMPLETE, using forceDest active /n");
+            forceDest = true;
+            bool newPathCalculated = true;
+            if (!i_path)
+                i_path = new PathInfo(&owner, x, y, z, forceDest);
+            else
+                newPathCalculated = i_path->Update(x, y, z, forceDest);
+        }
+     
         if (i_destinationHolder.HasArrived() && m_pathPointsSent)
             --m_pathPointsSent;
 
@@ -231,7 +264,8 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
             float dist = sqrt(x*x + y*y + z*z) + pointPath.GetTotalLength(1, endIndex);
 
             // calculate travel time, set spline, then send path
-            uint32 traveltime = uint32(dist / (traveller.Speed()*0.001f));
+            //uint32 traveltime = uint32(dist / (traveller.Speed()*0.001f));
+            uint32 traveltime = uint32(dist / ((traveller.Speed()*0.001f)+ 0.001f) + 0.1f); //Test Change MMAPs
 
             owner.SendMonsterMoveByPath(pointPath, 1, endIndex, traveltime);
         }
@@ -305,6 +339,7 @@ bool TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 
     if (m_usePathfinding)
     {
+        
         if (i_path && (i_path->getPathType() & PATHFIND_NOPATH))
             return true;
 
@@ -334,7 +369,6 @@ bool TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
                 float dist = owner.GetCombatReach() + sWorld->getRate(RATE_TARGET_POS_RECALCULATION_RANGE);
 
                 needNewDest = i_destinationHolder.HasArrived() && (!i_path->inRange(next_point, i_path->getActualEndPosition(), dist, dist) || !owner.IsWithinLOSInMap(i_target.getTarget()));
-
                 if (!needNewDest)
                 {
                     // GetClosePoint() will always return a point on the ground, so we need to
@@ -366,9 +400,9 @@ bool TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
                 i_recalculateTravel = false;
                 //Angle update will take place into owner.StopMoving()
                 owner.SetInFront(i_target.getTarget());
-
+                //MMAPS Changes
                 owner.StopMoving();
-                if (owner.IsWithinMeleeRange(i_target.getTarget()) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
+                if (owner.IsWithinMeleeRange(i_target.getTarget(), 1.35f) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
                     owner.Attack(i_target.getTarget(), true);
             }
         }
@@ -407,7 +441,7 @@ bool TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
                 owner.SetInFront(i_target.getTarget());
 
                 owner.StopMoving();
-                if (owner.IsWithinMeleeRange(i_target.getTarget()) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
+                if (owner.IsWithinMeleeRange(i_target.getTarget(), 1.35f) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
                     owner.Attack(i_target.getTarget(),true);
             }
         }

@@ -3985,7 +3985,6 @@ uint8 Spell::CanCast(bool strict)
                 if (Unit* target = m_targets.getUnitTarget())
                     if (!m_caster->CanMakePathTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 50.0f))
                         return SPELL_FAILED_NOPATH;
-
                 break;
             }
             case SPELL_EFFECT_SKINNING:

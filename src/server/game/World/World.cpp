@@ -1125,8 +1125,14 @@ void World::LoadConfigSettings(bool reload)
 
     // mmaps
     m_configs[CONFIG_BOOL_MMAP_ENABLED] = ConfigMgr::GetBoolDefault("mmap.enable", true);
+    //MMAP-Changes
+    /*
     std::string ignoreMMapIds = ConfigMgr::GetStringDefault("mmap.ignoreMapIds", "");
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMMapIds.c_str());
+    */
+    std::string implementMMapIds = ConfigMgr::GetStringDefault("mmap.implementMapIds", "");
+    MMAP::MMapFactory::implementPathFindingOnMaps(implementMMapIds.c_str());
+    //MMAP-Changes
     sLog->outString("WORLD: Pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 }
 

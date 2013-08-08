@@ -6003,11 +6003,12 @@ void Spell::EffectCharge(uint32 /*i*/)
     Unit *target = m_targets.getUnitTarget();
     if (!target)
         return;
-
+    
     float angle = target->GetAngle(m_caster) - target->GetOrientation();
     Position pos;
     target->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     target->GetFirstCollisionPosition(pos, target->GetObjectSize(), angle);
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         m_caster->MonsterMoveByPath(pos.m_positionX, pos.m_positionY, pos.m_positionZ, SPEED_CHARGE, true);
     else

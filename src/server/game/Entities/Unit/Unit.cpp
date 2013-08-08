@@ -51,8 +51,8 @@
 #include "PassiveAI.h"
 #include "Traveller.h"
 #include "TemporarySummon.h"
-#include "PathFinder.h"
 #include "ScriptMgr.h"
+#include "PathFinder.h"
 
 #include <math.h>
 
@@ -358,7 +358,7 @@ void Unit::Update(uint32 p_time)
 
     _UpdateSpells(p_time);
 
-    // update combat timer only for players and pets
+    // update combat timer
     if (isInCombat() && GetCharmerOrOwnerPlayerOrPlayerItself())
     {
         // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
@@ -517,11 +517,25 @@ bool Unit::CanMakePathTo(float x, float y, float z, float maxLen) const
     return true;
 }
 
+
+void Unit::BuildHeartBeatMsg(WorldPacket *data) const
+{
+    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
+    *data << GetPackGUID();
+    *data << uint32(((GetUnitMovementFlags() & MOVEFLAG_LEVITATING) || isInFlight())? (SPLINEFLAG_FLYING|SPLINEFLAG_WALKMODE) : GetUnitMovementFlags());
+    *data << uint8(0);                                      // 2.3.0
+    *data << uint32(getMSTime());                           // time
+    *data << float(GetPositionX());
+    *data << float(GetPositionY());
+    *data << float(GetPositionZ());
+    *data << float(GetOrientation());
+    *data << uint32(0);
+}
+
 template<typename Elem, typename Node>
 void Unit::SendMonsterMoveByPath(Path<Elem, Node> const& path, uint32 start, uint32 end, uint32 traveltime)
 {
     uint32 pathSize = end - start;
-
     if (pathSize < 1)
     {
         SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(), 0);
@@ -558,7 +572,6 @@ void Unit::SendMonsterMoveByPath(Path<Elem, Node> const& path, uint32 start, uin
     else
     {
         // sending a series of points
-
         // destination
         data << path[end-1].x;
         data << path[end-1].y;
@@ -568,29 +581,14 @@ void Unit::SendMonsterMoveByPath(Path<Elem, Node> const& path, uint32 start, uin
         float mid_X = (GetPositionX() + path[end-1].x) * 0.5f;
         float mid_Y = (GetPositionY() + path[end-1].y) * 0.5f;
         float mid_Z = (GetPositionZ() + path[end-1].z) * 0.5f;
-
         for (uint32 i = start; i < end - 1; ++i)
             data.appendPackXYZ(mid_X - path[i].x, mid_Y - path[i].y, mid_Z - path[i].z);
     }
 
     SendMessageToSet(&data, true);
-
     addUnitState(UNIT_STAT_MOVE);
 }
 
-void Unit::BuildHeartBeatMsg(WorldPacket *data) const
-{
-    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
-    *data << GetPackGUID();
-    *data << uint32(((GetUnitMovementFlags() & MOVEFLAG_LEVITATING) || isInFlight())? (SPLINEFLAG_FLYING|SPLINEFLAG_WALKMODE) : GetUnitMovementFlags());
-    *data << uint8(0);                                      // 2.3.0
-    *data << uint32(getMSTime());                           // time
-    *data << float(GetPositionX());
-    *data << float(GetPositionY());
-    *data << float(GetPositionZ());
-    *data << float(GetOrientation());
-    *data << uint32(0);
-}
 
 void Unit::resetAttackTimer(WeaponAttackType type)
 {
@@ -8896,6 +8894,14 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
         me->UpdatePvP(true);
         me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
     }
+    
+    if (GetTypeId() != TYPEID_PLAYER && ToCreature()->isPet())
+    {
+        if (Unit *owner = GetOwner())
+            for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+                SetSpeed(UnitMoveType(i), owner->GetSpeedRate(UnitMoveType(i)) * 1.20f, true);
+    }
+    
 }
 
 void Unit::SetInCombatState(bool PvP, Unit* enemy)
@@ -8937,13 +8943,14 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
         }
-
+        
         if (ToCreature()->isPet())
         {
             UpdateSpeed(MOVE_RUN, true);
             UpdateSpeed(MOVE_SWIM, true);
             UpdateSpeed(MOVE_FLIGHT, true);
         }
+        
     }
 
     for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
@@ -8972,7 +8979,7 @@ void Unit::ClearInCombat()
     {
         if (Unit *owner = GetOwner())
             for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-                SetSpeed(UnitMoveType(i), owner->GetSpeedRate(UnitMoveType(i)), true);
+                SetSpeed(UnitMoveType(i), (owner->GetSpeedRate(UnitMoveType(i))+ 0.10f), true);
     }
     else if (!isCharmed())
         return;
@@ -11874,6 +11881,27 @@ void Unit::RemoveAurasAtChanneledTarget(SpellEntry const* spellInfo, Unit * cast
     }
 }
 
+void Unit::MonsterMoveByPath(float x, float y, float z, uint32 speed, bool forceDest)
+{
+    PathInfo path(this, x, y, z, forceDest);
+    PointPath pointPath = path.getFullPath();
+
+    uint32 traveltime = uint32(pointPath.GetTotalLength() / float(speed));
+    MonsterMoveByPath(pointPath, 1, pointPath.size(), traveltime);
+}
+
+template<typename PathElem, typename PathNode>
+void Unit::MonsterMoveByPath(Path<PathElem, PathNode> const& path, uint32 start, uint32 end, uint32 transitTime)
+{
+    SplineFlags flags = GetTypeId() == TYPEID_PLAYER ? SPLINEFLAG_WALKMODE : SplineFlags(((Creature*)this)->GetUnitMovementFlags());
+    SetUnitMovementFlags(flags);
+    SendMonsterMoveByPath(path, start, end, transitTime);
+}
+
+template void Unit::MonsterMoveByPath<PathNode>(const Path<PathNode> &, uint32, uint32, uint32);
+template void Unit::SendMonsterMoveByPath<PathNode>(const Path<PathNode> &, uint32, uint32, uint32);
+template void Unit::SendMonsterMoveByPath<TaxiPathNodePtr, const TaxiPathNodeEntry>(const Path<TaxiPathNodePtr, const TaxiPathNodeEntry> &, uint32, uint32, uint32);
+
 bool Unit::SetPosition(float x, float y, float z, float orientation, bool teleport)
 {
     // prevent crash when a bad coord is sent by the client
@@ -11918,29 +11946,6 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
         SendMessageToSet(&data, false);
     }
 }
-
-void Unit::MonsterMoveByPath(float x, float y, float z, uint32 speed, bool forceDest)
-{
-    PathInfo path(this, x, y, z, forceDest);
-    PointPath pointPath = path.getFullPath();
-
-    uint32 traveltime = uint32(pointPath.GetTotalLength() / float(speed));
-    MonsterMoveByPath(pointPath, 1, pointPath.size(), traveltime);
-}
-
-template<typename PathElem, typename PathNode>
-void Unit::MonsterMoveByPath(Path<PathElem, PathNode> const& path, uint32 start, uint32 end, uint32 transitTime)
-{
-    SplineFlags flags = GetTypeId() == TYPEID_PLAYER ? SPLINEFLAG_WALKMODE : SplineFlags(((Creature*)this)->GetUnitMovementFlags());
-    SetUnitMovementFlags(flags);
-    SendMonsterMoveByPath(path, start, end, transitTime);
-}
-
-template void Unit::MonsterMoveByPath<PathNode>(const Path<PathNode> &, uint32, uint32, uint32);
-
-
-template void Unit::SendMonsterMoveByPath<PathNode>(const Path<PathNode> &, uint32, uint32, uint32);
-template void Unit::SendMonsterMoveByPath<TaxiPathNodePtr, const TaxiPathNodeEntry>(const Path<TaxiPathNodePtr, const TaxiPathNodeEntry> &, uint32, uint32, uint32);
 
 /*-----------------------Trinity-----------------------------*/
 

@@ -26,10 +26,11 @@
 
 struct PathNode
 {
+    float x, y, z;
     PathNode(): x(0.0f), y(0.0f), z(0.0f) { }
     PathNode(float _x, float _y, float _z): x(_x), y(_y), z(_z) { }
-    float x, y, z;
 };
+
 template<typename PathElem, typename PathNode = PathElem>
 
 class Path
@@ -53,6 +54,7 @@ class Path
                 --end;
             }
         }
+
         void clear() { i_nodes.clear(); }
 
         float GetTotalLength(uint32 start, uint32 end) const

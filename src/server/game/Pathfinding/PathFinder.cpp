@@ -22,6 +22,7 @@
 #include "PathFinder.h"
 #include "Log.h"
 
+
 #include "DetourCommon.h"
 
 ////////////////// PathInfo //////////////////
@@ -443,19 +444,19 @@ void PathInfo::BuildPointPath(const float *startPoint, const float *endPoint)
                 (int*)&pointCount,
                 m_pointPathLimit);    // maximum number of points
     }
-
-    // this could be commented out if pets are stuck at corners (needs testing)
+    
     if (pointCount < 2 || dtResult != DT_SUCCESS)
     {
         // only happens if pass bad data to findStraightPath or navmesh is broken
         // single point paths can be generated here
         // TODO : check the exact cases
         //DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathInfo::BuildPointPath FAILED! path sized %d returned\n", pointCount);
+        sLog->outError("++ PathInfo::BuildPointPath FAILED! path sized %d returned\n", pointCount);
         BuildShortcut();
         m_type = PATHFIND_NOPATH;
         return;
     }
-
+    
     m_pathPoints.resize(pointCount);
     for (uint32 i = 0; i < pointCount; ++i)
         m_pathPoints.set(i, PathNode(pathPoints[i*VERTEX_SIZE+2], pathPoints[i*VERTEX_SIZE], pathPoints[i*VERTEX_SIZE+1]));
@@ -483,14 +484,11 @@ void PathInfo::BuildPointPath(const float *startPoint, const float *endPoint)
 
         m_type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
     }
-
-    //DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathInfo::BuildPointPath path type %d size %d poly-size %d\n", m_type, pointCount, m_polyLength);
 }
 
 void PathInfo::BuildShortcut()
 {
     //DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildShortcut :: making shortcut\n");
-
     clear();
 
     // make two point path, our curr pos is the start, and dest is the end

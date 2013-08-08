@@ -338,6 +338,7 @@ class Object
         Unit* ToUnit(){ if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return reinterpret_cast<Unit*>(this); else return NULL; }
         const Unit* ToUnit() const {if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER) return (const Unit*)((Unit*)this); else return NULL; }
 
+
     protected:
 
         Object ();
@@ -608,11 +609,12 @@ class WorldObject : public Object, public WorldLocation
             pos.Relocate(x, y, z, GetOrientation());
         }
 
+        uint32 GetInstanceId() const { return m_InstanceId; }
+
         float GetDistanceSqr(float x, float y, float z) const;
         bool HasInArc(float arcangle, const Position *pos) const;
         bool HasInArc(const float arcangle, const float x, const float y) const;
 
-        uint32 GetInstanceId() const { return m_InstanceId; }
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;

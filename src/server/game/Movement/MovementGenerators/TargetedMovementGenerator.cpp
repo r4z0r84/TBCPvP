@@ -103,7 +103,7 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
                     // nothing we can do here ...
                     if (i_path->getPathType() & PATHFIND_NOPATH)
                         return true;
-                    
+
                     PointPath pointPath = i_path->getFullPath();
 
                     if (i_destinationHolder.HasArrived() && m_pathPointsSent)
@@ -131,6 +131,7 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
 
                         // calculate travel time, set spline, then send path
                         uint32 traveltime = uint32(dist / (traveller.Speed()*0.001f));
+
                         owner.SendMonsterMoveByPath(pointPath, 1, endIndex, traveltime);
 
                         return false;
@@ -159,11 +160,11 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
     {
         // caster chase
         i_target->GetContactPoint(&owner, x, y, z, i_offset * urand(80, 95) * 0.01f);
-    }
+     }
     else
     {
         // to at i_offset distance from target and i_angle from target facing
-        i_target->GetClosePoint(x, y, z, owner.GetObjectSize(), i_offset, i_angle);
+        i_target->GetClosePoint(x, y, z, owner.GetObjectSize(), i_offset,i_angle);
     }
 
     /*
@@ -179,7 +180,7 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
 
         //We don't update Mob Movement, if the difference between New destination and last destination is < BothObjectSize
         float  bothObjectSize = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
-        if (i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x, y, z) < bothObjectSize)
+        if (i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize)
             return;
     */
     //i_destinationHolder.SetDestination(traveller, x, y, z);
@@ -194,13 +195,13 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
             && owner.ToCreature()->isPet())
             forceDest = true;
         */    
- 
+
         bool newPathCalculated = true;
         if (!i_path)
             i_path = new PathInfo(&owner, x, y, z, forceDest);
         else
         newPathCalculated = i_path->Update(x, y, z, forceDest);
- 
+
         // nothing we can do here ...
         if (i_path->getPathType() & PATHFIND_NOPATH)
         {
@@ -218,10 +219,10 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
         if (i_path->getPathType() & PATHFIND_NOPATH)
             return true;
             */
- 
+
         if (i_destinationHolder.HasArrived() && m_pathPointsSent)
             --m_pathPointsSent;
-
+ 
         i_path->getNextPosition(x, y, z);
         i_destinationHolder.SetDestination(traveller, x, y, z, false);
 
@@ -236,21 +237,21 @@ bool TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
             // send 10 nodes, or send all nodes if there are less than 10 left
             m_pathPointsSent = std::min<uint32>(10, pointPath.size() - 1);
             uint32 endIndex = m_pathPointsSent + 1;
-
+ 
             // dist to next node + world-unit length of the path
             x -= owner.GetPositionX();
             y -= owner.GetPositionY();
             z -= owner.GetPositionZ();
             float dist = sqrt(x*x + y*y + z*z) + pointPath.GetTotalLength(1, endIndex);
-
+ 
             // calculate travel time, set spline, then send path
             uint32 traveltime = uint32(dist / (traveller.Speed()*0.001f));
- 
+
             owner.SendMonsterMoveByPath(pointPath, 1, endIndex, traveltime);
         }
 
         owner.addUnitState(UNIT_STAT_CHASE);
-    }
+    }    
     else
     {
         i_destinationHolder.SetDestination(traveller, x, y, z);
@@ -321,7 +322,6 @@ bool TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 
     if (i_path && !owner.hasUnitState(UNIT_STAT_FOLLOW) && i_path->getPathType() & PATHFIND_NOPATH)
     {
-        sLog->outError("++ Detected Pet stuck/bugged, disable pathfinding");
         unStuck = true;
         i_path = NULL;
     }

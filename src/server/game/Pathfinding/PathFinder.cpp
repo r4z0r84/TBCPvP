@@ -444,7 +444,7 @@ void PathInfo::BuildPointPath(const float *startPoint, const float *endPoint)
                 (int*)&pointCount,
                 m_pointPathLimit);    // maximum number of points
     }
-    
+
     if (pointCount < 2 || dtResult != DT_SUCCESS)
     {
         // only happens if pass bad data to findStraightPath or navmesh is broken
@@ -456,8 +456,7 @@ void PathInfo::BuildPointPath(const float *startPoint, const float *endPoint)
         m_type = PATHFIND_NOPATH;
         return;
     }
-    
-    
+
     m_pathPoints.resize(pointCount);
     for (uint32 i = 0; i < pointCount; ++i)
         m_pathPoints.set(i, PathNode(pathPoints[i*VERTEX_SIZE+2], pathPoints[i*VERTEX_SIZE], pathPoints[i*VERTEX_SIZE+1]));
@@ -467,7 +466,7 @@ void PathInfo::BuildPointPath(const float *startPoint, const float *endPoint)
     setActualEndPosition(m_pathPoints[pointCount-1]);
 
     // force the given destination, if needed
-    if(m_forceDestination &&
+    if (m_forceDestination &&
         (!(m_type & PATHFIND_NORMAL) || !inRange(getEndPosition(), getActualEndPosition(), 1.0f, 1.0f)))
     {
         // we may want to keep partial subpath

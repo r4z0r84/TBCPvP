@@ -8899,7 +8899,7 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
     {
         if (Unit *owner = GetOwner())
             for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-                SetSpeed(UnitMoveType(i), owner->GetSpeedRate(UnitMoveType(i)) * 1.20f, true);
+                SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
     }
     
 }
@@ -8946,7 +8946,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         
         if (ToCreature()->isPet())
         {
-            UpdateSpeed(MOVE_RUN, true);
+            UpdateSpeed(MOVE_RUN, true, 1.125f);
             UpdateSpeed(MOVE_SWIM, true);
             UpdateSpeed(MOVE_FLIGHT, true);
         }
@@ -8979,7 +8979,16 @@ void Unit::ClearInCombat()
     {
         if (Unit *owner = GetOwner())
             for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-                SetSpeed(UnitMoveType(i), (owner->GetSpeedRate(UnitMoveType(i))+ 0.10f), true);
+            {
+                if (owner->GetSpeedRate(UnitMoveType(i)) > GetSpeedRate(UnitMoveType(i)))
+                {
+                    SetSpeed(UnitMoveType(i), owner->GetSpeedRate(UnitMoveType(i)) * 1.10f, true);
+                }
+                else
+                {
+                    SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)) * 1.10f, true);
+                }
+            }
     }
     else if (!isCharmed())
         return;

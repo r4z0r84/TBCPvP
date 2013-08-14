@@ -457,6 +457,7 @@ void PathInfo::BuildPointPath(const float *startPoint, const float *endPoint)
         return;
     }
     
+    
     m_pathPoints.resize(pointCount);
     for (uint32 i = 0; i < pointCount; ++i)
         m_pathPoints.set(i, PathNode(pathPoints[i*VERTEX_SIZE+2], pathPoints[i*VERTEX_SIZE], pathPoints[i*VERTEX_SIZE+1]));

@@ -2752,6 +2752,14 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (pVictim->IsImmunedToSpell(spell, true))
         return SPELL_MISS_IMMUNE;
 
+    if (spell->Mechanic == MECHANIC_FEAR)
+    {
+         if (pVictim->HasAura(12292, 0) || pVictim->HasAura(18499,0))  // Deathwish and Berserker Rage
+         {
+             return SPELL_MISS_IMMUNE;
+         }
+    }
+
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
     if (IsPositiveSpell(spell->Id)

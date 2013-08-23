@@ -4084,6 +4084,7 @@ bool Player::resetTalents(bool no_cost)
                 // unlearn if first rank is talent or learned by talent
                 if (itrFirstId == talentInfo->RankID[j] || sSpellMgr->IsSpellLearnToSpell(talentInfo->RankID[j], itrFirstId))
                 {
+                    RemoveArenaAuras();
                     removeSpell(itr->first, !IsPassiveSpell(itr->first), true);
                     itr = GetSpellMap().begin();
                     continue;

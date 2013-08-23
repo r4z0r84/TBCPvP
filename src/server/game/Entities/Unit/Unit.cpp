@@ -946,6 +946,16 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                     bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
         }
     }
+    else if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() != TYPEID_PLAYER && GetTypeId() == TYPEID_UNIT)    //Pets need damage added to bg score
+    {
+        if (Creature *creature = ToCreature())
+            if (creature->isPet() && creature->GetOwner()->GetTypeId() == TYPEID_PLAYER)
+                if (Player* owner = creature->GetOwner()->ToPlayer())
+                    if (owner->InBattleGround())
+                        if (BattleGround *bg = owner->GetBattleGround())
+                            bg->UpdatePlayerScore(owner, SCORE_DAMAGE_DONE, damage);
+
+    }
 
     if (pVictim->GetTypeId() == TYPEID_UNIT && !pVictim->ToCreature()->isPet())
     {

@@ -2445,7 +2445,8 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->speed = 430.0f;   // Tiny delay
             break;
         case 1833:                        // Cheap Shot
-            spellInfo->speed = 1230.0f;   // Tiny delay
+            spellInfo->speed = 1030.0f;   // Tiny delay
+            spellInfo->EffectMechanic[0] = MECHANIC_STUN;
             break;
         case 26679:                       // Deadly Throw
             spellInfo->speed = 0;         // Instant

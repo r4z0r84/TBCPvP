@@ -2560,16 +2560,23 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
         if (roll < tmp)
             return SPELL_MISS_MISS;
     }
-
-    // Same spells cannot be parry/dodge
-    if (spell->Attributes & SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK)
-        return SPELL_MISS_NONE;
-
     // Chance resist mechanic
     int32 resist_chance = pVictim->GetMechanicResistChance(spell)*100;
     tmp += resist_chance;
     if (roll < tmp)
+    {
+        if (spell->SpellIconID == 495 && spell->SpellVisual == 3942)
+        {
+            uint32 triggered_spell_id = spell->EffectTriggerSpell[1];
+            if (triggered_spell_id && pVictim)
+                 CastSpell(pVictim, triggered_spell_id, true, NULL, NULL);
+        }
         return SPELL_MISS_RESIST;
+    }
+
+    // Same spells cannot be parry/dodge
+    if (spell->Attributes & SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK)
+        return SPELL_MISS_NONE;
 
     // Ranged attack can`t miss too
     if (attType == RANGED_ATTACK)

@@ -3344,7 +3344,7 @@ void Spell::TakePower()
 
                     if (ihit->targetGUID == targetGUID)
                     {
-                        if (ihit->missCondition != SPELL_MISS_NONE && ihit->missCondition != SPELL_MISS_MISS/* && ihit->targetGUID != m_caster->GetGUID()*/)
+                        if (ihit->missCondition != SPELL_MISS_NONE || ihit->missCondition == SPELL_MISS_MISS/* && ihit->targetGUID != m_caster->GetGUID()*/)
                             hit = false;
                         break;
                     }

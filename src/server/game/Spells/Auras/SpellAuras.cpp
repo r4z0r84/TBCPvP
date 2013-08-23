@@ -3946,6 +3946,15 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
             default: break;
         }
     }
+    if (GetId() == 37386) // Void Star Talisman Trinket Pet effect
+    {
+        Guardian* pet = m_target->ToPlayer()->GetGuardianPet();
+        if (pet)
+        {
+            for(int8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
+                pet->UpdateResistances(i);
+        }
+    }
 }
 
 void Aura::HandleAuraModStalked(bool apply, bool Real)

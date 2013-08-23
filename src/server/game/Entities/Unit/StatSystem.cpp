@@ -898,6 +898,9 @@ void Guardian::UpdateResistances(uint32 school)
         if (isHunterPet() || isPet() && m_owner->getClass() == CLASS_WARLOCK)
             value += float(CalculatePctN(m_owner->GetResistance(SpellSchools(school)), 40));
 
+        if (m_owner->HasAura(37386, 0))  // Void Star Talisman
+           value += 130;
+
         SetResistance(SpellSchools(school), int32(value));
     }
     else

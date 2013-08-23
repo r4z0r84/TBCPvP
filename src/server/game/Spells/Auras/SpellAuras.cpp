@@ -5984,6 +5984,20 @@ void Aura::PeriodicTick()
             else
                 pdamage = pCaster->SpellHealingBonus(GetSpellProto(), amount, DOT, m_target);
 
+            if (pCaster->getClass() == CLASS_HUNTER)    //Improved Mend pet periodic dispell
+            {
+                if (GetSpellProto()->SpellVisual == 652)
+                {
+                    int chance = 0;
+                    if (pCaster->HasSpell(19572))
+                        chance += 25;
+                    else if (pCaster->HasSpell(19573))
+                        chance += 50;
+                    if (roll_chance_i(chance))
+                        pCaster->CastSpell(m_target, 24406, true, NULL, this);
+                }
+            }
+
             pdamage *= EffectModifier;
             pdamage *= GetStackAmount();
 

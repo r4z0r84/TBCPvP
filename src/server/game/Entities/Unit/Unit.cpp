@@ -2555,6 +2555,9 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
     if (canMiss)
     {
         uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell->Id)*100.0f);
+
+        if (IsAreaOfEffectSpell(spell))
+            missChance += (pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE)*100.0f);
         // Roll miss
         tmp += missChance;
         if (roll < tmp)

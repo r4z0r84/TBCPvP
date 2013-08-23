@@ -1335,7 +1335,10 @@ void Player::Update(uint32 p_time)
     }
     else if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))    //Short delay for first swing when entering melee combat    
     {
-        setAttackTimer(BASE_ATTACK, (GetAttackTime(BASE_ATTACK)/8 + 50));
+        if (isInCombat())
+            setAttackTimer(BASE_ATTACK, (GetAttackTime(BASE_ATTACK)/2 + 50));
+        else
+            setAttackTimer(BASE_ATTACK, (GetAttackTime(BASE_ATTACK)/6 + 50));
     }
     else if (hasUnitState(UNIT_STAT_CHARGING))  // stops erroneous white attacks happening while charging
     {

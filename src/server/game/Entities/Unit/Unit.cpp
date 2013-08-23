@@ -7636,7 +7636,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 {
                     if (pVictim->GetTypeId() != TYPEID_PLAYER)
                         continue;
-                    float mod = pVictim->ToPlayer()->GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*(-8.0f);
+                    float mod = pVictim->ToPlayer()->GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*(-4.0f);
                     if (mod < (*i)->GetModifier()->m_amount)
                         mod = (*i)->GetModifier()->m_amount;
                     TakenTotalMod *= (mod+100.0f)/100.0f;

@@ -2519,6 +2519,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 33745: // Lacerate
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
             break;
+        case 35685: // Electro Shock Therapy - Limit to netherstorm
+            spellInfo->AreaId = 3523;
+            break;
         default:
             break;
         }

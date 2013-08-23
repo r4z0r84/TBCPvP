@@ -2522,6 +2522,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 35685: // Electro Shock Therapy - Limit to netherstorm
             spellInfo->AreaId = 3523;
             break;
+        case 14181: //Relentless Strikes Effect
+            spellInfo->speed = 500.0f;
+            break;
         default:
             break;
         }

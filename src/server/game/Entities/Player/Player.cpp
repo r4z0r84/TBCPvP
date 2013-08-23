@@ -7447,7 +7447,7 @@ void Player::CheckDuelDistance(time_t currTime)
 
     if (duel->outOfBound == 0)
     {
-        if (!IsWithinDistInMap(obj, 65))
+        if (!IsWithinDistInMap(obj, 75))
         {
             duel->outOfBound = currTime;
 

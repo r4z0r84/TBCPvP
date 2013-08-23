@@ -8013,6 +8013,12 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
         return false;
 
     float crit_chance = 0.0f;
+    if (spellProto->SpellFamilyName & SPELLFAMILY_ROGUE)
+    {
+        if (FindCurrentSpellBySpellId(5938))
+            crit_chance = 0.0f;
+    }
+
     switch (spellProto->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_NONE:  // Exception for Earth Shield and Lifebloom Final Bloom

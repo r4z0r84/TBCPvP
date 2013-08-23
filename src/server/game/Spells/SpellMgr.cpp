@@ -2516,6 +2516,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 25387: // Mind Flay rank 7
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
             break;
+        case 33745: // Lacerate
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
+            break;
         default:
             break;
         }

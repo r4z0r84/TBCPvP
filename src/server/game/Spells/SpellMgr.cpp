@@ -2918,6 +2918,14 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_LIMITONLY;
             break;
         }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Turn Evil
+            if (spellproto->Id == 10326)
+                return DIMINISHING_FEAR;
+            break;
+            //spellproto->SpellFamilyFlags & 0x00000004000LL &&
+        }
         default:
         {
             if (spellproto->Id == 12494) // frostbite

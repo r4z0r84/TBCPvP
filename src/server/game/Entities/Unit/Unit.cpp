@@ -3572,6 +3572,15 @@ bool Unit::AddAura(Aura *Aur)
 
     spellEffectPair spair = spellEffectPair(Aur->GetId(), Aur->GetEffIndex());
 
+    if (this->HasAura(1044,0))
+    {
+        for (uint8 i = 0 ; i < MAX_SPELL_EFFECTS; ++i)
+        {
+            if (IsImmunedToSpellEffect(aurSpellInfo, i))
+                return false;
+        }
+    }
+
     bool stackModified=false;
     // passive and persistent auras can stack with themselves any number of times
     if (!Aur->IsPassive() && !Aur->IsPersistent())

@@ -1078,6 +1078,8 @@ class Player : public Unit, public GridObject<Player>
         void Whisper(const std::string& text, const uint32 language, uint64 receiver);
         void BuildPlayerChat(WorldPacket *data, uint8 msgtype, const std::string& text, uint32 language) const;
 
+        void ChangeRace(Player *player, uint32 newRace);
+
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/

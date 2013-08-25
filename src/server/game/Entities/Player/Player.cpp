@@ -21687,3 +21687,167 @@ uint32 Player::SuitableForTransmogrification(Item* oldItem, Item* newItem)
     return ERR_FAKE_BAD_CLASS;
 }
 
+void Player::ChangeRace(Player *player, uint32 newRace)
+{
+    uint8 currentRace = player->getRace();
+    uint8 pClass = player->getClass();
+    uint8 gender = player->getGender();
+    uint8 team = player->GetTeam();
+    Powers powertype = player->getPowerType();
+
+    // store various reps to convert
+    uint32 force1, force2, force3, out1, out2;
+
+    enum ChangeReps
+    {
+        // Horde
+        WARSONG     = 889,
+        DEFILERS    = 510,
+        FROSTWOLF   = 729,
+        THRALLMAR   = 947,
+        MAGHAR      = 941,
+
+        // Alliance
+        SILVERWING      = 890,
+        LEAGUEOFARATHOR = 509,
+        STORMPIKE       = 730,
+        HONORHOLD       = 946,
+        KURENAI         = 978
+    };
+
+    if (team == 67) // Horde
+    {
+        force1 = player->GetReputation(WARSONG);
+        force2 = player->GetReputation(DEFILERS);
+        force3 = player->GetReputation(FROSTWOLF);
+        out1 = player->GetReputation(THRALLMAR);
+        out2 = player->GetReputation(MAGHAR);
+    }
+    else // Alliance
+    {
+        force1 = player->GetReputation(SILVERWING);
+        force2 = player->GetReputation(LEAGUEOFARATHOR);
+        force3 = player->GetReputation(STORMPIKE);
+        out1 = player->GetReputation(HONORHOLD);
+        out2 = player->GetReputation(KURENAI);
+    }
+
+    const PlayerInfo* info = sObjectMgr->GetPlayerInfo(newRace, pClass);
+    if (!info)
+        return;
+
+    player->setFactionForRace(newRace);
+    player->SetFloatValue(OBJECT_FIELD_SCALE_X, ((newRace == RACE_TAUREN) ? 1.3f : 1.0f));
+    player->SetUInt32Value(UNIT_FIELD_BYTES_0, ((newRace) | (pClass << 8) | (gender << 16) | (powertype << 24)));
+    player->SetUInt32Value(UNIT_FIELD_DISPLAYID, gender == GENDER_MALE ? info->displayId_m : info->displayId_f);
+    player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, gender == GENDER_MALE ? info->displayId_m : info->displayId_f);
+    player->SetUInt32Value(PLAYER_BYTES, 1 | (1 << 8) | (1 << 16) | (1 << 24));
+    player->SetUInt32Value(PLAYER_BYTES_2, (1) | (0x02 << 24));
+
+    player->resetSpells();
+
+    std::list<CreateSpellPair>::const_iterator new_spell_itr;
+    for (new_spell_itr = info->spell.begin(); new_spell_itr != info->spell.end(); ++new_spell_itr)
+    {
+        uint16 tspell = new_spell_itr->first;
+        if (tspell)
+            if (!player->HasSpell(tspell)) player->learnSpell(tspell);
+    }
+
+    // we have new faction
+    uint8 oldTeam = team;
+    team = player->GetTeam();
+
+    // have they changed faction?
+    if (oldTeam != team)
+    {
+        if (team == 67)
+        {
+            // Silverwing -> Warsong
+            player->SetFactionReputation(sFactionStore.LookupEntry(WARSONG), force1);
+            // League of Arathor -> Defilers
+            player->SetFactionReputation(sFactionStore.LookupEntry(DEFILERS), force2);
+            // Stormpike -> Frostwolf
+            player->SetFactionReputation(sFactionStore.LookupEntry(FROSTWOLF), force3);
+            // Honor Hold > Thrallmar
+            player->SetFactionReputation(sFactionStore.LookupEntry(THRALLMAR), out1);
+            // Kurenai -> Mag'har
+            player->SetFactionReputation(sFactionStore.LookupEntry(MAGHAR), out2);
+        }
+        else
+        {
+            // Warsong -> Silverwing
+            player->SetFactionReputation(sFactionStore.LookupEntry(SILVERWING), force1);
+            // Defilers -> League of Arathor
+            player->SetFactionReputation(sFactionStore.LookupEntry(LEAGUEOFARATHOR), force2);
+            // Frostwolf -> Stormpike
+            player->SetFactionReputation(sFactionStore.LookupEntry(STORMPIKE), force3);
+            // Thrallmar > Honor Hold
+            player->SetFactionReputation(sFactionStore.LookupEntry(HONORHOLD), out1);
+            // Mag'har -> Kurenai
+            player->SetFactionReputation(sFactionStore.LookupEntry(KURENAI), out2);
+        }
+    }
+
+    // Basic code to swap mounts/items. Not implemented.
+    /*
+    uint32 array_mount [] = { 25527, 18776, 18787, 18767, 18772, 29745, 25477, 18797, 13334, 18794, 18790, 29223, 37864, 37865 };
+    for (uint32 i = 0; i < 14; i++)
+    {
+        if (player->HasItemCount(array_mount[i], 1))
+        {
+            for (int i_slot = EQUIPMENT_SLOT_START; i_slot < INVENTORY_SLOT_ITEM_END; i_slot++)
+            {
+                Item *pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i_slot);
+                player->DestroyItemCount(array_mount[i], 1, true);
+            }
+        }
+    }
+
+    switch (newRace)
+    {
+        case RACE_HUMAN:         player->StoreNewItemInBestSlots(array_mount[1], 1);  break;
+        case RACE_ORC:           player->StoreNewItemInBestSlots(array_mount[7], 1);  break;
+        case RACE_DWARF:         player->StoreNewItemInBestSlots(array_mount[2], 1);  break;
+        case RACE_NIGHTELF:      player->StoreNewItemInBestSlots(array_mount[3], 1);  break;
+        case RACE_UNDEAD_PLAYER: player->StoreNewItemInBestSlots(array_mount[8], 1);  break;
+        case RACE_TAUREN:        player->StoreNewItemInBestSlots(array_mount[9], 1);  break;
+        case RACE_GNOME:         player->StoreNewItemInBestSlots(array_mount[4], 1);  break;
+        case RACE_TROLL:         player->StoreNewItemInBestSlots(array_mount[9], 1);  break;
+        case RACE_BLOODELF:      player->StoreNewItemInBestSlots(array_mount[11], 1); break;
+        case RACE_DRAENEI:       player->StoreNewItemInBestSlots(array_mount[5], 1);  break;
+    }
+
+    switch (getFactionForRace(newRace))
+    {
+        case 1:
+        case 3:
+        case 4:
+        case 115:
+        case 1629:
+            player->StoreNewItemInBestSlots(array_mount[0], 1);
+            player->StoreNewItemInBestSlots(array_mount[12], 1);
+            break;
+        case 2:
+        case 5:
+        case 6:
+        case 116:
+        case 1610:
+            player->StoreNewItemInBestSlots(array_mount[6], 1);
+            player->StoreNewItemInBestSlots(array_mount[13], 1);
+            break;
+    }
+    */
+
+    player->SaveToDB();
+    player->GetSession()->LogoutPlayer(true);
+
+    // we need to delete full record of factions
+    if (oldTeam != team)
+    {
+        if (team == 67)
+            CharacterDatabase.PExecute("DELETE from `character_reputation` WHERE guid='%i' AND faction IN (890,509,730,946,978)", player->GetGUID());
+        else
+            CharacterDatabase.PExecute("DELETE from `character_reputation` WHERE guid='%i' AND faction IN (889,510,729,947,941)", player->GetGUID());
+    }
+}

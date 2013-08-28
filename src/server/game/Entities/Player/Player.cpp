@@ -19640,6 +19640,24 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
         if (GetGUID() == guid)
             return true;
 
+    // Duel Phasing System
+    if (this->duel)
+    {
+        // Only see the duel opponent
+        if (u->GetTypeId() == TYPEID_PLAYER && this->duel->opponent != u->ToPlayer() && duel->startTime != 0)
+            return false;
+        // Is creature a pet?
+        if (u->GetTypeId() != TYPEID_PLAYER && u->ToCreature()->isPet() && duel->startTime != 0)
+        {
+            // Only display pet if it belongs to the duel
+            if (u->ToCreature()->GetOwner()->ToPlayer() != this->duel->opponent)
+                return false;
+        }
+        // Do not display any friendly units
+        if (u->GetTypeId() != TYPEID_PLAYER && u->IsFriendlyTo(this) && duel->startTime != 0)
+            return false;
+    }
+
     if (uint64 guid = GetUInt64Value(PLAYER_FARSIGHT))
         if (u->GetGUID() == guid)
             return true;

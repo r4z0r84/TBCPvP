@@ -577,9 +577,16 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
 
+    static ChatCommand arenaspecCommandTable[] =
+    {
+        { "reset",          SEC_PLAYER,         false,  &ChatHandler::HandleArenaSpecResetCommand,			"", NULL },
+        { "watch",          SEC_PLAYER,         false,  &ChatHandler::HandleArenaSpecWatchCommand,			"", NULL },
+        { NULL,             0,                  false,  NULL,												"", NULL }
+    };
     static ChatCommand commandTable[] =
     {
         { "account",       SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
+        { "spectator",     SEC_PLAYER,         false, NULL,										      "", arenaspecCommandTable},   //Spectator diff
         { "gm",            SEC_MODERATOR,      true,  NULL,                                           "", gmCommandTable       },
         { "ticket",        SEC_MODERATOR,      false, NULL,                                           "", ticketCommandTable   },
         { "npc",           SEC_MODERATOR,      false, NULL,                                           "", npcCommandTable      },

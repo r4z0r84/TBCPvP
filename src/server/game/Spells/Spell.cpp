@@ -2131,6 +2131,11 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         if (m_caster->GetTypeId() == TYPEID_PLAYER && m_casttime == 0)
             m_caster->ToPlayer()->AddGlobalCooldown(m_spellInfo, this);
 
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (!m_IsTriggeredSpell)
+                ((Player*)m_caster)->SendArenaSpectatorSpell(m_spellInfo->Id, m_casttime);
+        }
         if (!m_casttime && !m_spellInfo->StartRecoveryTime
             && !m_castItemGUID     //item: first cast may destroy item and second cast causes crash
             && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
@@ -2605,9 +2610,16 @@ void Spell::SendSpellCooldown()
     if (rec <= 0 && catrec <= 0 && (cat == 76 || cat == 351))
         rec = _player->GetAttackTime(RANGED_ATTACK);
 
+    /*
     // Now we have cooldown data (if found any), time to apply mods
     if (rec > 0)
         _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec, this);
+        */
+    if (rec > 0)
+    {
+        _player->SendArenaSpectatorSpellCooldown(m_spellInfo->Id, rec * 0.001);
+        _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec, this);
+    }
 
     if (catrec > 0)
         _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec, this);

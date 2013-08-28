@@ -1081,6 +1081,18 @@ class Player : public Unit, public GridObject<Player>
         void ChangeRace(Player *player, uint32 newRace);
 
         /*********************************************************/
+        /***                  Spectator System                 ***/
+        /*********************************************************/
+        uint16 m_arenaSpectatorFlags;
+        bool isSpectator() const { return m_isArenaSpectator; }
+        void setSpectator(bool on);
+        void BuildArenaSpectatorUpdate();
+        void SendArenaSpectatorSpell(uint32 id, uint32 time);
+        void SendArenaSpectatorSpellCooldown(uint32 spell, uint32 cooldown);
+        void SendArenaSpectatorAura(int32 remove,uint32 stack,int32 expiration,int32 duration,int32 id,int32 nevim2,bool nevim,int32 caster);
+        void SendAddonMessage(std::string& text, char* prefix);
+
+        /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/
 
@@ -1418,7 +1430,7 @@ class Player : public Unit, public GridObject<Player>
         QuestStatusMap& getQuestStatusMap() { return mQuestStatus; };
 
         const uint64& GetSelection() const { return m_curSelection; }
-        void SetSelection(const uint64 &guid) { m_curSelection = guid; SetUInt64Value(UNIT_FIELD_TARGET, guid); }
+        void SetSelection(const uint64 &guid) { m_curSelection = guid; SetUInt64Value(UNIT_FIELD_TARGET, guid);  m_arenaSpectatorFlags |= ARENASPEC_TARGET; }
 
         uint8 GetComboPoints() { return m_comboPoints; }
         uint64 GetComboTarget() { return m_comboTarget; }
@@ -1912,6 +1924,7 @@ class Player : public Unit, public GridObject<Player>
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
+        bool m_isArenaSpectator;
 
         bool InBattleGround()       const                { return m_bgData.bgInstanceID != 0; }
         bool InArena()              const;
@@ -1933,6 +1946,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetBattleGroundQueueId(uint32 index) const { return m_bgBattleGroundQueueID[index].bgQueueType; }
         uint32 GetBattleGroundQueueIndex(uint32 bgQueueType) const
         {
+            if (isSpectator())
+                return 0;
             for (uint8 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
                 if (m_bgBattleGroundQueueID[i].bgQueueType == bgQueueType)
                     return i;

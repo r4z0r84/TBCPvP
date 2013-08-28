@@ -3115,6 +3115,14 @@ void Unit::_UpdateSpells(uint32 time)
         Aura* i_aura = m_AurasUpdateIterator->second;
         ++m_AurasUpdateIterator;                            // need shift to next for allow update if need into aura update
         i_aura->Update(time);
+
+        Unit* target = i_aura->GetTarget();
+        Unit* caster = i_aura->GetCaster();
+
+        if (target && target->GetTypeId() == TYPEID_PLAYER && caster && caster->GetTypeId() == TYPEID_PLAYER)
+            if (!i_aura->IsPassive())
+                ((Player*)target)->SendArenaSpectatorAura(false, i_aura->GetStackAmount(), i_aura->GetAuraDuration(), 
+                    i_aura->GetAuraMaxDuration(), i_aura->GetId(), i_aura->IsPeriodic(), i_aura->IsPositive(), ((Player*)caster)->GetGUID());
     }
 
     // remove expired auras
@@ -3276,6 +3284,9 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
             if (GetTypeId() == TYPEID_PLAYER)
                 ToPlayer()->SendAutoRepeatCancel();
         }
+
+        if (GetTypeId() == TYPEID_PLAYER)
+            ((Player*)this)->SendArenaSpectatorSpell(spell->m_spellInfo->Id, 99999);
 
         if (spell->getState() != SPELL_STATE_FINISHED)
             spell->cancel();
@@ -3673,7 +3684,7 @@ bool Unit::AddAura(Aura *Aur)
                     ++i2;
                     continue;
             }
-            if ((aurSpellInfo->SpellFamilyFlags & 0x800000LL) && aurSpellInfo->SpellIconID == 548)  // Special Case: Mindflay
+            if (((aurSpellInfo->SpellFamilyFlags & 0x800000LL) && aurSpellInfo->SpellIconID == 548) || (aurSpellInfo->Id == 35339))  // Special Case: Mindflay
             {
                 ++i2;
                 continue;
@@ -4286,6 +4297,13 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
     sLog->outDebug("Aura %u (%u) now is remove mode %d", Aur->GetId(), Aur->GetModifier()->m_auraname, mode);
     ASSERT(!Aur->IsInUse());
     Aur->ApplyModifier(false, true);
+
+    Unit* auraTarget = Aur->GetTarget();
+    Unit* auraCaster = Aur->GetCaster();
+
+    if (auraTarget && auraTarget->GetTypeId() == TYPEID_PLAYER && auraCaster && auraCaster->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)Aur->GetTarget())->SendArenaSpectatorAura(true, Aur->GetStackAmount(), Aur->GetAuraDuration(), Aur->GetAuraMaxDuration(), 
+            Aur->GetId(), Aur->IsPeriodic(), Aur->IsPositive(), ((Player*)Aur->GetCaster())->GetGUID());
 
     Aur->SetStackAmount(0);
 
@@ -6630,6 +6648,7 @@ void Unit::setPowerType(Powers new_powertype)
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        ((Player*)this)->m_arenaSpectatorFlags |= (ARENASPEC_POWERTYPE | ARENASPEC_MAXPOWER);
         if (ToPlayer()->GetGroup())
             ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER_TYPE);
     }
@@ -10493,6 +10512,7 @@ void Unit::SetHealth(uint32 val)
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        ((Player*)this)->m_arenaSpectatorFlags |= ARENASPEC_HEALTH;
         if (ToPlayer()->GetGroup())
             ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_HP);
     }
@@ -10516,6 +10536,7 @@ void Unit::SetMaxHealth(uint32 val)
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        ((Player*)this)->m_arenaSpectatorFlags |= ARENASPEC_MAXHEALTH;
         if (ToPlayer()->GetGroup())
             ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_HP);
     }
@@ -10600,6 +10621,7 @@ void Unit::ApplyPowerMod(Powers power, uint32 val, bool apply)
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        ((Player*)this)->m_arenaSpectatorFlags |= ARENASPEC_POWER;
         if (ToPlayer()->GetGroup())
             ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
     }
@@ -10622,6 +10644,7 @@ void Unit::ApplyMaxPowerMod(Powers power, uint32 val, bool apply)
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        ((Player*)this)->m_arenaSpectatorFlags |= ARENASPEC_MAXPOWER;
         if (ToPlayer()->GetGroup())
             ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
     }

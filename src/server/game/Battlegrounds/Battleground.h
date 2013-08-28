@@ -366,7 +366,9 @@ class BattleGround
         bool isRated() const        { return m_IsRated; }
 
         typedef std::map<uint64, BattleGroundPlayer> BattleGroundPlayerMap;
+        typedef std::map<uint64, BattleGroundPlayer> BattleGroundSpectatorMap;
         BattleGroundPlayerMap const& GetPlayers() const { return m_Players; }
+        BattleGroundSpectatorMap const& GetSpectators() const { return m_Spectators; }
         uint32 GetPlayersSize() const { return m_Players.size(); }
         uint32 GetRemovedPlayersSize() const { return m_RemovedPlayers.size(); }
 
@@ -486,6 +488,8 @@ class BattleGround
 
         virtual void AddPlayer(Player *plr);                // must be implemented in BG subclass
 
+        virtual void AddSpectator(Player *plr);
+
         virtual void RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPacket);
                                                             // can be extended in in BG subclass
 
@@ -536,6 +540,7 @@ class BattleGround
 
         /* Player lists, those need to be accessible by inherited classes */
         BattleGroundPlayerMap  m_Players;
+        BattleGroundSpectatorMap m_Spectators;
                                                             // Spirit Guide guid + Player list GUIDS
         std::map<uint64, std::vector<uint64> >  m_ReviveQueue;
 

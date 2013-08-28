@@ -528,6 +528,9 @@ class ChatHandler
         bool HandleSetInstanceDataCommand(const char* args);
         bool HandleGetInstanceDataCommand(const char* args);
 
+        // Arena spectator Commands
+        bool HandleArenaSpecResetCommand(const char* args);
+        bool HandleArenaSpecWatchCommand(const char* args);
         Player*   getSelectedPlayer();
         Creature* getSelectedCreature();
         Unit*     getSelectedUnit();

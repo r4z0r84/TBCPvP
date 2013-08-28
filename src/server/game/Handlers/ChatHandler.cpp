@@ -57,6 +57,9 @@ bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg
         }
     }
 
+    if (GetPlayer()->isSpectator())
+        return false;
+
     return true;
 }
 
@@ -197,6 +200,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 break;
 
             if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
+                break;
+
+            if (GetPlayer()->isSpectator())
                 break;
 
             if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
@@ -620,6 +626,9 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recv_data)
         SendNotification(GetSkyFireString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
         return;
     }
+
+    if (GetPlayer()->isSpectator())
+        return;
 
     GetPlayer()->UpdateSpeakTime(true);
 

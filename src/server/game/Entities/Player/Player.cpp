@@ -125,6 +125,242 @@ enum CharacterFlags
 
 static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
 
+class ArenaSpecUpdate
+{
+public:
+    std::string msg;
+
+    ArenaSpecUpdate(Player *p)
+    {
+        msg = "";
+        msg.append(p->GetName());
+        msg.push_back(';');
+    }
+
+    void Appendlast(uint32 data)
+    {
+        std::ostringstream os;
+        os << data;
+        msg.append(os.str());
+        msg.push_back(';');
+    }
+
+    void Appendname(char* prefix, const char* data)
+    {
+        msg.append(prefix);
+        msg.push_back('=');
+        msg.append(data);
+        msg.push_back(';');
+    }
+
+    void Append(char* prefix, uint32 data)
+    {
+        msg.append(prefix);
+        msg.push_back('=');
+        std::ostringstream os;
+        os << data;
+        msg.append(os.str());
+        msg.push_back(';');
+    }
+
+    void Append(uint32 data)
+    {
+        std::ostringstream os;
+        os << data;
+        msg.append(os.str());
+        msg.push_back(',');
+    }
+
+    void Appendwithoutdelimiter(uint32 data)
+    {
+        std::ostringstream os;
+        os << data;
+        msg.append(os.str());
+    }
+
+    void Appendaur(char* prefix, uint32 data)
+    {
+        msg.append(prefix);
+        msg.push_back('=');
+        std::ostringstream os;
+        os << data;
+        msg.append(os.str());
+        msg.push_back(',');
+    }
+
+    void Append(char* prefix, char* data)
+    {
+        msg.append(prefix);
+        msg.push_back('=');
+        msg.append(data);
+        msg.push_back(';');
+    }
+
+    void Append(char* prefix, uint32 data, uint32 extended)
+    {
+         msg.append(prefix);
+         msg.push_back('=');
+         std::ostringstream os;
+         os << data << ',' << extended;
+         msg.append(os.str());
+         msg.push_back(';');
+    }
+};
+
+void Player::setSpectator(bool on)
+{
+    if (on == true)
+    {
+        if (isSpectator())
+        {
+            sLog->outDebug("Player::setSpectator: trying to set spectator state for player but he already has this state.");
+            return;
+        }
+
+        SetSpeed(MOVE_RUN, 3, true);
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+        RemovePet(NULL,PET_SAVE_NOT_IN_SLOT, true);
+        if (GetGroup())
+            RemoveFromGroup();
+
+        WorldPacket status;
+        sBattleGroundMgr->BuildBattleGroundStatusPacket(&status, NULL, 0, 0, STATUS_NONE, 0, 0, 0, 0);
+        GetSession()->SendPacket(&status);
+    }
+    else
+    {
+        UpdateSpeed(MOVE_RUN, true);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+
+        WorldPacket status;
+        sBattleGroundMgr->BuildBattleGroundStatusPacket(&status, NULL, 0, 0, STATUS_NONE, 0, 0, 0, 0);
+        GetSession()->SendPacket(&status); // remove minimap PvP icon
+    }
+
+    m_isArenaSpectator = on;
+}
+
+void Player::SendArenaSpectatorAura(int32 remove, uint32 stack, int32 expiration, int32 duration, int32 id, int32 nevim2, bool nevim, int32 caster)
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+    update.Appendaur("AUR", remove);
+    update.Append(stack);
+    update.Append(expiration);
+    update.Append(duration);
+    update.Append(id);
+    update.Append(nevim2);
+    update.Append(nevim);
+    update.Appendlast(caster);
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
+void Player::SendArenaSpectatorSpellCooldown(uint32 spell, uint32 cooldown)
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+    update.Append("CD", spell, cooldown);
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
+void Player::BuildArenaSpectatorUpdate()
+{
+    if (!m_arenaSpectatorFlags)
+        return;
+
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+
+    if (m_arenaSpectatorFlags & ARENASPEC_STATUS)
+        update.Append("STA", isAlive() ? 1 : 0);
+    if (m_arenaSpectatorFlags & ARENASPEC_MAXHEALTH)
+        update.Append("MHP", GetMaxHealth());
+    if (m_arenaSpectatorFlags & ARENASPEC_HEALTH)
+        update.Append("CHP", GetHealth());
+
+    if (m_arenaSpectatorFlags & ARENASPEC_MAXPOWER)
+    {
+        Powers type = getPowerType();
+        int32 power;
+        if (type == POWER_RAGE)
+            power = GetMaxPower(type) / 10;
+        else
+            power = GetMaxPower(type);
+        update.Append("MPW", power);
+    }
+    if (m_arenaSpectatorFlags & ARENASPEC_POWERTYPE)
+        update.Append("PWT", uint32(getPowerType()));
+    if (m_arenaSpectatorFlags & ARENASPEC_POWER)
+    {
+        Powers type = getPowerType();
+        int32 power;
+        if (type == POWER_RAGE)
+            power = GetPower(type) / 10;
+        else
+            power = GetPower(type);
+        update.Append("CPW", power);
+    }
+
+    Unit *selection = GetUnit(*m_session->GetPlayer(),GetSelection());
+    const char* name = "0";
+    if (selection)
+        if (selection->GetTypeId() == TYPEID_PLAYER)
+            name = selection->GetName();
+
+    if (m_arenaSpectatorFlags & ARENASPEC_TARGET)
+        update.Appendname("TRG", name);
+
+    if (m_arenaSpectatorFlags & ARENASPEC_TEAM)
+        update.Append("TEM", GetBGTeam());
+
+    if (m_arenaSpectatorFlags & ARENASPEC_CLASS)
+        update.Append("CLA", uint32(getClass()));
+
+    m_arenaSpectatorFlags = 0;
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
+void Player::SendArenaSpectatorSpell(uint32 id, uint32 time)
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+    update.Append("SPE", id, time);
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
+void Player::SendAddonMessage(std::string& text, char* prefix)
+{
+    std::string message;
+    message.append(prefix);
+    message.push_back(9);
+    message.append(text);
+
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
+    data << uint8(CHAT_MSG_WHISPER);
+    data << uint32(LANG_ADDON);
+    data << uint64(0); // guid
+    data << uint32(LANG_ADDON);                               //language 2.1.0 ?
+    data << uint64(0); // guid
+    data << uint32(message.length() + 1);
+    data << message;
+    data << uint8(0);
+
+    SendMessageToSetInRange(&data, MAX_VISIBILITY_DISTANCE, false, false);
+}
+
 //== PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -544,6 +780,8 @@ Player::Player (WorldSession *session): Unit()
     m_DamageCustomReduction = 0; // Used for Damage Reduction spells, such as Blessed Life
 
     m_globalCooldowns.clear();
+
+    m_isArenaSpectator = false;
 }
 
 Player::~Player ()
@@ -1479,6 +1717,8 @@ void Player::Update(uint32 p_time)
     // group update
     SendUpdateToOutOfRangeGroupMembers();
 
+    BuildArenaSpectatorUpdate();
+
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && !pet->isPossessed())
         RemovePet(pet, PET_SAVE_NOT_IN_SLOT, true);
@@ -1490,6 +1730,8 @@ void Player::Update(uint32 p_time)
 void Player::setDeathState(DeathState s)
 {
     uint32 ressSpellId = 0;
+
+    m_arenaSpectatorFlags |= ARENASPEC_STATUS;
 
     bool cur = isAlive();
 
@@ -19608,6 +19850,9 @@ bool Player::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bool
     if (isGameMaster())
         return true;
 
+    if (u->GetTypeId() == TYPEID_PLAYER && u->ToPlayer()->isSpectator())
+        return false;
+
     // Arena visibility before arena start
     if (InArena() && GetBattleGround() && GetBattleGround()->GetStatus() == STATUS_WAIT_JOIN)
         if (const Player* target = u->GetCharmerOrOwnerPlayerOrPlayerItself())
@@ -19796,6 +20041,9 @@ bool Player::IsVisibleGloballyFor(Player* u) const
     // Always can see self
     if (u == this)
         return true;
+
+    if (u->GetTypeId() == TYPEID_PLAYER && ((Player*)u)->isSpectator())
+        return false;
 
     // Visible units, always are visible for all players
     if (GetVisibility() == VISIBILITY_ON)

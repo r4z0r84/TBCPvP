@@ -677,6 +677,8 @@ namespace Trinity
                 if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->isTotem())
                     return false;
 
+                if (u->GetTypeId() == TYPEID_PLAYER && ((Player*)u)->isSpectator())
+                    return false;
                 return i_obj->IsWithinDistInMap(u, i_range) && !i_funit->IsFriendlyTo(u);
             }
         private:
@@ -957,6 +959,8 @@ namespace Trinity
         AnyPlayerInObjectRangeCheck(WorldObject const* obj, float range) : i_obj(obj), i_range(range) {}
         bool operator()(Player* u)
         {
+            if (u->GetTypeId() == TYPEID_PLAYER && ((Player*)u)->isSpectator())
+                return false;
             if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range))
                 return true;
 

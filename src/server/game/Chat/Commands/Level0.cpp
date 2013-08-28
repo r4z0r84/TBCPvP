@@ -266,3 +266,48 @@ bool ChatHandler::HandleServerMotdCommand(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleArenaSpecResetCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr || !plr->InArena() || !plr->isAlive())
+        return false;
+
+    Map::PlayerList const &PlList = plr->GetMap()->GetPlayers();
+
+    if (PlList.isEmpty())
+        return true;
+
+    for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+    {
+        if (Player* pPlayer = i->getSource())
+        {
+            if (pPlayer->isGameMaster())
+                continue;
+
+            pPlayer->m_arenaSpectatorFlags = 0xFFFF;
+        }
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleArenaSpecWatchCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr || !plr->InArena())
+        return false;
+
+    Player *t = sObjectAccessor->FindPlayerByName(args);
+    if (!t || !t->InBattleGround() || !t->isAlive())
+        return false;
+
+    if (plr->HasAura(35339, 0))
+    {
+        plr->CastSpell(plr, 10101, true);
+    }
+    plr->CastSpell(t, 35339, false);
+
+    return true;
+}

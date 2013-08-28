@@ -862,8 +862,19 @@ void BattleGround::EndBattleGround(uint32 winner)
         plr->GetSession()->SendPacket(&data);
 
         uint32 bgQueueTypeId = sBattleGroundMgr->BGQueueTypeId(GetTypeID(), GetArenaType());
-        sBattleGroundMgr->BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
+        sBattleGroundMgr->BuildBattleGroundStatusPacket(&data, this, plr->GetBGTeam(), plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
         plr->GetSession()->SendPacket(&data);
+    }
+    for (std::map<uint64, BattleGroundPlayer>::iterator itr = m_Spectators.begin(); itr != m_Spectators.end(); ++itr)
+    {
+        if (Player *plr = sObjectMgr->GetPlayer(itr->first))
+        {
+            sBattleGroundMgr->BuildPvpLogDataPacket(&data, this);
+            plr->GetSession()->SendPacket(&data);
+            uint32 bgQueueTypeId = sBattleGroundMgr->BGQueueTypeId(GetTypeID(), GetArenaType());
+            sBattleGroundMgr->BuildBattleGroundStatusPacket(&data, this, 0, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
+            plr->GetSession()->SendPacket(&data);
+        }
     }
 
     if (isArena() && isRated() && winner_arena_team && loser_arena_team)
@@ -1033,6 +1044,9 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         delete itr2->second;                                // delete player's score
         m_PlayerScores.erase(itr2);
     }
+    std::map<uint64, BattleGroundPlayer>::iterator itr3 = m_Spectators.find(guid);
+    if (itr3 != m_Spectators.end())
+        m_Spectators.erase(itr3);
 
     RemovePlayerFromResurrectQueue(guid);
 
@@ -1138,6 +1152,9 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         if (Transport)
             plr->TeleportToBGEntryPoint();
 
+        // Remove spectator flags on arena leave
+        if (plr->isSpectator())
+            plr->setSpectator(false);
         sLog->outDetail("BATTLEGROUND: Removed player %s from BattleGround.", plr->GetName());
     }
 
@@ -1964,4 +1981,16 @@ void BattleGround::Announce()
 
         sWorld->SendWorldText(LANG_BG_QUEUE_ANNOUNCE_START, bgName, q_min_level, q_max_level);
     }
+}
+
+void BattleGround::AddSpectator(Player *plr)
+{
+    uint64 guid = plr->GetGUID();
+
+    BattleGroundPlayer bp;
+    bp.LastOnlineTime = 0;
+    bp.Team = 5;
+
+    // Add to list/maps
+    m_Spectators[guid] = bp;
 }

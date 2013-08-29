@@ -32,7 +32,7 @@ bool GossipHello_spectator(Player *player, Creature *_Creature)
     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,  "2v2 Rated"              , ARENA_TYPE_2v2, 0); // start listing at arena 0
     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,  "3v3 Rated"              , ARENA_TYPE_3v3, 0);
     //player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT,  "5v5 Rated"              , ARENA_TYPE_5v5, 0);
-    player->PlayerTalkClass->SendGossipMenu(66, creature->GetGUID());
+    player->PlayerTalkClass->SendGossipMenu(66, _Creature->GetGUID());
 
     return true;
 }

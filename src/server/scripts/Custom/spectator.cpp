@@ -253,7 +253,7 @@ void SendSubMenu_spectator(Player *player, Creature *_Creature, uint32 arenaType
     if (totalcount > 0)
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Reload", arenaType, action);
 
-    player->SEND_GOSSIP_MENU(totalcount > 0 ? DEFAULT_GOSSIP_MESSAGE : 67 ,_Creature->GetGUID());
+    player->SEND_GOSSIP_MENU(totalcount > 0 ? 66 : 67 ,_Creature->GetGUID());
 }
 
 void SendMenu_spectator(Player *player, Creature *_Creature, uint32 action)

@@ -2135,6 +2135,9 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         {
             if (!m_IsTriggeredSpell)
                 ((Player*)m_caster)->SendArenaSpectatorSpell(m_spellInfo->Id, m_casttime);
+
+            if (m_spellInfo->Id == 42292)
+                m_caster->ToPlayer()->SendGladdyNotification();
         }
         if (!m_casttime && !m_spellInfo->StartRecoveryTime
             && !m_castItemGUID     //item: first cast may destroy item and second cast causes crash

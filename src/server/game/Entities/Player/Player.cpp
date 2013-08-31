@@ -8512,7 +8512,7 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
             ApplySpellMod(pEnchant->spellid[s], SPELLMOD_CHANCE_OF_SUCCESS, chance);
 
             // Shiv
-            if (FindCurrentSpellBySpellId(5938))
+            if (FindCurrentSpellBySpellId(5938) && spellInfo->SpellFamilyName == 8)
                 chance = 100.0f;
 
             if (roll_chance_f(chance))

@@ -4555,6 +4555,11 @@ uint8 Spell::CheckCasterAuras() const
     else if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY)
         prevented_reason = SPELL_FAILED_PACIFIED;
 
+   // Prevent All Spells from being used as an Arena Spectator, excluding Mind Vision
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id != 35339)
+        if (m_caster->ToPlayer()->isSpectator())
+            return SPELL_FAILED_PACIFIED;
+
     // Attr must make flag drop spell totally immune from all effects
     if (prevented_reason)
     {

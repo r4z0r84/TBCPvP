@@ -2582,7 +2582,7 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
 
             int32 tickheal = targetAura->GetModifierValuePerStack();
             if (Unit* auraCaster = targetAura->GetCaster())
-                tickheal = auraCaster->SpellHealingBonus(targetAura->GetSpellProto(), tickheal, DOT, unitTarget);
+                tickheal = auraCaster->SpellHealingBonusHOT(targetAura->GetSpellProto(), tickheal, DOT, unitTarget);
             //int32 tickheal = targetAura->GetSpellProto()->EffectBasePoints[idx] + 1;
             //It is said that talent bonus should not be included
             //int32 tickheal = targetAura->GetModifierValue();

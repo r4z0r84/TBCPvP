@@ -190,6 +190,9 @@ class SpellCastTargets
         ObjectGuid m_CorpseTargetGUID;
         ObjectGuid m_itemTargetGUID;
         uint32 m_itemTargetEntry;
+
+        // Custom Delay Patch
+        uint64 GetPVPSpellDelay(SpellEntry const *m_spellInfo);
 };
 
 inline ByteBuffer& operator<< (ByteBuffer& buf, SpellCastTargets const& targets)

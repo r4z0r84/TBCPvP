@@ -2334,9 +2334,85 @@ void SpellMgr::LoadSpellCustomAttr()
         {
             spellInfo->SpellVisual = 9219;
         }
+        // Warrior ------------------------------------------------------------
+        // Pummel
+        if (spellInfo->SpellVisual == 1023 && spellInfo->SpellFamilyName == 4)
+        {
+            spellInfo->speed = 3600.0f;
+            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
+        }
+        // Sword Specialisation Proc
+        if (spellInfo->SpellIconID == 1462 && spellInfo->SpellVisual == 6560 && spellInfo->SpellFamilyName == 4)
+            spellInfo->speed = 500.0f;
+
+        // Paladin ------------------------------------------------------------
+        // Seal of Command (20424)
+        if (spellInfo->SpellVisual == 39 && spellInfo->SpellFamilyName == 10)
+            spellInfo->speed = 75.0f;
+        // Hammer of Justice
+        if (spellInfo->SpellVisual == 322 && spellInfo->SpellFamilyName == 10)
+        {
+            spellInfo->speed = 500.0f;
+            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
+        }
+
+        // Rogue --------------------------------------------------------------
+        // Gouge
+        if (spellInfo->SpellVisual == 256 && spellInfo->SpellFamilyName == 8)
+            spellInfo->speed = 1000.0f;
+        // Kick
+        if (spellInfo->SpellIconID == 246 && spellInfo->SpellFamilyName == 8)
+            spellInfo->speed = 2200.0f;
+
+        // Shaman -------------------------------------------------------------
+        // Earth Shock
+        if (spellInfo->SpellIconID == 687 && spellInfo->SpellFamilyName == 11)
+            spellInfo->speed = 2000.0f;
+        // Windfury weapon effect
+        if (spellInfo->SpellIconID == 220 && spellInfo->SpellFamilyName == 11)
+            spellInfo->speed = 400.0f;
+        // Windfury totem effect
+        if (spellInfo->SpellIconID == 8251 && spellInfo->SpellVisual == 1397 && spellInfo->SpellFamilyName == 11)
+            spellInfo->speed = 400.0f;
+
+        // Mage ---------------------------------------------------------------
+        // Counterspell - interrupt
+        if (spellInfo->SpellIconID == 17 && spellInfo->SpellVisual == 239 && spellInfo->SpellFamilyName == 3)
+            spellInfo->speed = 3000.0f;
+        // Improved Counterspell (needs to be slower than the interupt)
+        if (spellInfo->SpellIconID == 17 && spellInfo->SpellVisual == 0 && spellInfo->SpellFamilyName == 3)
+            spellInfo->speed = 2600.0f;
+
+        // Druid --------------------------------------------------------------
+        // Pounce
+        if (spellInfo->SpellIconID == 495 && spellInfo->SpellFamilyName == 7)
+            spellInfo->speed = 1200.0f;
 
         switch (i)
         {
+        case 19675: // Feral Charge Interrupt Effect
+            spellInfo->speed = 2000.0f;
+            break;
+        case 32748: // Rogue Deadly Throw interrupt
+            spellInfo->speed = 1800.0f;
+            break;
+        case 33076: // Prayer of Mending, implement spell speed
+            spellInfo->speed = 65.0f;
+            break;
+        case 41637: //Prayer of Mending visual
+            spellInfo->speed = 35.0f;
+            break;
+        case 32221: //Seal of Blood self damage proc
+            spellInfo->speed = 400.0f;
+            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_SPELL_BONUS;
+            break;
+        case 32220: //Judgement of Blood self damage proc
+            spellInfo->speed = 500.0f;
+            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_SPELL_BONUS;
+            break;
+        case 41635: // Prayer of Mending
+            spellInfo->MaxAffectedTargets = 1;
+            break;
         case 26029: // dark glare
         case 37433: // spout
         case 43140: case 43215: // flame breath
@@ -2360,7 +2436,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 44978: case 45001: case 45002:     // Wild Magic
         case 45004: case 45006: case 45010:     // Wild Magic
         case 31347: // Doom
-        case 41635: // Prayer of Mending
         case 44869: // Spectral Blast
         case 45027: // Revitalize
         case 45976: // Muru Portal Channel
@@ -2423,7 +2498,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100:   //Charge
         case 6178:
         case 11578:
-            spellInfo->speed = 300.0f;
+            spellInfo->speed = 1000.0f;
             spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
             spellInfo->AttributesEx |= SPELL_ATTR_EX_CANT_BE_REFLECTED; 
             break;
@@ -2437,7 +2512,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx |= SPELL_ATTR_EX_CANT_BE_REFLECTED;
             break;
         case 2094:                        // Blind
-            spellInfo->speed = 690.0f;    // Minor delay
+            spellInfo->speed = 400.0f;    // Minor delay
             break;
         case 11297:                       //Sap  
         case 2070:
@@ -2449,7 +2524,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectMechanic[0] = MECHANIC_STUN;
             break;
         case 26679:                       // Deadly Throw
-            spellInfo->speed = 0;         // Instant
+            spellInfo->speed = 600.0f;
             break;
         case 12051:                       // Evocation
             spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;

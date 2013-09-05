@@ -52,6 +52,129 @@
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
+// Custom PvP Spell Delay
+uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
+{
+    // Warrior ---------------------------------------------------------------
+    // Charge Stuns
+    if (spellInfo->SpellVisual == 2816 && spellInfo->SpellFamilyName == 4)
+        return 10.0f;
+    // Intercept Stuns
+    if (spellInfo->SpellVisual == 2816 && spellInfo->SpellIconID == 15 && spellInfo->SpellFamilyName == 0)
+        return 50.0f;
+    // Charge
+    if (spellInfo->SpellIconID == 457 && spellInfo->SpellFamilyName == 4)
+        return 25.0f;
+    // Intercept
+    if (spellInfo->SpellIconID == 516 && spellInfo->SpellFamilyName == 4)
+        return 100.0f;
+    // Pummel
+    if (spellInfo->SpellVisual == 1023 && spellInfo->SpellFamilyName == 4)
+        return 75.0f;
+    // Sword Specialisation Proc
+    if (spellInfo->SpellIconID == 1462 && spellInfo->SpellVisual == 6560 && spellInfo->SpellFamilyName == 4)
+        return 500.0f;
+
+    // Paladin ---------------------------------------------------------------
+    // Hammer of Justice
+    if (spellInfo->SpellVisual == 322 && spellInfo->SpellFamilyName == 10)
+        return 150.0f;
+    // Seal of Command Proc Attack
+    if (spellInfo->SpellVisual == 39 && spellInfo->SpellIconID == 561 && spellInfo->SpellFamilyName == 10)
+        return 500.0f;
+    // Seal of Blood Judgement
+    if (spellInfo->Id == 32220)
+        return 1050.0f;
+
+    // Shaman ----------------------------------------------------------------
+    // Earth Shock
+    if (spellInfo->SpellIconID == 687 && spellInfo->SpellFamilyName == 11)
+        return 75.0f;
+    // Windfury
+    if (spellInfo->SpellIconID == 220 && spellInfo->SpellFamilyName == 11)
+        return 500.0f;
+    // Windfury totem effect
+    if (spellInfo->SpellIconID == 8251 && spellInfo->SpellVisual == 1397 && spellInfo->SpellFamilyName == 11)
+        return 500.0f;
+
+    // Mages -----------------------------------------------------------------
+    // Counter Spell (spell lock effect)
+    if (spellInfo->SpellIconID == 17 && spellInfo->SpellVisual == 239 && spellInfo->SpellFamilyName == 3)
+        return 50.0f;
+    // Counter Spell (Silience - Improved Counterspell
+    if (spellInfo->SpellIconID == 17 && spellInfo->SpellVisual == 0 && spellInfo->SpellFamilyName == 3)
+        return 100.0f;
+
+    // Druids -----------------------------------------------------------------
+    // Maim
+    if (spellInfo->SpellIconID == 1681 && spellInfo->SpellFamilyName == 7)
+        return 100.0f;
+    // Pounce
+    if (spellInfo->SpellIconID == 495 && spellInfo->SpellFamilyName == 7)
+        return 150.0f;
+    // Feral Deadly Interrupt
+    if (spellInfo->Id == 32747)
+        return 50.0f;
+    // Feral Charge Interrupt
+    if (spellInfo->Id == 19675)
+        return 100.0f;
+
+    // Rogues ------------------------------------------------------------------
+    // Gouge
+    if (spellInfo->SpellVisual == 256 && spellInfo->SpellFamilyName == 8)
+        return 175.0f;
+    // Kick
+    if (spellInfo->SpellIconID == 246 && spellInfo->SpellFamilyName == 8)
+        return 100.0f;
+    // Blind
+    if (spellInfo->SpellIconID == 48 && spellInfo->SpellFamilyName == 8)
+        return 300.0f;
+    // Sap
+    if (spellInfo->SpellIconID == 249 && spellInfo->SpellFamilyName == 8)
+        return 50.0f;
+    // Cheap Shot
+    if (spellInfo->SpellIconID == 244 && spellInfo->SpellFamilyName == 8)
+        return 100.0f;
+    // Kindney Shot
+    if (spellInfo->SpellIconID == 499 && spellInfo->SpellFamilyName == 8)
+        return 400.0f;
+    // Deadly Throw
+    if (spellInfo->Id == 26679)
+        return 150.0f;
+    // Deadly Throw Interrupt
+    if (spellInfo->Id == 32748)
+        return 150.0f;
+
+    // Misc.
+    switch(spellInfo->Id)
+    {
+        case 11196: // Recently Bandaged
+        case 31616: // Nature's Guardian
+        case 17794: // Shadow Vulnerability (Rank 1)
+        case 17797: // Shadow Vulnerability (Rank 2)
+        case 17798: // Shadow Vulnerability (Rank 3)
+        case 17799: // Shadow Vulnerability (Rank 4)
+        case 17800: // Shadow Vulnerability (Rank 5)
+        case 118:   // Polymorph (Rank 1)
+        case 12824: // Polymorph (Rank 2)
+        case 12825: // Polymorph (Rank 3)
+        case 12826: // Polymorph (Rank 4)
+        case 28271: // Polymorph (Rank 1: Turtle)
+        case 28272: // Polymorph (Rank 1: Pig)
+            return 100.0f;
+            break;
+        case 33076: // Prayer of Mending
+            return 100.0f;
+            break;
+        default:
+            return 50.0f;
+            break;
+    }
+    // Default - Very Small Delay to prevent trinket/consumable abuse macros
+    return 50.0f;
+
+}
+
 bool IsQuestTameSpell(uint32 spellId)
 {
     SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
@@ -772,6 +895,10 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
     }
     else
         target.timeDelay = 0LL;
+
+    // Calculate Additional Custom PvP spell delays
+    target.timeDelay += GetPVPSpellDelay(m_spellInfo);
+    m_delayMoment = target.timeDelay;
 
     // If target reflect spell back to caster
     if (target.missCondition == SPELL_MISS_REFLECT)

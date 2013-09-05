@@ -5589,7 +5589,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     case 1:
                     {
                         // damage
-                        damage += CalculateDamage(BASE_ATTACK, false) * 35 / 100; // add spell damage from prev effect (35%)
+                        damage += CalculateDamage(BASE_ATTACK, false) * 10 / 100; // add spell damage from prev effect (10%)
                         basepoints0 =  triggeredByAura->GetModifier()->m_amount * damage / 100;
 
                         target = this;
@@ -7934,6 +7934,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         default:
             break;
     }
+
+    if (CastingTime = 0.0f)
+        if (spellProto->Id == 32221 || 32220)   // Fix for Seal of Blood reflective damage (no family mask)
+            CastingTime = 0.0f;
 
     float LvlPenalty = CalculateLevelPenalty(spellProto);
 

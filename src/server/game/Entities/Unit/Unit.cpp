@@ -6527,6 +6527,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 return false;
             break;
         }
+        // Aftermath Self Stun
+        case 18118:
+        {
+            if (pVictim == this)
+                return false;
+            break;
+        }
     }
 
     SpellDelayEntry const *spellDelay = sSpellDelayStore.LookupEntry<SpellDelayEntry>(trigger_spell_id);

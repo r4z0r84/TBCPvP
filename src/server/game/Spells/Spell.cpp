@@ -47,6 +47,7 @@
 #include "Battleground.h"
 #include "Util.h"
 #include "TemporarySummon.h"
+#include "Totem.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -1691,7 +1692,7 @@ void Spell::SetTargetMap(uint32 i, uint32 cur)
             switch (cur)
             {
                 case TARGET_UNIT_TARGET_ENEMY:
-                    if ((m_spellInfo->AttributesEx & (0x8 | 0x80)) == 0)
+                    if (((m_spellInfo->AttributesEx & (0x8 | 0x80)) == 0 ) || (m_spellInfo->SpellIconID == 225 && m_spellInfo->SpellVisual == 262))
                     {
                         // try to select magnet target first
                         if (SelectMagnetTarget() == m_targets.getUnitTarget())
@@ -5491,9 +5492,9 @@ Unit* Spell::SelectMagnetTarget()
 {
     Unit* target = m_targets.getUnitTarget();
 
-    if (target && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
+    if ((target && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
         && !(m_spellInfo->Attributes & SPELL_ATTR_ABILITY || m_spellInfo->AttributesEx & SPELL_ATTR_EX_CANT_BE_REDIRECTED || m_spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) // Patch 1.2 notes: Spell Reflection no longer reflects abilities
-        && target->HasAuraType(SPELL_AURA_SPELL_MAGNET))
+        && target->HasAuraType(SPELL_AURA_SPELL_MAGNET)) || (m_spellInfo->SpellIconID == 225 && m_spellInfo->SpellVisual == 262))
     {
         Unit::AuraList const& magnetAuras = target->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
         for (Unit::AuraList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
@@ -5502,7 +5503,10 @@ Unit* Spell::SelectMagnetTarget()
             {
                 if ((*itr)->m_procCharges>0)
                 {
-                    (*itr)->SetAuraProcCharges((*itr)->m_procCharges-1);
+                    if ((*itr)->GetId() == 8178)    //Do not remove the grounding totem effect aura here.  This is removed seperatly when totem is affected by redirected spell
+                        (*itr)->SetAuraProcCharges((*itr)->m_procCharges);
+                    else
+                        (*itr)->SetAuraProcCharges((*itr)->m_procCharges-1);
                     target = magnet;
                     m_targets.setUnitTarget(target);
                     AddUnitTarget(target, 0);
@@ -5522,8 +5526,16 @@ Unit* Spell::SelectMagnetTarget()
                 }
             }
         }
+        // Delay despawn for damage spells to enable the grounding of multiple in-flight spells
+        bool damageSpell = false;
+        for (uint8 i = 0 ; i < MAX_SPELL_EFFECTS; ++i)
+        {
+            if (m_spellInfo->Effect[i] == SPELL_EFFECT_SCHOOL_DAMAGE)
+                damageSpell = true;
+        }
+        if(target->GetTypeId() != TYPEID_PLAYER && target->ToCreature()->isTotem() && target->ToCreature()->GetEntry() == 5925 && !damageSpell)
+            ((Totem*)target)->UnSummon();
     }
-
     return target;
 }
 

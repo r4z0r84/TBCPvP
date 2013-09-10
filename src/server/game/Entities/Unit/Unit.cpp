@@ -9307,7 +9307,6 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             UpdateSpeed(MOVE_SWIM, true);
             UpdateSpeed(MOVE_FLIGHT, true);
         }
-        
     }
 
     for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end(); ++itr)
@@ -9553,6 +9552,13 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
 
 bool Unit::canDetectStealthOf(Unit const* target, float distance) const
 {
+    // Prohibit Spectators from detecting stealthed players
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        if (ToPlayer()->isSpectator())
+            return false;
+    }
+
     if (hasUnitState(UNIT_STAT_STUNNED))
         return false;
     if (distance < 0.24f) //collision

@@ -7970,9 +7970,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             break;
     }
 
-    if (CastingTime = 0.0f)
-        if (spellProto->Id == 32221 || 32220)   // Fix for Seal of Blood reflective damage (no family mask)
-            CastingTime = 0.0f;
+    if (spellProto->Id == 32221 || 32220)   // Fix for Seal of Blood reflective damage (no family mask)
+        CastingTime = 0.0f;
 
     float LvlPenalty = CalculateLevelPenalty(spellProto);
 

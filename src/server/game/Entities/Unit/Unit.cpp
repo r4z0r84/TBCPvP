@@ -6534,6 +6534,36 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 return false;
             break;
         }
+        // Shadowguard Blackout stun - This has to be hardcoded for now
+        case 28378:
+        case 28379:
+        case 28380:
+        case 28381:
+        case 28382:
+        case 28385:
+        {
+            if (GetTypeId() == TYPEID_PLAYER && pVictim)
+            {
+                float chance = 0.0f;
+                if (ToPlayer()->HasSpell(15326))        // Rank 5
+                    chance = 0.1f;
+                else if (ToPlayer()->HasSpell(15325))   // Rank 4
+                    chance = 0.08f;
+                else if (ToPlayer()->HasSpell(15324))   // Rank 3
+                    chance = 0.06f;
+                else if (ToPlayer()->HasSpell(15323))   // Rank 2
+                    chance = 0.04f;
+                else if (ToPlayer()->HasSpell(15268))   // Rank 1
+                    chance = 0.02f;
+                if (chance > 0.0f)
+                {
+                    chance = chance * 100.0f;
+                    if (chance >= urand(0, 100))
+                        CastSpell(pVictim, 15269, true, NULL);
+                }
+            }
+            break;
+        }
     }
 
     SpellDelayEntry const *spellDelay = sSpellDelayStore.LookupEntry<SpellDelayEntry>(trigger_spell_id);
@@ -7897,10 +7927,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 DotFactor = damagetype == DOT ? 0.165f : 1.0f;
                 CastingTime = damagetype == DOT ? 3500 : 3000;
             }
-            // Shadowguard - 28% per charge
+            // Shadowguard - 33% per charge
             else if ((spellProto->SpellFamilyFlags & 0x2000000LL) && spellProto->SpellIconID == 19)
             {
-                CastingTime = 980;
+                CastingTime = 1165;
             }
             // Touch of Weakeness - 10%
             else if ((spellProto->SpellFamilyFlags & 0x80000LL) && spellProto->SpellIconID == 1591)

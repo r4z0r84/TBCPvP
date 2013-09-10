@@ -3102,8 +3102,9 @@ void Spell::SendSpellGo()
     sLog->outDebug("Sending SMSG_SPELL_GO id=%u", m_spellInfo->Id);
 
     // Some spell mods are used already upon cast, such as Presence of Mind, remove them here already as it may cause abuse
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && !m_caster->HasAura(16166, 0) && !m_caster->HasAura(14751, 0) 
-        && !m_caster->HasAura(23920, 0) && !m_caster->HasAura(8178, 0)) // Elemental Mastery/Inner Focus/Spell Reflect/Grounding Effect must not be removed on cast
+    // Elemental Mastery/Inner Focus/Spell Reflect/Grounding Effect/Fel Domination/Cold Snap/Preparation must not be removed on cast
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && !m_caster->HasAura(16166, 0) && !m_caster->HasAura(14751, 0)
+        && !m_caster->HasAura(23920, 0) && !m_caster->HasAura(8178, 0) && !m_caster->HasAura(18708,0) && !(m_spellInfo->Id == 11958) && !(m_spellInfo->Id == 14185))
         m_caster->ToPlayer()->RemoveSpellMods(this);
 
     Unit *target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;

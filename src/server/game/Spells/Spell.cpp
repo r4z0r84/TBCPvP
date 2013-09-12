@@ -71,7 +71,7 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
         return 100.0f;
     // Pummel
     if (spellInfo->SpellVisual == 1023 && spellInfo->SpellFamilyName == 4)
-        return 75.0f;
+        return 35.0f;
     // Sword Specialisation Proc
     if (spellInfo->SpellIconID == 1462 && spellInfo->SpellVisual == 6560 && spellInfo->SpellFamilyName == 4)
         return 500.0f;
@@ -90,7 +90,7 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
     // Shaman ----------------------------------------------------------------
     // Earth Shock
     if (spellInfo->SpellIconID == 687 && spellInfo->SpellFamilyName == 11)
-        return 75.0f;
+        return 35.0f;
     // Windfury
     if (spellInfo->SpellIconID == 220 && spellInfo->SpellFamilyName == 11)
         return 500.0f;
@@ -101,10 +101,10 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
     // Mages -----------------------------------------------------------------
     // Counter Spell (spell lock effect)
     if (spellInfo->SpellIconID == 17 && spellInfo->SpellVisual == 239 && spellInfo->SpellFamilyName == 3)
-        return 50.0f;
+        return 35.0f;
     // Counter Spell (Silience - Improved Counterspell
     if (spellInfo->SpellIconID == 17 && spellInfo->SpellVisual == 0 && spellInfo->SpellFamilyName == 3)
-        return 100.0f;
+        return 60.0f;
 
     // Druids -----------------------------------------------------------------
     // Maim
@@ -126,7 +126,7 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
         return 175.0f;
     // Kick
     if (spellInfo->SpellIconID == 246 && spellInfo->SpellFamilyName == 8)
-        return 100.0f;
+        return 45.0f;
     // Blind
     if (spellInfo->SpellIconID == 48 && spellInfo->SpellFamilyName == 8)
         return 300.0f;
@@ -141,10 +141,10 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
         return 400.0f;
     // Deadly Throw
     if (spellInfo->Id == 26679)
-        return 150.0f;
+        return 50.0f;
     // Deadly Throw Interrupt
     if (spellInfo->Id == 32748)
-        return 150.0f;
+        return 50.0f;
 
     // Misc.
     switch(spellInfo->Id)

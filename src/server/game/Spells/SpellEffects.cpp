@@ -2273,7 +2273,7 @@ void Spell::EffectApplyAura(uint32 i)
 
     sLog->outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
-    if (m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL)    //HOTS gain static spellpower bonus on cast rather than on-tick
+    if (m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL && m_spellInfo->Id != 28880)    //HOTS gain static spellpower bonus on cast rather than on-tick
         damage = m_caster->SpellHealingBonusStatic(m_spellInfo, 0, DOT, unitTarget) + m_spellInfo->EffectBasePoints[i];
 
     Aura* Aur = CreateAura(m_spellInfo, i, &damage, unitTarget, caster, m_CastItem);

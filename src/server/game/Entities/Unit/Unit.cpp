@@ -1170,7 +1170,12 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const *spellInfo, bool triggered, 
     Spell *spell = new Spell(this, spellInfo, triggered, originalCaster);
 
     spell->m_CastItem = castItem;
-    spell->prepare(&targets, triggeredByAura);
+
+    // Exceptions - Seal of Blood, Seal of Command
+    if (spellInfo->Id == 31893 || spellInfo->Id == 20424)   // These spells require a triggeredAura exception to handle crit procs
+        spell->prepare(&targets, 0);                        // Do not add spells here that have no ICD
+    else
+        spell->prepare(&targets, triggeredByAura);
 }
 
 void Unit::CastCustomSpell(Unit* target, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem, Aura* triggeredByAura, uint64 originalCaster)
@@ -5791,7 +5796,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
 
                     // Attack Twice
                     for (uint32 i = 0; i < 2; ++i)
-                        CastCustomSpell(pVictim, triggered_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura);
+                        CastCustomSpell(pVictim, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, 0, originalCaster);
 
                     return true;
                 }
@@ -5960,11 +5965,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
 
     if (basepoints0)
         CastCustomSpell(target, triggered_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura, originalCaster);
-    else
+    else if (triggered_spell_id != 31893)
         CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura, originalCaster);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
+
+    if (triggered_spell_id == 31893)    // Seal of Blood (must be added after cooldown is added)
+        CastSpell(pVictim, 31893, true, 0, NULL, originalCaster);
 
     return true;
 }

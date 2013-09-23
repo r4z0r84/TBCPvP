@@ -493,7 +493,7 @@ void Player::BuildGladdyUpdate()
 void Player::SendGladdyNotification()
 {
     std::stringstream sstream;
-    sstream << "0x" << std::setfill('0') << std::setw(sizeof(uint64) * 2) << std::hex << GetGUID();
+    sstream << "0x" << std::setfill('0') << std::setw(sizeof(uint64) * 2) << std::hex << std::uppercase << GetGUID();
     std::string result = sstream.str();
 
     SendAddonMessage(result, "GladdyTrinketUsed");

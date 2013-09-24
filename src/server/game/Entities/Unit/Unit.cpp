@@ -2952,15 +2952,33 @@ float Unit::GetUnitParryChance() const
     }
     else if (GetTypeId() == TYPEID_UNIT)
     {
-        if (GetCreatureType() == CREATURE_TYPE_HUMANOID || CREATURE_TYPE_DRAGONKIN || CREATURE_TYPE_ELEMENTAL || CREATURE_TYPE_GIANT  || CREATURE_TYPE_GIANT || CREATURE_TYPE_DEMON)
+        if (ToCreature()->isTotem())
+            chance = 0.0f;
+        else if (GetCreatureType() == CREATURE_TYPE_HUMANOID || CREATURE_TYPE_DRAGONKIN || CREATURE_TYPE_ELEMENTAL || CREATURE_TYPE_GIANT  || CREATURE_TYPE_GIANT || CREATURE_TYPE_DEMON)
         {
             chance = 5.0f;
             chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         }
-        else if (GetEntry() == 17252)   // Felguard Pet can parry (due to weapon)
+        else if (GetEntry() == 17252 || GetEntry() == 1860 || GetEntry() == 1863)   // Felguard, Succubus and Voidwalker have additional parry
         {
             chance = 8.62f;
+            chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
         }
+        else if (GetEntry() == 417) // Felhunter
+        {
+            chance = 6.0f;
+            chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
+        }
+        else if (ToCreature()->isPet()) // Hunter Pets
+        {
+            if (Pet *pet = ((Pet*)this))
+                if (pet->getPetType() == HUNTER_PET)
+                {
+                    chance = 5.0f;
+                    chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
+                }
+        }
+
     }
     if (getLevel() > 71) // bosses and high level elites have a much higher chance to parry
         chance += (getLevel() - 70) * 0.5f; 
@@ -2989,6 +3007,10 @@ float Unit::GetUnitBlockChance() const
     {
         if (ToCreature()->isTotem())
             return 0.0f;
+        else if (GetEntry() == 17252 || GetEntry() == 1860 || GetEntry() == 1863)   // Felguard, Succubus and Voidwalker have additional block
+            return 20.0f;
+        else if (GetEntry() == 417) // Felhunter
+            return 10.0f;
         else
         {
             float block = 5.0f;

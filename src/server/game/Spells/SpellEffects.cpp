@@ -4390,6 +4390,13 @@ void Spell::SpellDamageWeaponDmg(uint32 i)
                 spell_bonus += int32(0.20f*m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)));
                 spell_bonus += int32(0.29f*m_caster->SpellBaseDamageBonusForVictim(GetSpellSchoolMask(m_spellInfo), unitTarget));
             }
+            // Crusader Strike +40% damage if Seal of the Crusader Active
+            if (m_spellInfo->SpellIconID == 2309 && m_spellInfo->SpellVisual == 8316)
+            {
+                if (m_caster->HasAura(27158, 0) || m_caster->HasAura(20308, 0) || m_caster->HasAura(20307, 0) 
+                    || m_caster->HasAura(20306, 0) || m_caster->HasAura(20305, 0) || m_caster->HasAura(20162, 0) || m_caster->HasAura(21082, 0))
+                    totalDamagePercentMod *= 1.4f;
+            }
             break;
         }
         case SPELLFAMILY_SHAMAN:

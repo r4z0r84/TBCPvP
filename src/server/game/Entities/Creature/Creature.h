@@ -490,7 +490,7 @@ class Creature : public Unit, public GridObject<Creature>
 
         uint32 GetShieldBlockValue() const                  //dunno mob block value
         {
-            return (getLevel()/2 + uint32(GetStat(STAT_STRENGTH)/20));
+            return (getLevel()/2 + (uint32(GetStat(STAT_STRENGTH)*2)/10));
         }
 
         SpellSchoolMask GetMeleeDamageSchoolMask() const { return m_meleeDamageSchoolMask; }

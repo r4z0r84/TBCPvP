@@ -8380,9 +8380,12 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                 }
                 break;
             case SPELLFAMILY_PRIEST:
-                // Holy Nova - 14%
+                // Holy Nova - 16%
                 if ((spellProto->SpellFamilyFlags & 0x8000000LL) && spellProto->SpellIconID == 1874)
-                    CastingTime = 500;
+                    CastingTime = 565;
+                // Gift of the Naaru 92%
+                else if (spellProto->Id == 28880)
+                    DotFactor = 9.21f;
                 break;
             case SPELLFAMILY_PALADIN:
                 // Seal and Judgement of Light (add 15%)

@@ -5611,6 +5611,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     case 0:
                         triggered_spell_id = 31893;
                         break;
+                    /*  Now handled in Unit::HandleDummyAuraProc
                     case 1:
                     {
                         // damage
@@ -5622,6 +5623,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         triggered_spell_id = 32221;
                         break;
                     }
+                    */
                 }
             }
 
@@ -5994,7 +5996,13 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
         ToPlayer()->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
 
     if (triggered_spell_id == 31893)    // Seal of Blood (must be added after cooldown is added)
+    {
         CastSpell(pVictim, 31893, true, 0, NULL, originalCaster);
+        // Now handle reflective damage here, and prevent scaling with +damage modifiers
+        int32 baseDamage = CalculateDamage(BASE_ATTACK, false) * 10 / 100; // add spell damage from prev effect (10%)
+        baseDamage += triggeredByAura->GetModifier()->m_amount * baseDamage / 100;
+        CastCustomSpell(this, 32221, &baseDamage, NULL, NULL, true, NULL, triggeredByAura, 0);
+    }
 
     return true;
 }

@@ -5979,7 +5979,7 @@ void Aura::PeriodicTick()
                 if (negativeMod)
                     EffectModifier *= (100.0f + negativeMod) / 100.0f;
             }
-            else if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_HEAL)
+            else if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_HEAL && GetSpellProto()->Id != 28880)
                 pdamage = pCaster->SpellHealingBonusHOT(GetSpellProto(), amount, DOT, m_target);    
             else
                 pdamage = pCaster->SpellHealingBonus(GetSpellProto(), amount, DOT, m_target);

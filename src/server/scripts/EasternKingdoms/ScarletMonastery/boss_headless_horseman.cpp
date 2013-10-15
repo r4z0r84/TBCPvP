@@ -30,13 +30,13 @@ EndScriptData */
 #include "scarlet_monastery.h"
 
 //this texts are already used by 3975 and 3976
-#define SAY_ENTRANCE                -1189001
-#define SAY_REJOINED                -1189002
-#define SAY_LOST_HEAD               -1189003
-#define SAY_CONFLAGRATION           -1189004
-#define SAY_SPROUTING_PUMPKINS      -1189005
-#define SAY_PLAYER_DEATH            -1189006
-#define SAY_DEATH                   -1189007
+#define SAY_ENTRANCE                -1189022
+#define SAY_REJOINED                -1189023
+#define SAY_LOST_HEAD               -1189024
+#define SAY_CONFLAGRATION           -1189025
+#define SAY_SPROUTING_PUMPKINS      -1189026
+#define SAY_PLAYER_DEATH            -1189027
+#define SAY_DEATH                   -1189028
 
 uint32 RandomLaugh[] = {11965, 11975, 11976};
 

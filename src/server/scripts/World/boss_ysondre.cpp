@@ -55,6 +55,8 @@ struct boss_ysondreAI : public ScriptedAI
     uint32 m_uiLightningWave_Timer;
     uint32 m_uiSummonDruidModifier;
 
+    bool mobsSpawned;
+
     void Reset()
     {
         m_uiSleep_Timer = 15000 + rand()%5000;
@@ -63,6 +65,8 @@ struct boss_ysondreAI : public ScriptedAI
         //m_uiMarkOfNature_Timer = 45000;
         m_uiLightningWave_Timer = 12000;
         m_uiSummonDruidModifier = 0;
+
+        mobsSpawned = false;
     }
 
     void EnterCombat(Unit* /*pWho*/)
@@ -134,14 +138,14 @@ struct boss_ysondreAI : public ScriptedAI
             m_uiLightningWave_Timer -= uiDiff;
 
         //Summon Druids
-        if ((me->GetHealth()*100 / me->GetMaxHealth()) <= (100-(25*m_uiSummonDruidModifier)))
+        if (me->GetHealth() < me->GetMaxHealth() * 0.1 && !mobsSpawned)
         {
             DoScriptText(SAY_SUMMONDRUIDS, me);
 
             for (int i = 0; i < 10; ++i)
                 DoCast(me, SPELL_SUMMONDRUIDS, true);
 
-            ++m_uiSummonDruidModifier;
+            mobsSpawned = true;
         }
 
         DoMeleeAttackIfReady();

@@ -6602,6 +6602,26 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             }
             break;
         }
+        // Blackout
+        case 15269:
+        {
+            // Prevent Blackout self-stun, Mind Vision stun, silence stun
+            if (procSpell)
+            {
+                switch (procSpell->Id)
+                {
+                    case 32409: // Shadow Word: Death reflective damage
+                    case 2096:  // Mind Vision rank 1
+                    case 10909: // Mind Vision rank 2
+                    case 15487: // Silence
+                        return false;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            break;
+        }
     }
 
     SpellDelayEntry const *spellDelay = sSpellDelayStore.LookupEntry<SpellDelayEntry>(trigger_spell_id);
@@ -7939,8 +7959,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 if (spellProto->SpellIconID == 33)          // Fire Nova totem attack must be 21.4%(untested)
                     CastingTime = 749;                      // ignore CastingTime and use as modifier
-                else if (spellProto->SpellIconID == 680)    // Searing Totem attack 8%
-                    CastingTime = 280;                      // ignore CastingTime and use as modifier
+                else if (spellProto->SpellIconID == 680)    // Searing Totem attack 16.8%
+                    CastingTime = 590;                      // ignore CastingTime and use as modifier
                 else if (spellProto->SpellIconID == 37)     // Magma totem attack must be 6.67%(untested)
                     CastingTime = 234;                      // ignore CastingTimePenalty and use as modifier
             }
@@ -9093,6 +9113,9 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
     if (spellProto)
         if (Player* modOwner = GetSpellModOwner())
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
+
+    if (damagetype == DOT)   // Don't apply flat benefit to bleeds
+        TakenFlatBenefit = 0;
 
     tmpDamage = (tmpDamage + TakenFlatBenefit)*TakenTotalMod;
 
@@ -11739,6 +11762,16 @@ void Unit::SetStandState(uint8 state)
 bool Unit::IsPolymorphed() const
 {
     return GetSpellSpecific(getTransForm()) == SPELL_MAGE_POLYMORPH;
+}
+
+bool Unit::hasNegativeAuraWithInterruptFlag(uint32 flag)
+{
+    for (AuraMap::const_iterator iter = GetAuras().begin(); iter != GetAuras().end(); ++iter)
+    {
+        if (!iter->second->IsPositive() && iter->second->GetSpellProto()->AuraInterruptFlags & flag)
+            return true;
+    }
+    return false;
 }
 
 void Unit::SetDisplayId(uint32 modelId)

@@ -83,6 +83,13 @@ void CombatAI::UpdateAI(const uint32 diff)
 
     events.Update(diff);
 
+    // In patch 2.0.1 guardian combat AI should not break CC
+    if (me->getVictim() && me->getVictim()->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) && me->isGuardian())
+    {
+        me->InterruptNonMeleeSpells(false);
+        return;
+    }
+
     if (me->hasUnitState(UNIT_STAT_CASTING))
         return;
 

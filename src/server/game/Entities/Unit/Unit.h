@@ -1083,6 +1083,7 @@ class Unit : public WorldObject
         bool isFeared()  const { return HasAuraType(SPELL_AURA_MOD_FEAR); }
         bool isInRoots() const { return HasAuraType(SPELL_AURA_MOD_ROOT); }
         bool IsPolymorphed() const;
+        bool hasNegativeAuraWithInterruptFlag(uint32 flag);
 
         bool isFrozen() const;
 

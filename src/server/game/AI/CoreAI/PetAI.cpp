@@ -53,7 +53,11 @@ bool PetAI::_needToStop() const
     // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
     if (me->isCharmed() && me->getVictim() == me->GetCharmer())
         return true;
-
+    /*
+    if (me->getVictim() && me->getVictim()->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) && !me->isattacking)
+        return true;
+    */
+    
     return !me->canAttack(me->getVictim());
 }
 
@@ -91,10 +95,17 @@ void PetAI::UpdateAI(const uint32 diff)
     // me->getVictim() can't be used for check in case stop fighting, me->getVictim() clear at Unit death etc.
     if (me->getVictim())
     {
+        if (me->getVictim()->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) && m_forceAttack == false)
+        {
+            _stopAttack();
+            me->InterruptNonMeleeSpells(false);
+            return;
+        }
         if (_needToStop())
         {
             sLog->outDebug("Pet AI stoped attacking [guid=%u]", me->GetGUIDLow());
             _stopAttack();
+            me->InterruptNonMeleeSpells(true);
             return;
         }
 
@@ -213,7 +224,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if (!me->HasInArc(M_PI, target))
             {
                 me->SetInFront(target);
-                if (target->GetTypeId() == TYPEID_PLAYER)
+                if (target && target->GetTypeId() == TYPEID_PLAYER)
                     me->SendUpdateToPlayer(target->ToPlayer());
 
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
@@ -492,6 +503,11 @@ void PetAI::MovementInform(uint32 moveType, uint32 data)
 
 bool PetAI::_CanAttack(Unit *target)
 {
+    m_forceAttack = false;
+
+    if (target && target->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE))
+        m_forceAttack = true;
+ 
     if (me->IsFriendlyTo(target))
         return false;
 

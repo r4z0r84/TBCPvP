@@ -830,7 +830,33 @@ void BattleGround::EndBattleGround(uint32 winner)
             else
                 loser_arena_team->MemberLost(plr, winner_rating);
         }
-
+        // Reward honor for arena skirmishes
+        if (isArena())
+        {
+            switch (GetArenaType())
+            {
+                case ARENA_TYPE_2v2:
+                {
+                    if(team == winner)
+                    {
+                        plr->ModifyHonorPoints(45);
+                        plr->ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 45, true);
+                    }
+                    break;
+                }
+                case ARENA_TYPE_3v3:
+                {
+                    if(team == winner)
+                    {
+                        plr->ModifyHonorPoints(135);
+                        plr->ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 135, true);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
         if (team == winner)
         {
             RewardMark(plr, ITEM_WINNER_COUNT);

@@ -9521,6 +9521,7 @@ void Unit::ModSpellCastTime(SpellEntry const* spellProto, int32 & castTime, Spel
     else // TODO: fix it
         if (spellProto->SpellFamilyName) // some magic spells doesn't have dmgType == SPELL_DAMAGE_CLASS_MAGIC (arcane missiles/evocation)
             castTime = int32(float(castTime) * GetFloatValue(UNIT_MOD_CAST_SPEED));
+
 }
 
 int32 Unit::ModifyPower(Powers power, int32 dVal)
@@ -11768,7 +11769,7 @@ bool Unit::hasNegativeAuraWithInterruptFlag(uint32 flag)
 {
     for (AuraMap::const_iterator iter = GetAuras().begin(); iter != GetAuras().end(); ++iter)
     {
-        if (!iter->second->IsPositive() && iter->second->GetSpellProto()->AuraInterruptFlags & flag)
+        if (!iter->second->IsPositive() && iter->second->GetSpellProto()->AuraInterruptFlags & flag && iter->second->GetSpellProto()->Id != 6358)
             return true;
     }
     return false;

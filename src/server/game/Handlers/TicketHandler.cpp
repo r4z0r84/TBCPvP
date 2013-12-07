@@ -90,6 +90,13 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket & recv_data)
 
     std::string NameLink = "|Hplayer:"+ticket->name+"|h["+ticket->name+"]|h";
     sWorld->SendGMText(LANG_COMMAND_TICKETNEW, NameLink.c_str(), ticket->guid);
+
+    // display message to ticket creator
+    if (GetPlayer())
+    {
+        GetPlayer()->GetSession()->SendAreaTriggerMessage("Thank you for submitting a ticket. Please remember, our in-game GMs cannot assist with broken quests or dungeons. If you have account-related issues, please email GM@Smolderforge.com.");
+        ChatHandler(this).PSendSysMessage("Thank you for submitting a ticket. Please remember, our in-game GMs cannot assist with broken quests or dungeons. If you have account-related issues, please email GM@Smolderforge.com.");
+    }
 }
 
 void WorldSession::HandleGMTicketUpdateOpcode(WorldPacket & recv_data)

@@ -4546,7 +4546,7 @@ uint8 Spell::CanCast(bool strict)
                 // not allow cast fly spells at old maps by players (all spells is self target)
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    if (!m_caster->ToPlayer()->isGameMaster() &&
+                    if (!m_caster->ToPlayer()->isGameMaster() && m_caster->GetAreaId() != 2317 &&
                         GetVirtualMapForMapAndZone(m_caster->GetMapId(), m_caster->GetZoneId()) != 530)
                         return SPELL_FAILED_NOT_HERE;
                 }

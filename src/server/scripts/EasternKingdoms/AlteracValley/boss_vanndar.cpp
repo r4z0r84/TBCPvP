@@ -68,6 +68,7 @@ struct boss_vanndarAI : public ScriptedAI
     void EnterCombat(Unit * /*who*/)
     {
         DoScriptText(YELL_AGGRO, me);
+        me->CallForHelp(VISIBLE_RANGE);
     }
 
     void JustRespawned()

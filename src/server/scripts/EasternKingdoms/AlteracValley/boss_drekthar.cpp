@@ -72,6 +72,7 @@ struct boss_drektharAI : public ScriptedAI
     void EnterCombat(Unit * /*who*/)
     {
         DoScriptText(YELL_AGGRO, me);
+        me->CallForHelp(VISIBLE_RANGE);
     }
 
     void JustRespawned()
@@ -116,7 +117,7 @@ struct boss_drektharAI : public ScriptedAI
         } else uiYellTimer -= diff;
 
         // check if creature is not outside of building
-        if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 20)
+        if (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) > 25)
         {
             EnterEvadeMode();
             DoScriptText(YELL_EVADE, me);

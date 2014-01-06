@@ -89,6 +89,11 @@ struct mob_av_marshal_or_warmasterAI : public ScriptedAI
         Reset();
     }
 
+    void EnterCombat()
+    {
+        me->CallForHelp(VISIBLE_RANGE);
+    }
+
     void UpdateAI(const uint32 diff)
     {
         if (!bHasAura)

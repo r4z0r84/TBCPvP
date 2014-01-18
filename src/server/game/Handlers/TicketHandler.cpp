@@ -206,7 +206,7 @@ void WorldSession::HandleGMSurveySubmit(WorldPacket& recv_data)
 
     // TODO: columns for "playerguid" "playername" and possibly "gm" after `surveyid` but how do we retrieve after ticket deletion?
     // first we must get in basic template so each answer can be inserted to the same field since they are not handled all at once
-    CharacterDatabase.PExecute("INSERT INTO gm_surveys (surveyid) VALUES ('%i')", nextSurveyID);
+    CharacterDatabase.PExecute("INSERT INTO gm_surveys (surveyid, time) VALUES ('%i', NOW())", nextSurveyID);
 
     uint8 result[10];
     memset(result, 0, sizeof(result));
@@ -239,7 +239,7 @@ void WorldSession::HandleGMSurveySubmit(WorldPacket& recv_data)
     std::string comment;
     recv_data >> comment; // additional comment
     CharacterDatabase.EscapeString(comment);
-    CharacterDatabase.PExecute("UPDATE gm_surveys SET comment = '%s' WHERE surveyid = %i;", comment.c_str(), nextSurveyID);
+    CharacterDatabase.PExecute("UPDATE gm_surveys SET comment = '%s', name = '%s' WHERE surveyid = %i;", comment.c_str(), GetPlayer()->GetName(), nextSurveyID);
 }
 
 void WorldSession::HandleGMTicketSystemStatusOpcode(WorldPacket & /*recv_data*/)

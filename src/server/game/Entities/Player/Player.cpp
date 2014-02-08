@@ -17995,7 +17995,7 @@ bool Player::DoSpamCheck(std::string message)
 
         if (pctcaps >= MaxPct)
         {
-            ChatHandler(this).PSendSysMessage("Your message was blocked by the server. Please do not type too many capitals in your message, such is considered spamming. You are are allowed %.2f%% caps in a message of %u characters.\n\n", MaxPct, ReqLength);
+            ChatHandler(this).PSendSysMessage("Your message was blocked by the server. Please do not type too many capitals in your message, such is considered spamming. You are allowed %.2f%% caps in a message of %u characters.\n\n", MaxPct, ReqLength);
             return false;
         }
     }
@@ -18033,7 +18033,7 @@ bool Player::DoSpamCheck(std::string message)
         }
        
         time_t TimeLeft = sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT) - (time(NULL) - RepeatTO);
-       ChatHandler(this).PSendSysMessage("Please don't repeat yourself. You are allowed to send 1 identical message every %u seconds. Pleasewait %u seconds before sending the same message again.\n\n", sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT), TimeLeft);
+       ChatHandler(this).PSendSysMessage("Please don't repeat yourself. You are allowed to send 1 identical message every %u seconds. Please wait %u seconds before sending the same message again.\n\n", sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT), TimeLeft);
         return false;
     }
     return true;

@@ -205,6 +205,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (GetPlayer()->isSpectator())
                 break;
 
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+                break;
+
             if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
                 return;
 
@@ -233,6 +236,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 return;
 
             if (msg.empty())
+                break;
+
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
                 break;
 
             if (!normalizePlayerName(to))
@@ -477,6 +483,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+                break;
+
             if (GetPlayer()->SpamCheckForType(type, lang))
                 if (!GetPlayer()->DoSpamCheck(msg))
                     return;
@@ -506,6 +515,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+                break;
+
             //battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
             Group *group = GetPlayer()->GetGroup();
             if (!group || !group->isBGGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
@@ -530,6 +542,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 return;
 
             if (msg.empty())
+                break;
+
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
                 break;
 
             if (GetPlayer()->SpamCheckForType(type, lang))
@@ -628,6 +643,9 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recv_data)
     }
 
     if (GetPlayer()->isSpectator())
+        return;
+
+    if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
         return;
 
     GetPlayer()->UpdateSpeakTime(true);

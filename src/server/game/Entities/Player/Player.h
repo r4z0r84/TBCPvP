@@ -506,7 +506,8 @@ enum AtLoginFlags
     AT_LOGIN_RENAME        = 1,
     AT_LOGIN_RESET_SPELLS  = 2,
     AT_LOGIN_RESET_TALENTS = 4,
-    AT_LOGIN_BANNED        = 8
+    AT_LOGIN_BANNED        = 8,
+    AT_LOGIN_RUUREN        = 16
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;

@@ -22025,6 +22025,8 @@ void Player::ChangeRace(Player *player, uint32 newRace)
 
     // store various reps to convert
     uint32 force1, force2, force3, out1, out2;
+    // are they a donor?
+    bool donor = false;
 
     enum ChangeReps
     {
@@ -22072,6 +22074,9 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     player->SetUInt32Value(PLAYER_BYTES, 1 | (1 << 8) | (1 << 16) | (1 << 24));
     player->SetUInt32Value(PLAYER_BYTES_2, (1) | (0x02 << 24));
 
+    if (player->HasSpell(42929) && player->HasSpell(24576))
+        donor = true;
+
     player->resetSpells();
 
     std::list<CreateSpellPair>::const_iterator new_spell_itr;
@@ -22116,6 +22121,15 @@ void Player::ChangeRace(Player *player, uint32 newRace)
             player->SetFactionReputation(sFactionStore.LookupEntry(KURENAI), out2);
         }
     }
+
+    if (donor)
+    {
+        player->learnSpell(42929);
+        player->learnSpell(24576);
+        player->TeleportTo(598, 148.98f, 163.384f, -16.727f, 1.58f);
+    }
+    else
+        player->TeleportTo(1, -11805.5f, -4754.13f, 5.96f, 3.25f);
 
     // Basic code to swap mounts/items. Not implemented.
     /*
@@ -22167,6 +22181,7 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     }
     */
 
+    player->ResetAllPowers();
     player->SaveToDB();
     player->GetSession()->LogoutPlayer(true);
 

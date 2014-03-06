@@ -22025,8 +22025,8 @@ void Player::ChangeRace(Player *player, uint32 newRace)
 
     // store various reps to convert
     uint32 force1, force2, force3, out1, out2;
-    // are they a donor?
-    bool donor = false;
+    // are they a donor or have dawnsaber?
+    bool donor, dawnsaber = false;
 
     enum ChangeReps
     {
@@ -22076,6 +22076,9 @@ void Player::ChangeRace(Player *player, uint32 newRace)
 
     if (player->HasSpell(42929) && player->HasSpell(24576))
         donor = true;
+
+    if (player->HasSpell(23220)
+        dawnsaber = true;
 
     player->resetSpells();
 
@@ -22130,6 +22133,9 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     }
     else
         player->TeleportTo(1, -11805.5f, -4754.13f, 5.96f, 3.25f);
+
+    if (dawnsaber)
+        player->learnSpell(23220);
 
     // Basic code to swap mounts/items. Not implemented.
     /*

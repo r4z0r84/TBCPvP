@@ -436,6 +436,8 @@ class BattleGround
 
         void SendMessageToAll(int32 entry, ChatMsg type, Player const* source = NULL);
         void PSendMessageToAll(int32 entry, ChatMsg type, Player const* source, ...);
+        void SendMessageToAll(char const* text);
+        void SendMessageToTeam(uint32 team, char const* text);
 
         // specialized version with 2 string id args
         void SendMessage2ToAll(int32 entry, ChatMsg type, Player const* source, int32 strId1 = 0, int32 strId2 = 0);
@@ -529,6 +531,8 @@ class BattleGround
 
         void Announce();
 
+        bool SetPlayerReady(uint64 guid);
+
     protected:
         //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
         void EndNow();
@@ -554,6 +558,8 @@ class BattleGround
 
         bool   m_BuffChange;
     uint32 m_score[2];                    //array that keeps general team scores, used to determine who gets most marks when bg ends prematurely
+
+    std::set<uint64>                        m_guidsReady[2];
 
         BGHonorMode m_HonorMode;
     private:

@@ -1792,6 +1792,20 @@ void BattleGround::PSendMessageToAll(int32 entry, ChatMsg type, Player const* so
     va_end(ap);
 }
 
+void BattleGround::SendMessageToAll(char const* text)
+{
+    WorldPacket data;
+    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, text, NULL);
+    SendPacketToAll(&data);
+}
+
+void BattleGround::SendMessageToTeam(uint32 team, char const* text)
+{
+    WorldPacket data;
+    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, text, NULL);
+    SendPacketToTeam(team, &data);
+}
+
 void BattleGround::SendMessage2ToAll(int32 entry, ChatMsg type, Player const* source, int32 arg1, int32 arg2)
 {
     Trinity::BattleGround2ChatBuilder bg_builder(type, entry, source, arg1, arg2);
@@ -2019,4 +2033,36 @@ void BattleGround::AddSpectator(Player *plr)
 
     // Add to list/maps
     m_Spectators[guid] = bp;
+}
+
+bool BattleGround::SetPlayerReady(uint64 playerGUID)
+{
+    if (!isArena())
+        return false;
+
+    uint32 team = GetPlayerTeam(playerGUID);
+    if (team == 0)
+        return false;
+
+    if (GetStatus() != STATUS_WAIT_JOIN)
+        return false;
+
+    if (GetStartDelayTime() <= 5000)//sWorld.getConfig(CONFIG_ARENA_READY_START_TIMER))
+        return false;
+
+    uint8 idx = team == ALLIANCE ? 0 : 1;
+    m_guidsReady[idx].insert(playerGUID);
+
+    uint32 readyCount = m_guidsReady[0].size() + m_guidsReady[1].size();
+    if (readyCount == GetMaxPlayers())
+    {
+        SendMessageToAll("Both teams are ready, game will begin in 5 seconds...");
+        SetStartDelayTime(5000);
+    }
+    else if (m_guidsReady[idx].size() == GetMaxPlayersPerTeam())
+    {
+        SendMessageToTeam(team == ALLIANCE ? HORDE : ALLIANCE, "The enemy team has opt-ed to begin the game early. If you are ready, you may start the game earlier by asking Lil' Hindenburg to do so.");
+    }
+
+    return true;
 }

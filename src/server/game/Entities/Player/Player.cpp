@@ -22077,7 +22077,7 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     if (player->HasSpell(42929) && player->HasSpell(24576))
         donor = true;
 
-    if (player->HasSpell(23220)
+    if (player->HasSpell(23220))
         dawnsaber = true;
 
     player->resetSpells();

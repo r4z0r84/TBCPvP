@@ -206,10 +206,6 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI
             case 0:
                 DoScriptText(SAY_TH_START_EVENT_PART1, me);
                 break;
-            case 1:
-                if (Creature* Armorer = me->SummonCreature(ENTRY_ARMORER, 2183.8288f, 121.2169f, 89.4548f, 1.08934f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 120 * IN_MILLISECONDS))
-                    Armorer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                break;
             case 9:
                 SetRun(false);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACKUNARMED);

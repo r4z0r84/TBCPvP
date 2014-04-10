@@ -101,7 +101,7 @@ class BattleGroundQueue
             void AddGroup(GroupQueueInfo * group);
             void RemoveGroup(GroupQueueInfo * group);
             uint32 GetPlayerCount() const {return PlayerCount;}
-            bool Build(uint32 MinPlayers, uint32 MaxPlayers, EligibleGroups::iterator startitr);
+            bool Build(uint32 MinPlayers, uint32 MaxPlayers);
         public:
             std::list<GroupQueueInfo *> SelectedGroups;
         private:

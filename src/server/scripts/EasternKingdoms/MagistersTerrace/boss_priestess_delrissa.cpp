@@ -222,6 +222,7 @@ struct boss_priestess_delrissaAI : public ScriptedAI
         if (!instance)
             return;
 
+        /* *** This is completely broken
         if (instance->GetData(DATA_DELRISSA_DEATH_COUNT) == MAX_ACTIVE_LACKEY)
             instance->SetData(DATA_DELRISSA_EVENT, DONE);
         else
@@ -229,6 +230,8 @@ struct boss_priestess_delrissaAI : public ScriptedAI
             if (me->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
                 me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         }
+        */
+        instance->SetData(DATA_DELRISSA_EVENT, DONE);
     }
 
     void UpdateAI(const uint32 diff)

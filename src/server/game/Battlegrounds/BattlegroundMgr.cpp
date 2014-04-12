@@ -394,21 +394,26 @@ bool BattleGroundQueue::InviteGroupToBG(GroupQueueInfo * ginfo, BattleGround * b
 }
 
 // used to recursively select groups from eligible groups
-bool BattleGroundQueue::SelectionPool::Build(uint32 MinPlayers, uint32 MaxPlayers)
+bool BattleGroundQueue::SelectionPool::Build(uint32 MinPlayers, uint32 MaxPlayers, EligibleGroups::iterator startitr)
 {
     // start from the specified start iterator
-    for (EligibleGroups::iterator itr1 = m_CurrEligGroups->begin(); itr1 != m_CurrEligGroups->end(); ++itr1)
+    for (EligibleGroups::iterator itr1 = startitr; itr1 != m_CurrEligGroups->end(); ++itr1)
     {
         // if it fits in, select it
         if (GetPlayerCount() + (*itr1)->Players.size() <= MaxPlayers)
         {
+            EligibleGroups::iterator next = itr1;
+            ++next;
             AddGroup((*itr1));
             if (GetPlayerCount() >= MinPlayers)
             {
                 // enough players are selected
                 return true;
             }
-
+            // try building from the rest of the elig. groups
+            // if that succeeds, return true
+            if (Build(MinPlayers, MaxPlayers, next))
+                return true;
             // the rest didn't succeed, so this group cannot be included
             RemoveGroup((*itr1));
         }
@@ -447,7 +452,7 @@ bool BattleGroundQueue::BuildSelectionPool(uint32 bgTypeId, uint32 queue_id, uin
     // we set it this way to only have one EligibleGroups object to save some memory
     m_SelectionPools[mode].Init(&m_EligibleGroups);
     // build succeeded
-    if (m_SelectionPools[mode].Build(MinPlayers, MaxPlayers))
+    if (m_SelectionPools[mode].Build(MinPlayers, MaxPlayers, m_EligibleGroups.begin()))
     {
         // the selection pool is set, return
         sLog->outDebug("Battleground-debug: pool build succeeded, return true");

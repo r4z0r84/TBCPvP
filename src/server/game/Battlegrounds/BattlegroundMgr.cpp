@@ -399,8 +399,10 @@ bool BattleGroundQueue::SelectionPool::Build(uint32 MinPlayers, uint32 MaxPlayer
     // start from the specified start iterator
     for (EligibleGroups::iterator itr1 = startitr; itr1 != m_CurrEligGroups->end(); ++itr1)
     {
+        uint64 PlayerSize = (*itr1) ? (*itr1)->Players.size() : 0;
+
         // if it fits in, select it
-        if (GetPlayerCount() + (*itr1)->Players.size() <= MaxPlayers)
+        if (GetPlayerCount() + PlayerSize <= MaxPlayers)
         {
             EligibleGroups::iterator next = itr1;
             ++next;

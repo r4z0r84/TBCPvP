@@ -15125,6 +15125,13 @@ void Player::KilledMonster(CreatureTemplate const* cInfo, uint64 guid)
 void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
 {
     uint32 addkillcount = 1;
+    uint32 real_entry = entry;
+    if (guid)
+    {
+        Creature *killed = GetMap()->GetCreature(guid);
+        if (killed && killed->GetEntry())
+            real_entry = killed->GetEntry();
+    }
     for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
     {
         uint32 questid = GetQuestSlotQuestId(i);
@@ -15152,7 +15159,7 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
 
                     uint32 reqkill = qInfo->ReqCreatureOrGOId[j];
 
-                    if (reqkill == entry)
+                    if (reqkill == real_entry)
                     {
                         uint32 reqkillcount = qInfo->ReqCreatureOrGOCount[j];
                         uint32 curkillcount = q_status.m_creatureOrGOcount[j];
@@ -15169,7 +15176,7 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
                             CompleteQuest(questid);
 
                         // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
-                        continue;
+                        break;
                     }
                 }
             }

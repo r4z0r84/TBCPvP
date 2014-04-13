@@ -177,6 +177,11 @@ struct mob_nascent_orcAI : public ScriptedAI
         Stomp_Timer = 5000+rand()%4000;
     }
 
+    void EnterCombat(Unit* /*who*/)
+    {
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+    }
+
     void MovementInform(uint32 uiMotionType, uint32 uiPointId)
     {
         if (uiMotionType == POINT_MOTION_TYPE)

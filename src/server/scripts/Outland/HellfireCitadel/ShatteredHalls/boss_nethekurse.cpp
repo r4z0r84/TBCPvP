@@ -120,7 +120,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         PeonEngagedCount = 0;
         PeonKilledCount = 0;
 
-        IntroEvent_Timer = 90000;                           //how long before getting bored and kills his minions?
+        IntroEvent_Timer = 10000;                           //how long before getting bored and kills his minions?
         DeathCoil_Timer = 20000;
         ShadowFissure_Timer = 8000;
         Cleave_Timer = 5000;

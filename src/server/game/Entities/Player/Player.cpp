@@ -15132,6 +15132,7 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
         if (killed && killed->GetEntry())
             real_entry = killed->GetEntry();
     }
+
     for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
     {
         uint32 questid = GetQuestSlotQuestId(i);
@@ -15159,7 +15160,7 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
 
                     uint32 reqkill = qInfo->ReqCreatureOrGOId[j];
 
-                    if (reqkill == real_entry)
+                    if (reqkill == entry || real_entry)
                     {
                         uint32 reqkillcount = qInfo->ReqCreatureOrGOCount[j];
                         uint32 curkillcount = q_status.m_creatureOrGOcount[j];

@@ -346,24 +346,47 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         if (plMover->isMovingOrTurning())
             plMover->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-        // Extra protection against flyhackers in arena
-        float over;
+        // Extra protection against flyhackers
+        float MAX_WSG   = 377.5f;
+        float MAX_AB    = 35.0f;
+        float MAX_EOTS  = 1286.5f;
+        float MAX_BE_NA = 20.0f;
+        float MAX_RUINS = 45.0f;
         if (plMover->InBattleGround())
         {
-            if (plMover->GetMapId() == 562)      // Blade's Edge Arena
-                over  =  20.0f;
-            else if (plMover->GetMapId() == 559) // Nagrand Arena 
-                over  =  20.0f;
-            else if (plMover->GetMapId() == 572) // Ruins of Lordaeron
-                over  =  45.0f;
-        }
+            bool trigger = false;
+            switch (plMover->GetMapId())
+            {
+                case 489: // Warsong Gulch
+                    if (movementInfo.GetPos()->GetPositionZ() > MAX_WSG && GetSecurity() < SEC_MODERATOR)
+                        trigger = true;
+                    break;
+                case 529: // Arathi Basin
+                    if (movementInfo.GetPos()->GetPositionZ() > MAX_AB && GetSecurity() < SEC_MODERATOR)
+                        trigger = true;
+                    break;
+                case 566: // Eye of the Storm
+                    if (movementInfo.GetPos()->GetPositionZ() > MAX_EOTS && GetSecurity() < SEC_MODERATOR)
+                        trigger = true;
+                    break;
+                case 562: // Blade's Edge Arena
+                case 559: // Nagrand Arena
+                    if (movementInfo.GetPos()->GetPositionZ() > MAX_BE_NA && GetSecurity() < SEC_MODERATOR)
+                        trigger = true;
+                    break;
+                case 572: // Ruins of Lordaeron
+                    if (movementInfo.GetPos()->GetPositionZ() > MAX_RUINS && GetSecurity() < SEC_MODERATOR)
+                        trigger = true;
+                    break;
+            }
 
-        if ((plMover->GetMapId() == 562 || plMover->GetMapId() == 559 || plMover->GetMapId() == 572) 
-            && movementInfo.GetPos()->GetPositionZ() > over && GetSecurity() < SEC_MODERATOR)
-        {
-            LoginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, 'Server', 'AUTO SUSPENSION: Player was above normal possible height in arena map, most likely hacking.', '1')", GetAccountId(), 86400); // suspend for 1 day
-            sLog->outError("ARENA: Player %s, GUID: %i above normal height in map: %i. (possible hacking)", plMover->GetName(), plMover->GetGUID(), plMover->GetMapId());
-            KickPlayer();
+            if (trigger)
+            {
+                LoginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, 'Server', 'AUTO SUSPENSION: Player was above normal possible height in BG or arena map, most likely hacking.', '1')", GetAccountId(), 86400); // suspend for 1 day
+                sLog->outError("ARENA: Player %s, GUID: %i above normal height in map: %i. (possible hacking)", plMover->GetName(), plMover->GetGUID(), plMover->GetMapId());
+                KickPlayer();
+                trigger = false;
+            }
         }
 
         if (plMover->GetAreaId() == 214 && !(plMover->isGameMaster()))

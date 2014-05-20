@@ -6317,6 +6317,8 @@ void Aura::PeriodicDummyTick()
                         {
                             if (m_target->ToPlayer()->getPowerType() != POWER_MANA)
                                 (*i)->GetModifier()->m_amount = 0;
+                            else if (m_target->ToPlayer()->HasAura(5419, 0) || m_target->ToPlayer()->HasAura(2645, 0)) // fix regen exploit with Travel Form & Ghost Wolf
+                                (*i)->GetModifier()->m_amount = 0;
                             else
                                 (*i)->GetModifier()->m_amount = m_modifier.m_amount;
                         }
@@ -6352,6 +6354,8 @@ void Aura::PeriodicDummyTick()
                     }
 
                     if (m_target->ToPlayer()->getPowerType() != POWER_MANA)
+                        (*i)->GetModifier()->m_amount = 0;
+                    else if (m_target->ToPlayer()->HasAura(5419, 0) || m_target->ToPlayer()->HasAura(2645, 0)) // fix regen exploit with Travel Form & Ghost Wolf
                         (*i)->GetModifier()->m_amount = 0;
 
                     m_target->ToPlayer()->UpdateManaRegen();

@@ -19250,6 +19250,8 @@ void Player::InitDataForForm(bool reapplyMods)
     else
         SetRegularAttackTime();
 
+    RemoveAurasDueToSpell(27089);
+
     switch (m_form)
     {
         case FORM_CAT:

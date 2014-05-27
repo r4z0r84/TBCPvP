@@ -2847,6 +2847,8 @@ bool IsSpellAllowedInLocation(SpellEntry const *spellInfo, uint32 map_id, uint32
 
             return false;
         }
+        case 29866:                                         // Cast Fishing Net
+            return area_id == 3857;
         case 32307:                                         // Warmaul Ogre Banner
             return area_id == 3610;
         case 32724:                                         // Gold Team (Alliance)

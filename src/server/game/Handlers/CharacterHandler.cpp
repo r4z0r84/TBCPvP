@@ -742,6 +742,88 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         }
     }
 
+    // Smolderforge arena title modification
+    // see if player is an arena finalist with title
+    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT * FROM season_titles WHERE guid = '%u' LIMIT 1", pCurrChar->GetGUIDLow());
+    if (result)
+    {
+        Field *fields = result->Fetch();
+        uint32 guid         = fields[0].GetUInt32();
+        uint8 title         = fields[1].GetUInt8();
+        uint8 earnedSeason  = fields[2].GetUInt8();
+        uint8 currentSeason = fields[3].GetUInt8();
+
+        if (earnedSeason < currentSeason) // we have a title to remove
+        {
+            CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(title);
+            if (pCurrChar->HasTitle(titleEntry))
+            {
+                switch (title)
+                {
+                    case 71: //  Vengeful Gladiator
+                        pCurrChar->SetTitle(titleEntry, true);
+                        titleEntry = sCharTitlesStore.LookupEntry(62);
+                        pCurrChar->SetTitle(titleEntry);
+                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+                        CharacterDatabase.PExecute("UPDATE season_titles SET title = '62', earnedSeason = DEFAULT WHERE guid ='%u'", pCurrChar->GetGUIDLow());
+                        break;
+                    case 62: // Merciless Gladiator
+                        pCurrChar->SetTitle(titleEntry, true);
+                        titleEntry = sCharTitlesStore.LookupEntry(42);
+                        pCurrChar->SetTitle(titleEntry);
+                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+                        CharacterDatabase.PExecute("UPDATE season_titles SET title = '42', earnedSeason = DEFAULT WHERE guid ='%u'", pCurrChar->GetGUIDLow());
+                        break;
+                    default:
+                        pCurrChar->SetTitle(titleEntry, true);
+                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+                        CharacterDatabase.PExecute("DELETE FROM season_titles WHERE guid ='%u'", pCurrChar->GetGUIDLow());
+                        break;
+                }
+            }
+        }
+    }
+    else if (!result) // player has no record, check for titles
+    {
+        CharTitlesEntry const* vGlad = sCharTitlesStore.LookupEntry(71);
+        CharTitlesEntry const* mGlad = sCharTitlesStore.LookupEntry(62);
+        CharTitlesEntry const* glad = sCharTitlesStore.LookupEntry(42);
+        CharTitlesEntry const* duelist = sCharTitlesStore.LookupEntry(43);
+        CharTitlesEntry const* rival = sCharTitlesStore.LookupEntry(44);
+        CharTitlesEntry const* challenger = sCharTitlesStore.LookupEntry(45);
+
+        if (pCurrChar->HasTitle(vGlad))
+        {
+            pCurrChar->SetTitle(vGlad, true);
+            pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+        }
+        if (pCurrChar->HasTitle(mGlad))
+        {
+            pCurrChar->SetTitle(mGlad, true);
+            pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+        }
+        if (pCurrChar->HasTitle(glad))
+        {
+            pCurrChar->SetTitle(glad, true);
+            pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+        }
+        if (pCurrChar->HasTitle(duelist))
+        {
+            pCurrChar->SetTitle(duelist, true);
+            pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+        }
+        if (pCurrChar->HasTitle(rival))
+        {
+            pCurrChar->SetTitle(rival, true);
+            pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+        }
+        if (pCurrChar->HasTitle(challenger))
+        {
+            pCurrChar->SetTitle(challenger, true);
+            pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+        }
+    }
+
     if (pCurrChar->isGameMaster())
         SendNotification(LANG_GM_ON);
 

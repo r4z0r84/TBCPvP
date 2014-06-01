@@ -263,15 +263,12 @@ void SendMenu_spectator(Player *player, Creature *_Creature, uint32 action)
         player->GetSession()->SendNotification("Please leave queue(s) before spectating.");
         return;
     }
-    if (player->IsMounted())
-    {
-        player->GetSession()->SendNotification("You are mounted. You must dismount first.");
-        return;
-    }
     player->CLOSE_GOSSIP_MENU();
     BattleGround *bg = sBattleGroundMgr->GetBattleGround(action);
     if (bg && bg->isArena() && bg->isRated() && bg->GetStatus() == STATUS_IN_PROGRESS && bg->GetPlayersCountByTeam(ALLIANCE) + bg->GetPlayersCountByTeam(HORDE) > 0)
     {
+        if (player->IsMounted())
+            player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bg->AddSpectator(player);
         player->SetBattleGroundId(action);
         player->SetBattleGroundEntryPoint();

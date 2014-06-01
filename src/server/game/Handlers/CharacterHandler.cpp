@@ -761,25 +761,26 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
                 switch (title)
                 {
                     case 71: //  Vengeful Gladiator
+                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
                         pCurrChar->SetTitle(titleEntry, true);
                         titleEntry = sCharTitlesStore.LookupEntry(62);
                         pCurrChar->SetTitle(titleEntry);
-                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
                         CharacterDatabase.PExecute("UPDATE season_titles SET title = '62', earnedSeason = DEFAULT WHERE guid ='%u'", pCurrChar->GetGUIDLow());
                         break;
                     case 62: // Merciless Gladiator
+                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
                         pCurrChar->SetTitle(titleEntry, true);
                         titleEntry = sCharTitlesStore.LookupEntry(42);
                         pCurrChar->SetTitle(titleEntry);
-                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
                         CharacterDatabase.PExecute("UPDATE season_titles SET title = '42', earnedSeason = DEFAULT WHERE guid ='%u'", pCurrChar->GetGUIDLow());
                         break;
                     default:
-                        pCurrChar->SetTitle(titleEntry, true);
                         pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+                        pCurrChar->SetTitle(titleEntry, true);
                         CharacterDatabase.PExecute("DELETE FROM season_titles WHERE guid ='%u'", pCurrChar->GetGUIDLow());
                         break;
                 }
+                pCurrChar->SaveToDB();
             }
         }
     }
@@ -794,34 +795,35 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
         if (pCurrChar->HasTitle(vGlad))
         {
-            pCurrChar->SetTitle(vGlad, true);
             pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+            pCurrChar->SetTitle(vGlad, true);
         }
         if (pCurrChar->HasTitle(mGlad))
         {
-            pCurrChar->SetTitle(mGlad, true);
             pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+            pCurrChar->SetTitle(mGlad, true);
         }
         if (pCurrChar->HasTitle(glad))
         {
-            pCurrChar->SetTitle(glad, true);
             pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+            pCurrChar->SetTitle(glad, true);
         }
         if (pCurrChar->HasTitle(duelist))
         {
-            pCurrChar->SetTitle(duelist, true);
             pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+            pCurrChar->SetTitle(duelist, true);
         }
         if (pCurrChar->HasTitle(rival))
         {
-            pCurrChar->SetTitle(rival, true);
             pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+            pCurrChar->SetTitle(rival, true);
         }
         if (pCurrChar->HasTitle(challenger))
         {
-            pCurrChar->SetTitle(challenger, true);
             pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+            pCurrChar->SetTitle(challenger, true);
         }
+        pCurrChar->SaveToDB();
     }
 
     if (pCurrChar->isGameMaster())

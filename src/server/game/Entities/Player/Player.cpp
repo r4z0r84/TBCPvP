@@ -5472,6 +5472,62 @@ void Player::RepopAtGraveyard()
     // stop countdown until repop
     m_deathTimer = 0;
 
+    // Smolderforge graveyards
+    switch (GetMapId())
+    {
+        case 44: // Scarlet Citadel
+            TeleportTo(0, 1741.3778, -5557.780, 118.831, 3.28);
+            ResurrectPlayer(1.0f, false);
+            SpawnCorpseBones();
+        break;
+        case 598: // Donor mall
+            TeleportTo(598, 148.98f, 163.384f, -16.727f, 1.58f);
+            ResurrectPlayer(1.0f, false);
+            SpawnCorpseBones();
+        break;
+    }
+
+    switch (GetZoneId())
+    {
+        case 268: // Azshara Crater
+            if (GetTeam()==ALLIANCE)
+            {
+                if (rand()%2)
+                    TeleportTo(37, 153.03f, -76.92f, 268.28f, 1.39f);
+                else
+                    TeleportTo(37, 442.06f, 146.11f, 268.44f, 5.36f);
+            }
+            else
+            {
+                if (rand()%2)
+                    TeleportTo(37, 71.43f, 126.62f, 252.13f, 5.5f);
+                else
+                    TeleportTo(37, 151.78f, 267.17f, 273.39f, 2.67);
+            }
+            ResurrectPlayer(1.0f, false);
+            SpawnCorpseBones();
+        break;
+        case 2037: // Quel'Thalas graveyard
+            TeleportTo(0, 4273.06f, -2774.95f, 5.65f, 4.41f);
+            ResurrectPlayer(1.0f, false);
+            SpawnCorpseBones();
+        break;
+    }
+
+    switch (GetAreaId())
+    {
+        case 2317: // Mall graveyard
+            TeleportTo(1, -11784.12695, -4781.511, 12.7245, 2.81);
+            ResurrectPlayer(1.0f, false);
+            SpawnCorpseBones();
+        break;
+        case 2477: // Godzilla graveyard
+            TeleportTo(1, -10794.37, 2164.335, 2.836, 1.43);
+            ResurrectPlayer(1.0f, false);
+            SpawnCorpseBones();
+        break;
+    }
+
     // if no grave found, stay at the current location
     // and don't show spirit healer location
     if (ClosestGrave)

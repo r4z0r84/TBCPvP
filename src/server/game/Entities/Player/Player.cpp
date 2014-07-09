@@ -7484,7 +7484,9 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor, bool pvpt
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime
-            ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
+            // smolderforge - cap HKs at 250k
+            //if (GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS) < 250000) //  && uVictim->GetZoneId() != 268
+                ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
         }
         else
         {

@@ -7495,6 +7495,15 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor, bool pvpt
             // smolderforge - cap HKs at 250k
             //if (GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS) < 250000) //  && uVictim->GetZoneId() != 268
                 ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
+
+            // Hyjal quests
+            if (uVictim->GetZoneId() == 616)
+            {
+                if (GetQuestStatus(68458) == QUEST_STATUS_INCOMPLETE)
+                    KilledMonsterCredit(1199725, GetGUID());
+                else if (GetQuestStatus(68459) == QUEST_STATUS_INCOMPLETE)
+                    KilledMonsterCredit(1199726, GetGUID());
+            }
         }
         else
         {

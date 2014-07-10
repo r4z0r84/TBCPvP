@@ -5476,7 +5476,7 @@ void Player::RepopAtGraveyard()
     switch (GetMapId())
     {
         case 44: // Scarlet Citadel
-            TeleportTo(0, 1741.3778, -5557.780, 118.831, 3.28);
+            TeleportTo(0, 1741.3778f, -5557.780f, 118.831f, 3.28f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
         break;
@@ -5502,8 +5502,16 @@ void Player::RepopAtGraveyard()
                 if (rand()%2)
                     TeleportTo(37, 71.43f, 126.62f, 252.13f, 5.5f);
                 else
-                    TeleportTo(37, 151.78f, 267.17f, 273.39f, 2.67);
+                    TeleportTo(37, 151.78f, 267.17f, 273.39f, 2.67f);
             }
+            ResurrectPlayer(1.0f, false);
+            SpawnCorpseBones();
+        break;
+        case 616: // Hyjal graveyards
+            if (GetTeam()==ALLIANCE)
+                TeleportTo(1, 5194.0f, -3437.84f, 1673.44f, 0.16f);
+            else
+                TeleportTo(1, 5585.11f, -3908.56f, 1710.0f, 1.89f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
         break;
@@ -5517,12 +5525,12 @@ void Player::RepopAtGraveyard()
     switch (GetAreaId())
     {
         case 2317: // Mall graveyard
-            TeleportTo(1, -11784.12695, -4781.511, 12.7245, 2.81);
+            TeleportTo(1, -11784.12695f, -4781.511f, 12.7245f, 2.81f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
         break;
         case 2477: // Godzilla graveyard
-            TeleportTo(1, -10794.37, 2164.335, 2.836, 1.43);
+            TeleportTo(1, -10794.37f, 2164.335f, 2.836f, 1.43f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
         break;

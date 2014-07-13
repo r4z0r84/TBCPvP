@@ -7492,8 +7492,10 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor, bool pvpt
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime
-            // smolderforge - cap HKs at 250k
-            //if (GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS) < 250000) //  && uVictim->GetZoneId() != 268
+
+            // Smolderforge - cap HKs at 250k (DEACTIVATED)
+            //if (GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS) < 250000)
+            if (uVictim->GetZoneId() != 440) // prevent HKs from death in mall, or farming in Tanaris
                 ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
 
             // Hyjal quests

@@ -397,9 +397,9 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand lookupPlayerCommandTable[] =
     {
-        { "ip",            SEC_GAMEMASTER,     true,  &ChatHandler::HandleLookupPlayerIpCommand,       "", NULL },
-        { "account",       SEC_GAMEMASTER,     true,  &ChatHandler::HandleLookupPlayerAccountCommand,  "", NULL },
-        { "email",         SEC_GAMEMASTER,     true,  &ChatHandler::HandleLookupPlayerEmailCommand,    "", NULL },
+        { "ip",            SEC_MODERATOR,      true,  &ChatHandler::HandleLookupPlayerIpCommand,       "", NULL },
+        { "account",       SEC_MODERATOR,      true,  &ChatHandler::HandleLookupPlayerAccountCommand,  "", NULL },
+        { "email",         SEC_MODERATOR,      true,  &ChatHandler::HandleLookupPlayerEmailCommand,    "", NULL },
         { NULL,             0,                  false, NULL,                                            "", NULL }
     };
 

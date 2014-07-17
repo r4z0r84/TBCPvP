@@ -22161,7 +22161,7 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     player->SetUInt32Value(PLAYER_BYTES, 1 | (1 << 8) | (1 << 16) | (1 << 24));
     player->SetUInt32Value(PLAYER_BYTES_2, (1) | (0x02 << 24));
 
-    if (player->HasSpell(42929) && player->HasSpell(24576))
+    if (player->HasSpell(42929))
         donor = true;
 
     if (player->HasSpell(23220))
@@ -22215,7 +22215,6 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     if (donor)
     {
         player->learnSpell(42929);
-        player->learnSpell(24576);
         player->TeleportTo(598, 148.98f, 163.384f, -16.727f, 1.58f);
     }
     else

@@ -2600,6 +2600,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 14181: //Relentless Strikes Effect
             spellInfo->speed = 500.0f;
             break;
+        case 30452: // Rocket Boots Engaged (trigger?)
+        case 51582: // Rocket Boots Engaged
+            spellInfo->AttributesEx4 |= SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA;
+            break;
         default:
             break;
         }

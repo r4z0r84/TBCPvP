@@ -940,6 +940,8 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_ARENA_RATING_DISCARD_TIMER]                = ConfigMgr::GetIntDefault("Arena.RatingDiscardTimer", 10 * MINUTE * IN_MILLISECONDS);
     m_configs[CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS]              = ConfigMgr::GetBoolDefault("Arena.AutoDistributePoints", false);
     m_configs[CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS]       = ConfigMgr::GetIntDefault("Arena.AutoDistributeInterval", 7);
+    m_configs[CONFIG_ENABLE_FAKE_WHO_ON_ARENA]                  = ConfigMgr::GetBoolDefault("Arena.EnableFakeWho", true);
+    m_configs[CONFIG_ENABLE_FAKE_WHO_IN_GUILD]                  = ConfigMgr::GetBoolDefault("Arena.EnableFakeWho.ForGuild", true);
     m_configs[CONFIG_ARENA_LOG_EXTENDED_INFO]                   = ConfigMgr::GetBoolDefault("ArenaLogExtendedInfo", false);
     m_configs[CONFIG_INSTANT_LOGOUT]                            = ConfigMgr::GetIntDefault("InstantLogout", SEC_MODERATOR);
 

@@ -275,6 +275,10 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode(WorldPacket & /*recv_data*
     if (!bg)
         return;
 
+    // Prevent players from sending in an arena
+    if (bg->isArena())
+        return;
+
     WorldPacket data;
     sBattleGroundMgr->BuildPvpLogDataPacket(&data, bg);
     SendPacket(&data);

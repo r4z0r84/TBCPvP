@@ -768,7 +768,7 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
             data << uint8(0);                               // new 2.4.0
             if (!pl->isGameMaster() && sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA))
             {
-                if (pl->InArena() && !pl->isGameMaster())
+                if (pl->InArena())
                     data << uint32(440); // Tanaris
                 else 
                     data << uint32(pl->GetZoneId());

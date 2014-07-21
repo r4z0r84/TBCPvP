@@ -150,23 +150,23 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     sLog->outDebug("WORLD: Recvd CMSG_WHO Message");
     //recv_data.hexlike();
 
-    // Disable Who in arena
-    if (GetPlayer()->InArena())
-    {
-        if (!GetPlayer()->isGameMaster() && sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA))
-        {
-            GetPlayer()->GetSession()->SendAreaTriggerMessage("You may not use Who in arena.");
-            ChatHandler(this).PSendSysMessage("You may not use Who in arena.");
-            return;
-        }
-    }
-
     if (time(NULL)- sWorld->getConfig(CONFIG_WHO_COOLDOWN) < m_lastWhoCommand)
     {
         recv_data.rpos(recv_data.wpos());
         return;
     }
     m_lastWhoCommand = time(NULL);
+
+    // Disable Who in arena
+    if (GetPlayer()->InArena() && !GetPlayer->isSpectator())
+    {
+        if (!GetPlayer()->isGameMaster() && sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA))
+        {
+            GetPlayer()->GetSession()->SendAreaTriggerMessage("You may not use the who list in arena.");
+            ChatHandler(this).PSendSysMessage("You may not use the who list in arena.");
+            return;
+        }
+    }
 
     uint32 clientcount = 0;
 

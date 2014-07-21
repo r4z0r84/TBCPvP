@@ -4770,6 +4770,11 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     // remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(playerguid, 10);
 
+    // characters played less than 1 hour go straight to deletion
+    QueryResult_AutoPtr resultPlayed = CharacterDatabase.PQuery("SELECT totaltime FROM characters WHERE guid='%u' AND totaltime < 3600", guid);
+    if (resultPlayed)
+        charDelete_method = CHAR_DELETE_REMOVE;
+
     switch (charDelete_method)
     {
         // completely remove from the database

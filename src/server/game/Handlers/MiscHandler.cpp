@@ -158,7 +158,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     m_lastWhoCommand = time(NULL);
 
     // Disable Who in arena
-    if (GetPlayer()->InArena() && !GetPlayer->isSpectator())
+    if (GetPlayer()->InArena() && !GetPlayer()->isSpectator())
     {
         if (!GetPlayer()->isGameMaster() && sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA))
         {

@@ -16131,6 +16131,10 @@ bool Player::LoadFromDB(uint32 guid, SqlQueryHolder *holder)
     time_t now = time(NULL);
     time_t logoutTime = time_t(fields[23].GetUInt64());
 
+    // Smolderforge compensation
+    if (logoutTime <= 1405910160)
+        CharacterDatabase.PExecute("INSERT INTO `mail_external` (receiver, subject, message, item, item_count) VALUES (%u, 'Compensation Package', 'This is a compensation package for the the recent gear changes and removal of SWP gear from the server. Because this changed affected many players, we have credited the entire server with some compensation to help they re-earn gear. If you are unaware of these changes, please visit our website to read about them!', 2131024, 1)", guid);
+
     // since last logout (in seconds)
     uint64 time_diff = uint64(now - logoutTime);
 

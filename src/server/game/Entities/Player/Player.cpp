@@ -5484,12 +5484,14 @@ void Player::RepopAtGraveyard()
             TeleportTo(0, 1741.3778f, -5557.780f, 118.831f, 3.28f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
-        break;
+            return;
+            break;
         case 598: // Donor mall
             TeleportTo(598, 148.98f, 163.384f, -16.727f, 1.58f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
-        break;
+            return;
+            break;
     }
 
     switch (GetZoneId())
@@ -5511,7 +5513,8 @@ void Player::RepopAtGraveyard()
             }
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
-        break;
+            return;
+            break;
         case 616: // Hyjal graveyards
             if (GetTeam()==ALLIANCE)
                 TeleportTo(1, 5194.0f, -3437.84f, 1673.44f, 0.16f);
@@ -5519,12 +5522,14 @@ void Player::RepopAtGraveyard()
                 TeleportTo(1, 5585.11f, -3908.56f, 1710.0f, 1.89f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
-        break;
+            return;
+            break;
         case 2037: // Quel'Thalas graveyard
             TeleportTo(0, 4273.06f, -2774.95f, 5.65f, 4.41f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
-        break;
+            return;
+            break;
     }
 
     switch (GetAreaId())
@@ -5533,12 +5538,14 @@ void Player::RepopAtGraveyard()
             TeleportTo(1, -11784.12695f, -4781.511f, 12.7245f, 2.81f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
-        break;
+            return;
+            break;
         case 2477: // Godzilla graveyard
             TeleportTo(1, -10794.37f, 2164.335f, 2.836f, 1.43f);
             ResurrectPlayer(1.0f, false);
             SpawnCorpseBones();
-        break;
+            return;
+            break;
     }
 
     // if no grave found, stay at the current location

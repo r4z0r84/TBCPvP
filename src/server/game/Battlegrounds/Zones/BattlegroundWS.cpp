@@ -283,6 +283,10 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         RewardHonorToTeam(BG_WSG_Honor[m_HonorMode][BG_WSG_FLAG_CAP], HORDE);                       // +40 bonushonor
     }
 
+    // smolderforge quest reward
+    if (Source->GetQuestStatus(68475) == QUEST_STATUS_INCOMPLETE)
+        Source->CompleteQuest(68475);
+
     SpawnBGObject(BG_WS_OBJECT_H_FLAG, BG_WS_FLAG_RESPAWN_TIME);
     SpawnBGObject(BG_WS_OBJECT_A_FLAG, BG_WS_FLAG_RESPAWN_TIME);
 

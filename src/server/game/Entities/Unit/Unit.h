@@ -882,8 +882,9 @@ class Unit : public WorldObject
         }
         Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
         {
-            if (getVictim() != NULL)
-                return getVictim();
+            // Wasn't added until 3.0.2
+            //if (getVictim() != NULL)
+            //    return getVictim();
 
             if (!m_attackers.empty())
                 return *(m_attackers.begin());

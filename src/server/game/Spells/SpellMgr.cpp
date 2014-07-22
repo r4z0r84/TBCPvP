@@ -2602,6 +2602,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 30452: // Rocket Boots Engaged (trigger?)
         case 51582: // Rocket Boots Engaged
+        case 13120: // Net-o-Matic
             spellInfo->AttributesEx4 |= SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA;
             break;
         default:

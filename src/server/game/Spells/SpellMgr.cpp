@@ -3017,6 +3017,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         {
             if (spellproto->Id == 12494) // frostbite
                 return DIMINISHING_TRIGGER_ROOT;
+
+            // Intimidation
+            if (spellproto->Id == 24394)
+                return DIMINISHING_CONTROL_STUN;
             break;
         }
     }

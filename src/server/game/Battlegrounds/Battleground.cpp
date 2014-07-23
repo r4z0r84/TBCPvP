@@ -785,10 +785,43 @@ void BattleGround::EndBattleGround(uint32 winner)
                 SetArenaTeamRatingChangeForTeam(ALLIANCE, loser_change);
             }
             sLog->outArena("Arena match Type: %u for Team1Id: %u - Team2Id: %u ended. WinnerTeamId: %u. Winner rating: %u, Loser rating: %u. RatingChange: %i.", m_ArenaType, m_ArenaTeamIds[BG_TEAM_ALLIANCE], m_ArenaTeamIds[BG_TEAM_HORDE], winner_arena_team->GetId(), winner_rating, loser_rating, winner_change);
+            CharacterDatabase.BeginTransaction();
+            CharacterDatabase.PExecute("INSERT INTO `arena_matches` (winner_teamid, loser_teamid, time, winner_rating, loser_rating, winner_rating_change, loser_rating_change) VALUES (%u, %u, NOW(), %u, %u, %u, %u)", winner_arena_team->GetId(), loser_arena_team->GetId(), winner_rating, loser_rating, winner_change, loser_change);
+            CharacterDatabase.CommitTransaction();
             if (sWorld->getConfig(CONFIG_ARENA_LOG_EXTENDED_INFO))
-                for (BattleGround::BattleGroundScoreMap::const_iterator itr = GetPlayerScoresBegin();itr !=GetPlayerScoresEnd(); ++itr)
-                    if (Player* player = sObjectMgr->GetPlayer(itr->first))
-                        sLog->outArena("Statistics for %s (GUID: " UI64FMTD ", Team: %d, IP: %s): %u damage, %u healing, %u killing blows", player->GetName(), itr->first, player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3), player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
+            {
+                QueryResult_AutoPtr result = CharacterDatabase.Query("SELECT MAX(matchid) FROM arena_matches");
+                if (result)
+                {
+                    Field *fields = result->Fetch();
+                    uint32 matchid = fields[0].GetUInt32() + 1; // why...
+                    uint32 winnerct = 1;
+                    uint32 loserct = 1;
+
+                    for (BattleGround::BattleGroundScoreMap::const_iterator itr = GetPlayerScoresBegin();itr !=GetPlayerScoresEnd(); ++itr)
+                    {
+                        if (Player* player = sObjectMgr->GetPlayer(itr->first))
+                        {
+                            sLog->outArena("Statistics for %s (GUID: " UI64FMTD ", Team: %d, IP: %s): %u damage, %u healing, %u killing blows", player->GetName(), itr->first, player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3), player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
+                            if (matchid)
+                            {
+                                if (winner_arena_team->GetId() == player->GetArenaTeamId(m_ArenaType == 5 ? 2 : m_ArenaType == 3))
+                                {
+                                    CharacterDatabase.PExecute("UPDATE `arena_matches` SET winner_player%u = %u, winner_player%u_kills = %u, winner_player%u_dmg = %u, winner_player%u_heal = %u WHERE matchid = %u", winnerct, itr->first, winnerct, itr->second->KillingBlows, winnerct, itr->second->DamageDone, winnerct, itr->second->HealingDone, matchid);
+                                    CharacterDatabase.PExecute("UPDATE `arena_team` SET class%u = %u WHERE arenateamid = %u", winnerct, player->getClass(), winner_arena_team->GetId());
+                                    winnerct++;
+                                }
+                                else
+                                {
+                                    CharacterDatabase.PExecute("UPDATE `arena_matches` SET loser_player%u = %u, loser_player%u_kills = %u, loser_player%u_dmg = %u, loser_player%u_heal = %u WHERE matchid = %u", loserct, itr->first, loserct, itr->second->KillingBlows, loserct, itr->second->DamageDone, loserct, itr->second->HealingDone, matchid);
+                                    CharacterDatabase.PExecute("UPDATE `arena_team` SET class%u = %u WHERE arenateamid = %u", loserct, player->getClass(), loser_arena_team->GetId());
+                                    loserct++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         else
         {

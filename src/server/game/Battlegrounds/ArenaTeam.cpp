@@ -530,9 +530,9 @@ uint32 ArenaTeam::GetPoints(uint32 MemberRating)
 
 float ArenaTeam::GetChanceAgainst(uint32 own_rating, uint32 enemy_rating)
 {
-    // returns the chance to win against a team with the given rating, used in the rating adjustment calculation
+    // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
     // ELO system
-    return 1.0f/(1.0f+exp(log(10.0f)*(float)((float)enemy_rating - (float)own_rating)/400.0f));
+    return 1.0f / (1.0f + exp(log(10.0f) * (float)((float)enemy_rating - (float)own_rating) / 650.0f));
 }
 
 void ArenaTeam::FinishGame(int32 mod)

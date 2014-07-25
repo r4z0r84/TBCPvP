@@ -9345,6 +9345,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
             if (m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Attributes & SPELL_ATTR_CANT_USED_IN_COMBAT)
                 InterruptSpell(CURRENT_GENERIC_SPELL);
         }
+
+        RemoveAurasDueToSpell(27089);
     }
     else
     {

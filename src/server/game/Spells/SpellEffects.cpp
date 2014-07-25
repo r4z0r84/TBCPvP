@@ -6664,7 +6664,14 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const *
             ((Minion*)summon)->SetFollowAngle(m_caster->GetAngle(summon));
 
         summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-        summon->AI()->EnterEvadeMode();
+
+        if (m_spellInfo->Id == 45145) // Snake Trap
+        {
+            summon->HasReactState(REACT_AGGRESSIVE);
+            summon->AI()->AttackStart(m_targets.getUnitTarget());
+        }
+        else
+            summon->AI()->EnterEvadeMode();
     }
 }
 

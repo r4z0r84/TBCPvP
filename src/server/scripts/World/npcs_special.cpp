@@ -1312,11 +1312,6 @@ struct npc_snake_trap_serpentsAI : public ScriptedAI
 
         CreatureTemplate const* Info = me->GetCreatureTemplate();
 
-        if (Info->Entry == C_VIPER)
-            IsViper = true;
-        else
-            IsViper = false;
-
         //Add delta to make them not all hit the same time
         uint32 delta = (rand() % 7) * 100;
         me->SetStatFloatValue(UNIT_FIELD_BASEATTACKTIME, Info->baseattacktime + delta);
@@ -1349,7 +1344,7 @@ struct npc_snake_trap_serpentsAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if (!me->isPet() || !Owner)
+        if (!Owner)
             return;
 
         //Follow if not in combat
@@ -1373,7 +1368,7 @@ struct npc_snake_trap_serpentsAI : public ScriptedAI
 
         if (SpellTimer <= diff)
         {
-            if (IsViper) //Viper
+            if (me->GetEntry() == C_VIPER) //Viper
             {
                 if (urand(0, 2) == 0) //33% chance to cast
                 {

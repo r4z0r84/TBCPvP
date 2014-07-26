@@ -254,7 +254,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             Player* player = sObjectMgr->GetPlayer(to.c_str());
             uint32 tSecurity = GetSecurity();
             uint32 pSecurity = player ? player->GetSession()->GetSecurity() : SEC_PLAYER;
-            if (!player || (tSecurity == SEC_PLAYER && pSecurity > SEC_PLAYER && !player->isAcceptWhispers()))
+            if (!player || (lang != LANG_ADDON && tSecurity == SEC_PLAYER && pSecurity > SEC_PLAYER && !player->isAcceptWhispers()))
             {
                 SendPlayerNotFoundNotice(to);
                 return;

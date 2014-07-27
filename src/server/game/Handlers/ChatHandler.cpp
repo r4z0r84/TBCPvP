@@ -57,9 +57,6 @@ bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg
         }
     }
 
-    if (GetPlayer()->isSpectator())
-        return false;
-
     return true;
 }
 
@@ -276,6 +273,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 SendNotification(GetSkyFireString(LANG_GM_SILENCE), GetPlayer()->GetName());
                 return;
             }
+
+            if (GetPlayer()->isSpectator() && player->InArena())
+                return;
 
             GetPlayer()->Whisper(msg, lang, player->GetGUID());
         } break;

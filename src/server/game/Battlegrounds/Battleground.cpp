@@ -785,7 +785,7 @@ void BattleGround::EndBattleGround(uint32 winner)
                 SetArenaTeamRatingChangeForTeam(ALLIANCE, loser_change);
             }
             sLog->outArena("Arena match Type: %u for Team1Id: %u - Team2Id: %u ended. WinnerTeamId: %u. Winner rating: %u, Loser rating: %u. RatingChange: %i.", m_ArenaType, m_ArenaTeamIds[BG_TEAM_ALLIANCE], m_ArenaTeamIds[BG_TEAM_HORDE], winner_arena_team->GetId(), winner_rating, loser_rating, winner_change);
-            CharacterDatabase.PExecute("INSERT INTO `arena_matches` (winner_teamid, loser_teamid, time, winner_rating, loser_rating, winner_rating_change, loser_rating_change) VALUES (%u, %u, NOW(), %u, %u, %u, %i)", winner_arena_team->GetId(), loser_arena_team->GetId(), winner_rating, loser_rating, winner_change, loser_change);
+            CharacterDatabase.PExecute("INSERT INTO `arena_matches` (winner_teamid, loser_teamid, map, time, duration, winner_rating, loser_rating, winner_rating_change, loser_rating_change) VALUES (%u, %u, %u, NOW(), %u, %u, %u, %u, %i)", winner_arena_team->GetId(), loser_arena_team->GetId(), m_MapId, GetStartTime() / IN_MILLISECONDS, winner_rating, loser_rating, winner_change, loser_change);
             if (sWorld->getConfig(CONFIG_ARENA_LOG_EXTENDED_INFO))
             {
                 QueryResult_AutoPtr result = CharacterDatabase.Query("SELECT MAX(matchid) FROM arena_matches");

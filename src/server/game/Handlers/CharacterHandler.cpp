@@ -742,6 +742,18 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         }
     }
 
+    if (pCurrChar->isGameMaster())
+        SendNotification(LANG_GM_ON);
+
+    std::string IP_str = GetRemoteAddress();
+    sLog->outChar("Account: %d (IP: %s) Login Character:[%s] (guid: %u)",
+        GetAccountId(), IP_str.c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow());
+
+    m_playerLoading = false;
+
+    //Hook for OnLogin Event
+    sScriptMgr->OnLogin(pCurrChar);
+
     // Smolderforge arena title modification
     // see if player is an arena finalist with title
     QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT * FROM season_titles WHERE guid = '%u' LIMIT 1", pCurrChar->GetGUIDLow());
@@ -752,35 +764,63 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         uint8 title         = fields[1].GetUInt8();
         uint8 earnedSeason  = fields[2].GetUInt8();
         uint8 currentSeason = fields[3].GetUInt8();
+        bool awarded        = fields[4].GetBool();
+        uint8 numKeepSeasons= fields[5].GetUInt8();
 
-        if (earnedSeason < currentSeason) // we have a title to remove
+        CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(title);
+
+        if (earnedSeason == currentSeason && titleEntry) // we may need to add a title
         {
-            CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(title);
-            if (pCurrChar->HasTitle(titleEntry))
+            if (!awarded)
             {
+                if (!pCurrChar->HasTitle(titleEntry))
+                {
+                    pCurrChar->SetTitle(titleEntry);
+                    pCurrChar->GetSession()->SendAreaTriggerMessage("Congratulations! You're an arena finalist! Your title has been added and if you were one of the top 3 teams, your mounts and tabard will be delivered to your mailbox shortly.");
+                    ChatHandler(pCurrChar).PSendSysMessage("Congratulations! You're an arena finalist! Your title has been added and if you were one of the top 3 teams, your mounts and tabard will be delivered to your mailbox shortly.");
+                }
+
                 switch (title)
                 {
-                    case 71: //  Vengeful Gladiator
-                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
-                        pCurrChar->SetTitle(titleEntry, true);
-                        titleEntry = sCharTitlesStore.LookupEntry(62);
-                        pCurrChar->SetTitle(titleEntry);
-                        CharacterDatabase.PExecute("UPDATE season_titles SET title = '62', earnedSeason = DEFAULT WHERE guid ='%u'", pCurrChar->GetGUIDLow());
+                    case 42:
+                    case 62:
+                    case 71:
+                        CharacterDatabase.PExecute("INSERT INTO `mail_external` (receiver, subject, message, item, item_count) VALUES (%u, 'Arena Rewards', 'You recent efforts in rated arena have placed you at the top 3 for season %u! Attached below are your exclusive mounts to ride upon for the next two seasons, and your tabard which you may keep permanently.', '3910%u', 1)", pCurrChar->GetGUIDLow(), currentSeason, title);
+                        CharacterDatabase.PExecute("UPDATE `season_titles` SET awarded = 1, numKeepSeasons = 1 WHERE guid = %u", pCurrChar->GetGUIDLow());
                         break;
-                    case 62: // Merciless Gladiator
-                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
-                        pCurrChar->SetTitle(titleEntry, true);
-                        titleEntry = sCharTitlesStore.LookupEntry(42);
-                        pCurrChar->SetTitle(titleEntry);
-                        CharacterDatabase.PExecute("UPDATE season_titles SET title = '42', earnedSeason = DEFAULT WHERE guid ='%u'", pCurrChar->GetGUIDLow());
-                        break;
-                    default:
-                        pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
-                        pCurrChar->SetTitle(titleEntry, true);
-                        CharacterDatabase.PExecute("DELETE FROM season_titles WHERE guid ='%u'", pCurrChar->GetGUIDLow());
+                    default: // non-glads
+                        CharacterDatabase.PExecute("UPDATE `season_titles` SET awarded = 1 WHERE guid = %u", pCurrChar->GetGUIDLow());
                         break;
                 }
-                pCurrChar->SaveToDB();
+            }
+        }
+
+        if (earnedSeason < currentSeason && titleEntry) // we have a title to remove
+        {
+            if (pCurrChar->HasTitle(titleEntry))
+            {
+                if (!numKeepSeasons) // no seasons left to hold onto title, remove
+                {
+                    pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+                    pCurrChar->SetTitle(titleEntry, true);
+                    CharacterDatabase.PExecute("DELETE FROM season_titles WHERE guid ='%u'", pCurrChar->GetGUIDLow());
+                    pCurrChar->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+                    pCurrChar->DestroyItemCount(30609, 1, true, false); // venge drake
+                    pCurrChar->DestroyItemCount(34092, 1, true, false); // merc drake
+                    pCurrChar->DestroyItemCount(37676, 1, true, false); // nether drake
+                    pCurrChar->DestroyItemCount(33225, 1, true, false); // spectral
+                }
+                else if (numKeepSeasons)
+                {
+                    switch (title)
+                    {
+                        case 71: // Vengeful Gladiator
+                        case 62: // Merciless Gladiator
+                        case 51: // Gladiator
+                            CharacterDatabase.PExecute("UPDATE season_titles SET earnedSeason = %u, numKeepSeasons = 0 WHERE guid ='%u'", earnedSeason + 1, pCurrChar->GetGUIDLow());
+                            break;
+                    }
+                }
             }
         }
     }
@@ -823,20 +863,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
             pCurrChar->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
             pCurrChar->SetTitle(challenger, true);
         }
-        pCurrChar->SaveToDB();
     }
-
-    if (pCurrChar->isGameMaster())
-        SendNotification(LANG_GM_ON);
-
-    std::string IP_str = GetRemoteAddress();
-    sLog->outChar("Account: %d (IP: %s) Login Character:[%s] (guid: %u)",
-        GetAccountId(), IP_str.c_str(), pCurrChar->GetName(), pCurrChar->GetGUIDLow());
-
-    m_playerLoading = false;
-
-    //Hook for OnLogin Event
-    sScriptMgr->OnLogin(pCurrChar);
+    pCurrChar->SaveToDB();
 
     delete holder;
 }

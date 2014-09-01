@@ -759,20 +759,6 @@ void BattleGround::EndBattleGround(uint32 winner)
             winner_rating = winner_arena_team->GetStats().rating;
             int32 winner_change = winner_arena_team->WonAgainst(loser_rating);
             int32 loser_change = loser_arena_team->LostAgainst(winner_rating);
-
-            // Smolderforge rating adjustments
-            if (winner_rating < 1850)
-                winner_change += 2;
-
-            if (loser_change <= -25)
-                loser_change = -24;
-
-            if (winner_change == 30)
-                winner_change++;
-
-            if (winner_change < 3)
-                winner_change = 3;
-
             sLog->outDebug("--- Winner rating: %u, Loser rating: %u, Winner change: %u, Losser change: %u ---", winner_rating, loser_rating, winner_change, loser_change);
             if (winner == ALLIANCE)
             {

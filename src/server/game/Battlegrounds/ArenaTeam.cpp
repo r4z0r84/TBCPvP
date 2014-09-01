@@ -561,6 +561,15 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating)
     float chance = GetChanceAgainst(m_stats.rating, againstRating);
     // calculate the rating modification (ELO system with k=32)
     int32 mod = (int32)floor(32.0f * (1.0f - chance));
+
+    // Smolderforge rating adjustments
+    if (m_stats.rating < 1850)
+        mod += 2;
+    if (m_stats.rating == 30)
+        mod++;
+    if (m_stats.rating < 3)
+        mod = 3;
+
     // modify the team stats accordingly
     FinishGame(mod);
     m_stats.wins_week += 1;
@@ -577,6 +586,11 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating)
     float chance = GetChanceAgainst(m_stats.rating, againstRating);
     // calculate the rating modification (ELO system with k=32)
     int32 mod = (int32)ceil(32.0f * (0.0f - chance));
+
+    // Smolderforge rating adjustments
+    if (m_stats.rating <= -25)
+        mod = -24;
+
     // modify the team stats accordingly
     FinishGame(mod);
 

@@ -608,6 +608,11 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
             // update personal rating
             float chance = GetChanceAgainst(itr->personal_rating, againstRating);
             int32 mod = (int32)ceil(32.0f * (0.0f - chance));
+
+            // Smolderforge rating adjustments
+            if (mod <= -25)
+                mod = -24;
+
             itr->ModifyPersonalRating(plr, mod, GetSlot());
             // update personal played stats
             itr->games_week += 1;
@@ -631,6 +636,10 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstRating)
             float chance = GetChanceAgainst(itr->personal_rating, againstRating);
             int32 mod = (int32)ceil(32.0f * (0.0f - chance));
 
+            // Smolderforge rating adjustments
+            if (mod <= -25)
+                mod = -24;
+
             int32 rating = int32(itr->personal_rating) + mod;
             itr->personal_rating = rating < 0 ? 0 : rating;
 
@@ -652,6 +661,15 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstRating)
             // update personal rating
             float chance = GetChanceAgainst(itr->personal_rating, againstRating);
             int32 mod = (int32)floor(32.0f * (1.0f - chance));
+
+            // Smolderforge rating adjustments
+            if (itr->personal_rating < 1850)
+                mod += 2;
+            if (mod == 30)
+                mod++;
+            if (mod < 3)
+                mod = 3;
+
             itr->ModifyPersonalRating(plr, mod, GetSlot());
             // update personal stats
             itr->games_week +=1;

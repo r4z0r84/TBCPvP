@@ -565,9 +565,9 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating)
     // Smolderforge rating adjustments
     if (m_stats.rating < 1850)
         mod += 2;
-    if (m_stats.rating == 30)
+    if (mod == 30)
         mod++;
-    if (m_stats.rating < 3)
+    if (mod < 3)
         mod = 3;
 
     // modify the team stats accordingly

@@ -2603,9 +2603,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 30452: // Rocket Boots Engaged (trigger?)
         case 51582: // Rocket Boots Engaged
         case 13120: // Net-o-Matic
+        case 835:   // Tidal Charm
+        case 15712: // Linken's Boomerang
             spellInfo->AttributesEx4 |= SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA;
             break;
-        case 46784: //Shadowsong Panther trinket on use effect
+        case 46784: // Shadowsong Panther trinket on use effect
             spellInfo->Effect[1] = 0;
             spellInfo->EffectApplyAuraName[1] = 0;
             spellInfo->EffectBasePoints[1] = 0;

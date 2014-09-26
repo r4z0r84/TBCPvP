@@ -588,7 +588,7 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating)
     int32 mod = (int32)ceil(32.0f * (0.0f - chance));
 
     // Smolderforge rating adjustments
-    if (m_stats.rating <= -25)
+    if (mod <= -25)
         mod = -24;
 
     // modify the team stats accordingly

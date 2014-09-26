@@ -2338,7 +2338,7 @@ void SpellMgr::LoadSpellCustomAttr()
         // Pummel
         if (spellInfo->SpellVisual == 1023 && spellInfo->SpellFamilyName == 4)
         {
-            spellInfo->speed = 3800.0f;
+            spellInfo->speed = 6800.0f;
             spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
         }
         // Sword Specialisation Proc
@@ -2362,12 +2362,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->speed = 1000.0f;
         // Kick
         if (spellInfo->SpellIconID == 246 && spellInfo->SpellFamilyName == 8)
-            spellInfo->speed = 3700.0f;
+            spellInfo->speed = 7700.0f;
 
         // Shaman -------------------------------------------------------------
         // Earth Shock
         if (spellInfo->SpellIconID == 687 && spellInfo->SpellFamilyName == 11)
-            spellInfo->speed = 2800.0f;
+            spellInfo->speed = 5800.0f;
         // Windfury weapon effect
         if (spellInfo->SpellIconID == 220 && spellInfo->SpellFamilyName == 11)
             spellInfo->speed = 400.0f;
@@ -2378,10 +2378,10 @@ void SpellMgr::LoadSpellCustomAttr()
         // Mage ---------------------------------------------------------------
         // Counterspell - interrupt
         if (spellInfo->SpellIconID == 17 && spellInfo->SpellVisual == 239 && spellInfo->SpellFamilyName == 3)
-            spellInfo->speed = 3800.0f;
+            spellInfo->speed = 6800.0f;
         // Improved Counterspell (needs to be slower than the interupt)
         if (spellInfo->SpellIconID == 17 && spellInfo->SpellVisual == 0 && spellInfo->SpellFamilyName == 3)
-            spellInfo->speed = 3200.0f;
+            spellInfo->speed = 6200.0f;
 
         // Druid --------------------------------------------------------------
         // Pounce
@@ -2391,7 +2391,7 @@ void SpellMgr::LoadSpellCustomAttr()
         switch (i)
         {
         case 19675: // Feral Charge Interrupt Effect
-            spellInfo->speed = 2600.0f;
+            spellInfo->speed = 3600.0f;
             break;
         case 32748: // Rogue Deadly Throw interrupt
             spellInfo->speed = 1800.0f;
@@ -2498,7 +2498,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100:   //Charge
         case 6178:
         case 11578:
-            spellInfo->speed = 1000.0f;
+            spellInfo->speed = 1900.0f;
             spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
             spellInfo->AttributesEx |= SPELL_ATTR_EX_CANT_BE_REFLECTED; 
             break;
@@ -2506,7 +2506,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 25273:                       // Intercept stun  
         case 20615:
         case 25274:                       
-            spellInfo->speed = 690.0f;    // Minor delay
+            spellInfo->speed = 3090.0f;    // Minor delay
             spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
             spellInfo->Attributes |= SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             spellInfo->AttributesEx |= SPELL_ATTR_EX_CANT_BE_REFLECTED;

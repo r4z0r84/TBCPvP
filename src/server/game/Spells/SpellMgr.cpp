@@ -2605,6 +2605,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 13120: // Net-o-Matic
             spellInfo->AttributesEx4 |= SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA;
             break;
+        case 46784: //Shadowsong Panther trinket on use effect
+            spellInfo->Effect[1] = 0;
+            spellInfo->EffectApplyAuraName[1] = 0;
+            spellInfo->EffectBasePoints[1] = 0;
+            break;
         default:
             break;
         }

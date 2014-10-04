@@ -980,6 +980,7 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
 
     SetUInt32Value(PLAYER_BYTES, (skin | (face << 8) | (hairStyle << 16) | (hairColor << 24)));
     SetUInt32Value(PLAYER_BYTES_2, (facialHair | (0x00 << 8) | (0x00 << 16) | (0x02 << 24)));
+    SetByteValue(PLAYER_BYTES_2, 2, 7); // grant all bank tabs
     SetByteValue(PLAYER_BYTES_3, 0, gender);
 
     SetUInt32Value(PLAYER_GUILDID, 0);

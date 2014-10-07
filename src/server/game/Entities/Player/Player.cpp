@@ -22163,7 +22163,9 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     // store various reps to convert
     uint32 force1, force2, force3, out1, out2;
     // are they a donor or have dawnsaber?
-    bool donor, dawnsaber = false;
+    bool donor = false;
+    bool dawnsaber = false;
+    bool bgTitle = false;
 
     enum ChangeReps
     {
@@ -22210,6 +22212,7 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, gender == GENDER_MALE ? info->displayId_m : info->displayId_f);
     player->SetUInt32Value(PLAYER_BYTES, 1 | (1 << 8) | (1 << 16) | (1 << 24));
     player->SetUInt32Value(PLAYER_BYTES_2, (1) | (0x02 << 24));
+    player->SetByteValue(PLAYER_BYTES_2, 2, 7); // keep bank tabs
 
     if (player->HasSpell(42929))
         donor = true;
@@ -22246,6 +22249,12 @@ void Player::ChangeRace(Player *player, uint32 newRace)
             player->SetFactionReputation(sFactionStore.LookupEntry(THRALLMAR), out1);
             // Kurenai -> Mag'har
             player->SetFactionReputation(sFactionStore.LookupEntry(MAGHAR), out2);
+
+            if (bgTitle)
+            {
+                player->SetTitle(conqEntry);
+                player->SetTitle(justicarEntry, true);
+            }
         }
         else
         {
@@ -22259,6 +22268,12 @@ void Player::ChangeRace(Player *player, uint32 newRace)
             player->SetFactionReputation(sFactionStore.LookupEntry(HONORHOLD), out1);
             // Mag'har -> Kurenai
             player->SetFactionReputation(sFactionStore.LookupEntry(KURENAI), out2);
+
+            if (bgTitle)
+            {
+                player->SetTitle(justicarEntry);
+                player->SetTitle(conqEntry, true);
+            }
         }
     }
 

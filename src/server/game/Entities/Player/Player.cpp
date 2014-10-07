@@ -22201,6 +22201,11 @@ void Player::ChangeRace(Player *player, uint32 newRace)
         out2 = player->GetReputation(KURENAI);
     }
 
+    CharTitlesEntry const* justicarEntry = sCharTitlesStore.LookupEntry(48);
+    CharTitlesEntry const* conqEntry = sCharTitlesStore.LookupEntry(47);
+    if (player->HasTitle(justicarEntry) || player->HasTitle(conqEntry))
+        bgTitle = true;
+
     const PlayerInfo* info = sObjectMgr->GetPlayerInfo(newRace, pClass);
     if (!info)
         return;

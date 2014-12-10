@@ -1448,7 +1448,7 @@ void Player::Update(uint32 p_time)
 
     // Neutral Dueling Zone
     if (GetTypeId() == TYPEID_PLAYER && GetZoneId() == 2037 && !(ToPlayer()->isGameMaster()))
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 1077); // Shattered Sun Offensive, friendly to horde and alliance
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 35); // Shattered Sun Offensive, friendly to horde and alliance
     else if (GetTypeId() == TYPEID_PLAYER && !(ToPlayer()->isGameMaster()))
     {
         ToPlayer()->getFactionTemplateEntry();

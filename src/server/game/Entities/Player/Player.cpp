@@ -19976,10 +19976,6 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if (BattleGround *bg = GetBattleGround())
     {
-        // Don't allow players to leave rated arena during preparation phase (spectators excluded)
-        if (bg->isArena() && bg->isRated() && bg->GetStatus() == STATUS_WAIT_JOIN && !isSpectator())
-            return;
-
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast

@@ -95,7 +95,7 @@ void WorldSession::HandleBattleGroundJoinOpcode(WorldPacket & recv_data)
     // can do this, since it's battleground, not arena
     uint32 bgQueueTypeId = sBattleGroundMgr->BGQueueTypeId(bgTypeId, 0);
 
-    if (_player->m_Played_time[PLAYED_TIME_TOTAL] < 900 || !_player->isGameMaster())
+    if (_player->m_Played_time[PLAYED_TIME_TOTAL] < 900 && !_player->isGameMaster())
     {
         _player->GetSession()->SendAreaTriggerMessage("You must have at least 15 minutes of played time before you may queue. Please spend a little more time setting up your character, and try again soon. You may check how much time is remaining by typing: /played");
         ChatHandler(_player).PSendSysMessage("You must have at least 15 minutes of played time before you may queue. Please spend a little more time setting up your character, and try again soon. You may check how much time is remaining by typing: /played");
@@ -716,7 +716,7 @@ void WorldSession::HandleBattleGroundArenaJoin(WorldPacket & recv_data)
         }
     }
 
-    if (_player->m_Played_time[PLAYED_TIME_TOTAL] < 900 || !_player->isGameMaster())
+    if (_player->m_Played_time[PLAYED_TIME_TOTAL] < 900 && !_player->isGameMaster())
     {
         _player->GetSession()->SendAreaTriggerMessage("You must have at least 15 minutes of played time before you may queue. Please spend a little more time setting up your character, and try again soon. You may check how much time is remaining by typing: /played");
         ChatHandler(_player).PSendSysMessage("You must have at least 15 minutes of played time before you may queue. Please spend a little more time setting up your character, and try again soon. You may check how much time is remaining by typing: /played");

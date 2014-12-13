@@ -19999,7 +19999,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
         // SOLO QUEUE: Decrease rating if player leaves before finishing
-        if (bg->GetArenaType() == ARENA_TYPE_SOLO_3v3 && bg->GetStatus() != STATUS_WAIT_LEAVE)
+        if (bg->GetArenaType() == ARENA_TYPE_SOLO_3v3 && bg->GetStatus() != STATUS_WAIT_LEAVE && !isSpectator())
         {
             uint8 slot = ArenaTeam::GetSlotByType(ARENA_TEAM_5v5);
             uint32 arena_team_id = GetArenaTeamId(slot);

@@ -22472,7 +22472,7 @@ bool Player::IsHealer()
     switch (getClass())
     {
         case CLASS_PALADIN:
-            if (HasSpell(31837) && HasSpell(20127) || HasSpell(33072) && HasSpell(31837) && !HasSpell(20218)) // Holy Guidance && Redoubt || Holy Shock && !Holy Shock
+            if (((HasSpell(31837) || HasSpell(31838) || HasSpell(31839) || HasSpell(31840) || HasSpell(31841) && HasSpell(20127)) || HasSpell(20130) || HasSpell(20135) || HasSpell(20136) || HasSpell(20137)) || ((HasSpell(31837) || HasSpell(31838) || HasSpell(31839) || HasSpell(31840) || HasSpell(31841)) && HasSpell(33072) && !HasSpell(20218))) // Holy Guidance && Redoubt || Holy Guidance && Holy Shock && !Sanctity Aura
                 return true;
         case CLASS_PRIEST:
             if (HasSpell(33206) || HasSpell(28275)) // Pain Suppression || Lightwell

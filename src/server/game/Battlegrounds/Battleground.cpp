@@ -848,6 +848,14 @@ void BattleGround::EndBattleGround(uint32 winner)
         {
             SetArenaTeamRatingChangeForTeam(ALLIANCE, 0);
             SetArenaTeamRatingChangeForTeam(HORDE, 0);
+
+            if (winner == 0)
+            {
+                if (ArenaTeam* team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(ALLIANCE)))
+                    team->LostAgainst(0);
+                if (ArenaTeam* team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(HORDE)))
+                    team->LostAgainst(0);
+            }
         }
     }
 

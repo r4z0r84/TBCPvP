@@ -207,7 +207,10 @@ void SendSubMenu_spectator(Player *player, Creature *_Creature, uint32 arenaType
         itr++;
     }
     if (totalcount > 0)
+    {
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Reload", arenaType, action);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "« Back", GOSSIP_SENDER, 1);
+    }
 
     player->SEND_GOSSIP_MENU(totalcount > 0 ? 66 : 67 ,_Creature->GetGUID());
 }
@@ -217,8 +220,10 @@ void SendMenu_spectator(Player *player, Creature *_Creature, uint32 action)
     if (player->InBattleGroundQueue())
     {
         player->GetSession()->SendNotification("Please leave queue(s) before spectating.");
+        player->CLOSE_GOSSIP_MENU();
         return;
     }
+
     player->CLOSE_GOSSIP_MENU();
     BattleGround *bg = sBattleGroundMgr->GetBattleGround(action);
     if (bg && bg->isArena() && bg->isRated() && bg->GetStatus() == STATUS_IN_PROGRESS && bg->GetPlayersCountByTeam(ALLIANCE) + bg->GetPlayersCountByTeam(HORDE) > 0)
@@ -256,6 +261,12 @@ bool GossipSelect_spectator(Player *player, Creature *_Creature, uint32 sender, 
         //case ARENA_TYPE_3v3:            SendSubMenu_spectator(player, _Creature, sender, action); break;
         case ARENA_TYPE_SOLO_3v3:       SendSubMenu_spectator(player, _Creature, sender, action); break;
         case GOSSIP_SENDER:             SendMenu_spectator(player, _Creature, action); break;
+    }
+    switch (action)
+    {
+        case 1:
+            GossipHello_spectator(player, creature);
+        break;
     }
     return true;
 }

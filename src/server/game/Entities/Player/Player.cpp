@@ -19998,6 +19998,30 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
     {
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
+        // SOLO QUEUE: Decrease rating if player leaves before finishing
+        if (bg->GetArenaType() == ARENA_TYPE_SOLO_3v3 && bg->GetStatus() != STATUS_WAIT_LEAVE)
+        {
+            uint8 slot = ArenaTeam::GetSlotByType(ARENA_TEAM_5v5);
+            uint32 arena_team_id = GetArenaTeamId(slot);
+            ArenaTeam * at = sObjectMgr->GetArenaTeamById(arena_team_id);
+
+            uint32 team = bg->GetPlayerTeam(GetGUID());
+            if (!team)
+                team = GetTeam();
+
+            uint32 sq_loser_rating = at->GetRating();
+            uint32 sq_winner_rating;
+            if (team == ALLIANCE)
+                sq_winner_rating = (bg->GetSoloQueueRatingForTeam(HORDE) / 3);
+            else
+                sq_winner_rating = (bg->GetSoloQueueRatingForTeam(ALLIANCE) / 3);
+
+            at->MemberLost(this, sq_winner_rating, sq_loser_rating);
+            at->LostAgainst(sq_winner_rating, sq_loser_rating);
+            at->SaveToDB();
+            at->NotifyStatsChanged();
+        }
+
         // call after remove to be sure that player resurrected for correct cast
         if (bg->isBattleGround() && !isGameMaster() && sWorld->getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
         {

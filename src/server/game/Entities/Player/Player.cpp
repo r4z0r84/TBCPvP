@@ -4337,6 +4337,13 @@ bool Player::resetTalents(bool no_cost)
         CharacterDatabase.PExecute("UPDATE characters set at_login = at_login & ~ %u WHERE guid ='%u'", uint32(AT_LOGIN_RESET_TALENTS), GetGUIDLow());
     }
 
+    // check if already in queue
+    if (InBattleGroundQueue())
+    {
+        GetSession()->SendNotification("You must leave all queues before resetting talents");
+        return false;
+    }
+
     uint32 level = getLevel();
     uint32 talentPointsForLevel = level < 10 ? 0 : uint32((level-9)*sWorld->getRate(RATE_TALENT));
 
@@ -4871,6 +4878,19 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                     uint32 petguidlow = fields3[0].GetUInt32();
                     Pet::DeleteFromDB(petguidlow);
                 } while (resultPets->NextRow());
+            }
+
+            // SOLOQUEUE - Disband 5v5 team when character is deleted
+            at_id = GetArenaTeamIdFromDB(playerguid,ARENA_TEAM_5v5);
+            if (at_id != 0)
+            {
+                ArenaTeam * at = sObjectMgr->GetArenaTeamById(at_id);
+                if (at)
+                {
+                    CharacterDatabase.PExecute("DELETE FROM arena_team WHERE arenateamid = '%u'", at_id);
+                    CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid = '%u'", at_id); //< this should be alredy done by calling DelMember(memberGuids[j]); for each member
+                    CharacterDatabase.PExecute("DELETE FROM arena_team_stats WHERE arenateamid = '%u'", at_id);
+                }
             }
 
             CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'", guid);
@@ -20596,6 +20616,23 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
+
+    // SOLOQUEUE - Create team at character creation
+    uint8 slot = ArenaTeam::GetSlotByType(ARENA_TEAM_5v5);
+    if (GetArenaTeamId(slot))
+        return;
+
+    ArenaTeam* at = new ArenaTeam;
+    if (!at->Create(GetGUID(), ARENA_TEAM_5v5, "Solo Queue 3v3", true))
+    {
+        sLog->outError("PetitionsHandler: arena team create failed.");
+        delete at;
+        return;
+    }
+
+    // looks cool
+    at->SetEmblem(4278190080, 37, 4294705141, 6, 4293719295);
+    sObjectMgr->AddArenaTeam(at);
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
@@ -22351,4 +22388,102 @@ void Player::ChangeRace(Player *player, uint32 newRace)
         else
             CharacterDatabase.PExecute("DELETE from `character_reputation` WHERE guid='%i' AND faction IN (889,510,729,947,941)", player->GetGUID());
     }
+}
+
+void Player::AddToArenaQueue(uint8 aType, bool isRated)
+{
+    if (!IsInWorld() || !isAlive())
+        return;
+
+    // only max level
+    if (getLevel() < sWorld->getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        return;
+
+    // check bg queue
+    if (InBattleGroundQueue())
+    {
+        GetSession()->SendNotification("Unable to queue for 3v3 solo while currently in another queue");
+        return;
+    }
+
+    //check existence
+    BattleGround* bg = NULL;
+    if (!(bg = sBattleGroundMgr->GetBattleGroundTemplate(BATTLEGROUND_AA)))
+    {
+        sLog->outError("Battleground: template BG (all arenas) not found");
+        return;
+    }
+
+    // Disallow queue naked
+    for (int i = EQUIPMENT_SLOT_FINGER1; i < EQUIPMENT_SLOT_TRINKET2; i++)
+    {
+        Item* itemTarget = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+
+        if (!itemTarget)
+        {
+            GetSession()->SendNotification("Please equip all items before attempting to queue");
+            return;
+        }
+    }
+
+    // Check for talents
+    if (GetFreeTalentPoints() > 0)
+    {
+        GetSession()->SendNotification("Please spend all your talent points before attempting to queue");
+        return;
+    }
+
+    // You can't queue as group
+    Group* grp = GetGroup();
+    if (grp && ARENA_TYPE_SOLO_3v3)
+    {
+        GetSession()->SendNotification("You must leave group before attempting to queue");
+        return;
+    }
+
+    uint32 bgQueueTypeId = sBattleGroundMgr->BGQueueTypeId(bg->GetTypeID(), aType);
+    uint32 arenaRating = 0;
+
+    // Store entry point coords
+    SetBattleGroundEntryPoint();
+
+    if (isRated)
+    {
+        uint32 ateamId = GetArenaTeamId(ArenaTeam::GetSlotByType(ARENA_TEAM_5v5));
+        // check real arena team existence only here (if it was moved to group->CanJoin .. () then we would have to get it twice)
+        ArenaTeam * at = sObjectMgr->GetArenaTeamById(ateamId);
+        // get the team rating for queueing
+        arenaRating = at->GetRating();
+    }
+
+    // Send BG Icon at Minimap
+    WorldPacket data;
+    sBattleGroundMgr->BuildBattleGroundStatusPacket(&data, bg, GetTeam(), AddBattleGroundQueueId(bgQueueTypeId), STATUS_WAIT_QUEUE, 0, 0, aType, isRated);
+    GetSession()->SendPacket(&data);
+
+    //Add to queue
+    GroupQueueInfo* gInfo = sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].AddGroup(this, bg->GetTypeID(), aType, isRated, arenaRating);
+    sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].AddPlayer(this, gInfo);
+    sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].Update(bg->GetTypeID(), GetBattleGroundQueueIdFromLevel(bg->GetTypeID()), aType, isRated, arenaRating);
+}
+
+bool Player::IsHealer()
+{
+    switch (getClass())
+    {
+        case CLASS_PALADIN:
+            if (HasSpell(31837) && HasSpell(20127) || HasSpell(33072) && HasSpell(31837) && !HasSpell(20218)) // Holy Guidance && Redoubt || Holy Shock && !Holy Shock
+                return true;
+        case CLASS_PRIEST:
+            if (HasSpell(33206) || HasSpell(28275)) // Pain Suppression || Lightwell
+                return true;
+        case CLASS_DRUID:
+            if (HasSpell(18562) || (HasSpell(24858) && HasSpell(17116) && !HasSpell(33603))) // Swiftmend || Moonkin Form && Nature's Swiftness
+                return true;
+        case CLASS_SHAMAN:
+            if (HasSpell(32594)) // Earth Shield
+                return true;
+    }
+
+    return false;
 }

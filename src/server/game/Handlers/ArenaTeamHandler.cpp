@@ -217,6 +217,13 @@ void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket & recv_data)
         return;
     }
 
+    // SOLOQUEUE - Disallow to disband / leave Solo Queue Team
+    if (at->GetType() == ARENA_TEAM_5v5)
+    {
+        SendNotification("You cannot disband your Solo Queue team");
+        return;
+    }
+
     // arena team has only one member (=captain)
     if (_player->GetGUID() == at->GetCaptain())
     {
@@ -251,6 +258,12 @@ void WorldSession::HandleArenaTeamDisbandOpcode(WorldPacket & recv_data)
 
         if (at->IsFighting())
             return;
+
+        if (at->GetType() == ARENA_TEAM_5v5)
+        {
+            SendNotification("You cannot disband your Solo Queue team");
+            return;
+        }
 
         at->Disband(this);
         delete at;

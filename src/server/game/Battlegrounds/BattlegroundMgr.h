@@ -32,11 +32,11 @@ typedef std::map<uint32, BattleGround*> BattleGroundSet;
 //typedef std::map<uint32, BattleGroundQueue*> BattleGroundQueueSet;
 typedef std::list<BattleGround*> BGFreeSlotQueueType;
 
-#define MAX_BATTLEGROUND_QUEUES 7                           // for level ranges 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70+
+#define MAX_BATTLEGROUND_QUEUES 9                           // for level ranges 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70+
 
-#define MAX_BATTLEGROUND_TYPES 9                            // each BG type will be in array
+#define MAX_BATTLEGROUND_TYPES 10                            // each BG type will be in array
 
-#define MAX_BATTLEGROUND_QUEUE_TYPES 8
+#define MAX_BATTLEGROUND_QUEUE_TYPES 9
 
 #define BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY    86400     // seconds in a day
 
@@ -98,15 +98,20 @@ class BattleGroundQueue
         {
         public:
             void Init(EligibleGroups * curr);
-            void AddGroup(GroupQueueInfo * group);
+            void AddGroup(GroupQueueInfo * group, bool isSoloQueue = false);
             void RemoveGroup(GroupQueueInfo * group);
             uint32 GetPlayerCount() const {return PlayerCount;}
-            bool Build(uint32 MinPlayers, uint32 MaxPlayers, EligibleGroups::iterator startitr);
+            bool Build(uint32 MinPlayers, uint32 MaxPlayers, EligibleGroups::iterator startitr, bool isSoloQueue);
+
+            bool HasSoloQueueHealer() { return hasSoloQueueHealer; }
+            void SetSoloQueueHealer(bool on) { hasSoloQueueHealer = on; }
         public:
             std::list<GroupQueueInfo *> SelectedGroups;
         private:
             uint32 PlayerCount;
             EligibleGroups * m_CurrEligGroups;
+
+            bool hasSoloQueueHealer;
         };
 
         enum SelectionPoolBuildMode

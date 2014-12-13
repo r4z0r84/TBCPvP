@@ -651,7 +651,7 @@ enum SkyFireStrings
     LANG_BG_QUEUE_ANNOUNCE_SELF         = 711,
     LANG_BG_QUEUE_ANNOUNCE_WORLD        = 712,
     LANG_YOUR_ARENA_LEVEL_REQ_ERROR     = 713,
-//                                      = 714, not used
+    LANG_BG_SOLO_QUEUE_ANNOUNCE_SELF    = 714,
     LANG_YOUR_BG_LEVEL_REQ_ERROR        = 715,
 //                                      = 716, not used
     LANG_BG_QUEUE_ANNOUNCE_START        = 717,

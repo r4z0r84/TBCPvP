@@ -160,6 +160,7 @@ enum BattleGroundQueueTypeId
     BATTLEGROUND_QUEUE_2v2     = 5,
     BATTLEGROUND_QUEUE_3v3     = 6,
     BATTLEGROUND_QUEUE_5v5     = 7,
+    BATTLEGROUND_QUEUE_SOLO_3v3 = 8
 };
 
 enum ScoreType
@@ -190,6 +191,7 @@ enum ScoreType
 
 enum ArenaType
 {
+    ARENA_TYPE_SOLO_3v3     = 1,
     ARENA_TYPE_2v2          = 2,
     ARENA_TYPE_3v3          = 3,
     ARENA_TYPE_5v5          = 5
@@ -470,6 +472,10 @@ class BattleGround
         uint32 GetArenaTeamIdForTeam(uint32 Team) const             { return m_ArenaTeamIds[GetTeamIndexByTeamId(Team)]; }
         void SetArenaTeamRatingChangeForTeam(uint32 Team, int32 RatingChange) { m_ArenaTeamRatingChanges[GetTeamIndexByTeamId(Team)] = RatingChange; }
         int32 GetArenaTeamRatingChangeForTeam(uint32 Team) const    { return m_ArenaTeamRatingChanges[GetTeamIndexByTeamId(Team)]; }
+
+        void SetSoloQueueRatingForTeam(uint32 Team, uint32 ArenaRating) { m_ArenaRating[GetTeamIndexByTeamId(Team)] += ArenaRating; }
+        int32 GetSoloQueueRatingForTeam(uint32 Team) const             { return m_ArenaRating[GetTeamIndexByTeamId(Team)]; }
+
         void CheckArenaWinConditions();
 
         /* Triggers handle */
@@ -604,6 +610,9 @@ class BattleGround
 
         /* Arena team ids by team */
         uint32 m_ArenaTeamIds[BG_TEAMS_COUNT];
+
+        /* SOLOQUEUE - Arena rating by team */
+        uint32 m_ArenaRating[BG_TEAMS_COUNT];
 
         int32 m_ArenaTeamRatingChanges[BG_TEAMS_COUNT];
 

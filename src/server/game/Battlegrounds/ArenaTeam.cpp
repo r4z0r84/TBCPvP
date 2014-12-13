@@ -55,12 +55,15 @@ ArenaTeam::~ArenaTeam()
 {
 }
 
-bool ArenaTeam::Create(uint64 captainGuid, uint32 type, std::string arenaTeamName)
+bool ArenaTeam::Create(uint64 captainGuid, uint32 type, std::string arenaTeamName, bool skipChecks)
 {
-    if (!sObjectMgr->GetPlayer(captainGuid))                      // player not exist
-        return false;
-    if (sObjectMgr->GetArenaTeamByName(arenaTeamName))            // arena team with this name already exist
-        return false;
+    if (!skipChecks)
+    {
+        if (!sObjectMgr->GetPlayer(captainGuid))                      // player not exist
+            return false;
+        if (sObjectMgr->GetArenaTeamByName(arenaTeamName))            // arena team with this name already exist
+            return false;
+    }
 
     sLog->outDebug("GUILD: creating arena team %s to leader: %u", arenaTeamName.c_str(), GUID_LOPART(captainGuid));
 
@@ -554,11 +557,11 @@ void ArenaTeam::FinishGame(int32 mod)
     }
 }
 
-int32 ArenaTeam::WonAgainst(uint32 againstRating)
+int32 ArenaTeam::WonAgainst(uint32 againstRating, uint32 SoloQueueRating)
 {
     // called when the team has won
     // 'chance' calculation - to beat the opponent
-    float chance = GetChanceAgainst(m_stats.rating, againstRating);
+    float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : m_stats.rating, againstRating);
     // calculate the rating modification (ELO system with k=32)
     int32 mod = (int32)floor(32.0f * (1.0f - chance));
 
@@ -579,11 +582,11 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating)
     return mod;
 }
 
-int32 ArenaTeam::LostAgainst(uint32 againstRating)
+int32 ArenaTeam::LostAgainst(uint32 againstRating, uint32 SoloQueueRating)
 {
     // called when the team has lost
     // 'chance' calculation - to loose to the opponent
-    float chance = GetChanceAgainst(m_stats.rating, againstRating);
+    float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : m_stats.rating, againstRating);
     // calculate the rating modification (ELO system with k=32)
     int32 mod = (int32)ceil(32.0f * (0.0f - chance));
 
@@ -592,13 +595,32 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating)
         mod = -24;
 
     // modify the team stats accordingly
-    FinishGame(mod);
+    if (int32(m_stats.rating) + mod < 0)
+        m_stats.rating = 0;
+    else
+        m_stats.rating += mod;
+
+    // SOLOQUEUE - Don't track stats for lost games
+    if (GetType() < ARENA_TEAM_5v5)
+    {
+        m_stats.games_week += 1;
+        m_stats.games_season += 1;
+    }
+
+    // update team's rank
+    m_stats.rank = 1;
+    ObjectMgr::ArenaTeamMap::const_iterator i = sObjectMgr->GetArenaTeamMapBegin();
+    for (; i != sObjectMgr->GetArenaTeamMapEnd(); ++i)
+    {
+        if (i->second->GetType() == m_Type && i->second->GetStats().rating > m_stats.rating)
+            ++m_stats.rank;
+    }
 
     // return the rating change, used to display it on the results screen
     return mod;
 }
 
-void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
+void ArenaTeam::MemberLost(Player * plr, uint32 againstRating, uint32 SoloQueueRating)
 {
     // called for each participant of a match after losing
     for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
@@ -606,7 +628,7 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
         if (itr->guid == plr->GetGUID())
         {
             // update personal rating
-            float chance = GetChanceAgainst(itr->personal_rating, againstRating);
+            float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : itr->personal_rating, againstRating);
             int32 mod = (int32)ceil(32.0f * (0.0f - chance));
 
             // Smolderforge rating adjustments
@@ -614,9 +636,14 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
                 mod = -24;
 
             itr->ModifyPersonalRating(plr, mod, GetSlot());
-            // update personal played stats
-            itr->games_week += 1;
-            itr->games_season += 1;
+
+            // SOLOQUEUE - Don't track stats for lost games
+            if (GetType() < ARENA_TEAM_5v5)
+            {
+                // update personal played stats
+                itr->games_week += 1;
+                itr->games_season += 1;
+            }
             // update the unit fields
             plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_WEEK,  itr->games_week);
             plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON,  itr->games_season);
@@ -644,14 +671,19 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstRating)
             itr->personal_rating = rating < 0 ? 0 : rating;
 
             // update personal played stats
-            itr->games_week +=1;
-            itr->games_season +=1;
+            // SOLOQUEUE - Don't track stats for lost games
+            if (GetType() < ARENA_TEAM_5v5)
+            {
+                itr->games_week +=1;
+                itr->games_season +=1;
+            }
+
             return;
         }
     }
 }
 
-void ArenaTeam::MemberWon(Player * plr, uint32 againstRating)
+void ArenaTeam::MemberWon(Player * plr, uint32 againstRating, uint32 SoloQueueRating)
 {
     // called for each participant after winning a match
     for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
@@ -659,7 +691,7 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstRating)
         if (itr->guid == plr->GetGUID())
         {
             // update personal rating
-            float chance = GetChanceAgainst(itr->personal_rating, againstRating);
+            float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : itr->personal_rating, againstRating);
             int32 mod = (int32)floor(32.0f * (1.0f - chance));
 
             // Smolderforge rating adjustments

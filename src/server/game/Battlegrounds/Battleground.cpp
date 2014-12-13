@@ -169,6 +169,10 @@ BattleGround::BattleGround()
     m_ArenaTeamIds[BG_TEAM_ALLIANCE]   = 0;
     m_ArenaTeamIds[BG_TEAM_HORDE]      = 0;
 
+    // SOLOQUEUE - Store rating
+    m_ArenaRating[BG_TEAM_ALLIANCE]    = 0;
+    m_ArenaRating[BG_TEAM_HORDE]       = 0;
+
     m_StartMaxDist = 0.0f;
 
     m_ArenaTeamRatingChanges[BG_TEAM_ALLIANCE]   = 0;
@@ -451,6 +455,13 @@ void BattleGround::Update(time_t diff)
                     if (Player *plr = sObjectMgr->GetPlayer(itr->first))
                         plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
 
+                // SOLOQUEUE - Check if there are enough players to start the game.
+                if (GetArenaType() == ARENA_TYPE_SOLO_3v3)
+                {
+                    if (GetPlayersCountByTeam(ALLIANCE) < 3 || GetPlayersCountByTeam(HORDE) < 3)
+                        EndBattleGround(0); // End battleground without winner
+                }
+
                 CheckArenaWinConditions();
             }
             else
@@ -716,6 +727,12 @@ void BattleGround::EndBattleGround(uint32 winner)
     WorldPacket data;
     int32 winmsg_id = 0;
 
+    // SOLOQUEUE - Store ratings
+    uint32 sq_loser_rating = 0;
+    uint32 sq_winner_rating = 0;
+    int32 sq_loser_change = 0;
+    int32 sq_winner_change = 0;
+
     if (winner == ALLIANCE)
     {
         winmsg_id = isBattleGround() ? LANG_BG_A_WINS : LANG_ARENA_GOLD_WINS;
@@ -740,8 +757,28 @@ void BattleGround::EndBattleGround(uint32 winner)
     SetStatus(STATUS_WAIT_LEAVE);
     m_EndTime = 0;
 
+    // SOLOQUEUE
+    if (isArena() && isRated() && GetArenaType() == ARENA_TYPE_SOLO_3v3)
+    {
+        if (winner == ALLIANCE)
+        {
+            sq_winner_rating = (GetSoloQueueRatingForTeam(ALLIANCE) / 3);
+            sq_loser_rating = (GetSoloQueueRatingForTeam(HORDE) / 3);
+            sLog->outDebug("--- Winner rating: %u. Loser rating: %u ---", sq_winner_rating, sq_loser_rating);
+        }
+        else if (winner = HORDE)
+        {
+            sq_winner_rating = (GetSoloQueueRatingForTeam(HORDE) / 3);
+            sq_loser_rating = (GetSoloQueueRatingForTeam(ALLIANCE) / 3);
+            sLog->outDebug("--- Winner rating: %u. Loser rating: %u ---", sq_winner_rating, sq_loser_rating);
+        }
+        for (BattleGround::BattleGroundScoreMap::const_iterator itr = GetPlayerScoresBegin();itr !=GetPlayerScoresEnd(); ++itr)
+            if (Player* player = sObjectMgr->GetPlayer(itr->first))
+                sLog->outArena("Solo Queue Statistics for %s (GUID: " UI64FMTD ", IP: %s): %u damage, %u healing, %u killing blows", player->GetName(), itr->first, player->GetSession()->GetRemoteAddress().c_str(), itr->second->DamageDone, itr->second->HealingDone, itr->second->KillingBlows);
+    }
+
     // arena rating calculation
-    if (isArena() && isRated())
+    if (isArena() && isRated() && GetArenaType() != ARENA_TYPE_SOLO_3v3)
     {
         if (winner == ALLIANCE)
         {
@@ -759,7 +796,7 @@ void BattleGround::EndBattleGround(uint32 winner)
             winner_rating = winner_arena_team->GetStats().rating;
             int32 winner_change = winner_arena_team->WonAgainst(loser_rating);
             int32 loser_change = loser_arena_team->LostAgainst(winner_rating);
-            sLog->outDebug("--- Winner rating: %u, Loser rating: %u, Winner change: %u, Losser change: %u ---", winner_rating, loser_rating, winner_change, loser_change);
+            sLog->outDebug("--- Winner rating: %u, Loser rating: %u, Winner change: %u, Loser change: %u ---", winner_rating, loser_rating, winner_change, loser_change);
             if (winner == ALLIANCE)
             {
                 SetArenaTeamRatingChangeForTeam(ALLIANCE, winner_change);
@@ -826,6 +863,41 @@ void BattleGround::EndBattleGround(uint32 winner)
         Player *plr = sObjectMgr->GetPlayer(itr->first);
         uint32 team = itr->second.Team;
 
+        if (GetArenaType() == ARENA_TYPE_SOLO_3v3)
+        {
+            uint8 slot = ArenaTeam::GetSlotByType(ARENA_TEAM_5v5);
+            uint32 arena_team_id = plr->GetArenaTeamId(slot);
+            ArenaTeam * at = sObjectMgr->GetArenaTeamById(arena_team_id);
+
+            if (winner)
+            {
+                if (team == winner)
+                {
+                    sq_winner_change = at->WonAgainst(sq_loser_rating, sq_winner_rating);
+                    at->MemberWon(plr, sq_loser_rating, sq_winner_rating);
+                }
+                else
+                {
+                    sq_loser_change = at->LostAgainst(sq_winner_rating, sq_loser_rating);
+                    at->MemberLost(plr, sq_winner_rating, sq_loser_rating);
+                }
+            }
+
+            if (winner == ALLIANCE)
+            {
+                SetArenaTeamRatingChangeForTeam(ALLIANCE, sq_winner_change);
+                SetArenaTeamRatingChangeForTeam(HORDE, sq_loser_change);
+            }
+            else if (winner == HORDE)
+            {
+                SetArenaTeamRatingChangeForTeam(HORDE, sq_winner_change);
+                SetArenaTeamRatingChangeForTeam(ALLIANCE, sq_loser_change);
+            }
+
+            at->SaveToDB();
+            at->NotifyStatsChanged();
+        }
+
         if (!plr)
         {
             //if rated arena match - make member lost!
@@ -854,7 +926,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         //if (!team) team = plr->GetTeam();
 
         // per player calculation
-        if (isArena() && isRated() && winner_arena_team && loser_arena_team)
+        if (isArena() && isRated() && winner_arena_team && loser_arena_team && GetArenaType() != ARENA_TYPE_SOLO_3v3)
         {
             if (team == winner)
                 winner_arena_team->MemberWon(plr, loser_rating);
@@ -934,7 +1006,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         }
     }
 
-    if (isArena() && isRated() && winner_arena_team && loser_arena_team)
+    if (isArena() && isRated() && winner_arena_team && loser_arena_team && GetArenaType() != ARENA_TYPE_SOLO_3v3)
     {
         // update arena points only after increasing the player's match count!
         //obsolete: winner_arena_team->UpdateArenaPointsHelper();

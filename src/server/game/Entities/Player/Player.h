@@ -2034,6 +2034,9 @@ class Player : public Unit, public GridObject<Player>
         bool CanUseBattleGroundObject();
         bool CanCaptureTowerPoint();
 
+        void AddToArenaQueue(uint8 aType, bool isRated = true);
+        bool IsHealer();
+
         /*********************************************************/
         /***               OUTDOOR PVP SYSTEM                  ***/
         /*********************************************************/

@@ -73,27 +73,52 @@ void BattleGroundQueue::EligibleGroups::Init(BattleGroundQueue::QueuedGroupsList
     // clear from prev initialization
     clear();
     BattleGroundQueue::QueuedGroupsList::iterator itr, next;
-    // iterate through the source
-    for (itr = source->begin(); itr != source->end(); itr = next)
+
+    if (ArenaType == ARENA_TYPE_SOLO_3v3)
     {
-        next = itr;
-        ++next;
-        if ((*itr)->BgTypeId == BgTypeId &&     // bg type must match
-            (*itr)->ArenaType == ArenaType &&   // arena type must match
-            (*itr)->IsRated == IsRated &&       // israted must match
-            (*itr)->IsInvitedToBGInstanceGUID == 0 && // leave out already invited groups
-            (*itr)->Team == side &&             // match side
-            (*itr)->Players.size() <= MaxPlayers &&   // the group must fit in the bg
-            (!excludeTeam || (*itr)->ArenaTeamId != excludeTeam) && // if excludeTeam is specified, leave out those arena team ids
-            (!IsRated || (*itr)->Players.size() == MaxPlayers) &&   // if rated, then pass only if the player count is exact NEEDS TESTING! (but now this should never happen)
-            (!DisregardTime || (*itr)->JoinTime <= DisregardTime              // pass if disregard time is greater than join time
-               || (*itr)->ArenaTeamRating == 0                 // pass if no rating info
-               || ((*itr)->ArenaTeamRating >= MinRating       // pass if matches the rating range
-                     && (*itr)->ArenaTeamRating <= MaxRating)))
+        // iterate through the source
+        for (itr = source->begin(); itr != source->end(); itr = next)
         {
-            // the group matches the conditions
-            // using push_back for proper selecting when inviting
-            push_back((*itr));
+            next = itr;
+            ++next;
+            if ((*itr)->BgTypeId == BgTypeId &&     // bg type must match
+                (*itr)->ArenaType == ArenaType &&   // arena type must match
+                (*itr)->IsRated == IsRated &&       // israted must match
+                (*itr)->IsInvitedToBGInstanceGUID == 0 && // leave out already invited groups
+                (*itr)->Team == side &&             // match side
+                (*itr)->Players.size() <= MaxPlayers &&   // the group must fit in the bg
+                (!excludeTeam || (*itr)->ArenaTeamId != excludeTeam))// if excludeTeam is specified, leave out those arena team ids
+            {
+                // the group matches the conditions
+                // using push_back for proper selecting when inviting
+                push_back((*itr));
+            }
+        }
+    }
+    else
+    {
+        // iterate through the source
+        for (itr = source->begin(); itr != source->end(); itr = next)
+        {
+            next = itr;
+            ++next;
+            if ((*itr)->BgTypeId == BgTypeId &&     // bg type must match
+                (*itr)->ArenaType == ArenaType &&   // arena type must match
+                (*itr)->IsRated == IsRated &&       // israted must match
+                (*itr)->IsInvitedToBGInstanceGUID == 0 && // leave out already invited groups
+                (*itr)->Team == side &&             // match side
+                (*itr)->Players.size() <= MaxPlayers &&   // the group must fit in the bg
+                (!excludeTeam || (*itr)->ArenaTeamId != excludeTeam) && // if excludeTeam is specified, leave out those arena team ids
+                (!IsRated || (*itr)->Players.size() == MaxPlayers) &&   // if rated, then pass only if the player count is exact NEEDS TESTING! (but now this should never happen)
+                (!DisregardTime || (*itr)->JoinTime <= DisregardTime              // pass if disregard time is greater than join time
+                    || (*itr)->ArenaTeamRating == 0                 // pass if no rating info
+                    || ((*itr)->ArenaTeamRating >= MinRating       // pass if matches the rating range
+                    && (*itr)->ArenaTeamRating <= MaxRating)))
+            {
+                // the group matches the conditions
+                // using push_back for proper selecting when inviting
+                push_back((*itr));
+            }
         }
     }
 }
@@ -104,6 +129,7 @@ void BattleGroundQueue::SelectionPool::Init(EligibleGroups * curr)
     m_CurrEligGroups = curr;
     SelectedGroups.clear();
     PlayerCount = 0;
+    hasSoloQueueHealer = false;
 }
 
 // remove group info from selection pool
@@ -124,8 +150,28 @@ void BattleGroundQueue::SelectionPool::RemoveGroup(GroupQueueInfo *ginfo)
 
 // add group to selection
 // used when building selection pools
-void BattleGroundQueue::SelectionPool::AddGroup(GroupQueueInfo * ginfo)
+void BattleGroundQueue::SelectionPool::AddGroup(GroupQueueInfo * ginfo, bool isSoloQueue)
 {
+    // SOLOQUEUE
+    if (isSoloQueue)
+    {
+        if (Player* curPlayer = ObjectAccessor::FindPlayer(ginfo->Players.begin()->first))
+        {
+            if (curPlayer->IsHealer())
+            {
+                if (HasSoloQueueHealer()) // Don't allow more than 1 healer
+                    return;
+
+                SetSoloQueueHealer(true);
+            }
+            else
+            {
+                if (!HasSoloQueueHealer()) // Only add if we already have a queued healer
+                    return;
+            }
+        }
+    }
+
     SelectedGroups.push_back(ginfo);
     // increase selected players count
     PlayerCount+=ginfo->Players.size();
@@ -146,7 +192,7 @@ GroupQueueInfo * BattleGroundQueue::AddGroup(Player *leader, uint32 BgTypeId, ui
     ginfo->IsRated                   = isRated;
     ginfo->IsInvitedToBGInstanceGUID = 0;                       // maybe this should be modifiable by function arguments to enable selection of running instances?
     ginfo->JoinTime                  = getMSTime();
-    ginfo->Team                      = leader->GetTeam();
+    ginfo->Team                      = (ArenaType == ARENA_TYPE_SOLO_3v3 ? ALLIANCE : leader->GetTeam()); // SOLOQUEUE: Always add team Alliance to queue info (Cross-faction)
     ginfo->ArenaTeamRating           = arenaRating;
     ginfo->OpponentsTeamRating       = 0;                       //initialize it to 0
 
@@ -191,28 +237,90 @@ void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo)
         int32 MinPlayers = bg->GetMinPlayersPerTeam();
         int32 MaxPlayers = bg->GetMaxPlayersPerTeam();
 
+        // reuse variables for solo queue. Horde = DPS, Alliance = Healers
         uint32 qHorde = 0;
         uint32 qAlliance = 0;
+        uint32 qRatedHorde = 0;
+        uint32 qRatedAlliance = 0;
 
         for (std::map<uint64, PlayerQueueInfo>::iterator itr = m_QueuedPlayers[queue_id].begin(); itr != m_QueuedPlayers[queue_id].end(); ++itr)
         {
             Player *_player = sObjectMgr->GetPlayer((uint64)itr->first);
             if (_player)
             {
-                if (_player->GetTeam() == ALLIANCE)
-                    qAlliance++;
-                else
-                    qHorde++;
+                if (bg->isArena())
+                {
+                    PlayerQueueInfo& qPlayerInfo = m_QueuedPlayers[queue_id][_player->GetGUID()];
+                    if (qPlayerInfo.GroupInfo->IsRated)
+                    {
+                        if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
+                        {
+                            if (_player->IsHealer())
+                                qRatedAlliance++;
+                            else
+                                qRatedHorde++;
+                        }
+                        else // normal team queues
+                        {
+                            if (_player->GetTeam() == ALLIANCE)
+                                qRatedAlliance++;
+                            else
+                                qRatedHorde++;
+                        }
+                    }
+                    else // skirmish
+                    {
+                        if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
+                        {
+                            if (_player->IsHealer())
+                                qAlliance++;
+                            else
+                                qHorde++;
+                        }
+                        else // normal queues
+                        {
+                            if (_player->GetTeam() == ALLIANCE)
+                                qAlliance++;
+                            else
+                                qHorde++;
+                        }
+                    }
+                }
+                else // battlegrounds
+                {
+                    if (_player->GetTeam() == ALLIANCE)
+                        qAlliance++;
+                    else
+                        qHorde++;
+                }
             }
         }
 
         // Show queue status to player only (when joining queue)
         if (sWorld->getConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY))
         {
-            uint32 needAlliance = (MinPlayers < qAlliance) ? 0 : MinPlayers - qAlliance;
-            uint32 needHorde = (MinPlayers < qHorde) ? 0 : MinPlayers - qHorde;
-            ChatHandler(plr).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_SELF,
-                bgName, q_min_level, q_max_level, qAlliance, needAlliance, qHorde, needHorde);
+            if (bg->isArena())
+            {
+                bool isRated = ginfo->IsRated;
+                if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
+                {
+                    ChatHandler(plr).PSendSysMessage(LANG_BG_SOLO_QUEUE_ANNOUNCE_SELF,
+                        bgName, q_min_level, q_max_level, (isRated ? qRatedHorde : qHorde), (isRated ? qRatedAlliance : qAlliance));
+                    return;
+                }
+
+                uint32 needAlliance = (MinPlayers < (isRated ? qRatedAlliance : qAlliance)) ? 0 : MinPlayers - (isRated ? qRatedAlliance : qAlliance);
+                uint32 needHorde = (MinPlayers < (isRated ? qRatedHorde : qHorde)) ? 0 : MinPlayers - (isRated ? qRatedHorde : qHorde);
+                ChatHandler(plr).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_SELF,
+                    bgName, q_min_level, q_max_level, (isRated ? qRatedAlliance : qAlliance), needAlliance, (isRated ? qRatedHorde : qHorde), needHorde);
+            }
+            else // battlegrounds
+            {
+                uint32 needAlliance = (MinPlayers < qAlliance) ? 0 : MinPlayers - qAlliance;
+                uint32 needHorde = (MinPlayers < qHorde) ? 0 : MinPlayers - qHorde;
+                ChatHandler(plr).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_SELF,
+                    bgName, q_min_level, q_max_level, qAlliance, needAlliance, qHorde, needHorde);
+            }
         }
         // System message
         else
@@ -394,38 +502,76 @@ bool BattleGroundQueue::InviteGroupToBG(GroupQueueInfo * ginfo, BattleGround * b
 }
 
 // used to recursively select groups from eligible groups
-bool BattleGroundQueue::SelectionPool::Build(uint32 MinPlayers, uint32 MaxPlayers, EligibleGroups::iterator startitr)
+bool BattleGroundQueue::SelectionPool::Build(uint32 MinPlayers, uint32 MaxPlayers, EligibleGroups::iterator startitr, bool isSoloQueue)
 {
-    // start from the specified start iterator
-    for (EligibleGroups::iterator itr1 = startitr; itr1 != m_CurrEligGroups->end(); ++itr1)
+    if (isSoloQueue)
     {
-        uint64 PlayerSize = (*itr1) ? (*itr1)->Players.size() : 0;
-
-        // if it fits in, select it
-        if (GetPlayerCount() + PlayerSize <= MaxPlayers)
+        bool LoopAgain = false;
+        // start from the specified start iterator
+        for (EligibleGroups::iterator itr1 = startitr; itr1 != m_CurrEligGroups->end(); ++itr1)
         {
-            EligibleGroups::iterator next = itr1;
-            ++next;
-            AddGroup((*itr1));
-            if (GetPlayerCount() >= MinPlayers)
+            // if it fits in, select it
+            if (GetPlayerCount() + (*itr1)->Players.size() <= MaxPlayers)
             {
-                // enough players are selected
-                return true;
+                EligibleGroups::iterator next = itr1;
+                ++next;
+
+                // SOLOQUEUE
+                if (Player* curPlayer = ObjectAccessor::FindPlayer((*itr1)->Players.begin()->first))
+                {
+                    if (curPlayer->IsHealer())
+                    {
+                        if (!HasSoloQueueHealer())
+                            LoopAgain = true;
+                    }
+                }
+                AddGroup((*itr1), isSoloQueue);
+                if (GetPlayerCount() >= MinPlayers)
+                {
+                    // enough players are selected
+                    return true;
+                }
+                // try building from the rest of the elig. groups
+                // if that succeeds, return true
+                if (Build(MinPlayers, MaxPlayers, (LoopAgain? m_CurrEligGroups->begin() : next), true))
+                    return true;
+                // the rest didn't succeed, so this group cannot be included
+                RemoveGroup((*itr1));
             }
-            // try building from the rest of the elig. groups
-            // if that succeeds, return true
-            if (Build(MinPlayers, MaxPlayers, next))
-                return true;
-            // the rest didn't succeed, so this group cannot be included
-            RemoveGroup((*itr1));
         }
     }
-    // build didn't succeed
-    return false;
-}
+    else
+    {
+        // start from the specified start iterator
+        for (EligibleGroups::iterator itr1 = startitr; itr1 != m_CurrEligGroups->end(); ++itr1)
+        {
+            // if it fits in, select it
+            if (GetPlayerCount() + (*itr1)->Players.size() <= MaxPlayers)
+             {
+                EligibleGroups::iterator next = itr1;
+                ++next;
+                AddGroup((*itr1));
+                if (GetPlayerCount() >= MinPlayers)
+                {
+                    // enough players are selected
+                    return true;
+                }
+                // try building from the rest of the elig. groups
+                // if that succeeds, return true
+                if (Build(MinPlayers, MaxPlayers, next, false))
+                    return true;
+                // the rest didn't succeed, so this group cannot be included
+                RemoveGroup((*itr1));
+             }
+         }
+     }
+
+     // build didn't succeed
+     return false;
+ }
 
 // this function is responsible for the selection of queued groups when trying to create new battlegrounds
-bool BattleGroundQueue::BuildSelectionPool(uint32 bgTypeId, uint32 queue_id, uint32 MinPlayers, uint32 MaxPlayers,  SelectionPoolBuildMode mode, uint8 ArenaType, bool isRated, uint32 MinRating, uint32 MaxRating, uint32 DisregardTime, uint32 excludeTeam)
+bool BattleGroundQueue::BuildSelectionPool(uint32 bgTypeId, uint32 queue_id, uint32 MinPlayers, uint32 MaxPlayers, SelectionPoolBuildMode mode, uint8 ArenaType, bool isRated, uint32 MinRating, uint32 MaxRating, uint32 DisregardTime, uint32 excludeTeam)
 {
     uint32 side;
     switch (mode)
@@ -447,6 +593,11 @@ bool BattleGroundQueue::BuildSelectionPool(uint32 bgTypeId, uint32 queue_id, uin
             break;
     }
 
+    // SOLOQUEUE
+    bool isSoloQueue = false;
+    if (ArenaType == ARENA_TYPE_SOLO_3v3)
+        isSoloQueue = true;
+
     // initiate the groups eligible to create the bg
     m_EligibleGroups.Init(&(m_QueuedGroups[queue_id]), bgTypeId, side, MaxPlayers, ArenaType, isRated, MinRating, MaxRating, DisregardTime, excludeTeam);
     // init the selected groups (clear)
@@ -454,7 +605,7 @@ bool BattleGroundQueue::BuildSelectionPool(uint32 bgTypeId, uint32 queue_id, uin
     // we set it this way to only have one EligibleGroups object to save some memory
     m_SelectionPools[mode].Init(&m_EligibleGroups);
     // build succeeded
-    if (m_SelectionPools[mode].Build(MinPlayers, MaxPlayers, m_EligibleGroups.begin()))
+    if (m_SelectionPools[mode].Build(MinPlayers, MaxPlayers, m_EligibleGroups.begin(), isSoloQueue))
     {
         // the selection pool is set, return
         sLog->outDebug("Battleground-debug: pool build succeeded, return true");
@@ -615,6 +766,10 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id, uint8 arenatype
                 MaxPlayersPerTeam = 3;
                 MinPlayersPerTeam = 3;
                 break;
+            case ARENA_TYPE_SOLO_3v3:
+                MaxPlayersPerTeam = 3;
+                MinPlayersPerTeam = 3;
+                break;
             case ARENA_TYPE_5v5:
                 MaxPlayersPerTeam = 5;
                 MinPlayersPerTeam = 5;
@@ -687,6 +842,10 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id, uint8 arenatype
                     bg2->SetMaxPlayers(4);
                     break;
                 case ARENA_TYPE_3v3:
+                    bg2->SetMaxPlayersPerTeam(3);
+                    bg2->SetMaxPlayers(6);
+                    break;
+                case ARENA_TYPE_SOLO_3v3:
                     bg2->SetMaxPlayersPerTeam(3);
                     bg2->SetMaxPlayers(6);
                     break;
@@ -855,6 +1014,10 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id, uint8 arenatype
                     bg2->SetMaxPlayers(4);
                     break;
                 case ARENA_TYPE_3v3:
+                    bg2->SetMaxPlayersPerTeam(3);
+                    bg2->SetMaxPlayers(6);
+                    break;
+                case ARENA_TYPE_SOLO_3v3:
                     bg2->SetMaxPlayersPerTeam(3);
                     bg2->SetMaxPlayers(6);
                     break;
@@ -1350,6 +1513,10 @@ void BattleGroundMgr::InvitePlayer(Player* plr, uint32 bgInstanceGUID, uint32 te
         case ARENA_TYPE_3v3:
             bg->SetArenaTeamIdForTeam(team, plr->GetArenaTeamId(1));
             break;
+        case ARENA_TYPE_SOLO_3v3:
+            bg->SetSoloQueueRatingForTeam(team, plr->GetArenaPersonalRating(2));
+            bg->SetArenaTeamIdForTeam(team, plr->GetArenaTeamId(2));
+            break;
         case ARENA_TYPE_5v5:
             bg->SetArenaTeamIdForTeam(team, plr->GetArenaTeamId(2));
             break;
@@ -1785,6 +1952,8 @@ uint32 BattleGroundMgr::BGQueueTypeId(uint32 bgTypeId, uint8 arenaType)
                     return BATTLEGROUND_QUEUE_2v2;
                 case ARENA_TYPE_3v3:
                     return BATTLEGROUND_QUEUE_3v3;
+                case ARENA_TYPE_SOLO_3v3:
+                    return BATTLEGROUND_QUEUE_SOLO_3v3;
                 case ARENA_TYPE_5v5:
                     return BATTLEGROUND_QUEUE_5v5;
                 default:

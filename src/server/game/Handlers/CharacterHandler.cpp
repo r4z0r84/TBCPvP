@@ -44,6 +44,7 @@
 #include "MapManager.h"
 #include "SystemConfig.h"
 #include "ScriptMgr.h"
+#include "Battleground.h"
 
 class LoginQueryHolder : public SqlQueryHolder
 {
@@ -407,12 +408,16 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket & recv_data)
     }
 
     // is arena team captain
-    if (sObjectMgr->GetArenaTeamByCaptain(guid))
+    if (ArenaTeam* at = sObjectMgr->GetArenaTeamByCaptain(guid))
     {
-        WorldPacket data(SMSG_CHAR_DELETE, 1);
-        data << (uint8)CHAR_DELETE_FAILED_ARENA_CAPTAIN;
-        SendPacket(&data);
-        return;
+        // SOLOQUEUE - Allow to delete character with Solo Queue Team
+        if (at->GetType() < ARENA_TYPE_5v5)
+        {
+            WorldPacket data(SMSG_CHAR_DELETE, 1);
+            data << (uint8)CHAR_DELETE_FAILED_ARENA_CAPTAIN;
+            SendPacket(&data);
+            return;
+        }
     }
 
     QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT account, name FROM characters WHERE guid='%u'", GUID_LOPART(guid));

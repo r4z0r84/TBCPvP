@@ -265,7 +265,7 @@ bool GossipSelect_spectator(Player *player, Creature *_Creature, uint32 sender, 
     switch (action)
     {
         case 1:
-            GossipHello_spectator(player, creature);
+            GossipHello_spectator(player, _Creature);
         break;
     }
     return true;

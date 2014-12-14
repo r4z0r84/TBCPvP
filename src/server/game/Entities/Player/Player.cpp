@@ -19996,8 +19996,6 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if (BattleGround *bg = GetBattleGround())
     {
-        bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
-
         // SOLO QUEUE: Decrease rating if player leaves before finishing
         if (bg->GetArenaType() == ARENA_TYPE_SOLO_3v3 && bg->GetStatus() != STATUS_WAIT_LEAVE && !isSpectator())
         {
@@ -20021,6 +20019,8 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
             at->SaveToDB();
             at->NotifyStatsChanged();
         }
+
+        bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast
         if (bg->isBattleGround() && !isGameMaster() && sWorld->getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))

@@ -22496,17 +22496,23 @@ bool Player::IsHealer()
     switch (getClass())
     {
         case CLASS_PALADIN:
-            if (((HasSpell(31837) || HasSpell(31838) || HasSpell(31839) || HasSpell(31840) || HasSpell(31841) && HasSpell(20127)) || HasSpell(20130) || HasSpell(20135) || HasSpell(20136) || HasSpell(20137)) || ((HasSpell(31837) || HasSpell(31838) || HasSpell(31839) || HasSpell(31840) || HasSpell(31841)) && HasSpell(33072) && !HasSpell(20218))) // Holy Guidance && Redoubt || Holy Guidance && Holy Shock && !Sanctity Aura
+            if (HasSpell(20218)) // Sanctity Aura
+                return false;
+            if (((HasSpell(31837) || HasSpell(31838) || HasSpell(31839) || HasSpell(31840) || HasSpell(31841) && HasSpell(20127)) || HasSpell(20130) || HasSpell(20135) || HasSpell(20136) || HasSpell(20137)) || ((HasSpell(31837) || HasSpell(31838) || HasSpell(31839) || HasSpell(31840) || HasSpell(31841)) && HasSpell(33072))) // Holy Guidance && Redoubt || Holy Guidance && Holy Shock
                 return true;
+            break;
         case CLASS_PRIEST:
             if (HasSpell(33206) || HasSpell(28275)) // Pain Suppression || Lightwell
                 return true;
+            break;
         case CLASS_DRUID:
             if (HasSpell(18562) || (HasSpell(24858) && HasSpell(17116) && !HasSpell(33603))) // Swiftmend || Moonkin Form && Nature's Swiftness
                 return true;
+            break;
         case CLASS_SHAMAN:
             if (HasSpell(32594)) // Earth Shield
                 return true;
+            break;
     }
 
     return false;

@@ -766,7 +766,7 @@ void BattleGround::EndBattleGround(uint32 winner)
             sq_loser_rating = (GetSoloQueueRatingForTeam(HORDE) / 3);
             sLog->outDebug("--- Winner rating: %u. Loser rating: %u ---", sq_winner_rating, sq_loser_rating);
         }
-        else if (winner = HORDE)
+        else if (winner == HORDE)
         {
             sq_winner_rating = (GetSoloQueueRatingForTeam(HORDE) / 3);
             sq_loser_rating = (GetSoloQueueRatingForTeam(ALLIANCE) / 3);
@@ -848,14 +848,6 @@ void BattleGround::EndBattleGround(uint32 winner)
         {
             SetArenaTeamRatingChangeForTeam(ALLIANCE, 0);
             SetArenaTeamRatingChangeForTeam(HORDE, 0);
-
-            if (winner == 0)
-            {
-                if (ArenaTeam* team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(ALLIANCE)))
-                    team->LostAgainst(0);
-                if (ArenaTeam* team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(HORDE)))
-                    team->LostAgainst(0);
-            }
         }
     }
 
@@ -906,7 +898,7 @@ void BattleGround::EndBattleGround(uint32 winner)
             at->NotifyStatsChanged();
         }
 
-        if (!plr)
+        if (!plr && GetArenaType() != ARENA_TYPE_SOLO_3v3)
         {
             //if rated arena match - make member lost!
             if (isArena() && isRated() && winner_arena_team && loser_arena_team)

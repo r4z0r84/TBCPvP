@@ -46,7 +46,7 @@ LookingForGroup_auto_join(false), LookingForGroup_auto_add(false), m_muteTime(mu
 _player(NULL), m_Socket(sock), _security(sec), _accountId(id), m_expansion(expansion),
 m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr->GetIndexForLocale(locale)),
 _logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
-m_latency(0), m_timeOutTime(0), m_Warden(NULL), m_lastWhoCommand(0)
+m_latency(0), m_timeOutTime(0), m_Warden(NULL), m_lastWhoCommand(0), m_expireTime(20000), m_forceExit(false)
 {
     if (sock)
     {
@@ -265,8 +265,12 @@ bool WorldSession::Update(uint32 diff)
     // Cleanup socket pointer if need
     if (m_Socket && m_Socket->IsClosed())
     {
-        m_Socket->RemoveReference();
-        m_Socket = NULL;
+        m_expireTime -= m_expireTime > diff ? diff : m_expireTime;
+        if (m_expireTime < diff || m_forceExit)
+        {
+            m_Socket->RemoveReference();
+            m_Socket = NULL;
+        }
     }
 
     if (!m_Socket)
@@ -455,7 +459,10 @@ void WorldSession::LogoutPlayer(bool Save)
 void WorldSession::KickPlayer()
 {
     if (m_Socket)
+    {
         m_Socket->CloseSocket();
+        m_forceExit = true;
+    }
 }
 
 // Cancel channeling handler

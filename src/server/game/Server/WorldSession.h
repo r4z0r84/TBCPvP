@@ -679,6 +679,9 @@ class WorldSession
         int m_sessionDbLocaleIndex;
         uint32 m_latency;
 
+        uint32 m_expireTime;
+        bool m_forceExit;
+
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
         uint32 m_lastWhoCommand;
 };

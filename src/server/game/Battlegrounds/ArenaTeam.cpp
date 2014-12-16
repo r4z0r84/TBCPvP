@@ -563,15 +563,23 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating, uint32 SoloQueueRating)
     // 'chance' calculation - to beat the opponent
     float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : m_stats.rating, againstRating);
     // calculate the rating modification (ELO system with k=32)
-    int32 mod = (int32)floor(32.0f * (1.0f - chance));
+    int32 mod = (int32)floor((SoloQueueRating > 0 ? 16.0f : 32.0f) * (1.0f - chance));
 
     // Smolderforge rating adjustments
-    if (m_stats.rating < 1850)
-        mod += 2;
-    if (mod == 30)
-        mod++;
-    if (mod < 3)
-        mod = 3;
+    if (SoloQueueRating > 0) // solo queue only
+    {
+        if (mod < 1)
+            mod = 1;
+    }
+    else // 2v2 teams
+    {
+        if (m_stats.rating < 1850)
+            mod += 2;
+        if (mod == 30)
+            mod++;
+        if (mod < 3)
+            mod = 3;
+    }
 
     // modify the team stats accordingly
     FinishGame(mod);
@@ -588,11 +596,19 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating, uint32 SoloQueueRating)
     // 'chance' calculation - to loose to the opponent
     float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : m_stats.rating, againstRating);
     // calculate the rating modification (ELO system with k=32)
-    int32 mod = (int32)ceil(32.0f * (0.0f - chance));
+    int32 mod = (int32)ceil((SoloQueueRating > 0 ? 16.0f : 32.0f) * (0.0f - chance));
 
     // Smolderforge rating adjustments
-    if (mod <= -25)
-        mod = -24;
+    if (SoloQueueRating > 0) // solo queue only
+    {
+        if (mod <= -15)
+            mod = -14;
+    }
+    else // 2v2 teams
+    {
+        if (mod <= -25)
+            mod = -24;
+    }
 
     // modify the team stats accordingly
     if (int32(m_stats.rating) + mod < 0)
@@ -629,11 +645,19 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating, uint32 SoloQueueR
         {
             // update personal rating
             float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : itr->personal_rating, againstRating);
-            int32 mod = (int32)ceil(32.0f * (0.0f - chance));
+            int32 mod = (int32)ceil((SoloQueueRating > 0 ? 16.0f : 32.0f) * (0.0f - chance));
 
             // Smolderforge rating adjustments
-            if (mod <= -25)
-                mod = -24;
+            if (SoloQueueRating > 0) // 3v3 solo queue
+            {
+                if (mod <= -15)
+                    mod = -14;
+            }
+            else // 2v2 teams
+            {
+                if (mod <= -25)
+                    mod = -24;
+            }
 
             itr->ModifyPersonalRating(plr, mod, GetSlot());
 
@@ -692,15 +716,23 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstRating, uint32 SoloQueueRa
         {
             // update personal rating
             float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : itr->personal_rating, againstRating);
-            int32 mod = (int32)floor(32.0f * (1.0f - chance));
+            int32 mod = (int32)floor((SoloQueueRating > 0 ? 16.0f : 32.0f) * (1.0f - chance));
 
             // Smolderforge rating adjustments
-            if (itr->personal_rating < 1850)
-                mod += 2;
-            if (mod == 30)
-                mod++;
-            if (mod < 3)
-                mod = 3;
+            if (SoloQueueRating > 0) // 3v3 solo queue
+            {
+                if (mod < 1)
+                    mod = 1;
+            }
+            else // 2v2 teams
+            {
+                if (m_stats.rating < 1850)
+                    mod += 2;
+                if (mod == 30)
+                    mod++;
+                if (mod < 3)
+                    mod = 3;
+            }
 
             itr->ModifyPersonalRating(plr, mod, GetSlot());
             // update personal stats

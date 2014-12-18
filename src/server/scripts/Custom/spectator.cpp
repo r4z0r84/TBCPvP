@@ -41,7 +41,7 @@ bool GossipHello_spectator(Player *player, Creature *_Creature)
 {
     if (player->InBattleGroundQueue())
     {
-        player->GetSession()->SendNotification("Please leave queue(s) before spectating.");
+        player->GetSession()->SendNotification("Please leave queue(s) before spectating");
         player->CLOSE_GOSSIP_MENU();
         return false;
     }
@@ -209,7 +209,7 @@ void SendSubMenu_spectator(Player *player, Creature *_Creature, uint32 arenaType
     if (totalcount > 0)
     {
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Reload", arenaType, action);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "« Back", GOSSIP_SENDER, 1);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "« Back", 1, 1);
     }
 
     player->SEND_GOSSIP_MENU(totalcount > 0 ? 66 : 67 ,_Creature->GetGUID());
@@ -265,6 +265,7 @@ bool GossipSelect_spectator(Player *player, Creature *_Creature, uint32 sender, 
     switch (action)
     {
         case 1:
+            player->PlayerTalkClass->ClearMenus();
             GossipHello_spectator(player, _Creature);
         break;
     }

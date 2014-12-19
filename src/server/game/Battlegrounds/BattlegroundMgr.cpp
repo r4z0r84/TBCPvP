@@ -411,19 +411,22 @@ void BattleGroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount, uin
             // update the join queue, maybe now the player's group fits in a queue!
             // not yet implemented (should store bgTypeId in group queue info?)
         }
-        //if player leaves queue and he is invited to rated arena match, then he has to loose
+        // if player leaves queue and he is invited to rated arena match, then he has to lose
         if (group->IsInvitedToBGInstanceGUID && group->IsRated && decreaseInvitedCount)
         {
             ArenaTeam * at = sObjectMgr->GetArenaTeamById(group->ArenaTeamId);
             if (at)
             {
-                sLog->outDebug("UPDATING memberLost's personal arena rating for %u by opponents rating: %u", GUID_LOPART(guid), group->OpponentsTeamRating);
-                Player *plr = sObjectMgr->GetPlayer(guid);
-                if (plr)
-                    at->MemberLost(plr, group->OpponentsTeamRating);
-                else
-                    at->OfflineMemberLost(guid, group->OpponentsTeamRating);
-                at->SaveToDB();
+                if (group->ArenaType != ARENA_TYPE_SOLO_3v3)
+                {
+                    sLog->outDebug("UPDATING memberLost's personal arena rating for %u by opponents rating: %u", GUID_LOPART(guid), group->OpponentsTeamRating);
+                    Player *plr = sObjectMgr->GetPlayer(guid);
+                    if (plr)
+                        at->MemberLost(plr, group->OpponentsTeamRating);
+                    else
+                        at->OfflineMemberLost(guid, group->OpponentsTeamRating);
+                    at->SaveToDB();
+                }
             }
         }
         // remove player queue info

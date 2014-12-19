@@ -1784,14 +1784,25 @@ void BattleGroundMgr::InitAutomaticArenaPointDistribution()
     {
         sLog->outDebug("Initializing Automatic Arena Point Distribution");
         QueryResult_AutoPtr result = CharacterDatabase.Query("SELECT NextArenaPointDistributionTime FROM saved_variables");
-        if (!result)
+        if (result)
         {
-            sLog->outDebug("Battleground: Next arena point distribution time not found in SavedVariables, reseting it now.");
+            time_t curtime = time(NULL);
+            time_t wstime = (*result)[0].GetUInt64();
+
+            if (wstime < curtime)
+            {
+                m_NextAutoDistributionTime = curtime;
+                sLog->outDebug("Next arena point distribution in past (crash?), resetting it now.");
+            }
+            else
+                m_NextAutoDistributionTime = wstime;
+        }
+        else
+        {
+            sLog->outDebug("Battleground: Next arena point distribution time not found in SavedVariables, resetting it now.");
             m_NextAutoDistributionTime = time(NULL) + BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY * sWorld->getConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS);
             CharacterDatabase.PExecute("INSERT INTO saved_variables (NextArenaPointDistributionTime) VALUES ('"UI64FMTD"')", m_NextAutoDistributionTime);
         }
-        else
-            m_NextAutoDistributionTime = (*result)[0].GetUInt64();
 
         sLog->outDebug("Automatic Arena Point Distribution initialized.");
     }
@@ -1804,27 +1815,22 @@ void BattleGroundMgr::DistributeArenaPoints()
 
     sWorld->SendGlobalText("Distributing arena points to players...", NULL);
 
-    //temporary structure for storing maximum points to add values for all players
+    // Temporary structure for storing maximum points to add values for all players
     std::map<uint32, uint32> PlayerPoints;
 
-    //at first update all points for all team members
+    // At first update all points for all team members
     for (ObjectMgr::ArenaTeamMap::iterator team_itr = sObjectMgr->GetArenaTeamMapBegin(); team_itr != sObjectMgr->GetArenaTeamMapEnd(); ++team_itr)
-    {
         if (ArenaTeam * at = team_itr->second)
-        {
             at->UpdateArenaPointsHelper(PlayerPoints);
-        }
-    }
 
-    //cycle that gives points to all players
+    // Cycle that gives points to all players
     for (std::map<uint32, uint32>::iterator plr_itr = PlayerPoints.begin(); plr_itr != PlayerPoints.end(); ++plr_itr)
     {
-        //update to database
-        CharacterDatabase.PExecute("UPDATE characters SET arenaPoints = arenaPoints + '%u' WHERE guid = '%u'", plr_itr->second, plr_itr->first);
-        //add points if player is online
-        Player* pl = sObjectMgr->GetPlayer(plr_itr->first);
-        if (pl)
+        // Add points to player if online
+        if (Player* pl = sObjectMgr->GetPlayer(plr_itr->first))
             pl->ModifyArenaPoints(plr_itr->second);
+        else // Update database
+            CharacterDatabase.PExecute("UPDATE characters SET arenaPoints = arenaPoints + '%u' WHERE guid = '%u'", plr_itr->second, plr_itr->first);
     }
 
     PlayerPoints.clear();

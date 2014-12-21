@@ -801,6 +801,27 @@ void ArenaTeam::FinishWeek()
     }
 }
 
+void ArenaTeam::FinishSeason()
+{
+    m_stats.games_week       = 0;
+    m_stats.games_season     = 0;
+    m_stats.rating           = ARENA_NEW_TEAM_RATING;
+    m_stats.wins_week        = 0;
+    m_stats.wins_season      = 0;
+
+    // Custom Solo Queue stats system
+    m_stats.sq_games_season  = 0;
+    m_stats.sq_wins_season   = 0;
+    for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
+        itr->games_week      = 0;
+        itr->wins_week       = 0;
+        itr->games_season    = 0;
+        itr->wins_season     = 0;
+        itr->personal_rating = 0;
+    }
+}
+
 bool ArenaTeam::IsFighting() const
 {
     for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)

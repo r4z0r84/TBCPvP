@@ -204,6 +204,7 @@ class ArenaTeam
         void NotifyStatsChanged();
 
         void FinishWeek();
+        void FinishSeason();
         void FinishGame(int32 mod);
 
     protected:

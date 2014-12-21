@@ -809,9 +809,6 @@ void ArenaTeam::FinishSeason()
     m_stats.wins_week        = 0;
     m_stats.wins_season      = 0;
 
-    // Custom Solo Queue stats system
-    m_stats.sq_games_season  = 0;
-    m_stats.sq_wins_season   = 0;
     for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
         itr->games_week      = 0;

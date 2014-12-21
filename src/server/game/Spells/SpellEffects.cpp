@@ -3855,10 +3855,10 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
     // rogue family enchantments exception by duration
     if (m_spellInfo->Id == 38615)
-        duration = 1800;                                    // 30 mins
+        duration = 864000;                                  // 10 day (30min but custom change to 10day)
     // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
     else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        duration = 3600;                                    // 1 hour
+        duration = 864000;                                  // 10 day (1h but custom change to 10day)
     // shaman family enchantments
     else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN)
         duration = 1800;                                    // 30 mins

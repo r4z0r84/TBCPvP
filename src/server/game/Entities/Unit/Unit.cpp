@@ -2561,11 +2561,15 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
     uint32 roll = urand (0, 10000);
     uint32 tmp = 0;
 
-    bool canDodge = true;
-    bool canParry = true;
+    bool isCasting = pVictim->IsNonMeleeSpellCasted(false);
+    bool lostControl = pVictim->hasUnitState(UNIT_STAT_LOST_CONTROL);
+
+    bool canDodge = !isCasting && !lostControl;
+    bool canParry = !isCasting && !lostControl;
     bool canBlock = spell->AttributesEx3 & SPELL_ATTR_EX3_MELEE;
     //We use SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY until right Attribute was found
     bool canMiss = !(spell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) && cMiss;
+    bool canResist = true; // Add custom attr
 
     if (canMiss)
     {
@@ -2578,18 +2582,22 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
         if (roll < tmp)
             return SPELL_MISS_MISS;
     }
-    // Chance resist mechanic
-    int32 resist_chance = pVictim->GetMechanicResistChance(spell)*100;
-    tmp += resist_chance;
-    if (roll < tmp)
+
+    if (canResist)
     {
-        if (spell->SpellIconID == 495 && spell->SpellVisual == 3942)
+        // Chance resist mechanic
+        int32 resist_chance = pVictim->GetMechanicResistChance(spell)*100;
+        tmp += resist_chance;
+        if (roll < tmp)
         {
-            uint32 triggered_spell_id = spell->EffectTriggerSpell[1];
-            if (triggered_spell_id && pVictim)
-                 CastSpell(pVictim, triggered_spell_id, true, NULL, NULL);
+            if (spell->SpellIconID == 495 && spell->SpellVisual == 3942)
+            {
+                uint32 triggered_spell_id = spell->EffectTriggerSpell[1];
+                if (triggered_spell_id && pVictim)
+                     CastSpell(pVictim, triggered_spell_id, true, NULL, NULL);
+            }
+            return SPELL_MISS_RESIST;
         }
-        return SPELL_MISS_RESIST;
     }
 
     // Same spells cannot be parry/dodge
@@ -2713,7 +2721,21 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     modHitChance-=resist_chance;
 
     // Chance resist debuff
-    modHitChance-=pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
+    if (!IsPositiveSpell(spell->Id))
+    {
+        bool hasAura = false;
+        for (uint8 i = 0; i < 3; i++)
+        {
+            if (spell->Effect[i] == SPELL_EFFECT_APPLY_AURA)
+            {
+                hasAura = true;
+                break;
+            }
+        }
+
+        if (hasAura)
+            modHitChance-=pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
+    }
 
     int32 HitChance = modHitChance * 100;
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings

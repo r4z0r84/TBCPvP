@@ -839,6 +839,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
     }
 
+    // Cancel capture spells at any damage taken
+    if (Spell* curSpell = pVictim->m_currentSpells[CURRENT_GENERIC_SPELL])
+        if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
+            if (curSpell->m_spellInfo->Id == 21651 || curSpell->m_spellInfo->Id == 26868)
+                pVictim->InterruptSpell(CURRENT_GENERIC_SPELL);
+
     if (damage || (cleanDamage && cleanDamage->damage))
     {
         if (spellProto)

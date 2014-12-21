@@ -22513,7 +22513,7 @@ bool Player::IsHealer()
                 return true;
             break;
         case CLASS_DRUID:
-            if (HasSpell(18562) || (HasSpell(24858) && HasSpell(17116) && !HasSpell(33603))) // Swiftmend || Moonkin Form && Nature's Swiftness
+            if (HasSpell(18562) || (HasSpell(24858) && HasSpell(17116) || HasSpell(33603) || HasSpell(24943) || HasSpell(24944) || HasSpell(24945) || HasSpell(24946))) // Swiftmend || Moonkin Form && Gift of Nature
                 return true;
             break;
         case CLASS_SHAMAN:

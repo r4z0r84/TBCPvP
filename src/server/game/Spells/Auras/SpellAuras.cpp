@@ -4139,6 +4139,13 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 3 / 100);
                 return;
             }
+            // Skull of Impending Doom (Flee)
+            if (m_spellProto->Id == 5024)
+            {
+                if (apply && !loading && caster)
+                    m_modifier.m_amount = (caster->GetMaxHealth() * 0.12f);
+                return;
+            }
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -4324,8 +4331,20 @@ void Aura::HandlePeriodicLeech(bool apply, bool /*Real*/)
 
 void Aura::HandlePeriodicManaLeech(bool apply, bool /*Real*/)
 {
+    Unit *caster = GetCaster();
+
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_amplitude;
+
+    // Skull of Impending Doom (Flee)
+    if (m_spellProto->Id == 5024)
+    {
+        if (apply && caster)
+        {
+            if (caster->GetPower(POWER_MANA))
+                m_modifier.m_amount = (caster->GetMaxPower(POWER_MANA) * 0.12f);
+        }
+    }
 
     m_isPeriodic = apply;
 }

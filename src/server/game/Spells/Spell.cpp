@@ -3720,8 +3720,11 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_MOVING;
     }
 
-    Unit *target = m_targets.getUnitTarget();
+    // always cancel seated state
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->IsSitState() && !(m_IsTriggeredSpell || IsAutoRepeat()) && !(m_spellInfo->Attributes & SPELL_ATTR_CASTABLE_WHILE_SITTING))
+        m_caster->ToPlayer()->SetStandState(UNIT_STAND_STATE_STAND);
 
+    Unit *target = m_targets.getUnitTarget();
     if (target)
     {
         // target state requirements (not allowed state), apply to self also

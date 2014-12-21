@@ -1239,7 +1239,7 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         }
         else
         {
-            if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
+            if (isRated() && GetStatus() == STATUS_IN_PROGRESS && GetArenaType() != ARENA_TYPE_SOLO_3v3)
             {
                 // left a rated match while the encounter was in progress, consider as loser
                 ArenaTeam * others_arena_team = sObjectMgr->GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));

@@ -20018,6 +20018,18 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
             at->LostAgainst(sq_winner_rating, sq_loser_rating);
             at->SaveToDB();
             at->NotifyStatsChanged();
+
+            // SOLO QUEUE: Add deserter (15 minutes) if player leaves on purpose during preparation
+            if (bg->GetStatus() == STATUS_WAIT_JOIN)
+            {
+                CastSpell(this, 26013, true); // Deserter
+
+                if (Aura* Aur = GetAura(26013, 0))
+                {
+                    Aur->SetAuraDuration(900000); // 15 minutes
+                    Aur->UpdateAuraDuration();
+                }
+            }
         }
 
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
@@ -22430,10 +22442,17 @@ void Player::AddToArenaQueue(uint8 aType, bool isRated)
     if (getLevel() < sWorld->getConfig(CONFIG_MAX_PLAYER_LEVEL))
         return;
 
-    // check bg queue
+    // check if in other queues
     if (InBattleGroundQueue())
     {
         GetSession()->SendNotification("Unable to queue for 3v3 solo while currently in another queue");
+        return;
+    }
+
+    // is deserter?
+    if (!CanJoinToBattleground())
+    {
+        GetSession()->SendNotification("Unable to queue while you are marked as Deserter");
         return;
     }
 

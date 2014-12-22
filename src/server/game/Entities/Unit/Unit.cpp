@@ -6639,21 +6639,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         // Blackout
         case 15269:
         {
-            // Prevent Blackout self-stun, Mind Vision stun, silence stun
-            if (procSpell)
-            {
-                switch (procSpell->Id)
-                {
-                    case 32409: // Shadow Word: Death reflective damage
-                    case 2096:  // Mind Vision rank 1
-                    case 10909: // Mind Vision rank 2
-                    case 15487: // Silence
-                        return false;
-                        break;
-                    default:
-                        break;
-                }
-            }
+            if (!pVictim || !pVictim->isAlive() || pVictim == this || procSpell == NULL)
+                return false;
+
+            // prevent trigger from non damaging spells
+            if (procSpell->SpellFamilyFlags & 0x100088000000)
+                return false;
+
             break;
         }
     }

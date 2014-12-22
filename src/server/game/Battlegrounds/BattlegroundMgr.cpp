@@ -34,7 +34,7 @@
 #include "Map.h"
 #include "MapInstanced.h"
 #include "ObjectMgr.h"
-
+#include "SpellAuras.h"
 #include "World.h"
 #include "Chat.h"
 #include "ArenaTeam.h"
@@ -1139,20 +1139,17 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         if (qMapItr != sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel(bg->GetTypeID())].end() && qMapItr->second.GroupInfo && qMapItr->second.GroupInfo->IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
         {
             // SOLO QUEUE: Add 10 minute Deserter debuff to block queuing if player misses queue
-            if (qMapItr->second.GroupInfo->IsRated)
+            if (qMapItr->second.GroupInfo->IsRated && qMapItr->second.GroupInfo->ArenaType == ARENA_TYPE_SOLO_3v3)
             {
-                if (bg->isArena() && bg->GetArenaType() == ARENA_TYPE_SOLO_3v3)
+                if (!plr->GetSession()->PlayerLoading())
                 {
-                    if (!plr->GetSession()->PlayerLoading())
-                    {
-                        plr->CastSpell(plr, 26013, true);
-                        ChatHandler(this).PSendSysMessage("You deserted your friends by failing to accept the invite to a rated arena match. You have been marked as a Deserter.");
+                    plr->CastSpell(plr, 26013, true);
+                    ChatHandler(plr).PSendSysMessage("You deserted your friends by failing to accept the invite to a rated arena match. You have been marked as a Deserter.");
 
-                        if (Aura* Aur = GetAura(26013, 0))
-                        {
-                            Aur->SetAuraDuration(600000); // 10 minutes
-                            Aur->UpdateAuraDuration();
-                        }
+                    if (Aura* Aur = plr->GetAura(26013, 0))
+                    {
+                        Aur->SetAuraDuration(600000); // 10 minutes
+                        Aur->UpdateAuraDuration();
                     }
                 }
             }

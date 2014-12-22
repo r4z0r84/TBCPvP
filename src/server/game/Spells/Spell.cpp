@@ -5535,8 +5535,8 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
             // all ok by some way or another, skip normal check
             break;
         default:                                            // normal case
-            if (target != m_caster && !target->IsWithinLOSInMap(m_caster))
-                return false;
+            if (target->GetEntry() == 5925) // Grounding Totem
+                return true;
             break;
     }
 

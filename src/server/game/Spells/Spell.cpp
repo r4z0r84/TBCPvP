@@ -910,59 +910,6 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
     target.timeDelay += GetPVPSpellDelay(m_spellInfo);
     m_delayMoment = target.timeDelay;
 
-    // Custom server-side delay for some spells
-    switch(m_spellInfo->Id)
-    {
-        case 32220: // Seal of Blood Judgement
-            m_delayMoment = 750;
-            break;
-        case 20424: // Seal of Command (Proc)
-        case 25504: // Windfury Attack
-        case 33750: // Windfury Attack
-            m_delayMoment = 500;
-            break;
-        case 118: // Polymorph (Rank 1)
-        case 12824: // Polymorph (Rank 2)
-        case 12825: // Polymorph (Rank 3)
-        case 12826: // Polymorph (Rank 4)
-        case 28271: // Polymorph (Rank 1: Turtle)
-        case 28272: // Polymorph (Rank 1: Pig)
-        case 2094: // Blind
-            m_delayMoment = 200;
-            break;
-        case 11196: // Recently Bandaged
-        case 17794: // Shadow Vulnerability (Rank 1)
-        case 17797: // Shadow Vulnerability (Rank 2)
-        case 17798: // Shadow Vulnerability (Rank 3)
-        case 17799: // Shadow Vulnerability (Rank 4)
-        case 17800: // Shadow Vulnerability (Rank 5)
-        case 12966: // Flury (Rank 1)
-        case 12967: // Flury (Rank 2)
-        case 12968: // Flury (Rank 3)
-        case 12969: // Flury (Rank 4)
-        case 12970: // Flury (Rank 5)
-        case 31616: // Nature's Guardian
-        case 14157: // Ruthlessness
-        case 14189: // Seal Fate
-        case 6770: // Sap (Rank 1)
-        case 2070: // Sap (Rank 2)
-        case 11297: // Sap (Rank 3)
-        case 1833: // Cheap Shot
-        case 853: // Hammer of Justice (Rank 1)
-        case 5588: // Hammer of Justice (Rank 2)
-        case 5589: // Hammer of Justice (Rank 3)
-        case 10308: // Hammer of Justice (Rank 4)
-        case 5211: // Bash (Rank 1)
-        case 6798: // Bash (Rank 2)
-        case 8983: // Bash (Rank 3)
-        case 33786: // Cyclone
-            m_delayMoment = 100;
-        case 3411: // Intervene
-        case 19675: // Feral Charge Effect (Kick)
-            m_delayMoment = 0;
-            break;
-    }
-
     // If target reflect spell back to caster
     if (target.missCondition == SPELL_MISS_REFLECT)
     {
@@ -1262,9 +1209,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     if (!unit || !effectMask)
         return SPELL_MISS_NONE;
 
-    float speed = m_spellInfo->speed;
     // Recheck immune (only for delayed spells)
-    if ((m_delayMoment || speed) && !(m_spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) &&
+    if (m_spellInfo->speed && !(m_spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) &&
         (unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo), true) || unit->IsImmunedToSpell(m_spellInfo, true)))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
@@ -1304,7 +1250,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
             bool isVisibleForHit = ((unit->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) || unit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE , SPELLFAMILYFLAG_ROGUE_VANISH)) && !unit->isVisibleForOrDetect(m_caster, true)) ? false : true;
 
             // for delayed spells ignore not visible explicit target
-            if (m_delayMoment && unit == m_targets.getUnitTarget() && !isVisibleForHit)
+            if (m_spellInfo->speed > 0.0f && unit == m_targets.getUnitTarget() && !isVisibleForHit)
             {
                 m_damage = 0;
                 return SPELL_MISS_EVADE;
@@ -1325,7 +1271,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
             // TODO: this cause soul transfer bugged
-            if (m_delayMoment && unit->GetTypeId() == TYPEID_PLAYER && !IsPositiveSpell(m_spellInfo->Id))
+            if (m_spellInfo->speed > 0.0f && unit->GetTypeId() == TYPEID_PLAYER && !IsPositiveSpell(m_spellInfo->Id))
             {
                 m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 m_damage = 0;

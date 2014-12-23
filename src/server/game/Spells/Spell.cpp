@@ -1308,6 +1308,10 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
 
             if (m_customAttr & SPELL_ATTR_CU_AURA_CC)
                 unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
+
+            // Remove Stealth and Invisibility on negative spell hit
+            if (isSpellBreakStealth(m_spellInfo))
+                unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
         else
         {

@@ -4876,20 +4876,32 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 case 35429:
                 {
                     // prevent chain of triggered spell from same triggered spell
-                    if (procSpell && procSpell->Id == 12723)
+                    if (procSpell && (procSpell->Id == 26654 || procSpell->Id == 12723))
                         return false;
 
                     target = SelectNearbyTarget();
 
-                    if (procSpell && procSpell->SpellFamilyFlags == 536870912 && procSpell->SpellIconID == 1648)        // Prevent Execute proc on targets with > 20% health
-                        if (target && target->GetHealth() > target->GetMaxHealth()*0.2)
-                                return false;
+                    if (!target)
+                        return false;
 
                     if (procSpell && procSpell->SpellIconID == 83)      // Prevent Whirlwind proc 4 times. It should proc 1 time.
                         cooldown = 1;
 
-                    if (!target)
-                        return false;
+                    if (procSpell)
+                    {
+                        // execute : normalized weapon damage if target > 20% health
+                        if (procSpell->SpellFamilyFlags & 0x000000002000000LL)
+                        {
+                            damage = CalculateDamage(BASE_ATTACK, false);
+                            MeleeDamageBonus(target, &damage, BASE_ATTACK);
+                            basepoints0 = damage;
+                            break;
+                        }
+
+                        // Limit Whirlwind to hit one target applying 1s cooldown
+                        if (procSpell->SpellFamilyName == SPELLFAMILY_WARRIOR && procSpell->SpellFamilyFlags & 0x400400000LL)
+                            cooldown = 1;
+                    }
 
                     triggered_spell_id = 12723;
 
@@ -4900,7 +4912,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     TakenTotalMod *= ((*i)->GetModifierValue() + 100.0f) / 100.0f;
 
                     damage = damage * TakenTotalMod;
-                    basepoints0 = damage;
                     break;
                 }
                 // Unstable Power

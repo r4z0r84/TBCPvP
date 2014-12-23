@@ -494,6 +494,10 @@ Spell::Spell(Unit* Caster, SpellEntry const *info, bool triggered, uint64 origin
             if (!IsPositiveTarget(m_spellInfo->EffectImplicitTargetA[j], m_spellInfo->EffectImplicitTargetB[j]))
                 m_canReflect = true;
 
+            // Dispel Magic can be reflected due to being positive and negative spell
+            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & 0x0000000100000000LL)
+                m_canReflect = true;
+
             if (m_canReflect)
                 continue;
             else

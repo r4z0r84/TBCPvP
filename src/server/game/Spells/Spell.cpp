@@ -156,16 +156,21 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
         case 17798: // Shadow Vulnerability (Rank 3)
         case 17799: // Shadow Vulnerability (Rank 4)
         case 17800: // Shadow Vulnerability (Rank 5)
+        case 12966: // Flury (Rank 1)
+        case 12967: // Flury (Rank 2)
+        case 12968: // Flury (Rank 3)
+        case 12969: // Flury (Rank 4)
+        case 12970: // Flury (Rank 5)
+        case 33076: // Prayer of Mending
+            return 100.0f;
+            break;
         case 118:   // Polymorph (Rank 1)
         case 12824: // Polymorph (Rank 2)
         case 12825: // Polymorph (Rank 3)
         case 12826: // Polymorph (Rank 4)
         case 28271: // Polymorph (Rank 1: Turtle)
         case 28272: // Polymorph (Rank 1: Pig)
-            return 100.0f;
-            break;
-        case 33076: // Prayer of Mending
-            return 100.0f;
+            return 200.0f;
             break;
         default:
             return 50.0f;

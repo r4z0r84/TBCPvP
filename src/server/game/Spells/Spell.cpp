@@ -952,6 +952,9 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
         case 8983: // Bash (Rank 3)
         case 33786: // Cyclone
             m_delayMoment = 100;
+        case 3411: // Intervene
+        case 19675: // Feral Charge Effect (Kick)
+            m_delayMoment = 0;
             break;
     }
 

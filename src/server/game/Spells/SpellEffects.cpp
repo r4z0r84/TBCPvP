@@ -2040,7 +2040,10 @@ void Spell::EffectTriggerSpell(uint32 i)
         case 41967:
         {
             if (Unit *pet = m_caster->GetGuardianPet())
-                pet->CastSpell(pet, 28305, true);
+            {
+                pet->CastSpell(pet, 28305, true); // mana gain
+                pet->CastSpell(pet, 34424, true); // shadowform visual
+            }
             return;
         }
     }
@@ -3412,6 +3415,10 @@ void Spell::EffectSummonType(uint32 i)
     {
         summon->SetCreatorGUID(m_originalCaster->GetGUID());
     }
+
+    // Shadowfiend should spawn agressive
+    if (summon->GetEntry() == 19668)
+        summon->SetReactState(REACT_AGGRESSIVE);
 }
 
 void Spell::EffectLearnSpell(uint32 i)

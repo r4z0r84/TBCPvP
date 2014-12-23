@@ -5552,6 +5552,8 @@ bool Spell::CheckTarget(Unit* target, uint32 eff)
         default:                                            // normal case
             if (target->GetEntry() == 5925) // Grounding Totem
                 return true;
+            if (target != m_caster && !target->IsWithinLOSInMap(m_caster) && IsAreaOfEffectSpell(m_spellInfo))
+                return false;
             break;
     }
 

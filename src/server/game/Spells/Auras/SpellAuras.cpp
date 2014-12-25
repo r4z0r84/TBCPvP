@@ -6171,6 +6171,20 @@ void Aura::PeriodicTick()
                 }
             }
 
+            // Mana Feed
+            int32 manaFeedVal = 0;
+            Unit::AuraList const& mAddFlatModifier = pCaster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
+            for (Unit::AuraList::const_iterator i = mAddFlatModifier.begin(); i != mAddFlatModifier.end(); ++i)
+            {
+                if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_EFFECT2 && (*i)->GetSpellProto()->SpellIconID == 1982)
+                {
+                    int32 value2 = pCaster->CalculateSpellDamage((*i)->GetSpellProto(), 0, (*i)->GetSpellProto()->EffectBasePoints[0], pCaster);
+                    manaFeedVal = value2 * gain_amount / 100;
+                }
+            }
+            if (manaFeedVal > 0)
+                pCaster->CastCustomSpell(pCaster, 32553, &manaFeedVal, NULL, NULL, true, NULL);
+
             m_target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, m_spellProto ? m_spellProto->Id : 0);
             break;
         }

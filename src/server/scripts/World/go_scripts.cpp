@@ -42,7 +42,6 @@ go_orb_of_command
 go_resonite_cask
 go_tablet_of_madness
 go_tablet_of_the_seven
-go_soulwell
 go_bashir_crystalforge
 EndContentData */
 
@@ -519,45 +518,6 @@ bool GOHello_go_blood_filled_orb(Player* player, GameObject *pGO)
 };
 
 /*######
-## go_soulwell
-######*/
-
-bool GOHello_go_soulwell(Player* player, GameObject* pGO)
-{
-    Unit *caster = pGO->GetOwner();
-    if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
-        return true;
-
-    if (!player->IsInSameRaidWith(static_cast<Player *>(caster)))
-        return true;
-
-    // Repeating this at every use is ugly and inefficient. But as long as we don't have proper
-    // GO scripting with at least On Create and On Update events, the other options are no less
-    // ugly and hacky.
-    uint32 newSpell = 0;
-    if (pGO->GetEntry() == 193169)                                  // Soulwell for rank 2
-    {
-        if (caster->HasAura(18693, 0))      // Improved Healthstone rank 2
-            newSpell = 58898;
-        else if (caster->HasAura(18692, 0)) // Improved Healthstone rank 1
-            newSpell = 58896;
-        else newSpell = 58890;
-    }
-    else if (pGO->GetEntry() == 181621)                             // Soulwell for rank 1
-    {
-        if (caster->HasAura(18693, 0))      // Improved Healthstone rank 2
-            newSpell = 34150;
-        else if (caster->HasAura(18692, 0)) // Improved Healthstone rank 1
-            newSpell = 34149;
-        else newSpell = 34130;
-    }
-
-    pGO->AddUse();
-    player->CastSpell(player, newSpell, true);
-    return true;
-};
-
-/*######
 ## Quest 1126: Hive in the Tower
 ######*/
 
@@ -697,11 +657,6 @@ void AddSC_go_scripts()
     newscript = new Script;
     newscript->Name = "go_blood_filled_orb";
     newscript->pGOHello = &GOHello_go_blood_filled_orb;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "go_soulwell";
-    newscript->pGOHello = &GOHello_go_soulwell;
     newscript->RegisterSelf();
 
     newscript = new Script;

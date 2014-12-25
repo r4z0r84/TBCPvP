@@ -1289,9 +1289,9 @@ void GameObject::Use(Unit* user)
             if (!info)
                 return;
 
+            Unit* caster = GetOwner();
             if (info->spellcaster.partyOnly)
             {
-                Unit* caster = GetOwner();
                 if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
@@ -1299,9 +1299,27 @@ void GameObject::Use(Unit* user)
                     return;
             }
 
-            spellId = info->spellcaster.spellId;
+            uint32 newSpell = 0;
+            if (GetEntry() == 193169)                                  // Soulwell for rank 2
+            {
+                if (caster->HasAura(18693, 0))      // Improved Healthstone rank 2
+                    newSpell = 58898;
+                else if (caster->HasAura(18692, 0)) // Improved Healthstone rank 1
+                    newSpell = 58896;
+                else
+                    newSpell = 58890;
+            }
+            else if (GetEntry() == 181621)                             // Soulwell for rank 1
+            {
+                if (caster->HasAura(18693, 0))      // Improved Healthstone rank 2
+                    newSpell = 34150;
+                else if (caster->HasAura(18692, 0)) // Improved Healthstone rank 1
+                    newSpell = 34149;
+                else
+                    newSpell = 34130;
+            }
 
-            AddUse();
+            spellId = newSpell ? newSpell : info->spellcaster.spellId;
             break;
         }
         case GAMEOBJECT_TYPE_MEETINGSTONE:                  //23
@@ -1421,6 +1439,14 @@ void GameObject::Use(Unit* user)
     }
 
     Spell *spell = new Spell(spellCaster, spellInfo, triggered);
+
+    // Only take charges from GAMEOBJECT_TYPE_SPELLCASTER if cast was successful
+    if (GetGoType() == GAMEOBJECT_TYPE_SPELLCASTER)
+    {
+        uint8 failResult = spell->CanCast(true);
+        if (!failResult)
+            AddUse();
+    }
 
     // spell target is user of GO
     SpellCastTargets targets;

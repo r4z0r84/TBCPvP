@@ -20654,23 +20654,6 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
-
-    // SOLOQUEUE - Create team at character creation
-    uint8 slot = ArenaTeam::GetSlotByType(ARENA_TEAM_5v5);
-    if (GetArenaTeamId(slot))
-        return;
-
-    ArenaTeam* at = new ArenaTeam;
-    if (!at->Create(GetGUID(), ARENA_TEAM_5v5, "Solo Queue 3v3", true))
-    {
-        sLog->outError("PetitionsHandler: arena team create failed.");
-        delete at;
-        return;
-    }
-
-    // looks cool
-    at->SetEmblem(4278190080, 37, 4294705141, 6, 4293719295);
-    sObjectMgr->AddArenaTeam(at);
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()

@@ -241,6 +241,7 @@ class BattleGroundMgr
 
         void InitAutomaticArenaPointDistribution();
         void DistributeArenaPoints();
+        void CancelAutomaticArenaPointDistribution();
         uint32 GetPrematureFinishTime() const {return m_PrematureFinishTimer;}
         void ToggleArenaTesting();
         void ToggleTesting();

@@ -1869,6 +1869,12 @@ void BattleGroundMgr::DistributeArenaPoints()
     sWorld->SendGlobalText("Done flushing Arena points.", NULL);
 }
 
+void BattlegroundMgr::CancelAutomaticArenaPointDistribution()
+{
+    sBattlegroundMgr->m_NextAutoDistributionTime = 0;
+    CharacterDatabase.PExecute("DELETE FROM saved_variables");
+}
+
 void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, uint64 guid, Player* plr, uint32 bgTypeId)
 {
     uint32 PlayerLevel = 10;

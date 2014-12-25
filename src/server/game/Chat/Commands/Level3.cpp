@@ -6766,6 +6766,12 @@ bool ChatHandler::HandleFlushArenaPointsCommand(const char * /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleCancelFlushCommand(const char * /*args*/)
+{
+    sBattlegroundMgr->CancelAutomaticArenaPointDistribution();
+    return true;
+}
+
 bool ChatHandler::HandleModifyGenderCommand(const char *args)
 {
     if (!*args)

@@ -2484,7 +2484,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[1] = NULL;
             break;
         case 12723: // Sweeping Strikes proc
-            mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
             spellInfo->Attributes |= SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             break;
         case 24905: // Moonkin form -> elune's touch

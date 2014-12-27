@@ -2611,6 +2611,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectApplyAuraName[1] = 0;
             spellInfo->EffectBasePoints[1] = 0;
             break;
+        case 32375: // Mass Dispel
+        case 32592: // Mass Dispel.
+        case 39897: // Mass Dispel
+        case 3600:  // Earthbind Totem
+        case 1725:  // Distract
+            spellInfo->AttributesEx |= SPELL_ATTR_EX_NOT_BREAK_STEALTH;
+            break;
         default:
             break;
         }

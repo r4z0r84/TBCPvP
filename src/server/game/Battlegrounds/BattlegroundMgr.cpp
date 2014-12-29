@@ -1869,9 +1869,9 @@ void BattleGroundMgr::DistributeArenaPoints()
     sWorld->SendGlobalText("Done flushing Arena points.", NULL);
 }
 
-void BattlegroundMgr::CancelAutomaticArenaPointDistribution()
+void BattleGroundMgr::CancelAutomaticArenaPointDistribution()
 {
-    sBattlegroundMgr->m_NextAutoDistributionTime = 0;
+    m_NextAutoDistributionTime = 0;
     CharacterDatabase.PExecute("DELETE FROM saved_variables");
 }
 

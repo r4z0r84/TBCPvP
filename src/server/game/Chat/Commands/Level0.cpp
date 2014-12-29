@@ -33,6 +33,7 @@
 #include "SystemConfig.h"
 #include "revision.h"
 #include "Util.h"
+#include "BattlegroundMgr.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
@@ -96,6 +97,9 @@ bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
     std::string str = secsToTimeString(sWorld->GetUptime());
     uint32 updateTime = sWorld->GetUpdateTime();
 
+    if (sWorld->getConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS))
+        std::string nextFlushStr = secsToTimeString(sBattleGroundMgr->GetNextArenaDistributionTime() - time(NULL));
+
     PSendSysMessage(_FULLVERSION);
     //if (m_session)
     //    full = _FULLVERSION(REVISION_DATE, REVISION_TIME, "|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r");
@@ -107,6 +111,8 @@ bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
     PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
     PSendSysMessage(LANG_UPTIME, str.c_str());
     PSendSysMessage("Update time diff: %u.", updateTime);
+    if (sWorld->getConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS))
+        PSendSysMessage("Next arena flush: %s", nextFlushStr.c_str());
 
     return true;
 }

@@ -249,6 +249,8 @@ class BattleGroundMgr
         bool isTesting() const { return m_Testing; }
 
         void SetHolidayWeekends(uint32 mask);
+
+        uint64 GetNextArenaDistributionTime() const {return m_NextAutoDistributionTime;}
     private:
 
         /* Battlegrounds */

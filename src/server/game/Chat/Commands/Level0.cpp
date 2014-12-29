@@ -97,8 +97,7 @@ bool ChatHandler::HandleServerInfoCommand(const char* /*args*/)
     std::string str = secsToTimeString(sWorld->GetUptime());
     uint32 updateTime = sWorld->GetUpdateTime();
 
-    if (sWorld->getConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS))
-        std::string nextFlushStr = secsToTimeString(sBattleGroundMgr->GetNextArenaDistributionTime() - time(NULL));
+    std::string nextFlushStr = secsToTimeString(sBattleGroundMgr->GetNextArenaDistributionTime() - time(NULL));
 
     PSendSysMessage(_FULLVERSION);
     //if (m_session)

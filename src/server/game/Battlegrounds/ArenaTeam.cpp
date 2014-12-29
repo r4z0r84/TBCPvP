@@ -566,12 +566,12 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating, uint32 SoloQueueRating)
     int32 mod = (int32)floor((SoloQueueRating > 0 ? 16.0f : 32.0f) * (1.0f - chance));
 
     // Smolderforge rating adjustments
-    if (SoloQueueRating > 0) // solo queue only
+    if (GetType() == ARENA_TEAM_2v2) // solo queue
     {
         if (mod < 1)
             mod = 1;
     }
-    else // 2v2 teams
+    else if (GetType() == ARENA_TEAM_2v2)
     {
         if (m_stats.rating < 1850)
             mod += 2;
@@ -599,12 +599,12 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating, uint32 SoloQueueRating)
     int32 mod = (int32)ceil((SoloQueueRating > 0 ? 16.0f : 32.0f) * (0.0f - chance));
 
     // Smolderforge rating adjustments
-    if (SoloQueueRating > 0) // solo queue only
+    if (GetType() == ARENA_TEAM_5v5) // solo queue
     {
         if (mod <= -15)
             mod = -14;
     }
-    else // 2v2 teams
+    else if (GetType() == ARENA_TEAM_2v2)
     {
         if (mod <= -25)
             mod = -24;
@@ -648,12 +648,12 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating, uint32 SoloQueueR
             int32 mod = (int32)ceil((SoloQueueRating > 0 ? 16.0f : 32.0f) * (0.0f - chance));
 
             // Smolderforge rating adjustments
-            if (SoloQueueRating > 0) // 3v3 solo queue
+            if (GetType() == ARENA_TEAM_5v5) // solo queue
             {
                 if (mod <= -15)
                     mod = -14;
             }
-            else // 2v2 teams
+            else if (GetType() == ARENA_TEAM_2v2)
             {
                 if (mod <= -25)
                     mod = -24;
@@ -688,8 +688,9 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstRating)
             int32 mod = (int32)ceil(32.0f * (0.0f - chance));
 
             // Smolderforge rating adjustments
-            if (mod <= -25)
-                mod = -24;
+            if (GetType() == ARENA_TEAM_2v2)
+                if (mod <= -25)
+                    mod = -24;
 
             int32 rating = int32(itr->personal_rating) + mod;
             itr->personal_rating = rating < 0 ? 0 : rating;
@@ -719,12 +720,12 @@ void ArenaTeam::MemberWon(Player * plr, uint32 againstRating, uint32 SoloQueueRa
             int32 mod = (int32)floor((SoloQueueRating > 0 ? 16.0f : 32.0f) * (1.0f - chance));
 
             // Smolderforge rating adjustments
-            if (SoloQueueRating > 0) // 3v3 solo queue
+            if (GetType() == ARENA_TEAM_5v5) // solo queue
             {
                 if (mod < 1)
                     mod = 1;
             }
-            else // 2v2 teams
+            else if (GetType() == ARENA_TEAM_2v2)
             {
                 if (m_stats.rating < 1850)
                     mod += 2;

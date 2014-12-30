@@ -24,6 +24,22 @@
 //This function is called when the player logs in (every login)
 void OnLogin(Player* player)
 {
+    uint16 maxLevel;
+    if (player->HasSkill(SKILL_COOKING) && player->GetBaseSkillValue(SKILL_COOKING) < 375)
+    {
+        maxLevel = player->GetPureMaxSkillValue(SKILL_COOKING);
+        player->SetSkill(SKILL_COOKING, maxLevel, maxLevel);
+    }
+    if (player->HasSkill(SKILL_FISHING) && player->GetBaseSkillValue(SKILL_FISHING) < 375)
+    {
+        maxLevel = player->GetPureMaxSkillValue(SKILL_FISHING);
+        player->SetSkill(SKILL_FISHING, maxLevel, maxLevel);
+    }
+    if (player->HasSkill(SKILL_FIRST_AID) && player->GetBaseSkillValue(SKILL_FIRST_AID) < 375)
+    {
+        maxLevel = player->GetPureMaxSkillValue(SKILL_FIRST_AID);
+        player->SetSkill(SKILL_FIRST_AID, maxLevel, maxLevel);
+    }
 }
 
 //This function is called when the player logs out

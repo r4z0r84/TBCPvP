@@ -3415,10 +3415,6 @@ void Spell::EffectSummonType(uint32 i)
     {
         summon->SetCreatorGUID(m_originalCaster->GetGUID());
     }
-
-    // Shadowfiend should spawn agressive
-    if (summon->GetEntry() == 19668)
-        summon->SetReactState(REACT_AGGRESSIVE);
 }
 
 void Spell::EffectLearnSpell(uint32 i)

@@ -1621,8 +1621,6 @@ class Unit : public WorldObject
         uint32 m_CombatTimer;
         uint32 m_lastManaUse;                               // msecs
 
-        uint32 m_damageTakenCounter;
-
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
 
         UnitVisibility m_Visibility;

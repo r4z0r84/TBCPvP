@@ -299,8 +299,6 @@ Unit::Unit()
     m_CombatTimer = 0;
     m_lastManaUse = 0;
 
-    m_damageTakenCounter = 0;
-
     //m_victimThreat = 0.0f;
     for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
         m_threatModifier[i] = 1.0f;
@@ -767,20 +765,8 @@ bool Unit::HasAuraTypeWithFamilyFlags(AuraType auraType, uint32 familyName  , ui
 void Unit::RemoveSpellbyDamageTaken(uint32 damage, uint32 spell)
 {
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
-    m_damageTakenCounter += damage;
-
-    // The chance to dispel an aura depends on the damage taken with respect to the casters level.
-    uint32 calc_dmg = getLevel() > 8 ? 25 *getLevel() + 150 : 50;
-    uint32 max_dmg = getLevel() > 8 ? 50 * getLevel() : 50;
-    uint32 min_dmg = getLevel() > 8 ? 7 * getLevel() + 10 : 10;
-    bool canBreak = true;
-
-    // Can break too early
-    if (m_damageTakenCounter < min_dmg)
-        canBreak = false;
-
-    // The chance to dispel an aura depends on the damage taken with respect to the casters level.
-    float chance = float(damage) / calc_dmg * 100.0f;
+    uint32 max_dmg = getLevel() > 8 ? 30 * getLevel() - 100 : 50;
+    float chance = float(damage) / max_dmg * 100.0f;
 
     AuraList::iterator i, next;
     for (i = m_ccAuras.begin(); i != m_ccAuras.end(); i = next)
@@ -788,10 +774,9 @@ void Unit::RemoveSpellbyDamageTaken(uint32 damage, uint32 spell)
         next = i;
         ++next;
 
-        if (*i && (!spell || (*i)->GetId() != spell) && (roll_chance_f(chance) && canBreak || m_damageTakenCounter >= max_dmg))
+        if (*i && (!spell || (*i)->GetId() != spell) && roll_chance_f(chance))
         {
             RemoveAurasDueToSpell((*i)->GetId());
-            m_damageTakenCounter = 0;
             if (!m_ccAuras.empty())
                 next = m_ccAuras.begin();
             else
@@ -1620,13 +1605,13 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
             // Crit bonus calc
             damageInfo->damage += damageInfo->damage;
             int32 mod = 0;
-            mod += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS);
             // Apply SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE or SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE
             if (damageInfo->attackType == RANGED_ATTACK)
                 mod += damageInfo->target->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE);
             else
                 mod += damageInfo->target->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE);
 
+            mod += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS);
             uint32 crTypeMask = damageInfo->target->GetCreatureTypeMask();
 
             // Increase crit damage from SPELL_AURA_MOD_CRIT_PERCENT_VERSUS

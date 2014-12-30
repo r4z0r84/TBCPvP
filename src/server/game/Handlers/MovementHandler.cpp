@@ -389,10 +389,33 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
             }
         }
 
+        // Player leaving neutral duelling area, teleport back.
         if (plMover->GetAreaId() == 214 && !(plMover->isGameMaster()))
             plMover->TeleportTo(0, 4273.06f, -2774.95f, 5.65f, 4.41f);
 
-        if (movementInfo.GetPos()->GetPositionZ() < -500.0f)
+        if (plMover->InBattleGround())
+        {
+            switch (plMover->GetMapId())
+            {
+                case 562: // Blade's Edge Arena
+                    if (movementInfo.GetPos()->GetPositionZ() < -5.0f)
+                        plMover->HandleFallUnderMap();
+                        break;
+                case 559: // Nagrand Arena
+                    if (movementInfo.GetPos()->GetPositionZ() < 6.0f)
+                        plMover->HandleFallUnderMap();
+                    break;
+                case 572: // Ruins of Lordaeron
+                    if (movementInfo.GetPos()->GetPositionZ() < 20.0f)
+                        plMover->HandleFallUnderMap();
+                    break;
+                default: // battlegrounds
+                    if (movementInfo.GetPos()->GetPositionZ() < -250.0f)
+                        plMover->HandleFallUnderMap();
+                    break;
+            }
+        }
+        else if (movementInfo.GetPos()->GetPositionZ() < -500.0f)
             plMover->HandleFallUnderMap();
     }
 }

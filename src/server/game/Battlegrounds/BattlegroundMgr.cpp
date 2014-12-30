@@ -1872,6 +1872,7 @@ void BattleGroundMgr::DistributeArenaPoints()
 void BattleGroundMgr::CancelAutomaticArenaPointDistribution()
 {
     m_NextAutoDistributionTime = 0;
+    sWorld->setConfig(CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS, 0);
     CharacterDatabase.PExecute("DELETE FROM saved_variables");
 }
 

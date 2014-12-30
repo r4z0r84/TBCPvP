@@ -6769,6 +6769,9 @@ bool ChatHandler::HandleFlushArenaPointsCommand(const char * /*args*/)
 bool ChatHandler::HandleCancelFlushCommand(const char * /*args*/)
 {
     sBattleGroundMgr->CancelAutomaticArenaPointDistribution();
+    Player* player = m_session->GetPlayer();
+    ChatHandler(player).PSendSysMessage("Next arena flush cancelled. System disabled until next restart.");
+    sLog->outString("Arena flush cancelled and disabled.");
     return true;
 }
 

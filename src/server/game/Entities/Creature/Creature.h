@@ -443,6 +443,8 @@ class Creature : public Unit, public GridObject<Creature>
 
         Pet* ToPet(){ if (isPet()) return reinterpret_cast<Pet*>(this); else return NULL; }
 
+        TempSummon* ToTempSummon() { if (isSummon()) return reinterpret_cast<TempSummon*>(this); else return NULL; }
+
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         bool isRacialLeader() const { return GetCreatureTemplate()->RacialLeader; }
         bool isCivilian() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }

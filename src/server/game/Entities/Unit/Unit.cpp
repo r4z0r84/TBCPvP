@@ -12552,6 +12552,11 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
         if (creature->IsAIEnabled)
             creature->AI()->JustDied(this);
 
+        if (TempSummon* summon = creature->ToTempSummon())
+            if (Unit* summoner = summon->GetSummoner())
+                if (summoner->ToCreature() && summoner->IsAIEnabled)
+                    summoner->ToCreature()->AI()->SummonedCreatureDies(creature, this);
+
         // Dungeon specific stuff, only applies to players killing creatures
         if (creature->GetInstanceId())
         {

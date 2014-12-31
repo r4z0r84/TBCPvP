@@ -32,21 +32,25 @@ enum eEnums
     SAY_AGGRO               = -1000399,
     SAY_SUMMONSHADE         = -1000400,
 
-    //Spells of Taerar
+    // Spells of Taerar
     SPELL_SLEEP             = 24777,
     SPELL_NOXIOUSBREATH     = 24818,
     SPELL_TAILSWEEP         = 15847,
-    // SPELL_MARKOFNATURE   = 25040,                        // Not working
+    SPELL_MARKOFNATURE      = 25040,
+    SPELL_MARKOFNATUREAURA  = 25041,
     SPELL_ARCANEBLAST       = 24857,
     SPELL_BELLOWINGROAR     = 22686,
+    SPELL_SELFSTUN          = 24883,
 
     SPELL_SUMMONSHADE_1     = 24841,
     SPELL_SUMMONSHADE_2     = 24842,
     SPELL_SUMMONSHADE_3     = 24843,
 
-    //Spells of Shades of Taerar
+    // Spells of Shades of Taerar
     SPELL_POSIONCLOUD       = 24840,
-    SPELL_POSIONBREATH      = 20667
+    SPELL_POSIONBREATH      = 20667,
+
+    NPC_SHADE_OF_TAERAR     = 15302
 };
 
 uint32 m_auiSpellSummonShade[]=
@@ -61,31 +65,32 @@ struct boss_taerarAI : public ScriptedAI
     uint32 m_uiSleep_Timer;
     uint32 m_uiNoxiousBreath_Timer;
     uint32 m_uiTailSweep_Timer;
-    //uint32 m_uiMarkOfNature_Timer;
     uint32 m_uiArcaneBlast_Timer;
     uint32 m_uiBellowingRoar_Timer;
-    uint32 m_uiShades_Timer;
-    uint32 m_uiShadesSummoned;
-
-    bool m_bShades;
+    uint32 m_uiShadesTimeout_Timer;
+    uint32 m_uiShadesDead;
+    uint32 m_uiEventCounter;
 
     void Reset()
     {
-        m_uiSleep_Timer = 15000 + rand()%5000;
+        m_uiSleep_Timer         = 15000 + rand()%5000;
         m_uiNoxiousBreath_Timer = 8000;
-        m_uiTailSweep_Timer = 4000;
-        //m_uiMarkOfNature_Timer = 45000;
-        m_uiArcaneBlast_Timer = 12000;
+        m_uiTailSweep_Timer     = 4000;
+        m_uiArcaneBlast_Timer   = 12000;
         m_uiBellowingRoar_Timer = 30000;
-        m_uiShades_Timer = 60000;                               //The time that Taerar is banished
-        m_uiShadesSummoned = 0;
+        m_uiShadesTimeout_Timer = 0; // Banished timer
+        m_uiShadesDead          = 0;
+        m_uiEventCounter        = 1;
 
-        m_bShades = false;
+        // Remove unselectable if needed
+        if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     void EnterCombat(Unit* /*pWho*/)
     {
         DoScriptText(SAY_AGGRO, me);
+        DoCast(me, SPELL_MARKOFNATUREAURA, true);
     }
 
     void JustSummoned(Creature* pSummoned)
@@ -94,27 +99,67 @@ struct boss_taerarAI : public ScriptedAI
             pSummoned->AI()->AttackStart(pTarget);
     }
 
+    void KilledUnit(Unit* pVictim)
+    {
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            pVictim->CastSpell(pVictim, SPELL_MARKOFNATURE, true, NULL, NULL, me->GetGUID());
+    }
+
+    void DoUnbanishBoss()
+    {
+        me->RemoveAurasDueToSpell(SPELL_SELFSTUN);
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+        m_uiShadesTimeout_Timer = 0;
+        m_uiShadesDead = 0;
+    }
+
+    void DoSpecialDragonAbility()
+    {
+        me->InterruptNonMeleeSpells(false);
+        // Make boss not selectable when banished
+        DoCast(me, SPELL_SELFSTUN, true);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        
+        // Summon the shades at boss position
+        int iSize = sizeof(m_auiSpellSummonShade) / sizeof(uint32);
+        for (int i = 0; i < iSize; ++i)
+            DoCast(me, m_auiSpellSummonShade[i], true);
+
+        DoScriptText(SAY_SUMMONSHADE, me);
+        m_uiShadesTimeout_Timer = 60000;
+    }
+
+    void SummonedCreatureDies(Creature* pSummoned, Unit* pSummoner)
+    {
+        if (pSummoned->GetEntry() == NPC_SHADE_OF_TAERAR)
+        {
+            ++m_uiShadesDead;
+
+            // If all shades are dead then unbanish the boss
+            if (m_uiShadesDead == 3)
+                DoUnbanishBoss();
+        }
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
-        if (m_bShades && m_uiShades_Timer <= uiDiff)
+        if (m_uiShadesTimeout_Timer)
         {
-            //Become unbanished again
-            me->setFaction(14);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_bShades = false;
-        }
-        else if (m_bShades)
-        {
-            m_uiShades_Timer -= uiDiff;
-            //Do nothing while banished
+            if (m_uiShadesTimeout_Timer <= uiDiff)
+                DoUnbanishBoss();
+            else
+                m_uiShadesTimeout_Timer -= uiDiff;
+
+            // Do nothing while banished
             return;
         }
 
-        //Return since we have no target
+        // Return since we have no target
         if (!UpdateVictim())
             return;
 
-        //Sleep_Timer
+        // Sleep_Timer
         if (m_uiSleep_Timer <= uiDiff)
         {
             if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
@@ -125,7 +170,7 @@ struct boss_taerarAI : public ScriptedAI
         else
             m_uiSleep_Timer -= uiDiff;
 
-        //NoxiousBreath_Timer
+        // NoxiousBreath_Timer
         if (m_uiNoxiousBreath_Timer <= uiDiff)
         {
             DoCast(me->getVictim(), SPELL_NOXIOUSBREATH);
@@ -134,7 +179,7 @@ struct boss_taerarAI : public ScriptedAI
         else
             m_uiNoxiousBreath_Timer -= uiDiff;
 
-        //Tailsweep every 2 seconds
+        // Tailsweep every 2 seconds
         if (m_uiTailSweep_Timer <= uiDiff)
         {
             DoCast(me, SPELL_TAILSWEEP);
@@ -143,16 +188,7 @@ struct boss_taerarAI : public ScriptedAI
         else
             m_uiTailSweep_Timer -= uiDiff;
 
-        //MarkOfNature_Timer
-        //if (m_uiMarkOfNature_Timer <= uiDiff)
-        //{
-        //    DoCast(me->getVictim(), SPELL_MARKOFNATURE);
-        //    m_uiMarkOfNature_Timer = 45000;
-        //}
-        //else
-        //    m_uiMarkOfNature_Timer -= uiDiff;
-
-        //ArcaneBlast_Timer
+        // ArcaneBlast_Timer
         if (m_uiArcaneBlast_Timer <= uiDiff)
         {
             DoCast(me->getVictim(), SPELL_ARCANEBLAST);
@@ -161,7 +197,7 @@ struct boss_taerarAI : public ScriptedAI
         else
             m_uiArcaneBlast_Timer -= uiDiff;
 
-        //BellowingRoar_Timer
+        // BellowingRoar_Timer
         if (m_uiBellowingRoar_Timer <= uiDiff)
         {
             DoCast(me->getVictim(), SPELL_BELLOWINGROAR);
@@ -170,29 +206,11 @@ struct boss_taerarAI : public ScriptedAI
         else
             m_uiBellowingRoar_Timer -= uiDiff;
 
-        //Summon 3 Shades at 75%, 50% and 25% (if bShades is true we already left in line 117, no need to check here again)
-        if (!m_bShades && (me->GetHealth()*100 / me->GetMaxHealth()) <= (100-(25*m_uiShadesSummoned)))
+        // Summon 3 Shades at 75%, 50% and 25% (if bShades is true we already left in line 117, no need to check here again)
+        if ((me->GetHealth() * 100 / me->GetMaxHealth()) <  m_uiEventCounter * 25 )
         {
-            if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
-            {
-                //Inturrupt any spell casting
-                me->InterruptNonMeleeSpells(false);
-
-                //horrible workaround, need to fix
-                me->setFaction(35);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-                DoScriptText(SAY_SUMMONSHADE, me);
-
-                int iSize = sizeof(m_auiSpellSummonShade) / sizeof(uint32);
-
-                for (int i = 0; i < iSize; ++i)
-                    DoCast(pTarget, m_auiSpellSummonShade[i], true);
-
-                ++m_uiShadesSummoned;                       // prevent casting twice at same health
-                m_bShades = true;
-            }
-            m_uiShades_Timer = 60000;
+            DoSpecialDragonAbility();
+            ++m_uiEventCounter;
         }
 
         DoMeleeAttackIfReady();

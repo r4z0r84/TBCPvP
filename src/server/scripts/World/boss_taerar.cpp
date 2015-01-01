@@ -60,7 +60,7 @@ uint32 m_auiSpellSummonShade[]=
 
 struct boss_taerarAI : public ScriptedAI
 {
-    boss_taerarAI(Creature *c) : ScriptedAI(c) {}
+    boss_taerarAI(Creature *c) : ScriptedAI(c), Summons(me) {}
 
     uint32 m_uiSleep_Timer;
     uint32 m_uiNoxiousBreath_Timer;
@@ -70,6 +70,8 @@ struct boss_taerarAI : public ScriptedAI
     uint32 m_uiShadesTimeout_Timer;
     uint32 m_uiShadesDead;
     uint32 m_uiEventCounter;
+
+    SummonList Summons;
 
     void Reset()
     {
@@ -85,6 +87,8 @@ struct boss_taerarAI : public ScriptedAI
         // Remove unselectable if needed
         if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+        Summons.DespawnAll();
     }
 
     void EnterCombat(Unit* /*pWho*/)
@@ -93,10 +97,17 @@ struct boss_taerarAI : public ScriptedAI
         DoCast(me, SPELL_MARKOFNATUREAURA, true);
     }
 
+    void JustDied(Unit* /*pKiller*/)
+    {
+        Summons.DespawnAll();
+    }
+
     void JustSummoned(Creature* pSummoned)
     {
         if (Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0))
             pSummoned->AI()->AttackStart(pTarget);
+
+        Summons.Summon(pSummoned);
     }
 
     void KilledUnit(Unit* pVictim)
@@ -207,7 +218,7 @@ struct boss_taerarAI : public ScriptedAI
             m_uiBellowingRoar_Timer -= uiDiff;
 
         // Summon 3 Shades at 75%, 50% and 25% (if bShades is true we already left in line 117, no need to check here again)
-        if ((me->GetHealth() * 100 / me->GetMaxHealth()) <  m_uiEventCounter * 25 )
+        if ((me->GetHealth() * 100 / me->GetMaxHealth()) <  100 - m_uiEventCounter * 25 )
         {
             DoSpecialDragonAbility();
             ++m_uiEventCounter;

@@ -566,7 +566,7 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating, uint32 SoloQueueRating)
     int32 mod = (int32)floor((SoloQueueRating > 0 ? 16.0f : 32.0f) * (1.0f - chance));
 
     // Smolderforge rating adjustments
-    if (GetType() == ARENA_TEAM_2v2) // solo queue
+    if (GetType() == ARENA_TEAM_5v5) // solo queue
     {
         if (mod < 1)
             mod = 1;

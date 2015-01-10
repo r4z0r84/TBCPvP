@@ -461,7 +461,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                         return SPELL_FOOD;
             }
             // this may be a hack
-            else if ((spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD)
+            else if ((spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD || spellInfo->Id == 43730) // Electrified (Stormchops)
                 && !spellInfo->Category)
                 return SPELL_WELL_FED;
 
@@ -2618,6 +2618,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 1725:  // Distract
         case 33206: // Pain Suppression
             spellInfo->AttributesEx |= SPELL_ATTR_EX_NOT_BREAK_STEALTH;
+            break;
+        case 43730: // Stormchops effect
+            spellInfo->EffectTriggerSpell[0] = 43733;
+            spellInfo->EffectTriggerSpell[1] = 43731;
+            spellInfo->EffectImplicitTargetA[1] = 1;
+            spellInfo->EffectImplicitTargetB[1] = 0;
             break;
         default:
             break;

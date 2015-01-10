@@ -1216,7 +1216,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                 unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
 
             // Remove Stealth and Invisibility on negative spell hit
-            if (isSpellBreakStealth(m_spellInfo))
+            if (!unit->IsFriendlyTo(m_caster) && isSpellBreakStealth(m_spellInfo))
                 unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
         else

@@ -126,6 +126,8 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
         case 12970: // Flury (Rank 5)
         case 33076: // Prayer of Mending
             return 100.0f;
+        case 14181: //Relentless Strikes Effect
+            return 500.0f;
             break;
     }
     // Default - Return none

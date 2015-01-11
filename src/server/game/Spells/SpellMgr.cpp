@@ -2539,14 +2539,15 @@ void SpellMgr::LoadSpellCustomAttr()
         case 27937:     // Anchor to Skulls
             spellInfo->rangeIndex = 13;
             break;
-        case 34580:
+        case 34580: // Impale
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
             break;
-        case 33619:
-        case 6774:
+        case 33619: // Reflective Shield
+        case 5171: // Slice and Dice (Rank 1)
+        case 6774: // Slice and Dice (Rank 2)
             spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
             break;
-        case 33395:
+        case 33395: // Freeze
             spellInfo->AttributesEx2 |= SPELL_ATTR_EX2_IGNORE_LOS;
             break;
         case 29200: // Purify Helboar Meat

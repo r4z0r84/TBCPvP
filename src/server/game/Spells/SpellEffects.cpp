@@ -3443,6 +3443,9 @@ void Spell::EffectDispel(uint32 i)
     if (!unitTarget)
         return;
 
+    if (unitTarget->hasUnitState(UNIT_STAT_ISOLATED))
+        return;
+
     // Fill possible dispell list
     std::vector <Aura *> dispel_list;
 

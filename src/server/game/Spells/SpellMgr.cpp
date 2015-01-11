@@ -2465,6 +2465,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 6774: // Slice and Dice (Rank 2)
             spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
             break;
+        case 1543: // Flare
+            spellInfo->speed = 0;
+            break;
         case 33395: // Freeze
             spellInfo->AttributesEx2 |= SPELL_ATTR_EX2_IGNORE_LOS;
             break;

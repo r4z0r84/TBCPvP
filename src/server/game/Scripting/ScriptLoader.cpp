@@ -22,10 +22,9 @@
 
 #ifdef SCRIPTS
 
-//examples
-//void AddSC_custom_example();
-//void AddSC_custom_gossip_codebox();
-//void AddSC_test();
+//custom
+void AddSC_beastmaster();
+void AddSC_npc_template();
 
 //world
 void AddSC_areatrigger_scripts();
@@ -397,9 +396,9 @@ void AddSC_onevents();
 void AddScripts()
 {
 #ifdef SCRIPTS
-//    AddSC_custom_example();
-//    AddSC_custom_gossip_codebox();
-//    AddSC_test();
+    AddSC_beastmaster();
+    AddSC_npc_template();
+
     AddSC_areatrigger_scripts();
     AddSC_boss_emeriss();
     AddSC_boss_taerar();

@@ -2463,10 +2463,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 33619: // Reflective Shield
         case 5171: // Slice and Dice (Rank 1)
         case 6774: // Slice and Dice (Rank 2)
+        case 13810: // Frost Trap
             spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
             break;
         case 1543: // Flare
             spellInfo->speed = 0;
+            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
             break;
         case 33395: // Freeze
             spellInfo->AttributesEx2 |= SPELL_ATTR_EX2_IGNORE_LOS;

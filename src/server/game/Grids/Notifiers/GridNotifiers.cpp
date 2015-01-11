@@ -30,6 +30,7 @@
 #include "ObjectAccessor.h"
 #include "CellImpl.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 
 using namespace Trinity;
 
@@ -286,14 +287,16 @@ void DynamicObjectUpdater::VisitHelper(Unit* target)
         if (i_check->IsFriendlyTo(target))
             return;
 
-        i_check->CombatStart(target);
+        if (IsAggressiveSpell(spellInfo, true))
+            i_check->CombatStart(target);
     }
     else
     {
         if (!i_check->IsHostileTo(target))
             return;
 
-        i_check->CombatStart(target);
+        if (IsAggressiveSpell(spellInfo, true))
+            i_check->CombatStart(target);
     }
 
     // Check target immune to spell or aura

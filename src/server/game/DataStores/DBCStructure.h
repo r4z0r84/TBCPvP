@@ -723,13 +723,6 @@ struct SpellThreatEntry
     int32       threat;
 };
 
-// stored in SQL table
-struct SpellDelayEntry
-{
-    uint32 spellId;
-    uint32 procDelay;
-};
-
 struct SpellRadiusEntry
 {
     uint32    ID;

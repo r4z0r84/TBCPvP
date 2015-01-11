@@ -1525,37 +1525,6 @@ void Player::Update(uint32 p_time)
         }
     }
 
-    // delayed triggers
-    if (!m_delayedTrigger.empty())
-    {
-        DelayedTriggers::iterator next, itr;
-        for (itr = m_delayedTrigger.begin(); itr != m_delayedTrigger.end(); itr = next)
-        {
-            next = itr;
-            ++next;
-            if (itr->m_timer <= p_time)
-            {
-                Aura *triggeredByAura = GetAura(itr->m_triggeredByAuraId, itr->m_effectIndex);
-                Unit *target = ObjectAccessor::GetUnit(*this, itr->m_targetGuid);
-                if (triggeredByAura && target && !HasSpellCooldown(itr->m_spellId))
-                {
-                    int32 basepoints = itr->m_basepoints;
-
-                    if (basepoints)
-                        CastCustomSpell(target, itr->m_spellId, &basepoints, NULL, NULL, true, 0, triggeredByAura);
-                    else
-                        CastSpell(target, itr->m_spellId, true, 0, triggeredByAura);
-
-                    if (itr->m_cooldown)
-                        AddSpellCooldown(itr->m_spellId, 0, time(NULL) + itr->m_cooldown);
-                }
-                m_delayedTrigger.erase(itr);
-            }
-            else
-                itr->m_timer -= p_time;
-        }
-    }
-
     if (hasUnitState(UNIT_STAT_CANNOT_AUTOATTACK) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) // better auto attack system
     {
         uint32 base_attack = getAttackTimer(BASE_ATTACK);
@@ -1810,8 +1779,6 @@ void Player::setDeathState(DeathState s)
         SetDrunkValue(0);
         // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
         ClearComboPoints();
-
-        ClearTriggeredSpells();
 
         clearResurrectRequestData();
 
@@ -22061,18 +22028,6 @@ void Player::RemoveGlobalCooldown(SpellEntry const *spellInfo)
         return;
 
     m_globalCooldowns[spellInfo->StartRecoveryCategory] = 0;
-}
-
-bool Player::HasTriggerWithCooldown(uint32 triggerSpellId)
-{
-    if (m_delayedTrigger.empty())
-        return false;
-
-    for (DelayedTriggers::iterator itr = m_delayedTrigger.begin(); itr != m_delayedTrigger.end(); ++itr)
-        if (itr->m_spellId == triggerSpellId && itr->m_cooldown < 0)
-            return true;
-
-    return false;
 }
 
 void Player::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const

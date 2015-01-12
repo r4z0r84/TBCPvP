@@ -4864,18 +4864,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     if (procSpell && (procSpell->Id == 26654 || procSpell->Id == 12723))
                         return false;
 
-                    target = SelectNearbyTarget();
-
+                    target = SelectNearbyTarget(8.0f);
                     if (!target)
                         return false;
 
-                    if (procSpell && procSpell->SpellIconID == 83)      // Prevent Whirlwind proc 4 times. It should proc 1 time.
-                        cooldown = 1;
+                    triggered_spell_id = 12723;
 
                     if (procSpell)
                     {
                         // execute : normalized weapon damage if target > 20% health
-                        if (procSpell->SpellFamilyFlags & 0x000000002000000LL)
+                        if (procSpell->Id == 20647 && target->GetHealth() > target->GetMaxHealth() * 0.2f)
                         {
                             damage = CalculateDamage(BASE_ATTACK, false);
                             MeleeDamageBonus(target, &damage, BASE_ATTACK);
@@ -4888,15 +4886,30 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                             cooldown = 1;
                     }
 
-                    triggered_spell_id = 12723;
+                    float armor = pVictim->GetArmor();
+                    // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
+                    armor += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, SPELL_SCHOOL_MASK_NORMAL);
 
-                    float TakenTotalMod = 1.0f;
-                    AuraList const& mModDamagePercentTaken = target->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
-                    for (AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
-                    if ((*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask())
-                    TakenTotalMod *= ((*i)->GetModifierValue() + 100.0f) / 100.0f;
+                    if (armor < 0.0f)
+                        armor = 0.0f;
 
-                    damage = damage * TakenTotalMod;
+                    float levelModifier = getLevel();
+                    if (levelModifier > 59)
+                        levelModifier = levelModifier + (4.5f * (levelModifier-59));
+
+                    float mitigation = 0.1f * armor / (8.5f * levelModifier + 40);
+                    mitigation = mitigation/(1.0f + mitigation);
+
+                    if (mitigation < 0.0f)
+                        mitigation = 0.0f;
+
+                    if (mitigation > 0.75f)
+                        mitigation = 0.75f;
+
+                    // calculate base damage before armor mitigation
+                    damage = uint32(damage / (1.0f - mitigation));
+
+                    basepoints0 = damage;
                     break;
                 }
                 // Unstable Power

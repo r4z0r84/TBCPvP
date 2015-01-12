@@ -20833,7 +20833,10 @@ void Player::learnSkillRewardedSpells(uint32 skill_id)
         if (sSpellStore.LookupEntry(pAbility->spellId))
         {
             // Ok need learn spell
-            learnSpell(pAbility->spellId);
+            if (!IsInWorld())
+                addSpell(pAbility->spellId, true);
+            else
+                learnSpell(pAbility->spellId);
         }
     }
 }

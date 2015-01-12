@@ -66,7 +66,7 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
     if (spellInfo->SpellVisual == 322 && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
         return 150.0f;
     // Seal of Command Proc Attack
-    if (spellInfo->SpellVisual == 39 && spellInfo->SpellIconID == 561 && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
+    if (spellInfo->Id == 20424)
         return 500.0f;
     // Seal of Blood Judgement
     if (spellInfo->Id == 32220)

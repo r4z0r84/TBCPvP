@@ -132,6 +132,13 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 }
             }
 
+            // check if player is in bg queue
+            if (player->InBattleGroundQueue())
+            {
+                player->GetSession()->SendNotification("You must leave all queues before resetting talents");
+                return true;
+            }
+
             switch (player->getClass())
             {
                 case CLASS_WARRIOR:

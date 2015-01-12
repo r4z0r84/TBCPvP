@@ -20874,6 +20874,10 @@ void Player::learnSkillAllSpells(uint32 skill_id, uint32 max_skill)
                 if (skillLine->classmask && (skillLine->classmask & classmask) == 0)
                     continue;
 
+                // skip too high value skills
+                if (skillLine->min_value > max_skill)
+                    continue;
+
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
                 if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, m_session->GetPlayer(), false))
                     continue;

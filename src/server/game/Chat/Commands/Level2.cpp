@@ -3637,32 +3637,9 @@ bool ChatHandler::HandleLearnAllRecipesCommand(const char* args)
 
         if (Utf8FitTo(name, wnamepart))
         {
-            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-            {
-                SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
-                if (!skillLine)
-                    continue;
-
-                if (skillLine->skillId != i || skillLine->forward_spellid)
-                    continue;
-
-                // skip racial skills
-                if (skillLine->racemask != 0)
-                    continue;
-
-                // skip wrong class skills
-                if (skillLine->classmask && (skillLine->classmask & classmask) == 0)
-                    continue;
-
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
-                if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, m_session->GetPlayer(), false))
-                    continue;
-
-                if (!target->HasSpell(spellInfo->Id))
-                    m_session->GetPlayer()->learnSpell(skillLine->spellId);
-            }
-
             uint16 maxLevel = target->GetPureMaxSkillValue(skillInfo->id);
+
+            target->learnSkillAllSpells(skillInfo->id, maxLevel);          
             target->SetSkill(skillInfo->id, maxLevel, maxLevel);
             PSendSysMessage(LANG_COMMAND_LEARN_ALL_RECIPES, name.c_str());
             return true;

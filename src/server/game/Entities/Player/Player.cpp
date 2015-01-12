@@ -20841,6 +20841,50 @@ void Player::learnSkillRewardedSpells(uint32 skill_id)
     }
 }
 
+void Player::learnSkillAllSpells(uint32 skill_id, uint32 max_skill)
+{
+    uint32 classmask = getClassMask();
+
+    for (uint32 i = 0; i < sSkillLineStore.GetNumRows(); ++i)
+    {
+        SkillLineEntry const *skillInfo = sSkillLineStore.LookupEntry(i);
+        if (!skillInfo)
+            continue;
+
+        if (skillInfo->categoryId != SKILL_CATEGORY_PROFESSION &&
+            skillInfo->categoryId != SKILL_CATEGORY_SECONDARY)
+            continue;
+
+        if (skillInfo->id == skill_id)
+        {
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
+                SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                if (!skillLine)
+                    continue;
+
+                if (skillLine->skillId != i || skillLine->forward_spellid)
+                    continue;
+
+                // skip racial skills
+                if (skillLine->racemask != 0)
+                    continue;
+
+                // skip wrong class skills
+                if (skillLine->classmask && (skillLine->classmask & classmask) == 0)
+                    continue;
+
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+                if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, m_session->GetPlayer(), false))
+                    continue;
+
+                if (!HasSpell(spellInfo->Id))
+                    learnSpell(skillLine->spellId);
+            }
+        }
+    }
+}
+
 void Player::SendAuraDurationsForTarget(Unit* target)
 {
     for (Unit::AuraMap::const_iterator itr = target->GetAuras().begin(); itr != target->GetAuras().end(); ++itr)

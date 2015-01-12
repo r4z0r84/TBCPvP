@@ -1778,6 +1778,7 @@ class Player : public Unit, public GridObject<Player>
         bool HasSkill(uint32 skill) const;
         void learnSkillRewardedSpells(uint32 id);
         void learnSkillRewardedSpells();
+        void learnSkillAllSpells(uint32 skill_id, uint32 max_skill);
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
         bool IsBeingTeleported() const { return mSemaphoreTeleport_Near || mSemaphoreTeleport_Far; }

@@ -10335,7 +10335,7 @@ void Unit::IncrDiminishing(DiminishingGroup group)
         m_Diminishing.push_back(DiminishingReturn(group, getMSTime(), DIMINISHING_LEVEL_2));
 }
 
-void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit* caster, DiminishingLevels Level)
+void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit* caster, DiminishingLevels Level, SpellEntry const *spellInfo)
 {
     if (duration == -1 || group == DIMINISHING_NONE)/*(caster->IsFriendlyTo(this) && caster != this)*/
         return;
@@ -10352,6 +10352,13 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, U
 
         if (target->GetTypeId() == TYPEID_PLAYER && source->GetTypeId() == TYPEID_PLAYER)
             duration = 10000;
+
+        // Curse of Tongues
+        if (spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo->SpellFamilyFlags & 0x80000000LL)
+            duration = 12000;
+
+        if (spellInfo)
+            ((Player*)source)->ApplySpellMod(spellInfo->Id, SPELLMOD_DURATION, duration);
     }
 
     float mod = 1.0f;

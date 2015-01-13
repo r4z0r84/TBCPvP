@@ -2061,32 +2061,6 @@ bool IsAllowedItemForRank(uint32 itemEntry, uint8 gmRank)
     return true;
 }
 
-bool IsAllowedItemForRank(uint32 itemEntry, uint8 gmRank)
-{
-    switch (gmRank)
-    {
-        case SEC_PLAYER:
-            return false;
-        case SEC_MODERATOR:
-        {
-            switch (itemEntry)
-            {
-                case 6657: // Savory Deviate Delight
-                case 8529: // Noggenfogger Elixir
-                    return true;
-                default:
-                    return false;
-            }
-        }
-        case SEC_GAMEMASTER:
-        case SEC_ADMINISTRATOR:
-        case SEC_CONSOLE:
-            return true;
-    }
-
-    return true;
-}
-
 bool ChatHandler::HandleAddItemCommand(const char *args)
 {
     if (!*args)
@@ -2167,13 +2141,6 @@ bool ChatHandler::HandleAddItemCommand(const char *args)
     if (count == 0 || dest.empty())                         // can't add any
     {
         PSendSysMessage(LANG_ITEM_CANNOT_CREATE, itemId, noSpaceForCount);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    if (!IsAllowedItemForRank(itemId, m_session->GetSecurity()))
-    {
-        SendSysMessage("You do not have access to do that.");
         SetSentErrorMessage(true);
         return false;
     }

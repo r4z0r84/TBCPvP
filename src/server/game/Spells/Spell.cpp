@@ -53,62 +53,62 @@
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
-// Custom PvP Spell Delay
-uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
+// Custom Spell Delay
+uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
 {
     // Warrior ---------------------------------------------------------------
     // Sword Specialisation Proc
     if (spellInfo->SpellIconID == 1462 && spellInfo->SpellVisual == 6560 && spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR)
-        return 500.0f;
+        return 500;
 
     // Paladin ---------------------------------------------------------------
     // Hammer of Justice
     if (spellInfo->SpellVisual == 322 && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
-        return 150.0f;
+        return 300;
     // Seal of Command Proc Attack
     if (spellInfo->Id == 20424)
-        return 500.0f;
+        return 500;
     // Seal of Blood Judgement
     if (spellInfo->Id == 32220)
-        return 750.0f;
+        return 750;
 
     // Shaman ----------------------------------------------------------------
     // Windfury
     if (spellInfo->SpellIconID == 220 && spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN)
-        return 500.0f;
+        return 500;
     // Windfury totem effect
     if (spellInfo->SpellIconID == 8251 && spellInfo->SpellVisual == 1397 && spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN)
-        return 500.0f;
+        return 500;
 
     // Druids -----------------------------------------------------------------
     // Maim
     if (spellInfo->SpellIconID == 1681 && spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
-        return 150.0f;
+        return 150;
     // Pounce
     if (spellInfo->SpellIconID == 495 && spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
-        return 150.0f;
+        return 150;
 
     // Rogues ------------------------------------------------------------------
     // Gouge
     if (spellInfo->SpellVisual == 256 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 150.0f;
+        return 150;
     // Blind
     if (spellInfo->SpellIconID == 48 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 300.0f;
+        return 300;
     // Sap
     if (spellInfo->SpellIconID == 249 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 150.0f;
+        return 150;
     // Cheap Shot
     if (spellInfo->SpellIconID == 244 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 150.0f;
+        return 150;
     // Kindney Shot
     if (spellInfo->SpellIconID == 499 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 150.0f;
+        return 150;
 
     // Mage --------------------------------------------------------------------
     // Polymorph
     if (spellInfo->SpellFamilyFlags & 0x1000000LL && spellInfo->SpellFamilyName == SPELLFAMILY_MAGE)
-        return 300.0f;
+        return 300;
 
     // Misc.
     switch(spellInfo->Id)
@@ -125,14 +125,13 @@ uint64 GetPVPSpellDelay(SpellEntry const *spellInfo)
         case 12969: // Flury (Rank 4)
         case 12970: // Flury (Rank 5)
         case 33076: // Prayer of Mending
-            return 100.0f;
+            return 100;
         case 14181: //Relentless Strikes Effect
-            return 500.0f;
+            return 500;
             break;
     }
     // Default - Return none
-    return 0.0f;
-
+    return 0;
 }
 
 bool IsQuestTameSpell(uint32 spellId)
@@ -861,8 +860,7 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
         target.timeDelay = 0LL;
 
     // Calculate Additional Custom PvP spell delays
-    target.timeDelay += GetPVPSpellDelay(m_spellInfo);
-    m_delayMoment = target.timeDelay;
+    m_delayMoment = GetCustomSpellDelay(m_spellInfo) ? GetCustomSpellDelay(m_spellInfo) : target.timeDelay;
 
     // If target reflect spell back to caster
     if (target.missCondition == SPELL_MISS_REFLECT)
@@ -2460,7 +2458,7 @@ void Spell::cast(bool skipCheck)
         EffectCharge(0);
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    if (m_spellInfo->speed > 0.0f && !IsChanneledSpell(m_spellInfo) || m_spellInfo->Id == 14157)
+    if (m_delayMoment && !IsChanneledSpell(m_spellInfo))
     {
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
         // in case delayed spell remove item at cast delay start

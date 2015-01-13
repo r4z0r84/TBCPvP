@@ -5080,6 +5080,15 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
     }
 
+    // Restore item depended aura after dead
+    Item * item = NULL;
+    if ((item = GetItemOrItemWithGemEquipped(13503)) || // Alchemist Stone
+        (item = GetItemOrItemWithGemEquipped(35751)) || // Alchemist Stone
+        (item = GetItemOrItemWithGemEquipped(35748)) || // Alchemist Stone
+        (item = GetItemOrItemWithGemEquipped(35750)) || // Alchemist Stone
+        (item = GetItemOrItemWithGemEquipped(35749)))   // Alchemist Stone
+        CastSpell(this, 17619, true, item);
+
     // Set Unattackable back to false, just in case it's not getting removed well
     ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE, false);
 

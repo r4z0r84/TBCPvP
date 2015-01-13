@@ -20900,6 +20900,7 @@ void Player::SendAuraDurationsForTarget(Unit* target)
 
 void Player::learnSkillRewardedSpells()
 {
+    /*
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end();)
     {
         if (itr->second.uState == SKILL_DELETED)
@@ -20908,9 +20909,9 @@ void Player::learnSkillRewardedSpells()
         learnSkillRewardedSpells(itr->first);
 
         ++itr;
-    }
+    }*/
 
-    /*for (uint16 i = 0; i < PLAYER_MAX_SKILLS; i++)
+    for (uint16 i = 0; i < PLAYER_MAX_SKILLS; i++)
     {
         if (!GetUInt32Value(PLAYER_SKILL_INDEX(i)))
             continue;
@@ -20918,7 +20919,7 @@ void Player::learnSkillRewardedSpells()
         uint32 pskill = GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF;
 
         learnSkillRewardedSpells(pskill);
-    }*/
+    }
 }
 
 void Player::SetDailyQuestStatus(uint32 quest_id)

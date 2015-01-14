@@ -4,19 +4,23 @@
 
 TempEventMgr::TempEventMgr()
 {
+    m_EventStatus = EVENT_STATUS_INACTIVE;
+    m_PlayerLimit = 0;
     m_EventParticipants.clear();
 }
 
 void TempEventMgr::ActiveEvent()
 {
     // Clear participants list on initialize
+    SetEventStatus(EVENT_STATUS_ACTIVE);
     m_EventParticipants.clear();
 }
 
 void TempEventMgr::DisableEvent()
 {
     // Clear participants list on delete
-   m_EventParticipants.clear();
+    SetEventStatus(EVENT_STATUS_INACTIVE);
+    m_EventParticipants.clear();
 }
 
 bool TempEventMgr::AddEventLocation(uint32 mapId, float x, float y, float z, float orientation)
@@ -47,6 +51,18 @@ void TempEventMgr::DeleteEventLocation()
 
 void TempEventMgr::AddPlayerToEvent(Player* player)
 {
+    if (GetEventStatus() == EVENT_STATUS_INACTIVE)
+    {
+        // This event has not started yes
+        return;
+    }
+
+    if (HasPlayerLimit() && (GetEventParticipants() >= GetPlayerLimit()))
+    {
+        // Player limit for this event has reached
+        return;
+    }
+
     if (m_EventParticipants.find(player) == m_EventParticipants.end())
         m_EventParticipants.insert(player);
 }
@@ -62,6 +78,12 @@ void TempEventMgr::DeletePlayerFromEvent(Player* player)
 
 void TempEventMgr::TeleportPlayersToEvent()
 {
+    if (GetEventStatus() == EVENT_STATUS_INACTIVE)
+    {
+        // GM needs to activate event before starting it
+        return;
+    }
+
     for (EventParticipants::const_iterator itr = m_EventParticipants.begin(); itr != m_EventParticipants.end(); ++itr)
     {
         (*itr)->TeleportTo(eventLoc.mapId, eventLoc.x, eventLoc.y, eventLoc.z, eventLoc.orientation);

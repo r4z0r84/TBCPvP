@@ -1,26 +1,26 @@
 #include "TempEventMgr.h"
+#include "Player.h"
 #include "MapManager.h"
 
-void TempEventMgr::AddEvent(uint32 eventEntry)
+TempEventMgr::TempEventMgr()
 {
-    // Adding Event to database
+    m_EventParticipants.clear();
 }
 
-void TempEventMgr::DeleteEvent(uint32 eventEntry)
+void TempEventMgr::ActiveEvent()
 {
-    // Delete Event from database
+    // Clear participants list on initialize
+    m_EventParticipants.clear();
 }
 
-bool TempEventMgr::AddEventLocation(uint32 eventEntry, uint32 mapId, float x, float y, float z, float orientation)
+void TempEventMgr::DisableEvent()
 {
-    for (TempEventLocation::const_iterator itr = GetTempEventLocationMap().begin(); itr != GetTempEventLocationMap().end(); ++itr)
-    {
-        if (itr->first == eventEntry)
-            return false;
-    }
+    // Clear participants list on delete
+   m_EventParticipants.clear();
+}
 
-    EventLocation eventLoc;
-    eventLoc.eventEntry     = eventEntry;
+bool TempEventMgr::AddEventLocation(uint32 mapId, float x, float y, float z, float orientation)
+{
     eventLoc.mapId          = mapId;
     eventLoc.x              = x;
     eventLoc.y              = y;
@@ -33,21 +33,37 @@ bool TempEventMgr::AddEventLocation(uint32 eventEntry, uint32 mapId, float x, fl
         return false;
     }
 
-    m_TempEventLocation[eventEntry] = eventLoc;
     return true;
 }
 
-void TempEventMgr::DeleteEventLocation(uint32 eventEntry)
+void TempEventMgr::DeleteEventLocation()
 {
-    // Delete teleport location from event
+    eventLoc.mapId          = 0;
+    eventLoc.x              = 0;
+    eventLoc.y              = 0;
+    eventLoc.z              = 0;
+    eventLoc.orientation    = 0; 
 }
 
-void TempEventMgr::AddPlayerToEvent(uint32 eventEntry, Player* player)
+void TempEventMgr::AddPlayerToEvent(Player* player)
 {
-    // ques the player for the event
+    if (m_EventParticipants.find(player) == m_EventParticipants.end())
+        m_EventParticipants.insert(player);
 }
 
-void TempEventMgr::DeletePlayerFromEvent(uint32 eventEntry, Player* player)
+void TempEventMgr::DeletePlayerFromEvent(Player* player)
 {
-    // deletes the player from the event
+    EventParticipants::iterator iter = m_EventParticipants.find(player);
+    if (iter == m_EventParticipants.end())
+        return;
+
+    m_EventParticipants.erase(iter);
+}
+
+void TempEventMgr::TeleportPlayersToEvent()
+{
+    for (EventParticipants::const_iterator itr = m_EventParticipants.begin(); itr != m_EventParticipants.end(); ++itr)
+    {
+        (*itr)->TeleportTo(eventLoc.mapId, eventLoc.x, eventLoc.y, eventLoc.z, eventLoc.orientation);
+    }
 }

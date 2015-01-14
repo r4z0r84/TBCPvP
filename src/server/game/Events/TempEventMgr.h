@@ -5,7 +5,6 @@
 
 struct EventLocation
 {
-    uint32 eventEntry;
     uint32 mapId;
     float x;
     float y;
@@ -23,34 +22,35 @@ class TempEventMgr
 {
 public:
 
-    TempEventMgr() {};
+    TempEventMgr();
     ~TempEventMgr() {};
 
-    void AddEvent(uint32 eventEntry);
-    void DeleteEvent(uint32 eventEntry);
+    void ActiveEvent();
+    void DisableEvent();
 
-    typedef std::set<uint16> ActiveTempEvents;
-    ActiveTempEvents const& GetActiveTempEventList() const { return m_ActiveTempEvents; }
+    typedef std::set<Player*> EventParticipants;
+    //EventParticipants const& GetEventParticipantsForEvent(
 
-    typedef std::map<uint32, EventLocation> TempEventLocation;
-    TempEventLocation const& GetTempEventLocationMap() const { return m_TempEventLocation; }
+    typedef std::list<EventLocation> TempEventLocation;
 
-    bool AddEventLocation(uint32 eventEntry, uint32 mapId, float x, float y, float z, float orientation);
-    void DeleteEventLocation(uint32 eventEntry);
+    bool AddEventLocation(uint32 mapId, float x, float y, float z, float orientation);
+    void DeleteEventLocation();
 
-    void AddPlayerToEvent(uint32 eventEntry, Player* player);
-    void DeletePlayerFromEvent(uint32 eventEntry, Player* player);
+    void AddPlayerToEvent(Player* player);
+    void DeletePlayerFromEvent(Player* player);
+
+    void TeleportPlayersToEvent();
 
     uint32 GetEventStatus() const            { return m_EventStatus; }
     void SetEventStatus(uint32 eventStatus) { m_EventStatus = eventStatus; }
 
 private:
 
-    ActiveTempEvents m_ActiveTempEvents;
-    TempEventLocation m_TempEventLocation;
+    EventParticipants m_EventParticipants;
 
+    EventLocation eventLoc;
+    
     uint32 m_EventStatus;
-
 };
 
 #define sTempEventMgr ACE_Singleton<TempEventMgr, ACE_NULL_MUTEX>::instance()

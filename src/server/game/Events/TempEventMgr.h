@@ -1,8 +1,6 @@
 #ifndef TRINITY_DEF_TEMPEVENTMGR_H
 #define TRINITY_DEF_TEMPEVENTMGR_H
 
-#include "Player.h"
-
 struct EventLocation
 {
     uint32 mapId;
@@ -31,13 +29,11 @@ public:
     typedef std::set<Player*> EventParticipants;
     uint32 GetEventParticipants() const { return m_EventParticipants.size(); }
 
-    typedef std::list<EventLocation> TempEventLocation;
-
     bool AddEventLocation(uint32 mapId, float x, float y, float z, float orientation);
     void DeleteEventLocation();
 
     void AddPlayerToEvent(Player* player);
-    void DeletePlayerFromEvent(Player* player);
+    void RemovePlayerFromEvent(Player* player);
 
     uint32 GetPlayerLimit() { return m_PlayerLimit; }
     void SetPlayerLimit(uint32 playerLimit) { m_PlayerLimit = playerLimit; }
@@ -58,6 +54,6 @@ private:
     uint32 m_PlayerLimit;
 };
 
-#define sTempEventMgr ACE_Singleton<TempEventMgr, ACE_NULL_MUTEX>::instance()
+#define sTempEventMgr ACE_Singleton<TempEventMgr, ACE_Null_Mutex>::instance()
 
 #endif

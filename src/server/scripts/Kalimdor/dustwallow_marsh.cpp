@@ -784,12 +784,12 @@ enum eHendel
     PHASE_COMPLETED             = 2
 };
 
-struct EventLocation
+struct HendelEventLocation
 {
     float m_fX, m_fY, m_fZ;
 };
 
-EventLocation m_afEventMoveTo[] =
+HendelEventLocation m_afEventMoveTo[] =
 {
     {-2943.92f, -3319.41f, 29.8336f},
     {-2933.01f, -3321.05f, 29.5781f}

@@ -1,0 +1,9 @@
+INSERT INTO `command` VALUES ('tempevent leave', 0, NULL);
+INSERT INTO `command` VALUES ('tempevent info', 0, NULL);
+INSERT INTO `command` VALUES ('tempevent gminfo', 2, NULL);
+INSERT INTO `command` VALUES ('tempevent create', 2, NULL);
+INSERT INTO `command` VALUES ('tempevent plimit', 2, NULL);
+INSERT INTO `command` VALUES ('tempevent location', 2, NULL);
+INSERT INTO `command` VALUES ('tempevent active', 2, NULL);
+INSERT INTO `command` VALUES ('tempevent join', 0, NULL);
+INSERT INTO `command` VALUES ('tempevent teleport', 2, NULL);

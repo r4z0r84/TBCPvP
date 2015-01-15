@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Chat.h"
 #include "World.h"
+#include "Language.h"
 #include "MapManager.h"
 
 TempEventMgr::TempEventMgr()
@@ -9,6 +10,8 @@ TempEventMgr::TempEventMgr()
     m_EventStatus = EVENT_STATUS_INACTIVE;
     m_PlayerLimit = 0;
     m_EventParticipants.clear();
+
+    DeleteEventLocation();
 }
 
 void TempEventMgr::ActiveEvent()
@@ -27,56 +30,51 @@ void TempEventMgr::DisableEvent()
 
     // Clear participants list on delete
     SetEventStatus(EVENT_STATUS_INACTIVE);
+    DeleteEventLocation();
     m_EventParticipants.clear();
 }
 
 bool TempEventMgr::AddEventLocation(uint32 mapId, float x, float y, float z, float orientation)
 {
+    if (!sMapMgr->IsValidMapCoord(mapId, x, y, z))
+        return false;
+
     eventLoc.mapId          = mapId;
     eventLoc.x              = x;
     eventLoc.y              = y;
     eventLoc.z              = z;
     eventLoc.orientation    = orientation;
 
-    if (!sMapMgr->IsValidMapCoord(eventLoc.mapId, eventLoc.x, eventLoc.y, eventLoc.z))
-    {
-        sLog->outError("AddEventLocation - !IsValidMapCoord");
-        return false;
-    }
-
-    sLog->outError("AddEventLocation - Successful");
     return true;
-}
-
-void TempEventMgr::DeleteEventLocation()
-{
-    eventLoc.mapId          = 0;
-    eventLoc.x              = 0;
-    eventLoc.y              = 0;
-    eventLoc.z              = 0;
-    eventLoc.orientation    = 0;
-
-    sLog->outError("DeleteEventLocation - Successful");
 }
 
 void TempEventMgr::AddPlayerToEvent(Player* player)
 {
+    uint32 eventParticipants = GetEventParticipants();
+    uint32 playerLimit = GetPlayerLimit();
+
     if (GetEventStatus() == EVENT_STATUS_INACTIVE)
     {
-        sLog->outError("AddPlayerToEvent - Event Inactive");
-        ChatHandler(player).PSendSysMessage("There is no active event as this time." /*LANG_TEMPEVENT_NOT_ACTIVE*/);
+        ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_NO_ACTIVE_EVENTS);
         return;
     }
 
-    if (HasPlayerLimit() && (GetEventParticipants() >= GetPlayerLimit()))
+    if (HasPlayerLimit() && (eventParticipants >= playerLimit))
     {
-        sLog->outError("AddPlayerToEvent - Event Player limit reached");
-        ChatHandler(player).PSendSysMessage("This event has enough participants." /*LANG_TEMPEVENT_ENOUGH_PARTICIPANTS*/);
+        ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_ENOUGH_PARTICIPANTS);
         return;
     }
 
     if (m_EventParticipants.find(player) == m_EventParticipants.end())
         m_EventParticipants.insert(player);
+
+    // Announce to the player that he is in queue.
+    ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_PLAYER_JOINED);
+
+    // Announce the current queue status if player joins the event.
+    // For example: Queue Status for Event: [6 / 12]
+    if (HasPlayerLimit())
+        ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_QUEUE_STATUS, eventParticipants, playerLimit);
 }
 
 void TempEventMgr::RemovePlayerFromEvent(Player* player)
@@ -86,19 +84,20 @@ void TempEventMgr::RemovePlayerFromEvent(Player* player)
         return;
 
     m_EventParticipants.erase(iter);
+
+    ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_PLAYER_LEFT);
 }
 
-void TempEventMgr::TeleportPlayersToEvent()
+bool TempEventMgr::TeleportPlayersToEvent()
 {
+    if (!HasEventLocation())
+        return false;
+
     if (GetEventStatus() == EVENT_STATUS_INACTIVE)
-    {
-        // GM needs to activate event before starting it
-        sLog->outError("TeleportPlayersToEvent - Event Inactive");
-        return;
-    }
+        return false;
 
     for (EventParticipants::const_iterator itr = m_EventParticipants.begin(); itr != m_EventParticipants.end(); ++itr)
-    {
         (*itr)->TeleportTo(eventLoc.mapId, eventLoc.x, eventLoc.y, eventLoc.z, eventLoc.orientation);
-    }
+
+    return true;
 }

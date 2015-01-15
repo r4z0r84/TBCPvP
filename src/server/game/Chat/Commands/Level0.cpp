@@ -34,6 +34,7 @@
 #include "revision.h"
 #include "Util.h"
 #include "BattlegroundMgr.h"
+#include "TempEventMgr.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
@@ -313,6 +314,41 @@ bool ChatHandler::HandleArenaSpecWatchCommand(const char* args)
         plr->CastSpell(plr, 10101, true);
     }
     plr->CastSpell(t, 35339, false);
+
+    return true;
+}
+
+bool ChatHandler::HandleTempEventJoinCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr || !plr->isAlive())
+        return false;
+
+    if (plr->GetBattleGround() || plr->InBattleGroundQueue())
+        return false;
+
+    sTempEventMgr->AddPlayerToEvent(plr);
+    return true;
+}
+
+bool ChatHandler::HandleTempEventLeaveCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr)
+        return false;
+
+    sTempEventMgr->RemovePlayerFromEvent(plr);
+    return true;
+}
+
+bool ChatHandler::HandleTempEventInfoCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr)
+        return false;
 
     return true;
 }

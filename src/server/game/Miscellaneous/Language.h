@@ -84,6 +84,12 @@ enum SkyFireStrings
     LANG_MOTD_CURRENT                   = 56,
     LANG_USING_WORLD_DB                 = 57,
     LANG_USING_SCRIPT_LIB               = 58,
+
+    LANG_TEMPEVENT_NO_ACTIVE_EVENTS     = 59,
+    LANG_TEMPEVENT_ENOUGH_PARTICIPANTS  = 60,
+    LANG_TEMPEVENT_PLAYER_JOINED        = 61,
+    LANG_TEMPEVENT_QUEUE_STATUS         = 62,
+    LANG_TEMPEVENT_PLAYER_LEFT          = 63,
     // Room for more level 0              59-99 not used
 
     // level 1 chat

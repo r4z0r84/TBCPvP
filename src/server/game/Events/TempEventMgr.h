@@ -30,7 +30,8 @@ public:
     uint32 GetEventParticipants() const { return m_EventParticipants.size(); }
 
     bool AddEventLocation(uint32 mapId, float x, float y, float z, float orientation);
-    void DeleteEventLocation();
+    void DeleteEventLocation() { eventLoc.mapId = 0; eventLoc.x = 0;eventLoc.y = 0;eventLoc.z = 0; eventLoc.orientation = 0; }
+    bool HasEventLocation() { return eventLoc.x != 0.0f && eventLoc.y != 0.0f && eventLoc.z != 0.0f; }
 
     void AddPlayerToEvent(Player* player);
     void RemovePlayerFromEvent(Player* player);
@@ -39,7 +40,7 @@ public:
     void SetPlayerLimit(uint32 playerLimit) { m_PlayerLimit = playerLimit; }
     bool HasPlayerLimit() { return m_PlayerLimit; }
 
-    void TeleportPlayersToEvent();
+    bool TeleportPlayersToEvent();
 
     uint32 GetEventStatus() { return m_EventStatus; }
     void SetEventStatus(uint32 eventStatus) { m_EventStatus = eventStatus; }

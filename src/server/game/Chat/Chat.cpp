@@ -583,6 +583,20 @@ ChatCommand * ChatHandler::getCommandTable()
         { "watch",          SEC_PLAYER,         false,  &ChatHandler::HandleArenaSpecWatchCommand,			"", NULL },
         { NULL,             0,                  false,  NULL,												"", NULL }
     };
+
+    static ChatCommand tempEventCommandTable[] =
+    {
+        { "join",          SEC_PLAYER,         false,  &ChatHandler::HandleTempEventJoinCommand,			"", NULL },
+        { "leave",         SEC_PLAYER,         false,  &ChatHandler::HandleTempEventLeaveCommand,			"", NULL },
+        { "info",          SEC_PLAYER,         false,  &ChatHandler::HandleTempEventInfoCommand,			"", NULL },
+        { "create",        SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventCreateCommand,			"", NULL },
+        { "location",      SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventLocationCommand,		"", NULL },
+        { "plimit",        SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventPLimitCommand,		    "", NULL },
+        { "active",        SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventActiveCommand,			"", NULL },
+        { "teleport",      SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventTeleportCommand,		"", NULL },
+        { NULL,             0,                 false,  NULL,												"", NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "account",       SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
@@ -599,6 +613,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "event",         SEC_GAMEMASTER,     false, NULL,                                           "", eventCommandTable    },
         { "gobject",       SEC_GAMEMASTER,     false, NULL,                                           "", gobjectCommandTable  },
         { "honor",         SEC_GAMEMASTER,     false, NULL,                                           "", honorCommandTable    },
+        { "tempevent",     SEC_PLAYER,         false, NULL,                                           "", tempEventCommandTable},
 
         //wp commands
         { "path",          SEC_GAMEMASTER,     false, NULL,                                           "", wpCommandTable },

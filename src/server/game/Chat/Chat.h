@@ -532,6 +532,17 @@ class ChatHandler
         // Arena spectator Commands
         bool HandleArenaSpecResetCommand(const char* args);
         bool HandleArenaSpecWatchCommand(const char* args);
+
+        // Temp Event System -Player- Commands
+        bool HandleTempEventJoinCommand(const char* args);
+        bool HandleTempEventLeaveCommand(const char* args);
+        bool HandleTempEventInfoCommand(const char* args);
+        bool HandleTempEventCreateCommand(const char* args);
+        bool HandleTempEventLocationCommand(const char* args);
+        bool HandleTempEventPLimitCommand(const char* args);
+        bool HandleTempEventActiveCommand(const char* args);
+        bool HandleTempEventTeleportCommand(const char* args);
+
         Player*   getSelectedPlayer();
         Creature* getSelectedCreature();
         Unit*     getSelectedUnit();

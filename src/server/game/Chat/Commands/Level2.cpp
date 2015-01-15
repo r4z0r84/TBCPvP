@@ -41,6 +41,7 @@
 #include "Util.h"
 #include "TicketMgr.h"
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
+#include "TempEventMgr.h"
 
 #include <cctype>
 #include <iostream>
@@ -4386,6 +4387,60 @@ bool ChatHandler::HandleTitlesCurrentCommand(const char* args)
 
     PSendSysMessage(LANG_TITLE_CURRENT_RES, id, titleInfo->name[m_session->GetSessionDbcLocale()], tNameLink.c_str());
 
+    return true;
+}
+
+bool ChatHandler::HandleTempEventCreateCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr)
+        return false;
+
+    return true;
+}
+
+bool ChatHandler::HandleTempEventLocationCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr)
+        return false;
+
+    sTempEventMgr->AddEventLocation(plr->GetMapId(), plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), plr->GetOrientation());
+    return true;
+}
+
+bool ChatHandler::HandleTempEventPLimitCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    uint32 pLimit = (uint32) atoi((char*)args);
+
+    sTempEventMgr->SetPlayerLimit(pLimit);
+    return true;
+}
+
+bool ChatHandler::HandleTempEventActiveCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr)
+        return false;
+
+    sTempEventMgr->ActiveEvent();
+    return true;
+}
+
+bool ChatHandler::HandleTempEventTeleportCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr)
+        return false;
+
+    sTempEventMgr->TeleportPlayersToEvent();
     return true;
 }
 

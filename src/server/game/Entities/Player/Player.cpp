@@ -65,6 +65,7 @@
 #include "SocialMgr.h"
 #include "Mail.h"
 #include "GameEventMgr.h"
+#include "TempEventMgr.h"
 
 #include <cmath>
 #include <iomanip>
@@ -21100,13 +21101,17 @@ void Player::SummonIfPossible(bool agree)
 {
     if (!agree)
     {
+        sTempEventMgr->RemovePlayerFromEvent(this);
         m_summon_expire = 0;
         return;
     }
 
     // expire and auto declined
     if (m_summon_expire < time(NULL))
+    {
+        sTempEventMgr->RemovePlayerFromEvent(this);
         return;
+    }
 
     // stop taxi flight at summon
     if (isInFlight())

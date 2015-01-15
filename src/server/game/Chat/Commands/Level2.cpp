@@ -4390,16 +4390,6 @@ bool ChatHandler::HandleTitlesCurrentCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleTempEventCreateCommand(const char* args)
-{
-    Player *plr = m_session->GetPlayer();
-
-    if (!plr)
-        return false;
-
-    return true;
-}
-
 bool ChatHandler::HandleTempEventLocationCommand(const char* args)
 {
     Player *plr = m_session->GetPlayer();
@@ -4407,7 +4397,7 @@ bool ChatHandler::HandleTempEventLocationCommand(const char* args)
     if (!plr)
         return false;
 
-    sTempEventMgr->AddEventLocation(plr->GetMapId(), plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), plr->GetOrientation());
+    sTempEventMgr->AddEventLocation(plr->GetMapId(), plr->GetZoneId(), plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), plr->GetOrientation());
     return true;
 }
 
@@ -4440,7 +4430,7 @@ bool ChatHandler::HandleTempEventTeleportCommand(const char* args)
     if (!plr)
         return false;
 
-    sTempEventMgr->TeleportPlayersToEvent();
+    sTempEventMgr->TeleportPlayersToEvent(plr);
     return true;
 }
 

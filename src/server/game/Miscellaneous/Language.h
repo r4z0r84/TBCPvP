@@ -90,6 +90,11 @@ enum SkyFireStrings
     LANG_TEMPEVENT_PLAYER_JOINED        = 61,
     LANG_TEMPEVENT_QUEUE_STATUS         = 62,
     LANG_TEMPEVENT_PLAYER_LEFT          = 63,
+    LANG_TEMPEVENT_INFO                 = 64,
+    LANG_TEMPEVENT_INFO_STATUS          = 65,
+    LANG_TEMPEVENT_INFO_LOCATION        = 66,
+    LANG_TEMPEVENT_INFO_PLIMIT          = 67,
+    LANG_TEMPEVENT_INFO_PARTICIPANTS    = 68,
     // Room for more level 0              59-99 not used
 
     // level 1 chat

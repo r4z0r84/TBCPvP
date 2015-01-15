@@ -350,5 +350,6 @@ bool ChatHandler::HandleTempEventInfoCommand(const char* args)
     if (!plr)
         return false;
 
+    sTempEventMgr->SendEventInfoString(plr);
     return true;
 }

@@ -578,6 +578,9 @@ class World
                 return 0;
         }
 
+        // Get configuration about force-loaded maps
+        std::set<uint32>* getConfigForceLoadMapIds() const { return m_configForceLoadMapIds; }
+
         // Are we on a "Player versus Player" server?
         bool IsPvPRealm() { return (getConfig(CONFIG_GAME_TYPE) == REALM_TYPE_PVP || getConfig(CONFIG_GAME_TYPE) == REALM_TYPE_RPPVP || getConfig(CONFIG_GAME_TYPE) == REALM_TYPE_FFA_PVP); }
         bool IsFFAPvPRealm() { return getConfig(CONFIG_GAME_TYPE) == REALM_TYPE_FFA_PVP; }
@@ -685,6 +688,9 @@ class World
         std::string m_motd;
         std::string m_dataPath;
         std::set<uint32> m_forbiddenMapIds;
+
+        // List of Maps that should be force-loaded on startup
+        std::set<uint32>* m_configForceLoadMapIds;
 
         // for max speed access
         static float m_MaxVisibleDistanceOnContinents;

@@ -872,15 +872,9 @@ void BattleGround::EndBattleGround(uint32 winner)
             if (winner)
             {
                 if (team == winner)
-                {
-                    sq_winner_change = at->WonAgainst(sq_loser_rating, sq_winner_rating);
-                    at->MemberWon(plr, sq_loser_rating, sq_winner_rating);
-                }
+                    at->WonAgainst(sq_loser_rating, sq_winner_rating);
                 else
-                {
-                    sq_loser_change = at->LostAgainst(sq_winner_rating, sq_loser_rating);
-                    at->MemberLost(plr, sq_winner_rating, sq_loser_rating);
-                }
+                    at->LostAgainst(sq_winner_rating, sq_loser_rating);
             }
 
             if (winner == ALLIANCE)

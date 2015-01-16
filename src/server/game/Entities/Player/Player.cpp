@@ -19993,7 +19993,6 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
             else
                 sq_winner_rating = (bg->GetSoloQueueRatingForTeam(ALLIANCE) / 3);
 
-            at->MemberLost(this, sq_winner_rating, sq_loser_rating);
             at->LostAgainst(sq_winner_rating, sq_loser_rating);
             at->SaveToDB();
             at->NotifyStatsChanged();

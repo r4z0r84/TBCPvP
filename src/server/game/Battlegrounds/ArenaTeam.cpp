@@ -570,6 +570,24 @@ int32 ArenaTeam::WonAgainst(uint32 againstRating, uint32 SoloQueueRating)
     {
         if (mod < 1)
             mod = 1;
+
+        // called for each participant of a match after losing
+        for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        {
+            Player *plr = sObjectMgr->GetPlayer(itr->guid);
+            if (plr)
+            {
+                itr->ModifyPersonalRating(plr, mod, GetSlot());
+                // update personal stats
+                itr->games_week +=1;
+                itr->games_season +=1;
+                itr->wins_season += 1;
+                itr->wins_week += 1;
+                // update unit fields
+                plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_WEEK, itr->games_week);
+                plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON, itr->games_season);
+            }
+        }
     }
     else if (GetType() == ARENA_TEAM_2v2)
     {
@@ -603,6 +621,14 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating, uint32 SoloQueueRating)
     {
         if (mod <= -15)
             mod = -14;
+
+        // called for each participant of a match after losing
+        for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        {
+            Player *plr = sObjectMgr->GetPlayer(itr->guid);
+            if (plr)
+                itr->ModifyPersonalRating(plr, mod, GetSlot());
+        }
     }
     else if (GetType() == ARENA_TEAM_2v2)
     {
@@ -636,24 +662,23 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating, uint32 SoloQueueRating)
     return mod;
 }
 
-void ArenaTeam::MemberLost(Player * plr, uint32 againstRating, uint32 SoloQueueRating)
+void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
 {
+    // We handle personal rating for Solo Queue in Arena Team win or lost function
+    if (GetType() == ARENA_TEAM_5v5)
+        return;
+
     // called for each participant of a match after losing
     for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
         if (itr->guid == plr->GetGUID())
         {
             // update personal rating
-            float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : itr->personal_rating, againstRating);
-            int32 mod = (int32)ceil((SoloQueueRating > 0 ? 16.0f : 32.0f) * (0.0f - chance));
+            float chance = GetChanceAgainst(itr->personal_rating, againstRating);
+            int32 mod = (int32)ceil(32.0f) * (0.0f - chance);
 
             // Smolderforge rating adjustments
-            if (GetType() == ARENA_TEAM_5v5) // solo queue
-            {
-                if (mod <= -15)
-                    mod = -14;
-            }
-            else if (GetType() == ARENA_TEAM_2v2)
+            if (GetType() == ARENA_TEAM_2v2)
             {
                 if (mod <= -25)
                     mod = -24;
@@ -708,24 +733,22 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstRating)
     }
 }
 
-void ArenaTeam::MemberWon(Player * plr, uint32 againstRating, uint32 SoloQueueRating)
+void ArenaTeam::MemberWon(Player * plr, uint32 againstRating)
 {
+    // We handle personal rating for Solo Queue in Arena Team win or lost function
+    if (GetType() == ARENA_TEAM_5v5)
+        return;
+
     // called for each participant after winning a match
     for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
         if (itr->guid == plr->GetGUID())
         {
             // update personal rating
-            float chance = GetChanceAgainst(SoloQueueRating > 0 ? SoloQueueRating : itr->personal_rating, againstRating);
-            int32 mod = (int32)floor((SoloQueueRating > 0 ? 16.0f : 32.0f) * (1.0f - chance));
+            float chance = GetChanceAgainst(itr->personal_rating, againstRating);
+            int32 mod = (int32)floor(32.0f * (1.0f - chance));
 
-            // Smolderforge rating adjustments
-            if (GetType() == ARENA_TEAM_5v5) // solo queue
-            {
-                if (mod < 1)
-                    mod = 1;
-            }
-            else if (GetType() == ARENA_TEAM_2v2)
+            if (GetType() == ARENA_TEAM_2v2)
             {
                 if (m_stats.rating < 1850)
                     mod += 2;

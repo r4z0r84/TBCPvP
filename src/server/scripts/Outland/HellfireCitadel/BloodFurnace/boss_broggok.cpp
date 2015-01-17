@@ -34,6 +34,11 @@ EndScriptData */
 #define SPELL_POISON_BOLT       (HeroicMode ? 38459 : 30917)
 #define SPELL_POISON_CLOUD      30916
 
+float centerPosition[3]=
+{
+    {439.85f, -12.475f, 9.60f} // MovePoint to center at EnterEvadeMode
+};
+
 struct boss_broggokAI : public ScriptedAI
 {
     boss_broggokAI(Creature *c) : ScriptedAI(c)
@@ -87,9 +92,9 @@ struct boss_broggokAI : public ScriptedAI
         if (pInstance)
         {
             pInstance->SetData(TYPE_BROGGOK_EVENT, FAIL);
-            float fRespX, fRespY, fRespZ;
-            me->GetRespawnCoord(fRespX, fRespY, fRespZ);
-            me->GetMotionMaster()->MovePoint(0, fRespX, fRespY, fRespZ);
+            /*float fRespX, fRespY, fRespZ;
+            me->GetRespawnCoord(fRespX, fRespY, fRespZ);*/
+            me->GetMotionMaster()->MovePoint(0, centerPosition[0], centerPosition[1], centerPosition[2]);
         }
         else
             me->GetMotionMaster()->MoveTargetedHome();

@@ -2545,6 +2545,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = 1;
             spellInfo->EffectImplicitTargetB[1] = 0;
             break;
+        case 66: // Invisibility Fade
+        case 20580: // Shadowmeld (does not get removed when casting mass dispell)
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CAST;
+            break;
         default:
             break;
         }

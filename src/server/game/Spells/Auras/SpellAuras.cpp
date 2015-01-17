@@ -3399,7 +3399,7 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 
         // apply glow vision
         if (Real && m_target->GetTypeId() == TYPEID_PLAYER)
-            m_target->SetByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+            m_target->SetFlag(PLAYER_FIELD_BYTES2, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
         // apply only if not in GM invisibility and not stealth
         if (m_target->GetVisibility() == VISIBILITY_ON)
@@ -3418,7 +3418,7 @@ void Aura::HandleInvisibility(bool apply, bool Real)
         {
             // remove glow vision
             if (m_target->GetTypeId() == TYPEID_PLAYER)
-                m_target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 3, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+                m_target->RemoveFlag(PLAYER_FIELD_BYTES2, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 
             // apply only if not in GM invisibility & not stealthed while invisible
             if (m_target->GetVisibility() == VISIBILITY_ON)

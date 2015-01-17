@@ -30,21 +30,19 @@ EndScriptData */
 
 #define SAY_AGGRO               -1542008
 
-#define SPELL_SLIME_SPRAY       30913
-#define SPELL_SLIME_SPRAY_H     38458
+#define SPELL_SLIME_SPRAY       (HeroicMode ? 38458 : 30913)
+#define SPELL_POISON_BOLT       (HeroicMode ? 38459 : 30917)
 #define SPELL_POISON_CLOUD      30916
-#define SPELL_POISON_BOLT       30917
-#define SPELL_POISON_BOLT_H     38459
 
 struct boss_broggokAI : public ScriptedAI
 {
     boss_broggokAI(Creature *c) : ScriptedAI(c)
     {
-        instance = c->GetInstanceScript();
+        pInstance = c->GetInstanceScript();
         HeroicMode = me->GetMap()->IsHeroic();
     }
 
-    ScriptedInstance* instance;
+    ScriptedInstance* pInstance;
     bool HeroicMode;
 
     uint32 AcidSpray_Timer;
@@ -55,24 +53,24 @@ struct boss_broggokAI : public ScriptedAI
     {
         me->SetUnitMovementFlags(MOVEFLAG_NONE);
         AcidSpray_Timer = 10000;
-        PoisonSpawn_Timer = 5000;
+        PoisonSpawn_Timer = 13000;
         PoisonBolt_Timer = 7000;
 
-        if (!instance)
+        if (!pInstance)
             return;
 
-        instance->SetData(TYPE_BROGGOK_EVENT, NOT_STARTED);
+        pInstance->SetData(TYPE_BROGGOK_EVENT, NOT_STARTED);
     }
 
     void EnterCombat(Unit* /*who*/)
     {
         DoScriptText(SAY_AGGRO, me);
 
-        if (!instance)
+        if (!pInstance)
             return;
 
-        if (instance->GetData(TYPE_BROGGOK_EVENT) != DONE && instance->GetData(TYPE_BROGGOK_EVENT) != IN_PROGRESS)
-            instance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
+        if (pInstance->GetData(TYPE_BROGGOK_EVENT) != DONE && pInstance->GetData(TYPE_BROGGOK_EVENT) != IN_PROGRESS)
+            pInstance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
     }
 
     void EnterEvadeMode()
@@ -86,9 +84,9 @@ struct boss_broggokAI : public ScriptedAI
         if (!me->isAlive())
             return;
 
-        if (instance)
+        if (pInstance)
         {
-            instance->SetData(TYPE_BROGGOK_EVENT, FAIL);
+            pInstance->SetData(TYPE_BROGGOK_EVENT, FAIL);
             float fRespX, fRespY, fRespZ;
             me->GetRespawnCoord(fRespX, fRespY, fRespZ);
             me->GetMotionMaster()->MovePoint(0, fRespX, fRespY, fRespZ);
@@ -113,13 +111,13 @@ struct boss_broggokAI : public ScriptedAI
 
         if (AcidSpray_Timer <= diff)
         {
-            DoCast(me->getVictim(), HeroicMode ? SPELL_SLIME_SPRAY_H : SPELL_SLIME_SPRAY);
+            DoCast(me->getVictim(), SPELL_SLIME_SPRAY);
             AcidSpray_Timer = 4000 + rand()%8000;
         } else AcidSpray_Timer -= diff;
 
         if (PoisonBolt_Timer <= diff)
         {
-            DoCast(me->getVictim(), HeroicMode ? SPELL_POISON_BOLT_H : SPELL_POISON_BOLT);
+            DoCast(me->getVictim(), SPELL_POISON_BOLT);
             PoisonBolt_Timer = 4000 + rand()%8000;
         } else PoisonBolt_Timer -= diff;
 
@@ -134,12 +132,12 @@ struct boss_broggokAI : public ScriptedAI
 
     void JustDied(Unit* Killer)
     {
-       if (!instance)
+       if (!pInstance)
            return;
 
-       instance->HandleGameObject(instance->GetData64(DATA_DOOR4), true);
-       instance->HandleGameObject(instance->GetData64(DATA_DOOR5), true);
-       instance->SetData(TYPE_BROGGOK_EVENT, DONE);
+       pInstance->HandleGameObject(pInstance->GetData64(DATA_DOOR4), true);
+       pInstance->HandleGameObject(pInstance->GetData64(DATA_DOOR5), true);
+       pInstance->SetData(TYPE_BROGGOK_EVENT, DONE);
     }
 
 };

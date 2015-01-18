@@ -81,9 +81,6 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
         return 500;
 
     // Druids -----------------------------------------------------------------
-    // Maim
-    if (spellInfo->SpellIconID == 1681 && spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
-        return 150;
     // Pounce
     if (spellInfo->SpellIconID == 495 && spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
         return 150;
@@ -100,9 +97,6 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
         return 150;
     // Cheap Shot
     if (spellInfo->SpellIconID == 244 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 150;
-    // Kindney Shot
-    if (spellInfo->SpellIconID == 499 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
         return 150;
 
     // Mage --------------------------------------------------------------------

@@ -34,10 +34,7 @@ EndScriptData */
 #define SPELL_POISON_BOLT       (HeroicMode ? 38459 : 30917)
 #define SPELL_POISON_CLOUD      30916
 
-float centerPosition[3]=
-{
-    {439.85f, -12.475f, 9.60f} // MovePoint to center at EnterEvadeMode
-};
+float centerPosition[3] = {439.85f, -12.475f, 9.60f}; // MovePoint to center at EnterEvadeMode
 
 struct boss_broggokAI : public ScriptedAI
 {

@@ -134,7 +134,7 @@ void WorldSession::HandleGMTicketUpdateOpcode(WorldPacket & recv_data)
     // Send packet
     SendPacket(&data);
 
-    sWorld->SendGMText(LANG_COMMAND_TICKETUPDATED, GetPlayer()->GetName(), ticket->guid);
+    //sWorld->SendGMText(LANG_COMMAND_TICKETUPDATED, GetPlayer()->GetName(), ticket->guid);
 }
 
 void WorldSession::HandleGMTicketDeleteOpcode(WorldPacket & /*recv_data*/)

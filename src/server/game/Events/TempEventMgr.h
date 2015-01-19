@@ -33,7 +33,7 @@ public:
 
     void ActiveEvent(Player* pInvoker);
     void StartEvent();
-    void DisableEvent();
+    void ResetEvent();
 
     typedef std::set<Player*> EventParticipants;
     uint32 GetEventParticipantCount() const { return m_EventParticipants.size(); }

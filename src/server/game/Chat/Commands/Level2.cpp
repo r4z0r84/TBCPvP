@@ -4423,14 +4423,14 @@ bool ChatHandler::HandleTempEventActiveCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleTempEventDisableCommand(const char* args)
+bool ChatHandler::HandleTempEventResetCommand(const char* args)
 {
     Player *plr = m_session->GetPlayer();
 
     if (!plr)
         return false;
 
-    sTempEventMgr->DisableEvent();
+    sTempEventMgr->ResetEvent();
     return true;
 }
 

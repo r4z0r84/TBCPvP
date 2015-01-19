@@ -540,7 +540,7 @@ class ChatHandler
         bool HandleTempEventLocationCommand(const char* args);
         bool HandleTempEventPLimitCommand(const char* args);
         bool HandleTempEventActiveCommand(const char* args);
-        bool HandleTempEventDisableCommand(const char* args);
+        bool HandleTempEventResetCommand(const char* args);
         bool HandleTempEventTeleportCommand(const char* args);
 
         Player*   getSelectedPlayer();

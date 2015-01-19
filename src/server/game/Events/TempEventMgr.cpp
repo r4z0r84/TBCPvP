@@ -47,7 +47,7 @@ void TempEventMgr::StartEvent()
     SetEventStatus(EVENT_STATUS_IN_PROGRESS);
 }
 
-void TempEventMgr::DisableEvent()
+void TempEventMgr::ResetEvent()
 {
     // Destructor?
     m_EventStatus = EVENT_STATUS_INACTIVE;

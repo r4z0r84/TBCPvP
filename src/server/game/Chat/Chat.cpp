@@ -592,6 +592,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "location",      SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventLocationCommand,		"", NULL },
         { "plimit",        SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventPLimitCommand,		    "", NULL },
         { "active",        SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventActiveCommand,			"", NULL },
+        { "disable",       SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventDisableCommand,			"", NULL },
         { "teleport",      SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventTeleportCommand,		"", NULL },
         { NULL,             0,                 false,  NULL,												"", NULL }
     };

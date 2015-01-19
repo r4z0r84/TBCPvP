@@ -131,6 +131,9 @@ bool TempEventMgr::TeleportPlayersToEvent(Player* pInvoker)
 
     for (EventParticipants::const_iterator itr = m_EventParticipants.begin(); itr != m_EventParticipants.end(); ++itr)
     {
+        if ((*itr)->GetZoneId() == eventLoc.zoneId)
+            continue;
+
         (*itr)->SetSummonPoint(eventLoc.mapId, eventLoc.x, eventLoc.y, eventLoc.z);
         (*itr)->GetSession()->SendPacket(&data);
     }

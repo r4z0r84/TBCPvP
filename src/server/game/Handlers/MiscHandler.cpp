@@ -47,6 +47,7 @@
 #include "CellImpl.h"
 #include "AccountMgr.h"
 #include "ScriptMgr.h"
+#include "TicketMgr.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket & recv_data)
 {
@@ -1282,6 +1283,36 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recv_data)
     data << uint8(0);
     SendPacket(&data);
 
+    Player* spammer = sObjectMgr->GetPlayer(spammer_guid);
+
+    std::stringstream ss;
+    ss << "Player: '";
+    ss << GetPlayer()->GetName() << "' reported Spammer: '";
+    ss << spammer->GetName() << "'";
+
+    GM_Ticket *ticket = new GM_Ticket;
+
+    ticket->name = GetPlayer()->GetName();
+    ticket->guid = sTicketMgr->GenerateTicketID();
+    ticket->playerGuid = GetPlayer()->GetGUID();
+    ticket->message = ss.str() + "\n" + description;
+    ticket->createtime = time(NULL);
+    ticket->timestamp = time(NULL);
+    ticket->closed = 0;
+    ticket->assignedToGM = 0;
+    ticket->comment = "";
+    ticket->escalated = false;
+    ticket->viewed = false;
+
+    // remove ticket by player, shouldn't happen
+    sTicketMgr->RemoveGMTicketByPlayer(GetPlayer()->GetGUID(), GetPlayer()->GetGUID());
+
+    // add ticket
+    sTicketMgr->AddGMTicket(ticket, false);
+
+    std::string NameLink = "|Hplayer:"+ticket->name+"|h["+ticket->name+"]|h";
+    sWorld->SendGMText(LANG_COMMAND_TICKETNEW, NameLink.c_str(), ticket->guid);
+    
     sLog->outDebug("REPORT SPAM: type %u, guid %u, unk1 %u, unk2 %u, unk3 %u, unk4 %u, message %s", spam_type, GUID_LOPART(spammer_guid), unk1, unk2, unk3, unk4, description.c_str());
 }
 

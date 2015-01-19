@@ -10351,14 +10351,16 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, U
         Unit const* source = casterOwner ? casterOwner : caster;
 
         if (target->GetTypeId() == TYPEID_PLAYER && source->GetTypeId() == TYPEID_PLAYER)
+        {
             duration = 10000;
 
-        // Curse of Tongues
-        if (spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo->SpellFamilyFlags & 0x80000000LL)
-            duration = 12000;
+            // Curse of Tongues
+            if (spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo->SpellFamilyFlags & 0x80000000LL)
+                duration = 12000;
 
-        if (spellInfo)
-            ((Player*)source)->ApplySpellMod(spellInfo->Id, SPELLMOD_DURATION, duration);
+            if (spellInfo)
+                ((Player*)source)->ApplySpellMod(spellInfo->Id, SPELLMOD_DURATION, duration);
+        }
     }
 
     float mod = 1.0f;

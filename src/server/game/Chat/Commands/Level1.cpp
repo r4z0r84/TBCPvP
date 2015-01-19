@@ -373,6 +373,14 @@ bool ChatHandler::HandleGMTicketGetByIdCommand(const char* args)
     }
 
     ticket->viewed = true;
+    Player *plr = sObjectMgr->GetPlayer(ticket->playerGuid);
+    if (plr && plr->IsInWorld())
+    {
+        // tell client to update display of ticket status
+        WorldPacket data(SMSG_GM_TICKET_STATUS_UPDATE, 4);
+        data << uint32(1);
+        plr->GetSession()->SendPacket(&data);
+    }
     sTicketMgr->SaveGMTicket(ticket); // update database
 
     std::string gmname;
@@ -408,6 +416,14 @@ bool ChatHandler::HandleGMTicketGetByNameCommand(const char* args)
     }
 
     ticket->viewed = true;
+    Player *plr = sObjectMgr->GetPlayer(ticket->playerGuid);
+    if (plr && plr->IsInWorld())
+    {
+        // tell client to update display of ticket status
+        WorldPacket data(SMSG_GM_TICKET_STATUS_UPDATE, 4);
+        data << uint32(1);
+        plr->GetSession()->SendPacket(&data);
+    }
     sTicketMgr->SaveGMTicket(ticket); // update database
 
     std::string gmname;
@@ -526,6 +542,15 @@ bool ChatHandler::HandleGMTicketAssignToCommand(const char* args)
     }
 
     ticket->escalated = true;
+    Player *plr = sObjectMgr->GetPlayer(ticket->playerGuid);
+    if (plr && plr->IsInWorld())
+    {
+        // tell client to update display of ticket status
+        WorldPacket data(SMSG_GM_TICKET_STATUS_UPDATE, 4);
+        data << uint32(1);
+        plr->GetSession()->SendPacket(&data);
+    }
+
     ticket->assignedToGM = tarGUID;
 
     sTicketMgr->UpdateGMTicket(ticket);
@@ -574,6 +599,15 @@ bool ChatHandler::HandleGMTicketUnAssignCommand(const char* args)
     SendGlobalGMSysMessage(ss.str().c_str());
 
     ticket->escalated = false;
+    Player* player = sObjectMgr->GetPlayer(ticket->playerGuid);
+    if (player && player->IsInWorld())
+    {
+        // tell client to update display of ticket status
+        WorldPacket data(SMSG_GM_TICKET_STATUS_UPDATE, 4);
+        data << uint32(1);
+        player->GetSession()->SendPacket(&data);
+    }
+
     ticket->assignedToGM = 0;
 
     sTicketMgr->UpdateGMTicket(ticket);

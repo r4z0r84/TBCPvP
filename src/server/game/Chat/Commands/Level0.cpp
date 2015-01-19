@@ -339,7 +339,7 @@ bool ChatHandler::HandleTempEventLeaveCommand(const char* args)
     if (!plr)
         return false;
 
-    sTempEventMgr->RemovePlayerFromEvent(plr);
+    sTempEventMgr->RemovePlayerFromEvent(plr, true);
     return true;
 }
 

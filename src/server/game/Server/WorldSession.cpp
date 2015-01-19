@@ -39,6 +39,7 @@
 #include "ScriptMgr.h"
 #include "WardenWin.h"
 #include "WardenMac.h"
+#include "TempEventMgr.h"
 
 // WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
@@ -425,6 +426,9 @@ void WorldSession::LogoutPlayer(bool Save)
         // Broadcast a logout message to the player's friends
         sSocialMgr->SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetGUIDLow(), true);
         sSocialMgr->RemovePlayerSocial (_player->GetGUIDLow ());
+
+        // Remove the player from tempevent queue
+        sTempEventMgr->RemovePlayerFromEvent(_player);
 
         // Remove the player from the world
         // the player may not be in the world when logging out

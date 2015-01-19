@@ -18,6 +18,12 @@ enum EventStatus
     EVENT_STATUS_IN_PROGRESS      = 2,
 };
 
+enum PlayerLimit
+{
+    PLAYER_LIMIT_NOT_SET          = -1,
+    PLAYER_LIMIT_DEFAULT          = 0,
+};
+
 class TempEventMgr
 {
 public:
@@ -25,7 +31,7 @@ public:
     TempEventMgr();
     ~TempEventMgr() {};
 
-    void ActiveEvent();
+    void ActiveEvent(Player* pInvoker);
     void StartEvent();
     void DisableEvent();
 
@@ -39,9 +45,9 @@ public:
     void AddPlayerToEvent(Player* player);
     void RemovePlayerFromEvent(Player* player);
 
-    uint32 GetPlayerLimit() { return m_PlayerLimit; }
-    void SetPlayerLimit(uint32 playerLimit) { m_PlayerLimit = playerLimit; }
-    bool HasPlayerLimit() { return m_PlayerLimit; }
+    int32 GetPlayerLimit() { return m_PlayerLimit; }
+    void SetPlayerLimit(int32 playerLimit) { m_PlayerLimit = playerLimit; }
+    bool HasPlayerLimit() { return m_PlayerLimit > 0; }
 
     bool TeleportPlayersToEvent(Player* pInvoker);
 
@@ -57,7 +63,7 @@ private:
     EventLocation eventLoc;
     
     uint32 m_EventStatus;
-    uint32 m_PlayerLimit;
+    int32 m_PlayerLimit;
 
     std::string m_EventName;
 };

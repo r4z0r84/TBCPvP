@@ -4419,7 +4419,7 @@ bool ChatHandler::HandleTempEventActiveCommand(const char* args)
     if (!plr)
         return false;
 
-    sTempEventMgr->ActiveEvent();
+    sTempEventMgr->ActiveEvent(plr);
     return true;
 }
 

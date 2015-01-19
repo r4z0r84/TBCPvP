@@ -8,14 +8,37 @@
 TempEventMgr::TempEventMgr()
 {
     m_EventStatus = EVENT_STATUS_INACTIVE;
-    m_PlayerLimit = 0;
+    m_PlayerLimit = PLAYER_LIMIT_NOT_SET;
     m_EventParticipants.clear();
 
-    DeleteEventLocation();
+    eventLoc.mapId       = 0;
+    eventLoc.zoneId      = 0;
+    eventLoc.x           = 0;
+    eventLoc.y           = 0;
+    eventLoc.z           = 0;
+    eventLoc.orientation = 0;
 }
 
-void TempEventMgr::ActiveEvent()
+void TempEventMgr::ActiveEvent(Player* pInvoker)
 {
+    if (GetEventStatus() == EVENT_STATUS_ACTIVE)
+    {
+        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_ALREADY_ACTIVE);
+        return;
+    }
+
+    if (!HasEventLocation())
+    {
+        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_NOT_SET_LOCATION);
+        return;
+    }
+
+    if (GetPlayerLimit() == PLAYER_LIMIT_NOT_SET)
+    {
+        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_NOT_SET_PLIMIT);
+        SetPlayerLimit(PLAYER_LIMIT_DEFAULT);
+    }
+
     SetEventStatus(EVENT_STATUS_ACTIVE);
 }
 
@@ -26,13 +49,17 @@ void TempEventMgr::StartEvent()
 
 void TempEventMgr::DisableEvent()
 {
-    sLog->outError("DisableEvent");
-    sWorld->SendGlobalText("Event: uint32 eventEntry, std::string name has ende! Winner is std::string name", NULL);
-
-    // Clear participants list on delete
-    SetEventStatus(EVENT_STATUS_INACTIVE);
-    DeleteEventLocation();
+    // Destructor?
+    m_EventStatus = EVENT_STATUS_INACTIVE;
+    m_PlayerLimit = PLAYER_LIMIT_NOT_SET;
     m_EventParticipants.clear();
+
+    eventLoc.mapId       = 0;
+    eventLoc.zoneId      = 0;
+    eventLoc.x           = 0;
+    eventLoc.y           = 0;
+    eventLoc.z           = 0;
+    eventLoc.orientation = 0;
 }
 
 bool TempEventMgr::AddEventLocation(uint32 mapId, uint32 zoneId, float x, float y, float z, float orientation)
@@ -91,11 +118,11 @@ void TempEventMgr::RemovePlayerFromEvent(Player* player)
 
 bool TempEventMgr::TeleportPlayersToEvent(Player* pInvoker)
 {
-    if (!HasEventLocation())
-        return false;
-
     if (GetEventStatus() == EVENT_STATUS_INACTIVE)
+    {
+        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_NO_ACTIVE_EVENTS);
         return false;
+    }
 
     WorldPacket data(SMSG_SUMMON_REQUEST, 8+4+4);
     data << uint64(pInvoker->GetGUID());

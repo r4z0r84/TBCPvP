@@ -96,11 +96,8 @@ void TempEventMgr::AddPlayerToEvent(Player* player)
     if (m_EventParticipants.find(player) == m_EventParticipants.end())
         m_EventParticipants.insert(player);
 
-    // Announce to the player that he is in queue.
     ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_PLAYER_JOINED);
 
-    // Announce the current queue status if player joins the event.
-    // For example: Queue Status for Event: [6 / 12]
     if (HasPlayerLimit())
         ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_QUEUE_STATUS, GetEventParticipantCount(), playerLimit);
 }

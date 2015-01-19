@@ -21100,7 +21100,7 @@ void Player::SummonIfPossible(bool agree)
 {
     if (!agree)
     {
-        sTempEventMgr->RemovePlayerFromEvent(this);
+        sTempEventMgr->RemovePlayerFromEvent(this, true);
         m_summon_expire = 0;
         return;
     }
@@ -21108,7 +21108,7 @@ void Player::SummonIfPossible(bool agree)
     // expire and auto declined
     if (m_summon_expire < time(NULL))
     {
-        sTempEventMgr->RemovePlayerFromEvent(this);
+        sTempEventMgr->RemovePlayerFromEvent(this, true);
         return;
     }
 

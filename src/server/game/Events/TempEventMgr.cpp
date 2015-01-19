@@ -102,7 +102,7 @@ void TempEventMgr::AddPlayerToEvent(Player* player)
         ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_QUEUE_STATUS, GetEventParticipantCount(), playerLimit);
 }
 
-void TempEventMgr::RemovePlayerFromEvent(Player* player)
+void TempEventMgr::RemovePlayerFromEvent(Player* player, bool sendNotification)
 {
     EventParticipants::iterator iter = m_EventParticipants.find(player);
     if (iter == m_EventParticipants.end())
@@ -110,7 +110,8 @@ void TempEventMgr::RemovePlayerFromEvent(Player* player)
 
     m_EventParticipants.erase(iter);
 
-    ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_PLAYER_LEFT);
+    if (sendNotification)
+        ChatHandler(player).PSendSysMessage(LANG_TEMPEVENT_PLAYER_LEFT);
 }
 
 bool TempEventMgr::TeleportPlayersToEvent(Player* pInvoker)

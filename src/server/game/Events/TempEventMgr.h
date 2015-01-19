@@ -43,7 +43,7 @@ public:
     bool HasEventLocation() { return eventLoc.x != 0.0f && eventLoc.y != 0.0f && eventLoc.z != 0.0f; }
 
     void AddPlayerToEvent(Player* player);
-    void RemovePlayerFromEvent(Player* player);
+    void RemovePlayerFromEvent(Player* player, bool sendNotification);
 
     int32 GetPlayerLimit() { return m_PlayerLimit; }
     void SetPlayerLimit(int32 playerLimit) { m_PlayerLimit = playerLimit; }

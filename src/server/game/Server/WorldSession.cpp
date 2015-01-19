@@ -428,7 +428,7 @@ void WorldSession::LogoutPlayer(bool Save)
         sSocialMgr->RemovePlayerSocial (_player->GetGUIDLow ());
 
         // Remove the player from tempevent queue
-        sTempEventMgr->RemovePlayerFromEvent(_player);
+        sTempEventMgr->RemovePlayerFromEvent(_player, false);
 
         // Remove the player from the world
         // the player may not be in the world when logging out

@@ -39,6 +39,7 @@
 #include "Util.h"
 #include "AuthSocket.h"
 #include "BigNumber.h"
+#include "FreezeDetector.h"
 
 #include <ace/Sig_Handler.h>
 
@@ -67,44 +68,6 @@ class WorldServerSignalHandler : public Trinity::SignalHandler
                     break;
             }
         }
-};
-
-class FreezeDetectorRunnable : public ACE_Based::Runnable
-{
-public:
-    FreezeDetectorRunnable() { _delaytime = 0; }
-    uint32 m_loops, m_lastchange;
-    uint32 w_loops, w_lastchange;
-    uint32 _delaytime;
-    void SetDelayTime(uint32 t) { _delaytime = t; }
-    void run(void)
-    {
-        if (!_delaytime)
-            return;
-        sLog->outString("Starting up anti-freeze thread (%u seconds max stuck time)...", _delaytime/1000);
-        m_loops = 0;
-        w_loops = 0;
-        m_lastchange = 0;
-        w_lastchange = 0;
-        while (!World::IsStopped())
-        {
-            ACE_Based::Thread::Sleep(1000);
-            uint32 curtime = getMSTime();
-            // normal work
-            if (w_loops != World::m_worldLoopCounter)
-            {
-                w_lastchange = curtime;
-                w_loops = World::m_worldLoopCounter;
-            }
-            // possible freeze
-            else if (getMSTimeDiff(w_lastchange, curtime) > _delaytime)
-            {
-                sLog->outError("World Thread hangs, kicking out server!");
-                *((uint32 volatile*)NULL) = 0;          // bang crash
-            }
-        }
-        sLog->outString("Anti-freeze thread exiting without problems.");
-    }
 };
 
 Master::Master()
@@ -253,10 +216,10 @@ int Master::Run()
     ///- Start up freeze catcher thread
     if (uint32 freeze_delay = ConfigMgr::GetIntDefault("MaxCoreStuckTime", 0))
     {
-        FreezeDetectorRunnable* fdr = new FreezeDetectorRunnable();
-        fdr->SetDelayTime(freeze_delay*1000);
-        ACE_Based::Thread freeze_thread(fdr);
-        freeze_thread.setPriority(ACE_Based::Highest);
+        FreezeDetectorRunnable* freezeDetector = new FreezeDetectorRunnable();
+        freezeDetector->SetDelayTime(freeze_delay*1000);
+        ACE_Based::Thread freezeThread(freezeDetector);
+        freezeThread.setPriority(ACE_Based::Highest);
     }
 
     ///- Launch the world listener socket

@@ -2345,6 +2345,12 @@ enum TradeStatus
     TRADE_STATUS_ONLY_CONJURED  = 22                        // You can only trade conjured items... (cross realm BG related).
 };
 
+enum SpamMessageType
+{
+    SPAM_MESSAGE_TYPE_MAIL      = 0,
+    SPAM_MESSAGE_TYPE_CHAT      = 1
+};
+
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
 // will only support WoW and WoW:TBC 2.4.3 client build 8606...

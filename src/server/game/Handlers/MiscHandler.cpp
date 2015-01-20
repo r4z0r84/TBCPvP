@@ -1250,30 +1250,40 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recv_data)
     sLog->outDebug("WORLD: CMSG_REPORT_SPAM");
     recv_data.hexlike();
 
-    uint8 spam_type;                                        // 0 - mail, 1 - chat
+    uint8 spam_type;
     uint64 spammer_guid;
-    uint32 unk1 = 0;
-    uint32 unk2 = 0;
-    uint32 unk3 = 0;
-    uint32 unk4 = 0;
+
+    // 0 - SPAM_MESSAGE_TYPE_MAIL
+    uint32 mailUnk1         = 0;
+    uint32 mailId           = 0;
+    uint32 mailUnk3         = 0;
+
+    // 1 - SPAM_MESSAGE_TYPE_CHAT
+    uint32 chatLanguage     = 0;
+    uint32 chatMessageType  = 0;
+    uint32 chatChannelId    = 0;
+    uint32 chatUnk4         = 0;
     std::string description = "";
+
     recv_data >> spam_type;                                 // unk 0x01 const, may be spam type (mail/chat)
     recv_data >> spammer_guid;                              // player guid
+
     switch (spam_type)
     {
-        case 0:
-            recv_data >> unk1;                              // const 0
-            recv_data >> unk2;                              // probably mail id
-            recv_data >> unk3;                              // const 0
+        case SPAM_MESSAGE_TYPE_MAIL:
+            recv_data >> mailUnk1;          // const 0
+            recv_data >> mailId;            // probably mail id
+            recv_data >> mailUnk3;          // const 0
             break;
-        case 1:
-            recv_data >> unk1;                              // probably language
-            recv_data >> unk2;                              // message type?
-            recv_data >> unk3;                              // probably channel id
-            recv_data >> unk4;                              // unk random value
-            recv_data >> description;                       // spam description string (messagetype, channel name, player name, message)
+        case SPAM_MESSAGE_TYPE_CHAT:
+            recv_data >> chatLanguage;      // probably language
+            recv_data >> chatMessageType;   // message type?
+            recv_data >> chatChannelId;     // probably channel id
+            recv_data >> chatUnk4;          // unk random value
+            recv_data >> description;        // spam description string (messagetype, channel name, player name, message)
             break;
     }
+    
 
     // NOTE: all chat messages from this spammer automatically ignored by spam reporter until logout in case chat spam.
     // if it's mail spam - ALL mails from this spammer automatically removed by client
@@ -1283,37 +1293,59 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recv_data)
     data << uint8(0);
     SendPacket(&data);
 
-    Player* spammer = sObjectMgr->GetPlayer(spammer_guid);
+    /*if (sWorld->getConfig(CONFIG_BOOL_SPAM_REPORT_ENABLED))
+    {*/
+        uint32 mail_id = 0;
+        std::string mail_subject;
+        std::string mail_message;
 
-    std::stringstream ss;
-    ss << "Player: '";
-    ss << GetPlayer()->GetName() << "' reported Spammer: '";
-    ss << spammer->GetName() << "'";
+        Mail* spammer_mail = GetPlayer()->GetMail(mailId);
+        mail_subject = spammer_mail->subject;
+        mail_message = sObjectMgr->GetItemText(spammer_mail->itemTextId);
 
-    GM_Ticket *ticket = new GM_Ticket;
+        std::string spammer_name;
+        sObjectMgr->GetPlayerNameByGUID(spammer_guid, spammer_name);
 
-    ticket->name = "Spam Report";
-    ticket->guid = sTicketMgr->GenerateTicketID();
-    ticket->playerGuid = 0;
-    ticket->message = ss.str() + "\n" + description;
-    ticket->createtime = time(NULL);
-    ticket->timestamp = time(NULL);
-    ticket->closed = 0;
-    ticket->assignedToGM = 0;
-    ticket->comment = "";
-    ticket->escalated = false;
-    ticket->viewed = false;
+        std::stringstream ss;
+        ss << "Player: '";
+        ss << GetPlayer()->GetName() << "' reported Spammer: '";
+        ss << spammer_name << "'";
+        ss << "\n";
 
-    // remove ticket by player, shouldn't happen
-    sTicketMgr->RemoveGMTicketByPlayer(GetPlayer()->GetGUID(), GetPlayer()->GetGUID());
+        if (spam_type == SPAM_MESSAGE_TYPE_MAIL)
+        {
+            ss << "Mail Subject: " << mail_subject;
+            ss << "\n";
+            ss << "Mail Message: " << mail_message;
+        }
+        else if (spam_type == SPAM_MESSAGE_TYPE_CHAT)
+        {
+            ss << description;
+        }
 
-    // add ticket
-    sTicketMgr->AddGMTicket(ticket, false);
+        GM_Ticket *ticket = new GM_Ticket;
 
-    std::string NameLink = "|Hplayer:"+ticket->name+"|h["+ticket->name+"]|h";
-    sWorld->SendGMText(LANG_COMMAND_TICKETNEW, NameLink.c_str(), ticket->guid);
-    
-    sLog->outDebug("REPORT SPAM: type %u, guid %u, unk1 %u, unk2 %u, unk3 %u, unk4 %u, message %s", spam_type, GUID_LOPART(spammer_guid), unk1, unk2, unk3, unk4, description.c_str());
+        ticket->name = "Spam Report System";
+        ticket->guid = sTicketMgr->GenerateTicketID();
+        ticket->playerGuid = 0;
+        ticket->message = ss.str();
+        ticket->createtime = time(NULL);
+        ticket->timestamp = time(NULL);
+        ticket->closed = 0;
+        ticket->assignedToGM = 0;
+        ticket->comment = "";
+        ticket->escalated = false;
+        ticket->viewed = false;
+
+        // remove ticket by player, shouldn't happen
+        sTicketMgr->RemoveGMTicketByPlayer(GetPlayer()->GetGUID(), GetPlayer()->GetGUID());
+
+        // add ticket
+        sTicketMgr->AddGMTicket(ticket, false);
+
+        std::string NameLink = "|Hplayer:"+ticket->name+"|h["+ticket->name+"]|h";
+        sWorld->SendGMText(LANG_COMMAND_TICKETNEW, NameLink.c_str(), ticket->guid);
+    /*}*/
 }
 
 void WorldSession::HandleRealmStateRequestOpcode(WorldPacket & recv_data)

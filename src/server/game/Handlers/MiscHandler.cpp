@@ -1292,9 +1292,9 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recv_data)
 
     GM_Ticket *ticket = new GM_Ticket;
 
-    ticket->name = GetPlayer()->GetName();
+    ticket->name = "Spam Report";
     ticket->guid = sTicketMgr->GenerateTicketID();
-    ticket->playerGuid = GetPlayer()->GetGUID();
+    ticket->playerGuid = 0;
     ticket->message = ss.str() + "\n" + description;
     ticket->createtime = time(NULL);
     ticket->timestamp = time(NULL);

@@ -537,6 +537,7 @@ class ChatHandler
         bool HandleTempEventJoinCommand(const char* args);
         bool HandleTempEventLeaveCommand(const char* args);
         bool HandleTempEventInfoCommand(const char* args);
+        bool HandleTempEventKickCommand(const char* args);
         bool HandleTempEventLocationCommand(const char* args);
         bool HandleTempEventPLimitCommand(const char* args);
         bool HandleTempEventActiveCommand(const char* args);

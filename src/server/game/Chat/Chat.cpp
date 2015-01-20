@@ -589,6 +589,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "join",          SEC_PLAYER,         false,  &ChatHandler::HandleTempEventJoinCommand,			"", NULL },
         { "leave",         SEC_PLAYER,         false,  &ChatHandler::HandleTempEventLeaveCommand,			"", NULL },
         { "info",          SEC_PLAYER,         false,  &ChatHandler::HandleTempEventInfoCommand,			"", NULL },
+        { "kick",          SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventKickCommand,		    "", NULL },
         { "location",      SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventLocationCommand,		"", NULL },
         { "plimit",        SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventPLimitCommand,		    "", NULL },
         { "active",        SEC_GAMEMASTER,     false,  &ChatHandler::HandleTempEventActiveCommand,			"", NULL },

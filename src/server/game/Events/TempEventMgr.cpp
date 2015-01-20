@@ -125,7 +125,7 @@ bool TempEventMgr::TeleportPlayersToEvent(Player* pInvoker)
     WorldPacket data(SMSG_SUMMON_REQUEST, 8+4+4);
     data << uint64(pInvoker->GetGUID());
     data << uint32(eventLoc.zoneId);
-    data << uint32(MAX_PLAYER_SUMMON_DELAY * 1000);
+    data << uint32(20000);
 
     for (EventParticipants::const_iterator itr = m_EventParticipants.begin(); itr != m_EventParticipants.end(); ++itr)
     {
@@ -144,31 +144,85 @@ char *GetStatusString(uint32 eventStatus)
     switch (eventStatus)
     {
         case EVENT_STATUS_INACTIVE:
-            return "EVENT_STATUS_INACTIVE";
+            return "Inactive";
         case EVENT_STATUS_ACTIVE:
-            return "EVENT_STATUS_ACTIVE";
+            return "Active";
         case EVENT_STATUS_IN_PROGRESS:
-            return "EVENT_STATUS_IN_PROGRESS";
+            return "Running";
     }
 
     return "";
 }
 
+char *classString(uint8 playerClass)
+{
+    switch (playerClass)
+    {
+        case CLASS_WARRIOR: return "Warrior"; break;
+        case CLASS_PALADIN: return "Paladin"; break;
+        case CLASS_HUNTER:  return "Hunter";  break;
+        case CLASS_ROGUE:   return "Rogue";   break;
+        case CLASS_PRIEST:  return "Priest";  break;
+        case CLASS_SHAMAN:  return "Shaman";  break;
+        case CLASS_MAGE:    return "Mage";    break;
+        case CLASS_WARLOCK: return "Warlock"; break;
+        case CLASS_DRUID:   return "Druid";   break;
+        default: return ""; break;
+    }
+}
+
+char *raceString(uint8 playerRace)
+{
+    switch (playerRace)
+    {
+        case RACE_HUMAN:         return "Human";    break;
+        case RACE_ORC:           return "Orc";      break;
+        case RACE_DWARF:         return "Dwarf";    break;
+        case RACE_NIGHTELF:      return "Nightelf"; break;
+        case RACE_UNDEAD_PLAYER: return "Undead";   break;
+        case RACE_TAUREN:        return "Tauren";   break;
+        case RACE_GNOME:         return "Gnome";    break;
+        case RACE_TROLL:         return "Troll";    break;
+        case RACE_BLOODELF:      return "Bloodelf"; break;
+        case RACE_DRAENEI:       return "Draenei";  break;
+        default: return ""; break;
+    }
+}
+
 void TempEventMgr::SendEventInfoString(Player* pInvoker)
 {
+    MapEntry const* mapEntry;
+    AreaTableEntry const* zoneEntry;
+    
     ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO);
     ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_STATUS, GetStatusString(GetEventStatus()));
     
     if (HasEventLocation())
     {
-        MapEntry const* mapEntry = sMapStore.LookupEntry(eventLoc.mapId);
-        AreaTableEntry const* zoneEntry = GetAreaEntryByAreaID(eventLoc.zoneId);
+        mapEntry = sMapStore.LookupEntry(eventLoc.mapId);
+        zoneEntry = GetAreaEntryByAreaID(eventLoc.zoneId);
 
-        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_LOCATION, mapEntry->name[0], zoneEntry->area_name[0], eventLoc.x, eventLoc.y, eventLoc.z);
+        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_LOCATION, 
+            mapEntry->name[0], 
+            zoneEntry->area_name[0]);
     }
 
     if (HasPlayerLimit())
         ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_PLIMIT, GetPlayerLimit());
 
-    ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_PARTICIPANTS, GetEventParticipantCount());
+    ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_PCOUNT, GetEventParticipantCount());
+
+    for (EventParticipants::const_iterator itr = m_EventParticipants.begin(); itr != m_EventParticipants.end(); ++itr)
+    {
+        mapEntry = sMapStore.LookupEntry((*itr)->GetMapId());
+        zoneEntry = GetAreaEntryByAreaID((*itr)->GetZoneId());
+
+        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_PARTICIPANTS, 
+            (*itr)->GetName(),
+            raceString((*itr)->getRace()),
+            classString((*itr)->getClass()),
+            mapEntry->name[0],
+            zoneEntry->area_name[0]);
+    }
+
 }

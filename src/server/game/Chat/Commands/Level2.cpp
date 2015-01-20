@@ -4390,6 +4390,59 @@ bool ChatHandler::HandleTitlesCurrentCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleTempEventKickCommand(const char* args)
+{
+    Player* target = NULL;
+    uint64 targetGUID = 0;
+
+    char* px = strtok((char*)args, " ");
+    char* py = NULL;
+
+    std::string name;
+
+    if (px)
+    {
+        name = px;
+
+        if (name.empty())
+            return false;
+
+        if (!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
+        target = sObjectMgr->GetPlayer(name.c_str());
+        if (target)
+            py = strtok(NULL, " ");
+        else
+        {
+            targetGUID = sObjectMgr->GetPlayerGUIDByName(name);
+            if (targetGUID)
+                py = strtok(NULL, " ");
+            else
+                py = px;
+        }
+    }
+
+    if (!target && !targetGUID)
+    {
+        target = getSelectedPlayer();
+    }
+
+    if (!target && !targetGUID)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    sTempEventMgr->RemovePlayerFromEvent(target, true);
+    return true;
+}
+
 bool ChatHandler::HandleTempEventLocationCommand(const char* args)
 {
     Player *plr = m_session->GetPlayer();

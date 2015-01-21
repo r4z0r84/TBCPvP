@@ -730,8 +730,6 @@ void BattleGround::EndBattleGround(uint32 winner)
     // SOLOQUEUE - Store ratings
     uint32 sq_loser_rating = 0;
     uint32 sq_winner_rating = 0;
-    int32 sq_loser_change = 0;
-    int32 sq_winner_change = 0;
 
     if (winner == ALLIANCE)
     {
@@ -858,6 +856,38 @@ void BattleGround::EndBattleGround(uint32 winner)
         almost_winning_team = ALLIANCE;
     }
 
+    if (GetArenaType() == ARENA_TYPE_SOLO_3v3)
+    {
+        if (winner == ALLIANCE)
+        {
+            sq_winner_rating = (GetSoloQueueRatingForTeam(ALLIANCE) / 3);
+            sq_loser_rating = (GetSoloQueueRatingForTeam(HORDE) / 3);
+            sLog->outDebug("--- Winner rating: %u. Loser rating: %u ---", sq_winner_rating, sq_loser_rating);
+        }
+        else if (winner == HORDE)
+        {
+            sq_winner_rating = (GetSoloQueueRatingForTeam(HORDE) / 3);
+            sq_loser_rating = (GetSoloQueueRatingForTeam(ALLIANCE) / 3);
+            sLog->outDebug("--- Winner rating: %u. Loser rating: %u ---", sq_winner_rating, sq_loser_rating);
+        }
+
+        float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)sq_loser_rating - (float)sq_winner_rating) / 650.0f));
+        // calculate the rating modification (ELO system with k=32)
+        int32 modWinner = (int32)floor(16.0f * (1.0f - chance));
+        int32 modLoser = (int32)ceil(16.0f * (0.0f - chance));
+
+        if (winner == ALLIANCE)
+        {
+            SetArenaTeamRatingChangeForTeam(ALLIANCE, modWinner);
+            SetArenaTeamRatingChangeForTeam(HORDE, modLoser);
+        }
+        else if (winner == HORDE)
+        {
+            SetArenaTeamRatingChangeForTeam(HORDE, modWinner);
+            SetArenaTeamRatingChangeForTeam(ALLIANCE, modLoser);
+        }
+    }
+
     for (std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         Player *plr = sObjectMgr->GetPlayer(itr->first);
@@ -872,9 +902,9 @@ void BattleGround::EndBattleGround(uint32 winner)
             if (winner)
             {
                 if (team == winner)
-                    sq_winner_change = at->WonAgainst(sq_loser_rating, sq_winner_rating);
+                    at->WonAgainst(sq_loser_rating, sq_winner_rating);
                 else
-                    sq_loser_change = at->LostAgainst(sq_winner_rating, sq_loser_rating);
+                    at->LostAgainst(sq_winner_rating, sq_loser_rating);
             }
 
             at->SaveToDB();
@@ -976,17 +1006,6 @@ void BattleGround::EndBattleGround(uint32 winner)
         uint32 bgQueueTypeId = sBattleGroundMgr->BGQueueTypeId(GetTypeID(), GetArenaType());
         sBattleGroundMgr->BuildBattleGroundStatusPacket(&data, this, plr->GetBGTeam(), plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
         plr->GetSession()->SendPacket(&data);
-    }
-
-    if (winner == ALLIANCE)
-    {
-        SetArenaTeamRatingChangeForTeam(ALLIANCE, sq_winner_change);
-        SetArenaTeamRatingChangeForTeam(HORDE, sq_loser_change);
-    }
-    else if (winner == HORDE)
-    {
-        SetArenaTeamRatingChangeForTeam(HORDE, sq_winner_change);
-        SetArenaTeamRatingChangeForTeam(ALLIANCE, sq_loser_change);
     }
 
     for (std::map<uint64, BattleGroundPlayer>::iterator itr = m_Spectators.begin(); itr != m_Spectators.end(); ++itr)

@@ -845,6 +845,8 @@ Player::Player (WorldSession *session): Unit()
     m_globalCooldowns.clear();
 
     m_isArenaSpectator = false;
+
+    m_currentVendorEntry = -1;
 }
 
 Player::~Player ()
@@ -19434,7 +19436,13 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         return false;
     }
 
-    VendorItemData const* vItems = creature->GetVendorItems();
+    VendorItemData const* vItems;
+    // Multigossip Vendor
+    if (creature->isGossipVendor())
+        vItems = sObjectMgr->GetNpcVendorItemList(m_currentVendorEntry);
+    else
+        vItems = creature->GetVendorItems();
+
     if (!vItems || vItems->Empty())
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
@@ -19442,7 +19450,7 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
     }
 
     size_t vendorslot = vItems->FindItemSlot(item);
-    if (vendorslot >= vItems->GetItemCount())
+    if (vendorslot >= vItems->GetItemCount() || m_currentVendorEntry == -1)
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
         return false;

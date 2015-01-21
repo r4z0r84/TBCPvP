@@ -2172,6 +2172,9 @@ class Player : public Unit, public GridObject<Player>
 
         void SendCinematicStart(uint32 CinematicSequenceId);
 
+        // Custom Mutligossip Vendor
+        int32 m_currentVendorEntry;
+
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/

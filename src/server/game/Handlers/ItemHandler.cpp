@@ -698,7 +698,7 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket & recv_data)
     SendListInventory(guid);
 }
 
-void WorldSession::SendListInventory(uint64 vendorguid)
+void WorldSession::SendListInventory(uint64 vendorguid, uint32 entry)
 {
     sLog->outDebug("WORLD: Sent SMSG_LIST_INVENTORY");
 
@@ -717,7 +717,7 @@ void WorldSession::SendListInventory(uint64 vendorguid)
     // Stop the npc if moving
     creature->StopMoving();
 
-    VendorItemData const* vItems = creature->GetVendorItems();
+    VendorItemData const* vItems = entry ? sObjectMgr->GetNpcVendorItemList(entry) : creature->GetVendorItems();
     if (!vItems)
     {
         WorldPacket data(SMSG_LIST_INVENTORY, (8+1+1));

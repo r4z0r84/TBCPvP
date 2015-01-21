@@ -19,32 +19,48 @@ TempEventMgr::TempEventMgr()
     eventLoc.orientation = 0;
 }
 
-void TempEventMgr::ActiveEvent(Player* pInvoker)
+void TempEventMgr::SetEventStatus(Player* pInvoker, uint32 eventStatus)
 {
-    if (GetEventStatus() == EVENT_STATUS_ACTIVE)
+    switch (eventStatus)
     {
-        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_ALREADY_ACTIVE);
-        return;
+        case EVENT_STATUS_INACTIVE:
+        {
+            break;
+        }
+        case EVENT_STATUS_ACTIVE:
+        {
+            if (GetEventStatus() == EVENT_STATUS_ACTIVE)
+            {
+                ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_ALREADY_ACTIVE);
+                return;
+            }
+
+            if (!HasEventLocation())
+            {
+                ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_NOT_SET_LOCATION);
+                return;
+            }
+
+            if (GetPlayerLimit() == PLAYER_LIMIT_NOT_SET)
+            {
+                ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_NOT_SET_PLIMIT);
+                SetPlayerLimit(PLAYER_LIMIT_DEFAULT);
+            }
+
+            break;
+        }
+        case EVENT_STATUS_IN_PROGRESS:
+        {
+            break;
+        }
+        case EVENT_STATUS_FINISHED:
+        {
+            TeleportPlayersToEntryPoint(pInvoker);
+            break;
+        }
     }
 
-    if (!HasEventLocation())
-    {
-        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_NOT_SET_LOCATION);
-        return;
-    }
-
-    if (GetPlayerLimit() == PLAYER_LIMIT_NOT_SET)
-    {
-        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_NOT_SET_PLIMIT);
-        SetPlayerLimit(PLAYER_LIMIT_DEFAULT);
-    }
-
-    SetEventStatus(EVENT_STATUS_ACTIVE);
-}
-
-void TempEventMgr::StartEvent()
-{
-    SetEventStatus(EVENT_STATUS_IN_PROGRESS);
+    m_EventStatus = eventStatus;
 }
 
 void TempEventMgr::ResetEvent()
@@ -139,6 +155,21 @@ bool TempEventMgr::TeleportPlayersToEvent(Player* pInvoker)
     return true;
 }
 
+bool TempEventMgr::TeleportPlayersToEntryPoint(Player* pInvoker)
+{
+    for (EventParticipants::const_iterator itr = m_EventParticipants.begin(); itr != m_EventParticipants.end(); ++itr)
+    {
+        // only teleport player to homebind if they are still in the event location
+        if ((*itr)->GetZoneId() != eventLoc.zoneId)
+            continue;
+
+        // ITSLOVELOL: Need to be changed to match function name
+        (*itr)->TeleportToHomebind();
+    }
+
+    return true;
+}
+
 char *GetStatusString(uint32 eventStatus)
 {
     switch (eventStatus)
@@ -149,6 +180,8 @@ char *GetStatusString(uint32 eventStatus)
             return "Active";
         case EVENT_STATUS_IN_PROGRESS:
             return "Running";
+        case EVENT_STATUS_FINISHED:
+            return "Finished";
     }
 
     return "";

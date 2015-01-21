@@ -16,6 +16,7 @@ enum EventStatus
     EVENT_STATUS_INACTIVE         = 0,
     EVENT_STATUS_ACTIVE           = 1,
     EVENT_STATUS_IN_PROGRESS      = 2,
+    EVENT_STATUS_FINISHED         = 3,
 };
 
 enum PlayerLimit
@@ -31,8 +32,6 @@ public:
     TempEventMgr();
     ~TempEventMgr() {};
 
-    void ActiveEvent(Player* pInvoker);
-    void StartEvent();
     void ResetEvent();
 
     typedef std::set<Player*> EventParticipants;
@@ -50,9 +49,10 @@ public:
     bool HasPlayerLimit() { return m_PlayerLimit > 0; }
 
     bool TeleportPlayersToEvent(Player* pInvoker);
+    bool TeleportPlayersToEntryPoint(Player* pInvoker);
 
     uint32 GetEventStatus() { return m_EventStatus; }
-    void SetEventStatus(uint32 eventStatus) { m_EventStatus = eventStatus; }
+    void SetEventStatus(Player* pInvoker, uint32 eventStatus);
 
     void SendEventInfoString(Player* pInvoker);
 

@@ -4465,14 +4465,30 @@ bool ChatHandler::HandleTempEventPLimitCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleTempEventActiveCommand(const char* args)
+bool ChatHandler::HandleTempEventSetStatusCommand(const char* args)
 {
-    Player *plr = m_session->GetPlayer();
+    if (!*args)
+        return false;
 
+    Player *plr = m_session->GetPlayer();
     if (!plr)
         return false;
 
-    sTempEventMgr->ActiveEvent(plr);
+    std::string argstr = (char*)args;
+    uint32 status = 0;
+    // whisper on
+    if (argstr == "inactive")
+        status = EVENT_STATUS_INACTIVE;
+    else if (argstr == "active")
+        status = EVENT_STATUS_ACTIVE;
+    else if (argstr == "inprogress")
+        status = EVENT_STATUS_IN_PROGRESS;
+    else if (argstr == "finished")
+        status = EVENT_STATUS_FINISHED;
+    else
+        return false;
+
+    sTempEventMgr->SetEventStatus(plr, status);
     return true;
 }
 

@@ -1299,9 +1299,11 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recv_data)
         std::string mail_subject;
         std::string mail_message;
 
-        Mail* spammer_mail = GetPlayer()->GetMail(mailId);
-        mail_subject = spammer_mail->subject;
-        mail_message = sObjectMgr->GetItemText(spammer_mail->itemTextId);
+        if (Mail* spammer_mail = GetPlayer()->GetMail(mailId))
+        {
+            mail_subject = spammer_mail->subject;
+            mail_message = sObjectMgr->GetItemText(spammer_mail->itemTextId);
+        }
 
         std::string spammer_name;
         sObjectMgr->GetPlayerNameByGUID(spammer_guid, spammer_name);
@@ -1336,9 +1338,6 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recv_data)
         ticket->comment = "";
         ticket->escalated = false;
         ticket->viewed = false;
-
-        // remove ticket by player, shouldn't happen
-        sTicketMgr->RemoveGMTicketByPlayer(GetPlayer()->GetGUID(), GetPlayer()->GetGUID());
 
         // add ticket
         sTicketMgr->AddGMTicket(ticket, false);

@@ -863,7 +863,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         Player *plr = sObjectMgr->GetPlayer(itr->first);
         uint32 team = itr->second.Team;
 
-        if (GetArenaType() == ARENA_TYPE_SOLO_3v3)
+        if (plr && GetArenaType() == ARENA_TYPE_SOLO_3v3)
         {
             uint8 slot = ArenaTeam::GetSlotByType(ARENA_TEAM_5v5);
             uint32 arena_team_id = plr->GetArenaTeamId(slot);
@@ -875,17 +875,6 @@ void BattleGround::EndBattleGround(uint32 winner)
                     sq_winner_change = at->WonAgainst(sq_loser_rating, sq_winner_rating);
                 else
                     sq_loser_change = at->LostAgainst(sq_winner_rating, sq_loser_rating);
-            }
-
-            if (winner == ALLIANCE)
-            {
-                SetArenaTeamRatingChangeForTeam(ALLIANCE, sq_winner_change);
-                SetArenaTeamRatingChangeForTeam(HORDE, sq_loser_change);
-            }
-            else if (winner == HORDE)
-            {
-                SetArenaTeamRatingChangeForTeam(HORDE, sq_winner_change);
-                SetArenaTeamRatingChangeForTeam(ALLIANCE, sq_loser_change);
             }
 
             at->SaveToDB();
@@ -988,6 +977,18 @@ void BattleGround::EndBattleGround(uint32 winner)
         sBattleGroundMgr->BuildBattleGroundStatusPacket(&data, this, plr->GetBGTeam(), plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
         plr->GetSession()->SendPacket(&data);
     }
+
+    if (winner == ALLIANCE)
+    {
+        SetArenaTeamRatingChangeForTeam(ALLIANCE, sq_winner_change);
+        SetArenaTeamRatingChangeForTeam(HORDE, sq_loser_change);
+    }
+    else if (winner == HORDE)
+    {
+        SetArenaTeamRatingChangeForTeam(HORDE, sq_winner_change);
+        SetArenaTeamRatingChangeForTeam(ALLIANCE, sq_loser_change);
+    }
+
     for (std::map<uint64, BattleGroundPlayer>::iterator itr = m_Spectators.begin(); itr != m_Spectators.end(); ++itr)
     {
         if (Player *plr = sObjectMgr->GetPlayer(itr->first))

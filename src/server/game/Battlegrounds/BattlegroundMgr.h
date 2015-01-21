@@ -98,15 +98,17 @@ class BattleGroundQueue
         {
         public:
             void Init(EligibleGroups * curr);
-            void AddGroup(GroupQueueInfo * group, bool isSoloQueue = false);
+            void AddGroup(GroupQueueInfo * group);
             void RemoveGroup(GroupQueueInfo * group);
             uint32 GetPlayerCount() const {return PlayerCount;}
             bool Build(uint32 MinPlayers, uint32 MaxPlayers, EligibleGroups::iterator startitr, bool isSoloQueue);
 
             bool HasSoloQueueHealer() { return hasSoloQueueHealer; }
             void SetSoloQueueHealer(bool on) { hasSoloQueueHealer = on; }
+            bool HasSoloQueueClass(uint8 playerClass);
         public:
             std::list<GroupQueueInfo *> SelectedGroups;
+            std::vector<uint8> SoloQueueClass;
         private:
             uint32 PlayerCount;
             EligibleGroups * m_CurrEligGroups;

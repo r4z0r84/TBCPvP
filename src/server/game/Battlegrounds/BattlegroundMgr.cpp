@@ -128,6 +128,7 @@ void BattleGroundQueue::SelectionPool::Init(EligibleGroups * curr)
 {
     m_CurrEligGroups = curr;
     SelectedGroups.clear();
+    SoloQueueClass.clear();
     PlayerCount = 0;
     hasSoloQueueHealer = false;
 }
@@ -150,31 +151,22 @@ void BattleGroundQueue::SelectionPool::RemoveGroup(GroupQueueInfo *ginfo)
 
 // add group to selection
 // used when building selection pools
-void BattleGroundQueue::SelectionPool::AddGroup(GroupQueueInfo * ginfo, bool isSoloQueue)
+void BattleGroundQueue::SelectionPool::AddGroup(GroupQueueInfo * ginfo)
 {
-    // SOLOQUEUE
-    if (isSoloQueue)
-    {
-        if (Player* curPlayer = ObjectAccessor::FindPlayer(ginfo->Players.begin()->first))
-        {
-            if (curPlayer->IsHealer())
-            {
-                if (HasSoloQueueHealer()) // Don't allow more than 1 healer
-                    return;
-
-                SetSoloQueueHealer(true);
-            }
-            else
-            {
-                if (!HasSoloQueueHealer()) // Only add if we already have a queued healer
-                    return;
-            }
-        }
-    }
-
     SelectedGroups.push_back(ginfo);
     // increase selected players count
     PlayerCount+=ginfo->Players.size();
+}
+
+bool BattleGroundQueue::SelectionPool::HasSoloQueueClass(uint8 playerClass)
+{
+    for (std::vector<uint8>::iterator itr = SoloQueueClass.begin(); itr != SoloQueueClass.end(); itr++)
+    {
+        if (*itr == playerClass)
+            return true;
+    }
+
+    return false;
 }
 
 // add group to bg queue with the given leader and bg specifications
@@ -524,11 +516,29 @@ bool BattleGroundQueue::SelectionPool::Build(uint32 MinPlayers, uint32 MaxPlayer
                 {
                     if (curPlayer->IsHealer())
                     {
-                        if (!HasSoloQueueHealer())
-                            LoopAgain = true;
+                        // Skip if current player is healer and we already have one
+                        if (HasSoloQueueHealer())
+                            continue;
+                        // else
+
+                        // Healer successfully added to group
+                        SetSoloQueueHealer(true);
+                        LoopAgain = true;
                     }
+                    else
+                    {
+                        // Always add healer first to group so skip if !healer and !havehealer
+                        if (!HasSoloQueueHealer())
+                            continue;
+                    }
+
+                    // Skip if we already have the class
+                    if (HasSoloQueueClass(curPlayer->getClass()))
+                        continue;
+
+                    SoloQueueClass.push_back(curPlayer->getClass());
                 }
-                AddGroup((*itr1), isSoloQueue);
+                AddGroup((*itr1));
                 if (GetPlayerCount() >= MinPlayers)
                 {
                     // enough players are selected

@@ -20001,9 +20001,12 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
             else
                 sq_winner_rating = (bg->GetSoloQueueRatingForTeam(ALLIANCE) / 3);
 
-            at->LostAgainst(sq_winner_rating, sq_loser_rating);
-            at->SaveToDB();
-            at->NotifyStatsChanged();
+            if (at)
+            {
+                at->LostAgainst(sq_winner_rating, sq_loser_rating);
+                at->SaveToDB();
+                at->NotifyStatsChanged();
+            }
 
             // SOLO QUEUE: Add deserter (15 minutes) if player leaves on purpose during preparation
             if (bg->GetStatus() == STATUS_WAIT_JOIN)

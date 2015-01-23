@@ -656,11 +656,11 @@ Player::Player (WorldSession *session): Unit()
 {
     m_transport = 0;
 
-    SpeakTimer = 0;
-    SpeakCount = 0;
+    m_speakTimer = 0;
+    m_speakCount = 0;
 
-    RepeatIT = 0;
-    RepeatTO = 0;
+    m_repeatIT = 0;
+    m_repeatTO = 0;
 
     m_objectType |= TYPEMASK_PLAYER;
     m_objectTypeId = TYPEID_PLAYER;
@@ -18076,27 +18076,27 @@ void Player::UpdateSpeakTime(bool Emote)
         return;
 
     time_t current = time (NULL);
-    if (SpeakTimer > current)
+    if (m_speakTimer > current)
     {
         uint32 max_count = (Emote ? sWorld->getConfig(CONFIG_CHATFLOOD_EMOTE_COUNT) : sWorld->getConfig(CONFIG_CHATFLOOD_MESSAGE_COUNT));
         if (!max_count)
             return;
 
-        SpeakCount++;
-        if (SpeakCount >= max_count)
+        m_speakCount++;
+        if (m_speakCount >= max_count)
         {
             // prevent overwrite mute time, if message send just before mutes set, for example.
             time_t new_mute = current + sWorld->getConfig(CONFIG_CHATFLOOD_MUTE_TIME);
             if (GetSession()->m_muteTime < new_mute)
                 GetSession()->m_muteTime = new_mute;
 
-            SpeakCount = 0;
+            m_speakCount = 0;
         }
     }
     else
-       SpeakCount = 0;
+       m_speakCount = 0;
 
-    SpeakTimer = current + (Emote ? sWorld->getConfig(CONFIG_CHATFLOOD_EMOTE_DELAY) : sWorld->getConfig(CONFIG_CHATFLOOD_MESSAGE_DELAY));
+    m_speakTimer = current + (Emote ? sWorld->getConfig(CONFIG_CHATFLOOD_EMOTE_DELAY) : sWorld->getConfig(CONFIG_CHATFLOOD_MESSAGE_DELAY));
 }
 
 bool Player::CanSpeak() const
@@ -18132,10 +18132,10 @@ bool Player::DoSpamCheck(std::string message)
     // Repeating Messages System
     
     // Check if we need to clear the cache when the time ran out.
-    if ((time(NULL) - RepeatTO) > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT))
+    if ((time(NULL) - m_repeatTO) > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT))
     {
         MessageCache.clear();
-        RepeatIT = 0;
+        m_repeatIT = 0;
     }
     transform(message.begin(), message.end(), message.begin(), toupper);
 
@@ -18143,17 +18143,17 @@ bool Player::DoSpamCheck(std::string message)
     {
         MessageCache.insert(message);
         
-        if (RepeatTO == NULL)
-            RepeatTO = time(NULL);
+        if (m_repeatTO == NULL)
+            m_repeatTO = time(NULL);
         
         // Double check if we need to reset the time in case of a fast spammer who would be able to say something twice.
-        if ((time(NULL) - RepeatTO) > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT)) // Reset the time
-            RepeatTO = time(NULL);
+        if ((time(NULL) - m_repeatTO) > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT)) // Reset the time
+            m_repeatTO = time(NULL);
     }
     else // We have found a double message
     {
-        ++RepeatIT;
-        if (RepeatIT > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES))
+        ++m_repeatIT;
+        if (m_repeatIT > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES))
         {
             time_t mutetime = time(NULL) + sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MUTE);
             GetSession()->m_muteTime = mutetime;
@@ -18161,7 +18161,7 @@ bool Player::DoSpamCheck(std::string message)
             return false; 
         }
        
-        time_t TimeLeft = sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT) - (time(NULL) - RepeatTO);
+        time_t TimeLeft = sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT) - (time(NULL) - m_repeatTO);
        ChatHandler(this).PSendSysMessage("Please don't repeat yourself. You are allowed to send 1 identical message every %u seconds. Please wait %u seconds before sending the same message again.\n\n", sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT), TimeLeft);
         return false;
     }

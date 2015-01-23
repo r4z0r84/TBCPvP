@@ -2050,10 +2050,10 @@ class Player : public Unit, public GridObject<Player>
         /*********************************************************/
 
         std::set<std::string> MessageCache;         // The message cache for the messages will be cleared every x seconds
-        uint32 RepeatIT;                            // Repeating messages in specific time
-        uint32 RepeatTO;                            // Repeat time out
-        uint32 SpeakTimer;                          // The time we last spoken
-        uint32 SpeakCount;                          // The total messages
+        uint32 m_repeatIT;                            // Repeating messages in specific time
+        uint32 m_repeatTO;                            // Repeat time out
+        uint32 m_speakTimer;                          // The time we last spoken
+        uint32 m_speakCount;                          // The total messages
 
         bool DoSpamCheck(std::string message);
         bool SpamCheckForType(uint32 Type, uint32 Lang);

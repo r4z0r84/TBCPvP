@@ -1435,13 +1435,6 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo, int32 dama
     else
         damage = 0;
 
-
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->ToPlayer()->m_DamageCustomReduction != 0)       
-    {
-        damage = damage - (damage * pVictim->ToPlayer()->m_DamageCustomReduction / 100);
-        pVictim->ToPlayer()->m_DamageCustomReduction = 0;
-    }
-
     damageInfo->damage = damage;
 }
 
@@ -1684,13 +1677,6 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
         // Calculate absorb & resists
         CalcAbsorbResist(damageInfo->target, SpellSchoolMask(damageInfo->damageSchoolMask), DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist);
         damageInfo->damage -= damageInfo->absorb + damageInfo->resist;
-
-        // Calculate custom damage reduction.
-        if (damageInfo->target->GetTypeId() == TYPEID_PLAYER && damageInfo->target->ToPlayer()->m_DamageCustomReduction != 0)       
-        {
-            damageInfo->damage = damageInfo->damage - (damageInfo->damage * damageInfo->target->ToPlayer()->m_DamageCustomReduction / 100);
-            pVictim->ToPlayer()->m_DamageCustomReduction = 0;
-        }
 
         if (damageInfo->absorb)
         {
@@ -6289,13 +6275,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         target = this;
                         break;
                     }
-                    case 31828:
-                    case 31829:
-                    case 31830: // Blessed Life
-                        {
-                            this->ToPlayer()->m_DamageCustomReduction = 50;
-                            break;
-                        }
+                    case 31828: // Blessed Life (Rank 1)
+                    case 31829: // Blessed Life (Rank 2)
+                    case 31830: // Blessed Life (Rank 3)
+                    {
+                        damage *= 0.5f;
+                        return true;
+                    }
                     // Lightning Capacitor
                     case 37657:
                     {

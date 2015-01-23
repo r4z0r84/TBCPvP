@@ -1003,6 +1003,51 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
     return 0;
 }
 
+bool IsBinaryResistable(SpellEntry const* spellInfo)
+{
+    if (spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)                  // can't resist holy spells
+        return false;
+
+    if (spellInfo->SpellFamilyName)         // only player's spells, bosses don't follow that simple rule
+    {
+        for(int eff = 0; eff < 3; eff++)
+        {
+            if (!spellInfo->Effect[eff])
+                continue;
+
+            if (IsPositiveEffect(spellInfo->Id, eff))
+                continue;
+
+            switch(spellInfo->Effect[eff])
+            {
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                    break;
+                case SPELL_EFFECT_APPLY_AURA:
+                case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
+                    if (spellInfo->EffectApplyAuraName[eff] != SPELL_AURA_PERIODIC_DAMAGE)       // spells that apply aura other then DOT are binary resistable
+                        return true;
+                    break;
+                default:
+                    return true;                                                                // spells that have other effects then damage or apply aura are binary resistable
+            }
+        }
+    }
+
+    switch (spellInfo->Id)
+    {
+        case 31306:     // Anetheron - Carrion Swarm
+        case 31344:     // Howl of Azgalor
+        case 31447:     // Mark of Kaz'Rogal
+        case 34190:     // Void - Arcane Orb
+        case 37730:     // Morogrim - Tidal Wave
+        case 38441:     // Fathom - Cataclysm bolt
+        case 38509:     // Vashj - Shock Blast
+        case 37675:     // Leotheras - Chaos Blast
+            return true;
+    }
+    return false;
+}
+
 void SpellMgr::LoadSpellTargetPositions()
 {
     mSpellTargetPositions.clear();                                // need for reload case
@@ -2240,17 +2285,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case SPELL_AURA_MOD_ROOT:
                 case SPELL_AURA_MOD_DECREASE_SPEED:
                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_MOVEMENT_IMPAIR;
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
                     break;
-                case SPELL_AURA_MOD_SILENCE:
-                case SPELL_AURA_MOD_PACIFY:
-                case SPELL_AURA_MOD_PACIFY_SILENCE:
-                case SPELL_AURA_MOD_FEAR:
-                case SPELL_AURA_MOD_CASTING_SPEED:
-                case SPELL_AURA_MELEE_SLOW:
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
-                    break;
-                
                 default:
                     break;
             }
@@ -2275,30 +2310,7 @@ void SpellMgr::LoadSpellCustomAttr()
                         spellInfo->Targets & (TARGET_FLAG_SOURCE_LOCATION|TARGET_FLAG_DEST_LOCATION))
                         spellInfo->Effect[j] = SPELL_EFFECT_TRIGGER_MISSILE;
                     break;
-                case SPELL_EFFECT_INTERRUPT_CAST:   //EarthShock/Counterspell etc
-                case SPELL_EFFECT_DISPEL:
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
-                    break;
             }
-
-            switch (spellInfo->Mechanic)    //These are single effect binary spells (CC)
-            {
-                case MECHANIC_FEAR:
-                case MECHANIC_CHARM:
-                case MECHANIC_SLEEP:
-                case MECHANIC_SHACKLE:
-                case MECHANIC_SNARE:
-                case MECHANIC_FREEZE:
-                case MECHANIC_ROOT:
-                case MECHANIC_POLYMORPH:
-                case MECHANIC_INTERRUPT:
-                case MECHANIC_SILENCE:
-                case MECHANIC_BANISH:
-                case MECHANIC_STUN:
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
-                    break;
-            }
-
         }
 
         for (uint8 j = 0; j < 3; ++j)
@@ -2318,8 +2330,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
         if (spellInfo->SpellVisual == 3879)
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_CONE_BACK;
-        if (spellInfo->activeIconID== 548)
-            mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
         if (spellInfo->AttributesEx2 & SPELL_ATTR_EX2_HEALTH_FUNNEL && spellInfo->SpellIconID == 153)    // Fix Health Funnel
         {
             spellInfo->SpellVisual = 9219;
@@ -2496,23 +2506,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 31241: // Find Weakness rank 4
         case 31242: // Find Weakness rank 5
             spellInfo->procFlags = 87376;
-            break;
-        case 5760:  // Mind Numbing Poison rank 1
-        case 8692:  // Mind Numbing Poison rank 2
-        case 11398: // Mind Numbing Poison rank 3
-        case 13218: // Wound Poison rank 1
-        case 13222: // Wound Poison rank 2
-        case 13223: // Wound Poison rank 3
-        case 13224: // Wound Poison rank 4
-        case 27189: // Wound Poison rank 5
-        case 15407: // Mind Flay rank 1
-        case 17311: // Mind Flay rank 2
-        case 17312: // Mind Flay rank 3
-        case 17313: // Mind Flay rank 4
-        case 17314: // Mind Flay rank 5
-        case 18807: // Mind Flay rank 6
-        case 25387: // Mind Flay rank 7
-            mSpellCustomAttr[i] |= SPELL_ATTR_CU_BINARY;
             break;
         case 33745: // Lacerate
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;

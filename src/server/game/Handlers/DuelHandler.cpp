@@ -58,11 +58,33 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         player->ResetAllPowers();
         plTarget->ResetAllPowers();
 
+        player->ClearDiminishings();
+        plTarget->ClearDiminishings();
+
+        player->RemoveAurasDueToSpell(11196);
+        player->RemoveAurasDueToSpell(25771);
+        player->RemoveAurasDueToSpell(41425);
+        plTarget->RemoveAurasDueToSpell(11196);
+        plTarget->RemoveAurasDueToSpell(25771);
+        plTarget->RemoveAurasDueToSpell(41425);
+
         if (sWorld->getConfig(CONFIG_DUEL_CD_RESET) && !player->GetMap()->IsDungeon())
             player->RemoveArenaSpellCooldowns();
 
         if (sWorld->getConfig(CONFIG_DUEL_CD_RESET) && !plTarget->GetMap()->IsDungeon())
             plTarget->RemoveArenaSpellCooldowns();
+
+        if (Pet* pet = player->GetPet())
+        {
+            pet->ModifyHealth(pet->GetMaxHealth());
+            pet->SetPower(pet->getPowerType(), pet->GetMaxPower(pet->getPowerType()));
+        }
+
+        if (Pet* pet = plTarget->GetPet())
+        {
+            pet->ModifyHealth(pet->GetMaxHealth());
+            pet->SetPower(pet->getPowerType(), pet->GetMaxPower(pet->getPowerType()));
+        }
     }
 
     player->SendDuelCountdown(3000);

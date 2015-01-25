@@ -112,8 +112,8 @@ bool GossipHello_npc_template(Player *player, Creature *creature)
 
 bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender, uint32 action)
 {
-    uint32 itemsCount;
-    uint32 talentsCount;
+    uint32 itemsCount = 0;
+    uint32 talentsCount = 0;
 
     switch (action)
     {

@@ -1181,22 +1181,22 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         participant = true;
     }
 
-	if (isBattleGround())
-	{ 
+    if (isBattleGround())
+    { 
         BattleGroundScoreMap::iterator itr2 = m_PlayerScores.find(guid);
         if (itr2 != m_PlayerScores.end())
         {
             delete itr2->second;                                // delete player's score
             m_PlayerScores.erase(itr2);
         }
-	}
+    }
 
-	if (isArena())
-	{
+    if (isArena())
+    {
         std::map<uint64, BattleGroundPlayer>::iterator itr3 = m_Spectators.find(guid);
         if (itr3 != m_Spectators.end())
             m_Spectators.erase(itr3);
-	}
+    }
 
     RemovePlayerFromResurrectQueue(guid);
 

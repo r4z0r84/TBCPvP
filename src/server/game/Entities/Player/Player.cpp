@@ -19447,7 +19447,7 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
     }
 
     size_t vendorslot = vItems->FindItemSlot(item);
-    if (vendorslot >= vItems->GetItemCount() || m_currentVendorEntry == -1)
+    if (vendorslot >= vItems->GetItemCount())
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
         return false;

@@ -505,6 +505,85 @@ CreatureAI* GetAI_mob_zerekethvoidzoneAI(Creature* creature)
     return new mob_zerekethvoidzoneAI (creature);
 }
 
+/*#####
+# npc_arcatraz_sentinel
+#####*/
+
+#define SPELL_AURA      (HeroicMode ? 38828 : 36716)
+#define SPELL_EXPLODE   (HeroicMode ? 38830 : 36719)
+
+struct npc_arcatraz_sentinelAI : public ScriptedAI
+{
+    npc_arcatraz_sentinelAI(Creature *c) : ScriptedAI(c)
+    {
+        pInstance = c->GetInstanceScript();
+    }
+
+    uint32 ThreatWipe_Timer;
+    uint32 Suicide_Timer;
+
+    ScriptedInstance *pInstance;
+    bool HeroicMode;
+
+    void Reset()
+    {
+        me->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+        me->SetStandState(UNIT_STAND_STATE_DEAD);
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        me->CastSpell(me, SPELL_AURA, true);
+
+        ThreatWipe_Timer = urand(5000, 10000);
+        Suicide_Timer = 0;
+    }
+
+    void EnterCombat(Unit *who)
+    {
+        me->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
+        me->SetStandState(UNIT_STAND_STATE_STAND);
+        me->SetHealth(me->GetMaxHealth() * 40 / 100);
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (!UpdateVictim())
+            return;
+
+        if (!Suicide_Timer)
+        {
+            if (ThreatWipe_Timer < diff)
+            {
+                DoResetThreat();
+                ThreatWipe_Timer = urand(10000, 15000);
+            }
+            else
+                ThreatWipe_Timer -= diff;
+
+            if (me->GetHealth()*100/me->GetMaxHealth() <= 12)
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveAllAuras();
+                me->CastSpell(me, SPELL_EXPLODE, true);
+
+                Suicide_Timer = 10000;
+            }
+        }
+        else
+        {
+            if (Suicide_Timer < diff)
+                me->Kill(me, false);
+            else
+                Suicide_Timer -= diff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_arcatraz_sentinel(Creature* creature)
+{
+    return new npc_arcatraz_sentinelAI (creature);
+}
+
 void AddSC_arcatraz()
 {
     Script *newscript;
@@ -522,6 +601,11 @@ void AddSC_arcatraz()
     newscript = new Script;
     newscript->Name = "mob_zerekethvoidzone";
     newscript->GetAI = &GetAI_mob_zerekethvoidzoneAI;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_arcatraz_sentinel";
+    newscript->GetAI = &GetAI_npc_arcatraz_sentinel;
     newscript->RegisterSelf();
 }
 

@@ -450,7 +450,7 @@ enum AttributesEx5
     SPELL_ATTR_EX5_UNK28                      = 0x10000000,        // 28
     SPELL_ATTR_EX5_UNK29                      = 0x20000000,        // 29 Alterac Valley auras (Might of Frostwolf, Honor of the Stormpike)
     SPELL_ATTR_EX5_UNK30                      = 0x40000000,        // 30 Ahune visual spells
-    SPELL_ATTR_EX5_USE_MELEE_HIT              = 0x80000000         // 31 Use melee hit rating, even if using spell dmg class
+    SPELL_ATTR_EX5_UNK31                      = 0x80000000         // 31
 };
 
 enum AttributesEx6

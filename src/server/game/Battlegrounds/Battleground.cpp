@@ -871,10 +871,11 @@ void BattleGround::EndBattleGround(uint32 winner)
             sLog->outDebug("--- Winner rating: %u. Loser rating: %u ---", sq_winner_rating, sq_loser_rating);
         }
 
-        float chance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)sq_loser_rating - (float)sq_winner_rating) / 650.0f));
+        float winnerChance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)sq_winner_rating - (float)sq_loser_rating) / 650.0f));
+        float loserChance = 1.0f / (1.0f + exp(log(10.0f) * (float)((float)sq_loser_rating - (float)sq_winner_rating) / 650.0f));
         // calculate the rating modification (ELO system with k=32)
-        int32 modWinner = (int32)floor(16.0f * (1.0f - chance));
-        int32 modLoser = (int32)ceil(16.0f * (0.0f - chance));
+        int32 modWinner = (int32)floor(16.0f * (1.0f - winnerChance));
+        int32 modLoser = (int32)ceil(16.0f * (0.0f - loserChance));
 
         if (winner == ALLIANCE)
         {

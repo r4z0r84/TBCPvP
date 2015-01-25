@@ -2334,15 +2334,6 @@ void SpellMgr::LoadSpellCustomAttr()
         {
             spellInfo->SpellVisual = 9219;
         }
-        // Warrior ------------------------------------------------------------
-        // Pummel
-        if (spellInfo->SpellVisual == 1023 && spellInfo->SpellFamilyName == 4)
-            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
-
-        // Paladin ------------------------------------------------------------
-        // Hammer of Justice
-        if (spellInfo->SpellVisual == 322 && spellInfo->SpellFamilyName == 10)
-            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
 
         switch (i)
         {
@@ -2439,14 +2430,12 @@ void SpellMgr::LoadSpellCustomAttr()
         case 100:   //Charge
         case 6178:
         case 11578:
-            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
             spellInfo->AttributesEx |= SPELL_ATTR_EX_CANT_BE_REFLECTED; 
             break;
         case 7922:                        // Charge stun
         case 25273:                       // Intercept stun  
         case 20615:
         case 25274:                       
-            spellInfo->AttributesEx5 |= SPELL_ATTR_EX5_USE_MELEE_HIT;
             spellInfo->Attributes |= SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             spellInfo->AttributesEx |= SPELL_ATTR_EX_CANT_BE_REFLECTED;
             break;

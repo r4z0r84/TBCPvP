@@ -463,7 +463,7 @@ enum AttributesEx6
     SPELL_ATTR_EX6_UNK5                       = 0x00000020,        // 5 *Ritual of Summoning
     SPELL_ATTR_EX6_UNK6                       = 0x00000040,        // 6 *some tracking spells
     SPELL_ATTR_EX6_UNK7                       = 0x00000080,        // 7 *chance to trigger spell on melee or ranged hit?
-    SPELL_ATTR_EX6_IGNORE_CROWD_CONTROL_TARGETS = 0x00000100,        // 8 Avenger's Shield only
+    SPELL_ATTR6_CANT_TARGET_CROWD_CONTROLLED  = 0x00000100,        // 8 Avenger's Shield only
     SPELL_ATTR_EX6_UNK9                       = 0x00000200,        // 9 not set in 2.4.3
     SPELL_ATTR_EX6_UNK10                      = 0x00000400,        // 10 *Find Minerals only
     SPELL_ATTR_EX6_NOT_IN_RAID_INSTANCE       = 0x00000800,        // 11 *Sayge's Dark Fortune of ... only

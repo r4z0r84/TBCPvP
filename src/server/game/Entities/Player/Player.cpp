@@ -22528,29 +22528,50 @@ void Player::AddToArenaQueue(uint8 aType, bool isRated)
     sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].Update(bg->GetTypeID(), GetBattleGroundQueueIdFromLevel(bg->GetTypeID()), aType, isRated, arenaRating);
 }
 
-bool Player::IsHealer()
+uint32 Player::GetTalentSpecialization()
 {
     switch (getClass())
     {
+        case CLASS_WARRIOR:
+        {
+            if (HasSpell(20243)) // Devastate
+                return TALENT_SPECIALIZATION_TANK;
+            else
+                return TALENT_SPECIALIZATION_DPS;
+        }
         case CLASS_PALADIN:
-            if (HasSpell(20218)) // Sanctity Aura
-                return false;
-            if (((HasSpell(31837) || HasSpell(31838) || HasSpell(31839) || HasSpell(31840) || HasSpell(31841) && HasSpell(20127)) || HasSpell(20130) || HasSpell(20135) || HasSpell(20136) || HasSpell(20137)) || ((HasSpell(31837) || HasSpell(31838) || HasSpell(31839) || HasSpell(31840) || HasSpell(31841)) && HasSpell(33072))) // Holy Guidance && Redoubt || Holy Guidance && Holy Shock
-                return true;
+        {
+            if (HasSpell(20473) && !HasSpell(20218)) // Holy Shock && !Sanctity Aura
+                return TALENT_SPECIALIZATION_HEALER;
+            if (HasSpell(31935)) // Avenger's Shield 
+                return TALENT_SPECIALIZATION_TANK;
             break;
+        }
         case CLASS_PRIEST:
-            if (HasSpell(33206) || HasSpell(28275)) // Pain Suppression || Lightwell
-                return true;
-            break;
-        case CLASS_DRUID:
-            if (HasSpell(18562) || (HasSpell(24858) && HasSpell(17116) || HasSpell(33603) || HasSpell(24943) || HasSpell(24944) || HasSpell(24945) || HasSpell(24946))) // Swiftmend || Moonkin Form && Gift of Nature
-                return true;
-            break;
+        {
+            if (HasSpell(33206) || HasSpell(724)) // Pain Suppression || Lightwell
+                return TALENT_SPECIALIZATION_HEALER;
+            else
+                return TALENT_SPECIALIZATION_DPS;
+        }
         case CLASS_SHAMAN:
-            if (HasSpell(32594)) // Earth Shield
-                return true;
-            break;
+        {
+            if (HasSpell(974)) // Earth Shield
+                return TALENT_SPECIALIZATION_HEALER;
+            else
+                return TALENT_SPECIALIZATION_DPS;
+        }
+        case CLASS_DRUID:
+        {
+            if (HasSpell(18562) || (HasSpell(24858) && HasSpell(17116) && !HasSpell(33603)))
+                return TALENT_SPECIALIZATION_HEALER;
+        }
+        case CLASS_HUNTER:
+        case CLASS_ROGUE:
+        case CLASS_MAGE:
+        case CLASS_WARLOCK:
+            return TALENT_SPECIALIZATION_DPS;
     }
 
-    return false;
+    return TALENT_SPECIALIZATION_NONE;
 }

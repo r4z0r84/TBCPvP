@@ -757,6 +757,14 @@ enum PlayerDelayedOperations
     DELAYED_END
 };
 
+enum PlayerTalentSpecializations
+{
+    TALENT_SPECIALIZATION_NONE      = 0,
+    TALENT_SPECIALIZATION_HEALER    = 1,
+    TALENT_SPECIALIZATION_DPS       = 2,
+    TALENT_SPECIALIZATION_TANK      = 3
+};
+
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
 #define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
@@ -2020,7 +2028,7 @@ class Player : public Unit, public GridObject<Player>
         bool CanCaptureTowerPoint();
 
         void AddToArenaQueue(uint8 aType, bool isRated = true);
-        bool IsHealer();
+        uint32 GetTalentSpecialization();
 
         /*********************************************************/
         /***               OUTDOOR PVP SYSTEM                  ***/

@@ -247,7 +247,7 @@ void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo)
                     {
                         if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
                         {
-                            if (_player->IsHealer())
+                            if (_player->GetTalentSpecialization() == TALENT_SPECIALIZATION_HEALER)
                                 qRatedAlliance++;
                             else
                                 qRatedHorde++;
@@ -264,7 +264,7 @@ void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo)
                     {
                         if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
                         {
-                            if (_player->IsHealer())
+                            if (_player->GetTalentSpecialization() == TALENT_SPECIALIZATION_HEALER)
                                 qAlliance++;
                             else
                                 qHorde++;
@@ -514,7 +514,7 @@ bool BattleGroundQueue::SelectionPool::Build(uint32 MinPlayers, uint32 MaxPlayer
                 // SOLOQUEUE
                 if (Player* curPlayer = ObjectAccessor::FindPlayer((*itr1)->Players.begin()->first))
                 {
-                    if (curPlayer->IsHealer())
+                    if (curPlayer->GetTalentSpecialization() == TALENT_SPECIALIZATION_HEALER)
                     {
                         // Skip if current player is healer and we already have one
                         if (HasSoloQueueHealer())

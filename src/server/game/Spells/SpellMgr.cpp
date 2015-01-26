@@ -447,6 +447,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     if (!spellInfo)
         return SPELL_NORMAL;
 
+    if (sSpellMgr->GetSpellCustomAttr(spellId) & SPELL_ATTR_CU_WELL_FED)
+        return SPELL_WELL_FED;
+
     switch (spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
@@ -460,10 +463,13 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                     else if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_REGEN)
                         return SPELL_FOOD;
             }
-            // this may be a hack
-            else if ((spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD || spellInfo->Id == 43730) // Electrified (Stormchops)
-                && !spellInfo->Category)
-                return SPELL_WELL_FED;
+            else
+            {
+                // this may be a hack
+                if (spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD && !spellInfo->Category)
+                    return SPELL_WELL_FED;
+            }
+            
 
             switch (spellInfo->Id)
             {
@@ -2526,6 +2532,28 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectTriggerSpell[1] = 43731;
             spellInfo->EffectImplicitTargetA[1] = 1;
             spellInfo->EffectImplicitTargetB[1] = 0;
+            break;
+        case 18191: // Food that should act like Well Fed
+        case 46687: // NOTE: Somebody needs to comment this
+        case 5257:
+        case 5021:
+        case 5020:
+        case 22789:
+        case 37058:
+        case 25804:
+        case 25722:
+        case 25037:
+        case 20875:
+        case 18193:
+        case 18125:
+        case 18192:
+        case 18141:
+        case 18194:
+        case 18222:
+        case 22730:
+        case 23697:
+        case 25661:
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_WELL_FED;
             break;
         case 66: // Invisibility Fade
         case 20580: // Shadowmeld (does not get removed when casting mass dispell)

@@ -98,6 +98,9 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
     // Cheap Shot
     if (spellInfo->SpellIconID == 244 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
         return 150;
+    // Ruthlessness
+    if (spellInfo->Id == 14157)
+        return 100;
 
     // Mage --------------------------------------------------------------------
     // Polymorph

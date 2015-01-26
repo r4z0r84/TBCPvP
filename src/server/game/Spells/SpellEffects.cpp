@@ -1051,6 +1051,17 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster, 23782, true);
                     m_caster->CastSpell(m_caster, 23783, true);
                     return;
+                case 24531:                                 // Refocus (Renataki's Charm of Beasts)
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (Player* plCaster = m_caster->ToPlayer())
+                    {
+                        plCaster->RemoveSpellCooldown(27065); // Aimed Shot (Rank 7)
+                        plCaster->RemoveSpellCooldown(27021); // Multi-Shot (Rank 6)
+                        plCaster->RemoveSpellCooldown(27022); // Volley (Rank 4)
+                    }
+                    return;
                 case 24930:                                 // Hallow's End Candy
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;

@@ -1142,6 +1142,7 @@ void Spell::EffectDummy(uint32 i)
 
                         m_caster->CastSpell(unitTarget, spellId, true);
                     }
+                    return;
                 }
                 case 28006:                                 // Arcane Cloaking
                 {

@@ -1121,6 +1121,28 @@ void Spell::EffectDummy(uint32 i)
                 }
                 //case 26074:                               // Holiday Cheer
                 //    return; -- implemented at client side
+                case 26374:                                 // Elune's Candle
+                {
+                    if (unitTarget)
+                    {
+                        uint32 spellId = 0;
+
+                        if (unitTarget->GetEntry() == 15467) // Omen
+                        {
+                            switch (urand(0, 3))
+                            {
+                                case 0: spellId = 26622; break; // Shoots a firework at Omen's Head.
+                                case 1: spellId = 26624; break; // Shoots a firework at Omen's Chest.
+                                case 2: spellId = 26625; break; // Shoots a firework at Omen's Right Hand.
+                                case 3: spellId = 26649; break; // Shoots a firework at Omen's Left Hand.
+                            }
+                        }
+                        else
+                            spellId = 26636;
+
+                        m_caster->CastSpell(unitTarget, spellId, true);
+                    }
+                }
                 case 28006:                                 // Arcane Cloaking
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)

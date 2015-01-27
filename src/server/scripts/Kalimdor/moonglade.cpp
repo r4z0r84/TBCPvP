@@ -1451,8 +1451,10 @@ enum Omen
 
     SPELL_OMEN_CLEAVE           = 15284,
     SPELL_OMEN_STARFALL         = 26540,
-    SPELL_OMEN_SUMMON_SPOTLIGHT = 26392,
     SPELL_ELUNE_CANDLE          = 26374,
+
+    SPELL_ELUNE_BLESSING        = 26393,
+    SPELL_QUEST_CREDIT          = 26394,
 };
 
 struct npc_omenAI : public ScriptedAI
@@ -1481,16 +1483,26 @@ struct npc_omenAI : public ScriptedAI
         {
             me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-            if (Unit* pTarget = me->SelectNearestTarget(40.0f))
-                AttackStart(pTarget);
+            AttackStart(me->getVictim());
         }
     }
 
     void EnterCombat(Unit * /*who*/) { }
 
-    void JustDied(Unit* /*killer*/)
+    void JustDied(Unit* pKiller)
     {
-        DoCast(SPELL_OMEN_SUMMON_SPOTLIGHT);
+        std::list<Player*> targets;
+        Trinity::AnyPlayerInObjectRangeCheck check(me, 30.0f);
+        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(targets, check);
+        me->VisitNearbyWorldObject(30.0f, searcher);
+        for (std::list<Player*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+        {
+            if (Player *plr = (*iter))
+            {
+                plr->CastSpell(plr, SPELL_ELUNE_BLESSING, true);
+                plr->CastSpell(plr, SPELL_QUEST_CREDIT, true);
+            }   
+        }
     }
 
     void SpellHit(Unit * /*who*/, const SpellEntry *spell)

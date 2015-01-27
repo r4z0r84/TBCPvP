@@ -1540,7 +1540,7 @@ Position omenSummonPos = { 7558.993f, -2839.999f, 450.0214f, 4.46f };
 
 struct npc_fireworkAI : public ScriptedAI
 {
-    npc_fireworkAI(Creature *c) : ScriptedAI(c) { }
+    npc_fireworkAI(Creature *c) : ScriptedAI(c) { Reset(); }
 
     bool isCluster()
     {
@@ -1716,7 +1716,9 @@ struct npc_fireworkAI : public ScriptedAI
             // Check if we are near Elune'ara lake south, if so try to summon Omen or a minion
             if (me->GetZoneId() == ZONE_MOONGLADE)
             {
-                if (!me->FindNearestCreature(NPC_OMEN, 100.0f, false) && me->GetDistance2d(omenSummonPos.GetPositionX(), omenSummonPos.GetPositionY()) <= 100.0f)
+                if (!me->FindNearestCreature(NPC_OMEN, 100.0f, false) && 
+                    !me->FindNearestCreature(NPC_OMEN, 100.0f, true) &&
+                    me->GetDistance2d(omenSummonPos.GetPositionX(), omenSummonPos.GetPositionY()) <= 100.0f)
                 {
                     switch (urand(0, 9))
                     {
@@ -1725,7 +1727,7 @@ struct npc_fireworkAI : public ScriptedAI
                     case 2:
                     case 3:
                         if (Creature* minion = me->SummonCreature(NPC_MINION_OF_OMEN, me->GetPositionX() -5.0f, me->GetPositionY() -5.0f, me->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000))
-                            minion->AI()->AttackStart(me->SelectNearestTarget(20.0f));
+                            minion->AI()->AttackStart(me->getVictim());
                         break;
                     case 9:
                         me->SummonCreature(NPC_OMEN, omenSummonPos);

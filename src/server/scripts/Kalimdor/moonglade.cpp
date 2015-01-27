@@ -31,6 +31,7 @@ npc_great_bear_spirit
 npc_silva_filnaveth
 npc_clintar_spirit
 npc_clintar_dreamwalker
+npc_omen
 EndContentData */
 
 #include "ScriptPCH.h"
@@ -1440,6 +1441,96 @@ CreatureAI* GetAI_npc_eranikus(Creature* creature)
     return new npc_eranikusAI(creature);
 }
 
+/*######
+## npc_omen
+######*/
+
+enum Omen
+{
+    NPC_OMEN                    = 15467,
+
+    SPELL_OMEN_CLEAVE           = 15284,
+    SPELL_OMEN_STARFALL         = 26540,
+    SPELL_OMEN_SUMMON_SPOTLIGHT = 26392,
+    SPELL_ELUNE_CANDLE          = 26374,
+};
+
+struct npc_omenAI : public ScriptedAI
+{
+    npc_omenAI(Creature *c) : ScriptedAI(c) 
+    {
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+        me->GetMotionMaster()->MovePoint(1, 7549.977f, -2855.137f, 456.9678f);
+    }
+
+    uint32 Cleave_Timer;
+    uint32 Starfall_Timer;
+
+    void Reset()
+    {
+        Cleave_Timer = urand(3000, 5000);
+        Starfall_Timer = urand(8000, 10000);
+    }
+
+    void MovementInform(uint32 type, uint32 pointId)
+    {
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (pointId == 1)
+        {
+            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+            if (Unit* pTarget = me->SelectNearestTarget(40.0f))
+                AttackStart(pTarget);
+        }
+    }
+
+    void EnterCombat(Unit * /*who*/) { }
+
+    void JustDied(Unit* /*killer*/)
+    {
+        DoCast(SPELL_OMEN_SUMMON_SPOTLIGHT);
+    }
+
+    void SpellHit(Unit * /*who*/, const SpellEntry *spell)
+    {
+        if (spell->Id == SPELL_ELUNE_CANDLE)
+        {
+            if (me->HasAura(SPELL_OMEN_STARFALL, NULL))
+                me->RemoveAurasDueToSpell(SPELL_OMEN_STARFALL);
+
+            Starfall_Timer = urand(14000, 16000);
+        }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (!UpdateVictim())
+            return;
+
+        if (Cleave_Timer <= diff)
+        {
+            DoCast(me->getVictim(), SPELL_OMEN_CLEAVE);
+            Cleave_Timer = urand(3000, 5000);
+        }
+        else Cleave_Timer -= diff;
+
+        if (Starfall_Timer <= diff)
+        {
+            DoCast(me->getVictim(), SPELL_OMEN_STARFALL);
+            Starfall_Timer = urand(8000, 10000);
+        }
+        else Starfall_Timer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+CreatureAI* GetAI_npc_omen(Creature* creature)
+{
+    return new npc_omenAI(creature);
+}
+
 void AddSC_moonglade()
 {
     Script *newscript;
@@ -1481,6 +1572,11 @@ void AddSC_moonglade()
     newscript = new Script;
     newscript->Name = "npc_eranikus";
     newscript->GetAI = &GetAI_npc_eranikus;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_omen";
+    newscript->GetAI = &GetAI_npc_omen;
     newscript->RegisterSelf();
 }
 

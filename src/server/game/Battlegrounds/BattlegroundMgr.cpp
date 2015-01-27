@@ -1411,7 +1411,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
     for (BattleGround::BattleGroundScoreMap::const_iterator itr = itr2; itr != bg->GetPlayerScoresEnd();)
     {
         itr2 = itr++;
-        if (!bg->IsPlayerInBattleGround(itr2->first))
+        if (bg->isBattleGround() && !bg->IsPlayerInBattleGround(itr2->first))
         {
             sLog->outError("Player " UI64FMTD " has scoreboard entry for battleground %u but is not in battleground!", itr->first, bg->GetTypeID());
             continue;

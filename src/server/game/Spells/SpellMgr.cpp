@@ -2559,6 +2559,10 @@ void SpellMgr::LoadSpellCustomAttr()
         case 20580: // Shadowmeld (does not get removed when casting mass dispell)
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CAST;
             break;
+        case 26373: // Lunar Invitation
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetB[1] = 0;
+            break;
         default:
             break;
         }

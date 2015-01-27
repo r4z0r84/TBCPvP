@@ -1443,6 +1443,14 @@ void Spell::EffectDummy(uint32 i)
                     }
                     return;
                 }
+                case 26373:                                 // Lunar Invitation
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(m_caster, 26451, false);
+                    return;
+                }
                 case 32826:
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)

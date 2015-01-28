@@ -1537,7 +1537,7 @@ CreatureAI* GetAI_npc_omen(Creature* creature)
 
 struct npc_giant_spotlightAI : public ScriptedAI
 {
-    npc_giant_spotlightAI(Creature *c) : ScriptedAI(c) { me->AddAura(25824, me); }
+    npc_giant_spotlightAI(Creature *c) : ScriptedAI(c) { }
 
     uint32 Despawn_Timer;
     uint32 SelfDespawn_Timer;

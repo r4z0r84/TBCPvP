@@ -1471,7 +1471,74 @@ void Spell::EffectDummy(uint32 i)
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    m_caster->CastSpell(m_caster, 26451, false);
+                    static uint32 LunarEntry[6] =
+                    {
+                        15905, // Darnassus
+                        15906, // Ironforge
+                        15694, // Stormwind
+                        15908, // Orgrimmar
+                        15719, // Thunderbluff
+                        15907  // Undercity
+                    };
+
+                    // Moonglade
+                    if (m_caster->ToPlayer()->GetZoneId() == 493)
+                    {
+                        int32 LunarNPCEntry = -1;
+
+                        for (uint8 i = 0; i < 6; ++i)
+                        {
+                            Creature* pCreature = m_caster->FindNearestCreature(LunarEntry[i], 10.0f);
+                            if (pCreature)
+                            {
+                                LunarNPCEntry = i;
+                                break;
+                            }
+                        }
+
+                        switch (m_caster->ToPlayer()->GetTeam())
+                        {
+                            case ALLIANCE:
+                            {
+                                switch (LunarNPCEntry)
+                                {
+                                    case 0: // Darnassus
+                                        m_caster->CastSpell(m_caster, 26450, false);
+                                        return;
+                                    case 1: // Ironforge
+                                        m_caster->CastSpell(m_caster, 26452, false);
+                                        return;
+                                    case 2: // Stormwind
+                                        m_caster->CastSpell(m_caster, 26454, false);
+                                        return;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            }
+                            case HORDE:
+                            {
+                                switch (LunarNPCEntry)
+                                {
+                                    case 3: // Orgrimmar
+                                        m_caster->CastSpell(m_caster, 26453, false);
+                                        return;
+                                    case 4: // Thunderbluff
+                                        m_caster->CastSpell(m_caster, 26455, false);
+                                        return;
+                                    case 5: // Undercity
+                                        m_caster->CastSpell(m_caster, 26456, false);
+                                        return;
+                                    default:
+                                        break;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    else
+                        m_caster->CastSpell(m_caster, 26451, false);
+
                     return;
                 }
                 case 32826:

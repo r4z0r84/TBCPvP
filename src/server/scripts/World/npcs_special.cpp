@@ -1726,11 +1726,10 @@ struct npc_fireworkAI : public ScriptedAI
                     case 1:
                     case 2:
                     case 3:
-                        if (Creature* minion = me->SummonCreature(NPC_MINION_OF_OMEN, me->GetPositionX() -5.0f, me->GetPositionY() -5.0f, me->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000))
-                            minion->AI()->AttackStart(me->getVictim());
+                        me->SummonCreature(NPC_MINION_OF_OMEN, me->GetPositionX() - 5.0f, me->GetPositionY() - 5.0f, me->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
                         break;
                     case 9:
-                        me->SummonCreature(NPC_OMEN, omenSummonPos);
+                        me->SummonCreature(NPC_OMEN, omenSummonPos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 25000);
                         break;
                     }
                 }

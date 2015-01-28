@@ -1462,11 +1462,7 @@ enum Omen
 
 struct npc_omenAI : public ScriptedAI
 {
-    npc_omenAI(Creature *c) : ScriptedAI(c) 
-    {
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-        me->GetMotionMaster()->MovePoint(1, 7549.977f, -2855.137f, 456.9678f);
-    }
+    npc_omenAI(Creature *c) : ScriptedAI(c) { }
 
     uint32 Cleave_Timer;
     uint32 Starfall_Timer;
@@ -1475,19 +1471,6 @@ struct npc_omenAI : public ScriptedAI
     {
         Cleave_Timer = urand(3000, 5000);
         Starfall_Timer = urand(8000, 10000);
-    }
-
-    void MovementInform(uint32 type, uint32 pointId)
-    {
-        if (type != POINT_MOTION_TYPE)
-            return;
-
-        if (pointId == 1)
-        {
-            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
-            AttackStart(me->getVictim());
-        }
     }
 
     void EnterCombat(Unit * /*who*/) { }

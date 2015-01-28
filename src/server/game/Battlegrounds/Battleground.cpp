@@ -31,7 +31,7 @@
 #include "Util.h"
 #include "GridNotifiersImpl.h"
 #include "SpellMgr.h"
-#include "BattleGroundNA.h"
+#include "BattlegroundNA.h"
 
 namespace Trinity
 {

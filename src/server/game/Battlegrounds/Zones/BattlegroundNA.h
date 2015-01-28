@@ -44,6 +44,11 @@ enum BattleGroundNAObjects
     BG_NA_OBJECT_TYPE_BUFF_2    = 184664
 };
 
+enum BattleGroundNATimers
+{
+    BG_NA_DOOR_DESPAWN_TIMER = 5
+};
+
 class BattleGroundNAScore : public BattleGroundScore
 {
     public:

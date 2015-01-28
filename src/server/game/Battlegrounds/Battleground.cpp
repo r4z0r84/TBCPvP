@@ -31,6 +31,7 @@
 #include "Util.h"
 #include "GridNotifiersImpl.h"
 #include "SpellMgr.h"
+#include "BattleGroundNA.h"
 
 namespace Trinity
 {
@@ -460,6 +461,13 @@ void BattleGround::Update(time_t diff)
                 {
                     if (GetPlayersCountByTeam(ALLIANCE) < 3 || GetPlayersCountByTeam(HORDE) < 3)
                         EndBattleGround(0); // End battleground without winner
+                }
+
+                // FIX ME: There should be a delay of 5 seconds before despawning
+                if (GetMapId() == 559) // Nagrand Arena
+                {
+                    for (uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; i++)
+                        DelObject(i);
                 }
 
                 CheckArenaWinConditions();

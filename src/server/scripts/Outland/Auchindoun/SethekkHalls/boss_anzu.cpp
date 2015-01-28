@@ -48,6 +48,13 @@ struct boss_anzuAI : public ScriptedAI
     {
         instance = c->GetInstanceScript();
         HeroicMode = me->GetMap()->IsHeroic();
+
+        if (instance && instance->GetData(DATA_ANZUEVENT) == DONE)
+        {
+            c->ForcedDespawn();
+            return;
+        }
+
         DoScriptText(SAY_INTRO1, me);
         DoScriptText(SAY_INTRO2, me);
     }

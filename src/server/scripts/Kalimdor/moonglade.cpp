@@ -1451,10 +1451,13 @@ enum Omen
 
     SPELL_OMEN_CLEAVE           = 15284,
     SPELL_OMEN_STARFALL         = 26540,
+    SPELL_OMEN_SUMMON_SPOTLIGHT = 26392,
     SPELL_ELUNE_CANDLE          = 26374,
-
     SPELL_ELUNE_BLESSING        = 26393,
     SPELL_QUEST_CREDIT          = 26394,
+
+    GO_ELUNE_TRAP_1             = 180876,
+    GO_ELUNE_TRAP_2             = 180877,
 };
 
 struct npc_omenAI : public ScriptedAI
@@ -1491,18 +1494,7 @@ struct npc_omenAI : public ScriptedAI
 
     void JustDied(Unit* pKiller)
     {
-        std::list<Player*> targets;
-        Trinity::AnyPlayerInObjectRangeCheck check(me, 30.0f);
-        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(targets, check);
-        me->VisitNearbyWorldObject(30.0f, searcher);
-        for (std::list<Player*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
-        {
-            if (Player *plr = (*iter))
-            {
-                plr->CastSpell(plr, SPELL_ELUNE_BLESSING, true);
-                plr->CastSpell(plr, SPELL_QUEST_CREDIT, true);
-            }   
-        }
+        DoCast(SPELL_OMEN_SUMMON_SPOTLIGHT);
     }
 
     void SpellHit(Unit * /*who*/, const SpellEntry *spell)
@@ -1541,6 +1533,66 @@ struct npc_omenAI : public ScriptedAI
 CreatureAI* GetAI_npc_omen(Creature* creature)
 {
     return new npc_omenAI(creature);
+}
+
+struct npc_giant_spotlightAI : public ScriptedAI
+{
+    npc_giant_spotlightAI(Creature *c) : ScriptedAI(c) { me->AddAura(25824, me); }
+
+    uint32 Despawn_Timer;
+    uint32 SelfDespawn_Timer;
+    uint32 Credit_Timer;
+
+    void Reset()
+    {
+        Despawn_Timer = 5 * MINUTE*IN_MILLISECONDS;
+        Credit_Timer = 10000;
+    }
+
+    void GiveQuestCreditToPlayers()
+    {
+        std::list<Player*> targets;
+        Trinity::AnyPlayerInObjectRangeCheck check(me, 5.0f);
+        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(targets, check);
+        me->VisitNearbyWorldObject(5.0f, searcher);
+        for (std::list<Player*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
+        {
+            if (Player *plr = (*iter))
+            {
+                plr->CastSpell(plr, SPELL_ELUNE_BLESSING, true);
+                plr->CastSpell(plr, SPELL_QUEST_CREDIT, true);
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (Despawn_Timer <= diff)
+        {
+            if (GameObject* trap = me->FindNearestGameObject(GO_ELUNE_TRAP_1, 5.0f))
+                trap->RemoveFromWorld();
+
+            if (GameObject* trap = me->FindNearestGameObject(GO_ELUNE_TRAP_2, 5.0f))
+                trap->RemoveFromWorld();
+
+            if (Creature* omen = me->FindNearestCreature(NPC_OMEN, 5.0f, false))
+                omen->ForcedDespawn();
+
+            me->ForcedDespawn();
+        }
+        else Despawn_Timer -= diff;
+
+        if (Credit_Timer <= diff)
+        {
+            GiveQuestCreditToPlayers();
+            Credit_Timer = 10000;
+        }
+        else Credit_Timer -= diff;
+    }
+};
+CreatureAI* GetAI_npc_giant_spotlight(Creature* creature)
+{
+    return new npc_giant_spotlightAI(creature);
 }
 
 void AddSC_moonglade()
@@ -1589,6 +1641,11 @@ void AddSC_moonglade()
     newscript = new Script;
     newscript->Name = "npc_omen";
     newscript->GetAI = &GetAI_npc_omen;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_giant_spotlight";
+    newscript->GetAI = &GetAI_npc_giant_spotlight;
     newscript->RegisterSelf();
 }
 

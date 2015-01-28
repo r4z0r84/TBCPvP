@@ -9471,7 +9471,7 @@ bool Unit::isTargetableForAttack() const
     return isAttackableByAOE() && !hasUnitState(UNIT_STAT_DIED);
 }
 
-bool Unit::canAttack(Unit const* target, bool force) const
+bool Unit::canAttack(Unit const* target, bool force, bool stealthCheck) const
 {
     ASSERT(target);
 
@@ -9497,7 +9497,7 @@ bool Unit::canAttack(Unit const* target, bool force) const
     else if (target->hasUnitState(UNIT_STAT_DIED))
         return false;
 
-    if ((m_invisibilityMask || target->m_invisibilityMask) && !canDetectInvisibilityOf(target))
+    if (stealthCheck && (m_invisibilityMask || target->m_invisibilityMask) && !canDetectInvisibilityOf(target))
         return false;
 
     if (target->GetVisibility() == VISIBILITY_GROUP_STEALTH && !canDetectStealthOf(target, GetDistance(target)))

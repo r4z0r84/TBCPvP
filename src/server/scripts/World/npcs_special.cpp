@@ -1730,7 +1730,7 @@ struct npc_fireworkAI : public ScriptedAI
                             minion->AI()->AttackStart(me->getVictim());
                         break;
                     case 9:
-                        me->SummonCreature(NPC_OMEN, omenSummonPos);
+                        me->SummonCreature(NPC_OMEN, omenSummonPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20000);
                         break;
                     }
                 }

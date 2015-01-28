@@ -123,7 +123,7 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
         case 12970: // Flury (Rank 5)
         case 33076: // Prayer of Mending
             return 100;
-        case 14181: //Relentless Strikes Effect
+        case 14181: // Relentless Strikes Effect
             return 500;
             break;
     }

@@ -4415,6 +4415,19 @@ void Unit::RemoveAllAuras()
     }
 }
 
+void Unit::RemoveAllAurasButPermanent()
+{
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
+    {
+        SpellEntry const *spell = iter->second->GetSpellProto();
+        int32 duration = GetSpellDuration(spell);
+        if (duration > 0)
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+}
+
 void Unit::RemoveArenaAuras(bool onleave)
 {
     // in join, remove positive buffs, on end, remove negative

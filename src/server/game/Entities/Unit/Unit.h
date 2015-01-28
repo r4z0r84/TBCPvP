@@ -1255,6 +1255,7 @@ class Unit : public WorldObject
         void RemoveMovementImpairingAuras();
 
         void RemoveAllAuras();
+        void RemoveAllAurasButPermanent();
         void RemoveArenaAuras(bool onleave = false);
         void RemoveAllAurasOnDeath();
         void DelayAura(uint32 spellId, uint32 effindex, int32 delaytime);

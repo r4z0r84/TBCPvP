@@ -4117,6 +4117,15 @@ void Spell::EffectSummonPet(uint32 i)
             //OldSummon->SetMap(owner->GetMap());
             //owner->GetMap()->Add(OldSummon->ToCreature());
 
+            if (OldSummon->getPetType() == SUMMON_PET)
+            {
+                OldSummon->SetHealth(OldSummon->GetMaxHealth());
+                OldSummon->SetPower(POWER_MANA, OldSummon->GetMaxPower(POWER_MANA));
+                OldSummon->RemoveAllAurasButPermanent();
+                OldSummon->m_CreatureSpellCooldowns.clear();
+                OldSummon->m_CreatureCategoryCooldowns.clear();
+            }
+
             if (owner->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled())
                 owner->ToPlayer()->PetSpellInitialize();
 

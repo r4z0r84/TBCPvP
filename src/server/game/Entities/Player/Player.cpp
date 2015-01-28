@@ -14464,6 +14464,8 @@ void Player::CompleteQuest(uint32 quest_id)
             else
                 SendQuestComplete(quest_id);
         }
+
+        CheckAllElderQuestsDone();
     }
 }
 
@@ -22574,4 +22576,46 @@ uint32 Player::GetTalentSpecialization()
     }
 
     return TALENT_SPECIALIZATION_NONE;
+}
+
+enum ElderRewards
+{
+    ITEM_GOLD_MEDALLION = 37297,
+};
+
+uint32 arrayLength(uint32 a[])
+{
+    return sizeof(a) / sizeof(a[0]);
+}
+
+void Player::CheckAllElderQuestsDone()
+{
+    uint32 elderQuests[] = { 8619, 8635, 8636, 8643, 8644, 8645, 8646, 8647, 8648, 8649,
+        8650, 8651, 8652, 8653, 8654, 8670, 8671, 8672, 8673, 8674, 8675, 8676, 8677,
+        8678, 8679, 8680, 8681, 8682, 8683, 8684, 8685, 8686, 8688, 8713, 8714, 8715,
+        8716, 8717, 8718, 8719, 8720, 8721, 8722, 8723, 8724, 8725, 8726, 8727, 8866 };
+
+    // Check for Gold Medallion
+    if (HasItemCount(ITEM_GOLD_MEDALLION, 1, true))
+        return;
+
+    for (uint8 i = 0; i < arrayLength(elderQuests); i++)
+    {
+        if (!GetQuestRewardStatus(elderQuests[i]))
+            return;
+    }
+
+    sWorld->SendGlobalText("%s has honored all Elders in the Eastern Kingdoms and Kalimdor. This Feat will not go unrewarded!", GetName(), NULL);
+
+    // attempt store
+    ItemPosCountVec sDest;
+    // store in main bag to simplify second pass (special bags can be not equipped yet at this moment)
+    uint8 msg = CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, ITEM_GOLD_MEDALLION, 1);
+    if (msg == EQUIP_ERR_OK)
+    {
+        StoreNewItem(sDest, ITEM_GOLD_MEDALLION, true, Item::GenerateItemRandomPropertyId(ITEM_GOLD_MEDALLION));
+        return;
+    }
+
+    ChatHandler(this).SendSysMessage("WARNING: Your reward has disappeard into the Twisting Nether. Please report this!");
 }

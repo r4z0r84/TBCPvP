@@ -2030,6 +2030,8 @@ class Player : public Unit, public GridObject<Player>
         void AddToArenaQueue(uint8 aType, bool isRated = true);
         uint32 GetTalentSpecialization();
 
+        void CheckAllElderQuestsDone();
+
         /*********************************************************/
         /***               OUTDOOR PVP SYSTEM                  ***/
         /*********************************************************/

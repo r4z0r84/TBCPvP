@@ -2681,6 +2681,12 @@ Map::GetCreature(uint64 guid)
     return ObjectAccessor::GetObjectInMap(guid, this, (Creature*)NULL);
 }
 
+Creature*
+Map::GetPet(uint64 guid)
+{
+    return ObjectAccessor::GetObjectInMap(guid, this, (Pet*)NULL);
+}
+
 GameObject*
 Map::GetGameObject(uint64 guid)
 {

@@ -25,6 +25,7 @@
 //custom
 void AddSC_beastmaster();
 void AddSC_npc_template();
+void AddSC_npc_spirit_of_competition();
 
 //world
 void AddSC_areatrigger_scripts();
@@ -398,6 +399,7 @@ void AddScripts()
 #ifdef SCRIPTS
     AddSC_beastmaster();
     AddSC_npc_template();
+    AddSC_npc_spirit_of_competition();
 
     AddSC_areatrigger_scripts();
     AddSC_boss_emeriss();

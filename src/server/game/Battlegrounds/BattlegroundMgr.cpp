@@ -677,6 +677,22 @@ void BattleGroundQueue::BGEndedRemoveInvites(BattleGround *bg)
                 uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
                 if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
                 {
+                    // SOLO QUEUE: Add 10 minute Deserter debuff to block queuing if player misses queue
+                    if (ginfo->IsRated && ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
+                    {
+                        if (!plr->GetSession()->PlayerLoading())
+                        {
+                            plr->CastSpell(plr, 26013, true);
+                            ChatHandler(plr).PSendSysMessage("You have been marked as a Deserter!");
+
+                            if (Aura* Aur = plr->GetAura(26013, 0))
+                            {
+                                Aur->SetAuraDuration(900000); // 15 minutes
+                                Aur->UpdateAuraDuration();
+                            }
+                        }
+                    }
+
                     plr->RemoveBattleGroundQueueId(bgQueueTypeId);
                     // remove player from queue, this might delete the ginfo as well! don't use that pointer after this!
                     RemovePlayer(itr2->first, true, bg->GetTypeID());
@@ -1148,22 +1164,6 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         BattleGroundQueue::QueuedPlayersMap::iterator qMapItr = sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel(bg->GetTypeID())].find(m_PlayerGuid);
         if (qMapItr != sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel(bg->GetTypeID())].end() && qMapItr->second.GroupInfo && qMapItr->second.GroupInfo->IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
         {
-            // SOLO QUEUE: Add 10 minute Deserter debuff to block queuing if player misses queue
-            if (qMapItr->second.GroupInfo->IsRated && qMapItr->second.GroupInfo->ArenaType == ARENA_TYPE_SOLO_3v3)
-            {
-                if (!plr->GetSession()->PlayerLoading())
-                {
-                    plr->CastSpell(plr, 26013, true);
-                    ChatHandler(plr).PSendSysMessage("You deserted your friends by failing to accept the invite to a rated arena match. You have been marked as a Deserter.");
-
-                    if (Aura* Aur = plr->GetAura(26013, 0))
-                    {
-                        Aur->SetAuraDuration(600000); // 10 minutes
-                        Aur->UpdateAuraDuration();
-                    }
-                }
-            }
-
             plr->RemoveBattleGroundQueueId(bgQueueTypeId);
             sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].RemovePlayer(m_PlayerGuid, true, bg->GetTypeID());
             sBattleGroundMgr->m_BattleGroundQueues[bgQueueTypeId].Update(bgQueueTypeId, bg->GetQueueType());

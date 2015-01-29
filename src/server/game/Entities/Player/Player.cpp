@@ -22605,7 +22605,11 @@ void Player::CheckAllElderQuestsDone()
             return;
     }
 
-    sWorld->SendGlobalText("%s has honored all Elders in the Eastern Kingdoms and Kalimdor. This Feat will not go unrewarded!", GetName(), NULL);
+    std::stringstream ss;
+    ss << GetName();
+    ss << " has honored all Elders in the Eastern Kingdoms and Kalimdor. This Feat will not go unrewarded!";
+    std::string str = ss.str();
+    sWorld->SendGlobalText(str.c_str(), NULL);
 
     // attempt store
     ItemPosCountVec sDest;

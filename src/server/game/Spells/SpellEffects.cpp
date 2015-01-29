@@ -4317,6 +4317,7 @@ void Spell::EffectSummonCritter(uint32 i)
     critter->SetCreatorGUID(m_caster->GetGUID());
     critter->setFaction(m_caster->getFaction());
     critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    critter->SetUInt32Value(UNIT_NPC_FLAGS, critter->GetCreatureTemplate()->npcflag);
 
     critter->AIM_Initialize();
     critter->InitPetCreateSpells();                         // e.g. disgusting oozeling has a create spell as critter...

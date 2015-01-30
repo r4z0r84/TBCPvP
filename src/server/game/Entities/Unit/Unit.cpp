@@ -2595,7 +2595,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
 
     bool canDodge = !isCasting && !lostControl;
     bool canParry = !isCasting && !lostControl;
-    bool canBlock = spell->AttributesEx3 & SPELL_ATTR_EX3_MELEE;
+    bool canBlock = !isCasting && !lostControl && spell->AttributesEx3 & SPELL_ATTR_EX3_MELEE;
     //We use SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY until right Attribute was found
     bool canMiss = !(spell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) && cMiss;
     bool canResist = true; // Add custom attr
@@ -2618,15 +2618,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
         int32 resist_chance = pVictim->GetMechanicResistChance(spell)*100;
         tmp += resist_chance;
         if (roll < tmp)
-        {
-            if (spell->SpellIconID == 495 && spell->SpellVisual == 3942)
-            {
-                uint32 triggered_spell_id = spell->EffectTriggerSpell[1];
-                if (triggered_spell_id && pVictim)
-                     CastSpell(pVictim, triggered_spell_id, true, NULL, NULL);
-            }
             return SPELL_MISS_RESIST;
-        }
     }
 
     // Same spells cannot be parry/dodge
@@ -2635,10 +2627,17 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
 
     // Ranged attack can`t miss too
     if (attType == RANGED_ATTACK)
+    {
+        if (spell->Category == 351) // Shoot (Wand)
+            return SPELL_MISS_NONE;
+
+        canParry = false;
+        canDodge = false;
+    }
         return SPELL_MISS_NONE;
 
     // Check for attack from behind
-    if (!pVictim->HasInArc(M_PI, this) || ((spell->AttributesEx2 == 0x100000 && (spell->AttributesEx & 0x200) == 0x200) && !pVictim->HasInArc(M_PI*0.25f, this)))
+    if (!pVictim->HasInArc(M_PI, this))
     {
         // Can`t dodge from behind in PvP (but its possible in PvE)
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
@@ -2736,35 +2735,17 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     modHitChance+=GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT, schoolMask);
     // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
     modHitChance+= pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
+
     // Reduce spell hit chance for Area of effect spells from victim SPELL_AURA_MOD_AOE_AVOIDANCE aura
     if (IsAreaOfEffectSpell(spell))
-        if (GetSpellModOwner())
-            if (!pVictim->IsFriendlyTo(GetSpellModOwner())) // AOE Avoidance should not affect friendly targets
-                modHitChance-=pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
+        modHitChance-=pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
     // Reduce spell hit chance for dispel mechanic spells from victim SPELL_AURA_MOD_DISPEL_RESIST
     if (IsDispelSpell(spell))
         modHitChance-=pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_DISPEL_RESIST);
-    // Chance resist mechanic (select max value from every mechanic spell effect)
-    int32 resist_chance = pVictim->GetMechanicResistChance(spell);
-    // Apply mod
-    modHitChance-=resist_chance;
-
     // Chance resist debuff
-    if (!IsPositiveSpell(spell->Id))
-    {
-        bool hasAura = false;
-        for (uint8 i = 0; i < 3; i++)
-        {
-            if (spell->Effect[i] == SPELL_EFFECT_APPLY_AURA)
-            {
-                hasAura = true;
-                break;
-            }
-        }
-
-        if (hasAura)
-            modHitChance-=pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
-    }
+    modHitChance -= pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
+    // Chance resist mechanic (select max value from every mechanic spell effect)
+    modHitChance -= pVictim->GetMechanicResistChance(spell);
 
     int32 HitChance = modHitChance * 100;
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
@@ -2775,7 +2756,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         HitChance -= int32(pVictim->ToPlayer()->GetRatingBonusValue(CR_HIT_TAKEN_SPELL)*100.0f);
 
     if (HitChance <  100) HitChance =  100;
-    if (HitChance > 10000) HitChance = 10000; // removed TBC 1% basic miss chance
+    if (HitChance > 10000) HitChance = 10000;
 
     uint32 rand = urand(0, 10000);
     if (rand > HitChance)
@@ -2806,14 +2787,6 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (pVictim->IsImmunedToSpell(spell, true))
         return SPELL_MISS_IMMUNE;
 
-    if (spell->Mechanic == MECHANIC_FEAR)
-    {
-         if (pVictim->HasAura(12292, 0) || pVictim->HasAura(18499,0))  // Deathwish and Berserker Rage
-         {
-             return SPELL_MISS_IMMUNE;
-         }
-    }
-
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
     if (IsPositiveSpell(spell->Id)
@@ -2837,10 +2810,9 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
         for (Unit::AuraList::const_iterator i = mReflectSpellsSchool.begin(); i != mReflectSpellsSchool.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spell))
                 reflectchance = (*i)->GetModifierValue();
+
         if (reflectchance > 0 && roll_chance_i(reflectchance))
-        {
             return SPELL_MISS_REFLECT;
-        }
     }
 
     switch (spell->DmgClass)

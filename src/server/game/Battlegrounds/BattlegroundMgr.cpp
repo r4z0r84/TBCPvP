@@ -677,19 +677,13 @@ void BattleGroundQueue::BGEndedRemoveInvites(BattleGround *bg)
                 uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
                 if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
                 {
-                    // SOLO QUEUE: Add 10 minute Deserter debuff to block queuing if player misses queue
+                    // SOLO QUEUE: Add Deserter debuff to block queuing if player misses queue
                     if (ginfo->IsRated && ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
                     {
                         if (!plr->GetSession()->PlayerLoading())
                         {
                             plr->CastSpell(plr, 26013, true);
-                            ChatHandler(plr).PSendSysMessage("You have been marked as a Deserter!");
-
-                            if (Aura* Aur = plr->GetAura(26013, 0))
-                            {
-                                Aur->SetAuraDuration(900000); // 15 minutes
-                                Aur->UpdateAuraDuration();
-                            }
+                            ChatHandler(plr).PSendSysMessage("You deserted your teammates by failing to accept the invite to a rated arena match. You have been marked as a Deserter.");
                         }
                     }
 

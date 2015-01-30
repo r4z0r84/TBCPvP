@@ -329,7 +329,7 @@ class BattleGround
         void SetTypeID(uint32 TypeID)       { m_TypeID = TypeID; }
         void SetQueueType(uint32 ID)        { m_Queue_type = ID; }
         void SetInstanceID(uint32 InstanceID) { m_InstanceID = InstanceID; }
-        void SetStatus(uint32 Status)       { m_Status = Status; }
+        void SetStatus(uint32 Status)       { m_Status = Status; m_TimeElapsedSinceBeggining = 0; }
         void SetStartTime(uint32 Time)      { m_StartTime = Time; }
         void SetEndTime(uint32 Time)        { m_EndTime = Time; }
         void SetLastResurrectTime(uint32 Time) { m_LastResurrectTime = Time; }
@@ -590,6 +590,7 @@ class BattleGround
         bool   m_IsRated;                                   // is this battle rated?
         bool   m_PrematureCountDown;
         uint32 m_PrematureCountDownTimer;
+        uint32 m_TimeElapsedSinceBeggining;
         char const *m_Name;
 
         /* Player lists */

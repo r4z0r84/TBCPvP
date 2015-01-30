@@ -46,7 +46,7 @@ enum BattleGroundNAObjects
 
 enum BattleGroundNATimers
 {
-    BG_NA_DOOR_DESPAWN_TIMER = 5
+    BG_NA_DOOR_DESPAWN_TIMER = 5000
 };
 
 class BattleGroundNAScore : public BattleGroundScore
@@ -78,6 +78,9 @@ class BattleGroundNA : public BattleGround
         virtual void FillInitialWorldStates(WorldPacket &d);
         void HandleKillPlayer(Player* player, Player* killer);
         bool HandlePlayerUnderMap(Player * plr);
+
+        uint32 m_TimeElapsedSinceBeggining;
+        bool m_doorDespawned;
 };
 #endif
 

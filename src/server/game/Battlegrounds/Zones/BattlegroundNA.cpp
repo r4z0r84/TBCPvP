@@ -40,6 +40,9 @@ BattleGroundNA::BattleGroundNA()
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
+
+    m_TimeElapsedSinceBeggining = 0;
+    m_doorDespawned = false;
 }
 
 BattleGroundNA::~BattleGroundNA()
@@ -49,6 +52,18 @@ BattleGroundNA::~BattleGroundNA()
 void BattleGroundNA::Update(time_t diff)
 {
     BattleGround::Update(diff);
+
+    if (GetStatus() == STATUS_IN_PROGRESS)
+    {
+        m_TimeElapsedSinceBeggining += diff;
+
+        if (m_TimeElapsedSinceBeggining >= BG_NA_DOOR_DESPAWN_TIMER && !m_doorDespawned)
+        {
+            m_doorDespawned = true;
+            for (uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; i++)
+                DelObject(i);
+        }
+    }
 }
 
 void BattleGroundNA::StartingEventCloseDoors()
@@ -64,6 +79,8 @@ void BattleGroundNA::StartingEventOpenDoors()
 
     for (uint32 i = BG_NA_OBJECT_BUFF_1; i <= BG_NA_OBJECT_BUFF_2; ++i)
         SpawnBGObject(i, 60);
+
+    m_TimeElapsedSinceBeggining = 0;
 }
 
 void BattleGroundNA::AddPlayer(Player *plr)

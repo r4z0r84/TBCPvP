@@ -2563,6 +2563,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
             spellInfo->EffectImplicitTargetB[1] = 0;
             break;
+        case 27066: // Trueshot Aura 4
+            spellInfo->Dispel = 0;
+            break;
         default:
             break;
         }

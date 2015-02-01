@@ -245,7 +245,7 @@ void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo)
                     PlayerQueueInfo& qPlayerInfo = m_QueuedPlayers[queue_id][_player->GetGUID()];
                     if (qPlayerInfo.GroupInfo->IsRated)
                     {
-                        if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
+                        /*if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
                         {
                             if (_player->GetTalentSpecialization() == TALENT_SPECIALIZATION_HEALER)
                                 qRatedAlliance++;
@@ -253,16 +253,16 @@ void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo)
                                 qRatedHorde++;
                         }
                         else // normal team queues
-                        {
+                        {*/
                             if (_player->GetTeam() == ALLIANCE)
                                 qRatedAlliance++;
                             else
                                 qRatedHorde++;
-                        }
+                        //}
                     }
                     else // skirmish
                     {
-                        if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
+                        /*if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
                         {
                             if (_player->GetTalentSpecialization() == TALENT_SPECIALIZATION_HEALER)
                                 qAlliance++;
@@ -270,12 +270,12 @@ void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo)
                                 qHorde++;
                         }
                         else // normal queues
-                        {
+                        {*/
                             if (_player->GetTeam() == ALLIANCE)
                                 qAlliance++;
                             else
                                 qHorde++;
-                        }
+                        //}
                     }
                 }
                 else // battlegrounds
@@ -294,12 +294,12 @@ void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo)
             if (bg->isArena())
             {
                 bool isRated = ginfo->IsRated;
-                if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
+                /*if (ginfo->ArenaType == ARENA_TYPE_SOLO_3v3)
                 {
                     ChatHandler(plr).PSendSysMessage(LANG_BG_SOLO_QUEUE_ANNOUNCE_SELF,
                         bgName, q_min_level, q_max_level, (isRated ? qRatedHorde : qHorde), (isRated ? qRatedAlliance : qAlliance));
                     return;
-                }
+                }*/
 
                 uint32 needAlliance = (MinPlayers < (isRated ? qRatedAlliance : qAlliance)) ? 0 : MinPlayers - (isRated ? qRatedAlliance : qAlliance);
                 uint32 needHorde = (MinPlayers < (isRated ? qRatedHorde : qHorde)) ? 0 : MinPlayers - (isRated ? qRatedHorde : qHorde);

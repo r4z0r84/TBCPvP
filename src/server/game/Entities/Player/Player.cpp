@@ -20013,15 +20013,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 
             // SOLO QUEUE: Add deserter (15 minutes) if player leaves on purpose during preparation
             if (bg->GetStatus() == STATUS_WAIT_JOIN)
-            {
                 CastSpell(this, 26013, true); // Deserter
-
-                if (Aura* Aur = GetAura(26013, 0))
-                {
-                    Aur->SetAuraDuration(900000); // 15 minutes
-                    Aur->UpdateAuraDuration();
-                }
-            }
         }
 
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);

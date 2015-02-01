@@ -376,8 +376,13 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             if (int32 bgTypeId = _player->GetBattleGroundQueueId(i))
             {
+                uint32 bgType = sBattleGroundMgr->BGTemplateId(bgTypeId);
+                BattleGround *bg = sBattleGroundMgr->GetBattleGroundTemplate(bgType);
+                if (bg && bg->GetTypeID() == ARENA_TYPE_SOLO_3v3 && bg->GetStatus() == STATUS_WAIT_JOIN)
+                    _player->CastSpell(_player, 26013, true);
+
                 _player->RemoveBattleGroundQueueId(bgTypeId);
-                sBattleGroundMgr->m_BattleGroundQueues[ bgTypeId ].RemovePlayer(_player->GetGUID(), true, bgTypeId);
+                sBattleGroundMgr->m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID(), true, bgTypeId);
             }
         }
 

@@ -5631,17 +5631,24 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             // first, check, if we have just started
             if (m_Spell->GetDelayStart() != 0)
             {
-                // run the spell handler and think about what we can do next
-                uint64 t_offset = e_time - m_Spell->GetDelayStart();
-                uint64 n_offset = m_Spell->handle_delayed(t_offset);
-                if (n_offset)
+                // no, we aren't, do the typical update
+                // check, if we have channeled spell on our hands
+                if (IsChanneledSpell(m_Spell->m_spellInfo))
+                        m_Spell->handle_immediate();
+                else
                 {
-                    // re-add us to the queue
-                    m_Spell->GetCaster()->m_Events.AddEvent(this, m_Spell->GetDelayStart() + n_offset, false);
-                    return(false);                      // event not complete
+                    // run the spell handler and think about what we can do next
+                    uint64 t_offset = e_time - m_Spell->GetDelayStart();
+                    uint64 n_offset = m_Spell->handle_delayed(t_offset);
+                    if (n_offset)
+                    {
+                        // re-add us to the queue
+                        m_Spell->GetCaster()->m_Events.AddEvent(this, m_Spell->GetDelayStart() + n_offset, false);
+                        return(false);                      // event not complete
+                    }
+                    // event complete
+                    // finish update event will be re-added automatically at the end of routine)
                 }
-                // event complete
-                // finish update event will be re-added automatically at the end of routine)
             }
             else
             {
@@ -5669,12 +5676,6 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 // Check if target of channeled spell still in range
                 else if (m_Spell->CheckRange(true))
                     m_Spell->cancel();
-                else
-                {
-                    // do the action (pass spell to channeling state)
-                    m_Spell->handle_immediate();
-                }
-                // event will be re-added automatically at the end of routine)
             }
             // all other states
             // event will be re-added automatically at the end of routine)

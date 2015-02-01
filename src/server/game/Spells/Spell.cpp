@@ -5634,7 +5634,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 // no, we aren't, do the typical update
                 // check, if we have channeled spell on our hands
                 if (IsChanneledSpell(m_Spell->m_spellInfo))
-                        m_Spell->handle_immediate();
+                    m_Spell->handle_immediate();
                 else
                 {
                     // run the spell handler and think about what we can do next

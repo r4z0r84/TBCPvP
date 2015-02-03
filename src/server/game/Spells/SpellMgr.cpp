@@ -2566,6 +2566,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 27066: // Trueshot Aura 4
             spellInfo->Dispel = 0;
             break;
+        case 24531: // Refocus (Renataki's Charm of Beasts)
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            break;
         default:
             break;
         }

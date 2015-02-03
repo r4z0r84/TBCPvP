@@ -1057,9 +1057,9 @@ void Spell::EffectDummy(uint32 i)
 
                     if (Player* plCaster = m_caster->ToPlayer())
                     {
-                        plCaster->RemoveSpellCooldown(27065); // Aimed Shot (Rank 7)
-                        plCaster->RemoveSpellCooldown(27021); // Multi-Shot (Rank 6)
-                        plCaster->RemoveSpellCooldown(27022); // Volley (Rank 4)
+                        plCaster->RemoveSpellCooldown(27065, true); // Aimed Shot (Rank 7)
+                        plCaster->RemoveSpellCooldown(27021, true); // Multi-Shot (Rank 6)
+                        plCaster->RemoveSpellCooldown(27022, true); // Volley (Rank 4)
                     }
                     return;
                 case 24930:                                 // Hallow's End Candy

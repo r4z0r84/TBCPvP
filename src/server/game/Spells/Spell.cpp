@@ -4788,7 +4788,7 @@ bool Spell::CanAutoCast(Unit* target)
     return false;                                           //target invalid
 }
 
-uint8 Spell::CheckRange(bool strict)
+uint8 Spell::CheckRange(bool strict, bool initialCheck)
 {
     float range_mod = 0.f;
 
@@ -4828,9 +4828,12 @@ uint8 Spell::CheckRange(bool strict)
         else if (min_range && m_caster->IsWithinCombatRange(target, min_range)) // skip this check if min_range = 0
             return SPELL_FAILED_TOO_CLOSE;
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER &&
-            (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(M_PI, target))
-            return SPELL_FAILED_UNIT_NOT_INFRONT;
+        if (initialCheck)
+        {
+            if (m_caster->GetTypeId() == TYPEID_PLAYER &&
+                (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(M_PI, target))
+                return SPELL_FAILED_UNIT_NOT_INFRONT;
+        }
     }
 
     if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_dstPos.GetPositionX() != 0 && m_targets.m_dstPos.GetPositionY() != 0 && m_targets.m_dstPos.GetPositionZ() != 0)
@@ -5674,7 +5677,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                     m_Spell->cancel();
                 }
                 // Check if target of channeled spell still in range
-                else if (m_Spell->CheckRange(true))
+                else if (m_Spell->CheckRange(true, false))
                     m_Spell->cancel();
             }
             // all other states

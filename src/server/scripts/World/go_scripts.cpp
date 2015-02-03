@@ -535,19 +535,6 @@ bool GOHello_go_hive_pod(Player* player, GameObject *pGO)
     return true;
 };
 
-/*######
-## Quest 11011: Eternal Vigilance
-######*/
-
-#define ITEM_ESSENCE_INFUSED_MOONSTONE 32449
-
-bool GOHello_go_the_ravens_claw(Player* player, GameObject* /*pGO*/)
-{
-    if (player->HasItemCount(ITEM_ESSENCE_INFUSED_MOONSTONE, 1))
-        player->DestroyItemCount(ITEM_ESSENCE_INFUSED_MOONSTONE, 1, true);
-    return true;
-}
-
 void AddSC_go_scripts()
 {
     Script *newscript;
@@ -662,10 +649,5 @@ void AddSC_go_scripts()
     newscript = new Script;
     newscript->Name = "go_hive_pod";
     newscript->pGOHello = &GOHello_go_hive_pod;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "go_the_ravens_claw";
-    newscript->pGOHello = &GOHello_go_the_ravens_claw;
     newscript->RegisterSelf();
 }

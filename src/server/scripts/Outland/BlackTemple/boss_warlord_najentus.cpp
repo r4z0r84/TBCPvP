@@ -49,8 +49,6 @@ enum eEnums
     SPELL_CREATE_NAJENTUS_SPINE     = 39956,
     SPELL_HURL_SPINE                = 39948,
     SPELL_BERSERK                   = 45078,
-    SPELL_NEEDLE_SPINE_DMG          = 39835,
-    SPELL_NEEDLE_SPINE_AOE          = 39968,
 
     GOBJECT_SPINE                   = 185584
 };
@@ -60,6 +58,7 @@ struct boss_najentusAI : public ScriptedAI
     boss_najentusAI(Creature *c) : ScriptedAI(c)
     {
         instance = c->GetInstanceScript();
+        c->GetPosition(&centerPos);
     }
 
     ScriptedInstance* instance;
@@ -69,23 +68,43 @@ struct boss_najentusAI : public ScriptedAI
     uint32 SpecialYellTimer;
     uint32 TidalShieldTimer;
     uint32 ImpalingSpineTimer;
+    uint32 CheckTimer;
 
-    uint64 SpineTargetGUID;
+    bool checkAura;
+
+    Position centerPos;
+
+    std::map<uint64, uint64> SpineTargetMap;
 
     void Reset()
     {
-        EnrageTimer = 480000;
+        EnrageTimer = 330000;
         SpecialYellTimer = 45000 + (rand()%76)*1000;
         TidalShieldTimer = 60000;
 
-        ResetTimer();
+        ImpalingSpineTimer = 20000;
+        NeedleSpineTimer = 2000 + rand() % 2000;
+        TidalShieldTimer = 60000;
+        CheckTimer = 3000;
 
-        SpineTargetGUID = 0;
+        checkAura = false;
+
+        std::map<uint64, uint64>::iterator spineTarget = SpineTargetMap.begin();
+        for (; spineTarget != SpineTargetMap.end(); ++spineTarget)
+        {
+            if (GameObject *go = GameObject::GetGameObject(*me, spineTarget->first))
+            {
+                go->SetLootState(GO_JUST_DEACTIVATED);
+                go->SetRespawnTime(0);
+            }
+        }
+
+        SpineTargetMap.clear();
+
+        DeleteSpine();
 
         if (instance)
             instance->SetData(DATA_HIGHWARLORDNAJENTUSEVENT, NOT_STARTED);
-
-        DeleteSpine();
     }
 
     void KilledUnit(Unit * /*victim*/)
@@ -98,8 +117,8 @@ struct boss_najentusAI : public ScriptedAI
         if (instance)
             instance->SetData(DATA_HIGHWARLORDNAJENTUSEVENT, DONE);
 
-        DoScriptText(SAY_DEATH, me);
         DeleteSpine();
+        DoScriptText(SAY_DEATH, me);
     }
 
     bool TryDoCast(Unit *victim, uint32 spellId, bool triggered = false)
@@ -120,16 +139,6 @@ struct boss_najentusAI : public ScriptedAI
         }
     }
 
-    void SpellHitTarget(Unit *pTarget, const SpellEntry *spell)
-    {
-        switch (spell->Id)
-        {
-        case SPELL_NEEDLE_SPINE:
-            me->CastSpell(pTarget, SPELL_NEEDLE_SPINE_DMG, true);
-            break;
-        }
-    }
-
     void EnterCombat(Unit * /*who*/)
     {
         if (instance)
@@ -139,20 +148,26 @@ struct boss_najentusAI : public ScriptedAI
         DoZoneInCombat();
     }
 
-    bool RemoveImpalingSpine()
-    {
-        if (!SpineTargetGUID) return false;
-        Unit *pTarget = Unit::GetUnit(*me, SpineTargetGUID);
-        if (pTarget && pTarget->HasAura(SPELL_IMPALING_SPINE, 1))
-            pTarget->RemoveAurasDueToSpell(SPELL_IMPALING_SPINE);
-        SpineTargetGUID=0;
-        return true;
-    }
-
     void ResetTimer(uint32 inc = 0)
     {
         NeedleSpineTimer = 10000 + inc;
         ImpalingSpineTimer = 20000 + inc;
+    }
+
+    bool RemoveImpalingSpine(uint64 spineGUID)
+    {
+        if (SpineTargetMap.empty())
+            return false;
+
+        std::map<uint64, uint64>::iterator spineTarget = SpineTargetMap.find(spineGUID);
+        if (spineTarget == SpineTargetMap.end())
+            return false;
+
+        Unit *pTarget = Unit::GetUnit(*me, spineTarget->second);
+        if (pTarget && pTarget->HasAura(SPELL_IMPALING_SPINE, 1))
+            pTarget->RemoveAurasDueToSpell(SPELL_IMPALING_SPINE);
+        SpineTargetMap.erase(spineTarget);
+        return true;
     }
 
     void DeleteSpine()
@@ -164,7 +179,7 @@ struct boss_najentusAI : public ScriptedAI
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
         {
             Player* i_pl = i->getSource();
-            if (i_pl)
+            if (i_pl && i_pl->HasItemCount(32408, i_pl->GetItemCount(32408)))
                 i_pl->DestroyItemCount(32408, i_pl->GetItemCount(32408), true);
         }
     }
@@ -174,12 +189,30 @@ struct boss_najentusAI : public ScriptedAI
         if (!UpdateVictim())
             return;
 
+        if (CheckTimer < diff)
+        {
+            if (!me->IsWithinDist3d(&centerPos, 105.0f))
+                EnterEvadeMode();
+
+            CheckTimer = 3000;
+        }
+        else CheckTimer -= diff;
+
+        if (checkAura)
+        {
+            if (me->HasAura(SPELL_TIDAL_SHIELD, 0))
+                NeedleSpineTimer = 10000;
+            else
+                checkAura = false;
+        }
+
         if (TidalShieldTimer <= diff)
         {
             if (TryDoCast(me, SPELL_TIDAL_SHIELD, true))
             {
                 ResetTimer(45000);
                 TidalShieldTimer = 60000;
+                checkAura = true;
             }
         } else TidalShieldTimer -= diff;
 
@@ -206,14 +239,20 @@ struct boss_najentusAI : public ScriptedAI
         {
             if (!me->IsNonMeleeSpellCasted(false))
             {
-                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 80, true);
-                if (!pTarget) pTarget = me->getVictim();
+                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, 150, true);
+                if (!pTarget)
+                    pTarget = me->getVictim();
+
                 if (pTarget)
                 {
-                    DoCast(pTarget, SPELL_IMPALING_SPINE);
-                    SpineTargetGUID = pTarget->GetGUID();
+                    DoCast(pTarget, SPELL_IMPALING_SPINE, true);
                     //must let target summon, otherwise you cannot click the spine
-                    pTarget->SummonGameObject(GOBJECT_SPINE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 0, 0);
+                    GameObject* spine = pTarget->SummonGameObject(GOBJECT_SPINE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 0, 30);
+                    if (spine)
+                    {
+                        std::pair<uint64, uint64> spineTarget(spine->GetGUID(), pTarget->GetGUID());
+                        SpineTargetMap.insert(spineTarget);
+                    }
 
                     switch (rand()%2)
                     {
@@ -228,13 +267,7 @@ struct boss_najentusAI : public ScriptedAI
         if (NeedleSpineTimer <= diff)
         {
             if (TryDoCast(me, SPELL_NEEDLE_SPINE, true))
-            {
-                //std::list<Unit*> target;
-                //SelectUnitList(target, 3, SELECT_TARGET_RANDOM, 100, true);
-                //for (std::list<Unit*>::iterator i = target.begin(); i != target.end(); ++i)
-                //    me->CastSpell(*i, 39835, true);
                 NeedleSpineTimer = 3000;
-            }
         } else NeedleSpineTimer -= diff;
 
         DoMeleeAttackIfReady();
@@ -245,10 +278,10 @@ bool GOHello_go_najentus_spine(Player* player, GameObject* pGo)
 {
     if (ScriptedInstance* instance = pGo->GetInstanceScript())
         if (Creature* Najentus = Unit::GetCreature(*pGo, instance->GetData64(DATA_HIGHWARLORDNAJENTUS)))
-            if (CAST_AI(boss_najentusAI, Najentus->AI())->RemoveImpalingSpine())
+            if (CAST_AI(boss_najentusAI, Najentus->AI())->RemoveImpalingSpine(pGo->GetGUID()))
             {
                 player->CastSpell(player, SPELL_CREATE_NAJENTUS_SPINE, true);
-                pGo->AddObjectToRemoveList();
+                pGo->Delete();
             }
     return true;
 }

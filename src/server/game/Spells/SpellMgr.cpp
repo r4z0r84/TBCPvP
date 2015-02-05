@@ -2386,7 +2386,6 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 41357: // L1 Acane Charge
         case 41376: // Spite
-        case 39992: // Needle Spine
         case 29576: // Multi-Shot
         case 37790: // Spread Shot
         case 46771: // Flame Sear
@@ -2568,6 +2567,10 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 24531: // Refocus (Renataki's Charm of Beasts)
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            break;
+        case 39992: // Needle Spine
+            spellInfo->MaxAffectedTargets = 3;
+            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_PLAYERS_ONLY;
             break;
         default:
             break;

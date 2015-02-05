@@ -1368,6 +1368,11 @@ void Spell::EffectDummy(uint32 i)
 
                     return;
                 }
+                case 39992:                                 // Needle Spine Targeting
+                {
+                    m_caster->CastSpell(unitTarget, 39835, true);
+                    break;
+                }
                 case 44997:                                 // Converting Sentry
                 {
                     //Converted Sentry Credit

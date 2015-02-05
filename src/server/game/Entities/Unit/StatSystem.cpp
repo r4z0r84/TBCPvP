@@ -625,14 +625,22 @@ void Player::UpdateManaRegen()
     }
 
     // Bonus from some dummy auras
-    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_PERIODIC_DUMMY);
-    for (AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
-        if ((*i)->GetId() == 34074)                          // Aspect of the Viper
+    AuraMap const& mAuras = GetAuras();
+    for (AuraMap::const_iterator itr = mAuras.begin(); itr != mAuras.end(); ++itr)
+    {
+        // Aspect of the Viper
+        if (itr->second->GetId() == 34074)
         {
-            power_regen_mp5 += (*i)->GetModifier()->m_amount * Intellect / 500.0f;
+            power_regen_mp5 += itr->second->GetModifier()->m_amount * Intellect / 500.0f;
             // Add regen bonus from level in this dummy
             power_regen_mp5 += getLevel() * 35 / 100;
         }
+        // Improved Water Shield (Totem of the Thunderhead)
+        if (itr->second->GetId() == 34318)
+        {
+            power_regen_mp5 += 0.4;//itr->second->GetSpellProto()->EffectMiscValue[1];
+        }
+    }
 
     // Set regen rate in cast state apply only on spirit based regen
     int32 modManaRegenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);

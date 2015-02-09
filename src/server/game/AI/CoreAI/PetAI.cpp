@@ -319,9 +319,6 @@ void PetAI::AttackStart(Unit *target)
     if (!_CanAttack(target))
         return;
 
-    if (Unit* owner = me->GetOwner())
-        owner->SetInCombatWith(target);
-
     DoAttack(target, true);
 }
 

@@ -9352,6 +9352,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     if (PvP)
         m_CombatTimer = 5000;
 
+    if (GetTypeId() == TYPEID_PLAYER)
+        if (Pet* pet = ToPlayer()->GetPet())
+            pet->SetInCombatState(PvP);
+
     if (isInCombat())
         return;
 
@@ -9387,6 +9391,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         
         if (ToCreature()->isPet())
         {
+            if (Unit* owner = GetCharmerOrOwnerPlayerOrPlayerItself())
+                owner->SetInCombatState(PvP);
+
             UpdateSpeed(MOVE_RUN, true, 1.125f);
             UpdateSpeed(MOVE_SWIM, true);
             UpdateSpeed(MOVE_FLIGHT, true);

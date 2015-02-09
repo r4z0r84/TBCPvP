@@ -3643,13 +3643,7 @@ uint8 Spell::CanCast(bool strict)
 {
     // check cooldowns to prevent cheating
     if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER && (m_caster->ToPlayer()->HasSpellCooldown(m_spellInfo->Id) || strict && m_caster->ToPlayer()->HasGlobalCooldown(m_spellInfo)))
-    {
-       //triggered spells shouldn't be casted (cooldown check in handleproctriggerspell)
-       // if (m_triggeredByAuraSpell)
-       //     return SPELL_FAILED_DONT_REPORT;
-       // else
             return SPELL_FAILED_NOT_READY;
-    }
 
     if (m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_INTERRUPTED_COMBAT;
@@ -3786,12 +3780,11 @@ uint8 Spell::CanCast(bool strict)
             }
         }
 
-        /* This prevented to cast heal on players in cyclone, which should be possible
         if (IsPositiveSpell(m_spellInfo->Id))
         {
-            if (target->IsImmunedToSpell(m_spellInfo, false))
+            if (target->IsImmunedToSpell(m_spellInfo, false) && !target->hasUnitState(UNIT_STAT_ISOLATED))
                 return SPELL_FAILED_TARGET_AURASTATE;
-        }*/
+        }
 
         //Must be behind the target.
         if (m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI*0.825f, m_caster)
@@ -3841,143 +3834,52 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_NOT_MOUNTED;
     }
 
+    // Check if devour magic dispel makes sense
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        uint32 dispelMask = GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[i]));
+        // Only check for Devour Magic (Warlock Felhunter Spell)
+        if (m_spellInfo->Effect[i] == SPELL_EFFECT_DISPEL &&
+            m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK)
+        {
+            if (target)
+            {
+                // Fill possible dispell list
+                std::vector <Aura *> dispel_list;
+
+                Unit::AuraMap const& auras = target->GetAuras();
+                for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                {
+                    Aura *aur = (*itr).second;
+                    if (aur && (1 << aur->GetSpellProto()->Dispel) & dispelMask)
+                    {
+                        if (aur->GetSpellProto()->Dispel == DISPEL_MAGIC)
+                        {
+                            bool positive = true;
+                            if (!aur->IsPositive())
+                                positive = false;
+
+                            // do not remove positive auras if friendly target
+                            //               negative auras if non-friendly target
+                            if (aur->IsPositive() == target->IsFriendlyTo(m_caster))
+                                continue;
+                        }
+                        // Add every aura stack to dispel list
+                        for (uint32 stack_amount = 0; stack_amount < aur->GetStackAmount(); ++stack_amount)
+                            dispel_list.push_back(aur);
+                    }
+                }
+
+                if (dispel_list.empty())
+                    return SPELL_FAILED_NOTHING_TO_DISPEL;
+            }
+        }
+    }
+
     // always (except passive spells) check items (focus object can be required for any type casts)
     if (!IsPassiveSpell(m_spellInfo->Id))
         if (uint8 castResult = CheckItems())
             return castResult;
-
-    /*//ImpliciteTargetA-B = 38, If fact there is 0 Spell with  ImpliciteTargetB=38
-    if (m_UniqueTargetInfo.empty())                          // skip second canCast apply (for delayed spells for example)
-    {
-        for (uint8 j = 0; j < 3; j++)
-        {
-            if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_UNIT_NEARBY_ENTRY ||
-                m_spellInfo->EffectImplicitTargetB[j] == TARGET_UNIT_NEARBY_ENTRY && m_spellInfo->EffectImplicitTargetA[j] != TARGET_UNIT_CASTER ||
-                m_spellInfo->EffectImplicitTargetA[j] == TARGET_DST_NEARBY_ENTRY ||
-                m_spellInfo->EffectImplicitTargetB[j] == TARGET_DST_NEARBY_ENTRY)
-            {
-                SpellScriptTarget::const_iterator lower = sSpellMgr->GetBeginSpellScriptTarget(m_spellInfo->Id);
-                SpellScriptTarget::const_iterator upper = sSpellMgr->GetEndSpellScriptTarget(m_spellInfo->Id);
-                if (lower == upper)
-                    sLog->outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = TARGET_UNIT_NEARBY_ENTRY or TARGET_DST_NEARBY_ENTRY, but does not have record in spell_script_target", m_spellInfo->Id);
-
-                SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-                float range = GetSpellMaxRange(srange);
-
-                Creature* creatureScriptTarget = NULL;
-                GameObject* goScriptTarget = NULL;
-
-                for (SpellScriptTarget::const_iterator i_spellST = lower; i_spellST != upper; ++i_spellST)
-                {
-                    switch (i_spellST->second.type)
-                    {
-                        case SPELL_TARGET_TYPE_GAMEOBJECT:
-                        {
-                            GameObject* p_GameObject = NULL;
-
-                            if (i_spellST->second.targetEntry)
-                            {
-                                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                                Cell cell(p);
-                                cell.data.Part.reserved = ALL_DISTRICT;
-
-                                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*m_caster, i_spellST->second.targetEntry, range);
-                                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(p_GameObject, go_check);
-
-                                TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
-                                cell.Visit(p, object_checker, *m_caster->GetMap(), *m_caster, range);
-
-                                if (p_GameObject)
-                                {
-                                    // remember found target and range, next attempt will find more near target with another entry
-                                    creatureScriptTarget = NULL;
-                                    goScriptTarget = p_GameObject;
-                                    range = go_check.GetLastRange();
-                                }
-                            }
-                            else if (focusObject)          //Focus Object
-                            {
-                                float frange = m_caster->GetDistance(focusObject);
-                                if (range >= frange)
-                                {
-                                    creatureScriptTarget = NULL;
-                                    goScriptTarget = focusObject;
-                                    range = frange;
-                                }
-                            }
-                            break;
-                        }
-                        case SPELL_TARGET_TYPE_CREATURE:
-                        case SPELL_TARGET_TYPE_DEAD:
-                        default:
-                        {
-                            Creature *p_Creature = NULL;
-
-                            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                            Cell cell(p);
-                            cell.data.Part.reserved = ALL_DISTRICT;
-                            cell.SetNoCreate();             // Really don't know what is that???
-
-                            MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, i_spellST->second.targetEntry, i_spellST->second.type != SPELL_TARGET_TYPE_DEAD, range);
-                            MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(p_Creature, u_check);
-
-                            TypeContainerVisitor<MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
-
-                            cell.Visit(p, grid_creature_searcher, *m_caster->GetMap(), *m_caster, range);
-
-                            if (p_Creature)
-                            {
-                                creatureScriptTarget = p_Creature;
-                                goScriptTarget = NULL;
-                                range = u_check.GetLastRange();
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                if (creatureScriptTarget)
-                {
-                    // store coordinates for TARGET_DST_NEARBY_ENTRY
-                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_DST_NEARBY_ENTRY ||
-                        m_spellInfo->EffectImplicitTargetB[j] == TARGET_DST_NEARBY_ENTRY)
-                    {
-                        m_targets.setDst(creatureScriptTarget->GetPositionX(), creatureScriptTarget->GetPositionY(), creatureScriptTarget->GetPositionZ());
-
-                        if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_DST_NEARBY_ENTRY && m_spellInfo->EffectImplicitTargetB[j] == 0 && m_spellInfo->Effect[j] != SPELL_EFFECT_PERSISTENT_AREA_AURA)
-                            AddUnitTarget(creatureScriptTarget, j);
-                    }
-                    // store explicit target for TARGET_UNIT_NEARBY_ENTRY
-                    else
-                        AddUnitTarget(creatureScriptTarget, j);
-                }
-                else if (goScriptTarget)
-                {
-                    // store coordinates for TARGET_DST_NEARBY_ENTRY
-                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_DST_NEARBY_ENTRY ||
-                        m_spellInfo->EffectImplicitTargetB[j] == TARGET_DST_NEARBY_ENTRY)
-                    {
-                        m_targets.setDst(goScriptTarget->GetPositionX(), goScriptTarget->GetPositionY(), goScriptTarget->GetPositionZ());
-
-                        if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_DST_NEARBY_ENTRY && m_spellInfo->EffectImplicitTargetB[j] == 0 && m_spellInfo->Effect[j] != SPELL_EFFECT_PERSISTENT_AREA_AURA)
-                            AddGOTarget(goScriptTarget, j);
-                    }
-                    // store explicit target for TARGET_UNIT_NEARBY_ENTRY
-                    else
-                        AddGOTarget(goScriptTarget, j);
-                }
-                //Missing DB Entry or targets for this spellEffect.
-                else
-                {
-                    // not report target not existence for triggered spells
-                    if (m_triggeredByAuraSpell || m_IsTriggeredSpell)
-                        return SPELL_FAILED_DONT_REPORT;
-                    else
-                        return SPELL_FAILED_BAD_TARGETS;
-                }
-            }
-        }
-    }*/
 
     if (!m_IsTriggeredSpell)
     {
@@ -4747,6 +4649,13 @@ uint8 Spell::CheckCasterAuras() const
 bool Spell::CanAutoCast(Unit* target)
 {
     uint64 targetguid = target->GetGUID();
+
+    // Devour Magic, don't allow to auto cast on friendly targets
+    if (m_spellInfo->Category == 12)
+    {
+        if (m_caster->IsFriendlyTo(target))
+            return false;
+    }
 
     for (uint32 j = 0;j<3;j++)
     {

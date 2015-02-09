@@ -2972,20 +2972,20 @@ void Spell::finish(bool ok)
 
 void Spell::SendCastResult(uint8 result)
 {
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if (m_caster->ToPlayer()->GetSession()->PlayerLoading())  // don't send cast results at loading time
+        return;
+
      // Send failture to others
-    if (result != 0)
+    if (result != 0 && result != SPELL_FAILED_SPELL_IN_PROGRESS)
     {
         WorldPacket data(SMSG_SPELL_FAILED_OTHER, (8+4));
         data << m_caster->GetPackGUID();
         data << m_spellInfo->Id;
         m_caster->SendMessageToSet(&data, false);
     }
-
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    if (m_caster->ToPlayer()->GetSession()->PlayerLoading())  // don't send cast results at loading time
-        return;
 
     if (result != 0)
     {

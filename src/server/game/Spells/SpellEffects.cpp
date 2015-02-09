@@ -4129,6 +4129,7 @@ void Spell::EffectSummonPet(uint32 i)
                 OldSummon->RemoveAllAurasButPermanent();
                 OldSummon->m_CreatureSpellCooldowns.clear();
                 OldSummon->m_CreatureCategoryCooldowns.clear();
+                OldSummon->m_GlobalCooldown = 0;
             }
 
             if (owner->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled())

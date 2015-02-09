@@ -1161,8 +1161,9 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     if (!unit || !effectMask)
         return SPELL_MISS_NONE;
 
+    float speed = m_spellInfo->speed;
     // Recheck immune (only for delayed spells)
-    if (m_spellInfo->speed && !(m_spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) &&
+    if ((m_delayMoment || speed) && !(m_spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) &&
         (unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo), true) || unit->IsImmunedToSpell(m_spellInfo, true)))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
@@ -1202,8 +1203,12 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
             bool isVisibleForHit = ((unit->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) || unit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE , SPELLFAMILYFLAG_ROGUE_VANISH)) && !unit->isVisibleForOrDetect(m_caster, true)) ? false : true;
 
             // for delayed spells ignore not visible explicit target
-            if (m_spellInfo->speed > 0.0f && unit == m_targets.getUnitTarget() && !isVisibleForHit)
+            if ((m_delayMoment || speed) && unit == m_targets.getUnitTarget() && !isVisibleForHit)
             {
+                // Remove vanish when vanishing instant spells
+                if (!speed)
+                    unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
                 m_damage = 0;
                 return SPELL_MISS_EVADE;
             }
@@ -1223,7 +1228,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
             // TODO: this cause soul transfer bugged
-            if (m_spellInfo->speed > 0.0f && unit->GetTypeId() == TYPEID_PLAYER && !IsPositiveSpell(m_spellInfo->Id))
+            if ((m_delayMoment || speed) && unit->GetTypeId() == TYPEID_PLAYER && !IsPositiveSpell(m_spellInfo->Id))
             {
                 m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 m_damage = 0;

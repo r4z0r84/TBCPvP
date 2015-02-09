@@ -2634,7 +2634,6 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
         canParry = false;
         canDodge = false;
     }
-        return SPELL_MISS_NONE;
 
     // Check for attack from behind
     if (!pVictim->HasInArc(M_PI, this))

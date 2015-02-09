@@ -54,6 +54,12 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
         return;
     }
 
+    if (pet->ToCreature()->ToPet() && pet->ToCreature()->ToPet()->GetLastCommandTimer() > 0)
+        return;
+
+    if (pet->ToCreature()->ToPet())
+        pet->ToCreature()->ToPet()->SetLastCommandTimer(500);
+
     if (pet != GetPlayer()->GetFirstControlled())
     {
         sLog->outError("HandlePetAction.Pet %u isn't pet of player %s.", uint32(GUID_LOPART(guid1)), GetPlayer()->GetName());

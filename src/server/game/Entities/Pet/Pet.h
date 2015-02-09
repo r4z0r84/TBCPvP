@@ -219,6 +219,9 @@ class Pet : public Guardian
         uint32  m_resetTalentsCost;
         time_t  m_resetTalentsTime;
 
+        uint32 GetLastCommandTimer() { return m_lastCommandTimer; }
+        uint32 SetLastCommandTimer(uint32 time) { return m_lastCommandTimer = time; }
+
         uint64 GetAuraUpdateMask() { return m_auraUpdateMask; }
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
         void UnsetAuraUpdateMask(uint8 slot) { m_auraUpdateMask &= ~(uint64(1) << slot); }
@@ -244,6 +247,7 @@ class Pet : public Guardian
         uint32  m_regenTimer;
         uint32  m_happinessTimer;
         uint32  m_loyaltyTimer;
+        uint32  m_lastCommandTimer;
         PetType m_petType;
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_loyaltyPoints;

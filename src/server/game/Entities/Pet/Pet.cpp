@@ -89,6 +89,8 @@ m_declinedname(NULL), m_owner(owner)
     m_regenTimer = 4000;
     m_loyaltyTimer = 12000;
 
+    m_lastCommandTimer = 0;
+
     m_loyaltyPoints = 0;
     m_TrainingPoints = 0;
 
@@ -580,6 +582,11 @@ void Pet::Update(uint32 diff)
                     }
                 }
             }
+
+            if (m_lastCommandTimer <= diff)
+                m_lastCommandTimer = 0;
+            else
+                m_lastCommandTimer -= diff;
 
             if (getPetType() != HUNTER_PET)
                 break;

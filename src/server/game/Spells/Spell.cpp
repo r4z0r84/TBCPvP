@@ -5281,8 +5281,8 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
     // Curse of Doom : not find another way to fix spell target check :/
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == 0x0200000000LL)
     {
-        // not allow cast at player
-        if (target->GetTypeId() == TYPEID_PLAYER)
+        // not allow cast at player or player pet
+        if (target->isCharmedOwnedByPlayerOrPlayer())
             return false;
 
         spellCreatureTargetMask = 0x7FF;

@@ -2572,6 +2572,9 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 3;
             spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_PLAYERS_ONLY;
             break;
+        case 1953: // Blink
+            spellInfo->DurationIndex = 328; // 250ms
+            break;
         default:
             break;
         }

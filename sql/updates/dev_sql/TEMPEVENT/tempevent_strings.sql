@@ -10,7 +10,7 @@ VALUES
     (66, 'Location: Map(%s), Area(%s) X(%i) Y(%i) Z(%i)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
     (67, 'Player Limit: %u', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
     (68, 'Queued Players: %u', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    (69, 'You have to set a player limit first. Use the command: .tempevent plimit <count>', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+    (69, '[Name: %s] %s - %s [Map: %s] %s', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
     (70, 'You have to set a player limit. Use the command: .tempevent plimit <count>', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
     (71, 'You have to set an event location first. Stand where you want the location to be set to and use the command: .tempevent location', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
     (72, 'This event is already active.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);

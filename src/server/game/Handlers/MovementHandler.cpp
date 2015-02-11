@@ -46,15 +46,12 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // get the teleport destination
     WorldLocation &loc = GetPlayer()->GetTeleportDest();
 
+    GetPlayer()->SetSemaphoreTeleportFar(false);
+
     // possible errors in the coordinate validity check
     if (!sMapMgr->IsValidMapCoord(loc))
     {
-        sLog->outError("WorldSession::HandleMoveWorldportAckOpcode: player %s (%d) was teleported far to a not valid location. (map:%u, x:%f, y:%f, "
-            "z:%f) We port him to his homebind instead..", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.GetMapId(), loc.GetPositionX(), loc.GetPositionY(), loc.GetPositionZ());
-        // stop teleportation else we would try this again and again in LogoutPlayer...
-        GetPlayer()->SetSemaphoreTeleportFar(false);
-        // and teleport the player to a valid place
-        GetPlayer()->TeleportToHomebind();
+        LogoutPlayer(false);
         return;
     }
 
@@ -66,10 +63,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     if (GetPlayer()->m_InstanceValid == false && !mInstance)
         GetPlayer()->m_InstanceValid = true;
 
-    GetPlayer()->SetSemaphoreTeleportFar(false);
-
     Map * oldMap = GetPlayer()->GetMap();
-    ASSERT(oldMap);
+    Map * newMap = sMapMgr->CreateMap(loc.GetMapId(), GetPlayer(), 0);
+
     if (GetPlayer()->IsInWorld())
     {
         sLog->outCrash("Player is still in world when teleported from map %u! to new map %u", oldMap->GetId(), loc.GetMapId());
@@ -77,7 +73,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     }
 
     // relocate the player to the teleport destination
-    Map * newMap = sMapMgr->CreateMap(loc.GetMapId(), GetPlayer(), 0);
     // the CanEnter checks are done in TeleporTo but conditions may change
     // while the player is in transit, for example the map may get full
     if (!newMap || !newMap->CanEnter(GetPlayer()))
@@ -86,9 +81,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->TeleportToHomebind();
         return;
     }
-    else
-        GetPlayer()->Relocate(&loc);
 
+    GetPlayer()->Relocate(&loc);
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
 

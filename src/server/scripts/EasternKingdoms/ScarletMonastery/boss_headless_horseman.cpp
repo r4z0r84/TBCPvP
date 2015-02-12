@@ -444,7 +444,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
             }
             case 6:
                 if (instance)
-                    instance->SetData(GAMEOBJECT_PUMPKIN_SHRINE, 0);   //hide gameobject
+                    instance->SetData(DATA_PUMPKIN_SHRINE, 0);   //hide gameobject
                 break;
             case 19:
                 me->RemoveUnitMovementFlag(MOVEFLAG_ONTRANSPORT | MOVEFLAG_LEVITATING);

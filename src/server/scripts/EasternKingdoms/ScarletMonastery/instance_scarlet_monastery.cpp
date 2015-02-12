@@ -28,50 +28,38 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "scarlet_monastery.h"
 
-#define ENTRY_PUMPKIN_SHRINE    186267
-#define ENTRY_HORSEMAN          23682
-#define ENTRY_HEAD              23775
-#define ENTRY_PUMPKIN           23694
-
-#define MAX_ENCOUNTER 2
-
 struct instance_scarlet_monastery : public ScriptedInstance
 {
-    instance_scarlet_monastery(Map* pMap) : ScriptedInstance(pMap) {Initialize();};
+    instance_scarlet_monastery(Map* map) : ScriptedInstance(map) { Initialize(); };
 
     uint64 PumpkinShrineGUID;
     uint64 HorsemanGUID;
     uint64 HeadGUID;
-    std::set<uint64> HorsemanAdds;
-
     uint64 MograineGUID;
     uint64 WhitemaneGUID;
     uint64 VorrelGUID;
-    uint64 DoorHighInquisitorGUID;
+    uint64 HighInquisitorsDoorGUID;
 
-    uint32 m_auiEncounter[MAX_ENCOUNTER];
+    std::set<uint64> HorsemanAdds;
 
     void Initialize()
     {
-        memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-
-        PumpkinShrineGUID  = 0;
-        HorsemanGUID = 0;
-        HeadGUID = 0;
+        SetBossNumber(EncounterCount);
         HorsemanAdds.clear();
-
-        MograineGUID = 0;
-        WhitemaneGUID = 0;
-        VorrelGUID = 0;
-        DoorHighInquisitorGUID = 0;
     }
 
     void OnGameObjectCreate(GameObject* pGo, bool /*add*/)
     {
         switch (pGo->GetEntry())
         {
-        case ENTRY_PUMPKIN_SHRINE: PumpkinShrineGUID = pGo->GetGUID();break;
-        case 104600: DoorHighInquisitorGUID = pGo->GetGUID(); break;
+            case GO_PUMPKIN_SHRINE:
+                PumpkinShrineGUID = pGo->GetGUID();
+                break;
+            case GO_HIGH_INQUISITORS_DOOR:
+                HighInquisitorsDoorGUID = pGo->GetGUID();
+                break;
+            default:
+                break;
         }
     }
 
@@ -79,12 +67,26 @@ struct instance_scarlet_monastery : public ScriptedInstance
     {
         switch (creature->GetEntry())
         {
-            case ENTRY_HORSEMAN:    HorsemanGUID = creature->GetGUID(); break;
-            case ENTRY_HEAD:        HeadGUID = creature->GetGUID(); break;
-            case ENTRY_PUMPKIN:     HorsemanAdds.insert(creature->GetGUID());break;
-            case 3976: MograineGUID = creature->GetGUID(); break;
-            case 3977: WhitemaneGUID = creature->GetGUID(); break;
-            case 3981: VorrelGUID = creature->GetGUID(); break;
+            case NPC_HORSEMAN:
+                HorsemanGUID = creature->GetGUID();
+                break;
+            case NPC_HEAD:
+                HeadGUID = creature->GetGUID();
+                break;
+            case NPC_PUMPKIN:
+                HorsemanAdds.insert(creature->GetGUID());
+                break;
+            case NPC_MOGRAINE:
+                MograineGUID = creature->GetGUID();
+                break;
+            case NPC_WHITEMANE:
+                WhitemaneGUID = creature->GetGUID();
+                break;
+            case NPC_VORREL:
+                VorrelGUID = creature->GetGUID();
+                break;
+            default:
+                break;
         }
     }
 
@@ -92,55 +94,49 @@ struct instance_scarlet_monastery : public ScriptedInstance
     {
         switch (type)
         {
-        case TYPE_MOGRAINE_AND_WHITE_EVENT:
-            if (data == IN_PROGRESS)
-                DoUseDoorOrButton(DoorHighInquisitorGUID);
-            if (data == FAIL)
-                DoUseDoorOrButton(DoorHighInquisitorGUID);
-
-            m_auiEncounter[0] = data;
-            break;
-        case GAMEOBJECT_PUMPKIN_SHRINE:
-            HandleGameObject(PumpkinShrineGUID, false);
-            break;
-        case DATA_HORSEMAN_EVENT:
-            m_auiEncounter[1] = data;
-            if (data == DONE)
-            {
-                for (std::set<uint64>::const_iterator itr = HorsemanAdds.begin(); itr != HorsemanAdds.end(); ++itr)
-                {
-                    Creature* add = instance->GetCreature(*itr);
-                    if (add && add->isAlive())
-                        add->Kill(add);
-                }
-                HorsemanAdds.clear();
+            case DATA_PUMPKIN_SHRINE:
                 HandleGameObject(PumpkinShrineGUID, false);
-            }
-            break;
+                break;
+            default:
+                break;
         }
+    }
+
+    bool SetBossState(uint32 type, EncounterState state)
+    {
+        if (!InstanceScript::SetBossState(type, state))
+            return false;
+
+        switch (type)
+        {
+            case DATA_HORSEMAN_EVENT:
+                if (state == DONE)
+                {
+                    for (std::set<uint64>::const_iterator itr = HorsemanAdds.begin(); itr != HorsemanAdds.end(); ++itr)
+                    {
+                        Creature* add = instance->GetCreature(*itr);
+                        if (add && add->isAlive())
+                            add->Kill(add);
+                    }
+                    HorsemanAdds.clear();
+                    HandleGameObject(PumpkinShrineGUID, false);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return true;
     }
 
     uint64 GetData64(uint32 type)
     {
         switch (type)
         {
-            //case GAMEOBJECT_PUMPKIN_SHRINE:   return PumpkinShrineGUID;
-            //case DATA_HORSEMAN:               return HorsemanGUID;
-            //case DATA_HEAD:                   return HeadGUID;
             case DATA_MOGRAINE:             return MograineGUID;
             case DATA_WHITEMANE:            return WhitemaneGUID;
             case DATA_VORREL:               return VorrelGUID;
-            case DATA_DOOR_WHITEMANE:       return DoorHighInquisitorGUID;
         }
-        return 0;
-    }
-
-    uint32 GetData(uint32 type)
-    {
-        if (type == TYPE_MOGRAINE_AND_WHITE_EVENT)
-            return m_auiEncounter[0];
-        if (type == DATA_HORSEMAN_EVENT)
-            return m_auiEncounter[1];
         return 0;
     }
 };

@@ -99,11 +99,8 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 
     void JustReachedHome()
     {
-        if (instance)
-        {
-            if (instance->GetData(DATA_MOGRAINE_AND_WHITE_EVENT != NOT_STARTED))
-                instance->SetBossState(DATA_MOGRAINE_AND_WHITE_EVENT, FAIL);
-        }
+        if (instance->GetBossState(DATA_MOGRAINE_AND_WHITE_EVENT != NOT_STARTED))
+            instance->SetBossState(DATA_MOGRAINE_AND_WHITE_EVENT, FAIL);
     }
 
     void EnterCombat(Unit* /*who*/)
@@ -170,9 +167,9 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
         if (!UpdateVictim())
             return;
 
-        if (_bHasDied && !_bHeal && instance->GetData(DATA_MOGRAINE_AND_WHITE_EVENT) == SPECIAL)
+        if (_bHasDied && !_bHeal && instance->GetBossState(DATA_MOGRAINE_AND_WHITE_EVENT) == SPECIAL)
         {
-            //On ressurection, stop fake death and heal whitemane and resume fight
+            // On ressurection, stop fake death and heal whitemane and resume fight
             if (Unit* Whitemane = Unit::GetUnit((*me), instance->GetData64(DATA_WHITEMANE)))
             {
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -252,7 +249,7 @@ struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
 
     void AttackStart(Unit* who)
     {
-        if (instance->GetData(DATA_MOGRAINE_AND_WHITE_EVENT) == NOT_STARTED)
+        if (instance->GetBossState(DATA_MOGRAINE_AND_WHITE_EVENT) == NOT_STARTED)
             return;
 
         ScriptedAI::AttackStart(who);

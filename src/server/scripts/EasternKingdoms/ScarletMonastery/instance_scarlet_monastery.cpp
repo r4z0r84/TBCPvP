@@ -28,6 +28,12 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "scarlet_monastery.h"
 
+DoorData const doorData[] =
+{
+    { GO_HIGH_INQUISITORS_DOOR, DATA_MOGRAINE_AND_WHITE_EVENT, DOOR_TYPE_ROOM },
+    { 0, 0, DOOR_TYPE_ROOM } // END
+};
+
 struct instance_scarlet_monastery : public ScriptedInstance
 {
     instance_scarlet_monastery(Map* map) : ScriptedInstance(map) { Initialize(); };
@@ -38,7 +44,6 @@ struct instance_scarlet_monastery : public ScriptedInstance
     uint64 MograineGUID;
     uint64 WhitemaneGUID;
     uint64 VorrelGUID;
-    uint64 HighInquisitorsDoorGUID;
 
     std::set<uint64> HorsemanAdds;
 
@@ -56,7 +61,7 @@ struct instance_scarlet_monastery : public ScriptedInstance
                 PumpkinShrineGUID = pGo->GetGUID();
                 break;
             case GO_HIGH_INQUISITORS_DOOR:
-                HighInquisitorsDoorGUID = pGo->GetGUID();
+                AddDoor(pGo, true);
                 break;
             default:
                 break;

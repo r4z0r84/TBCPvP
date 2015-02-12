@@ -131,6 +131,7 @@ class InstanceScript : public ZoneScript
         void DoUpdateWorldState(uint32 worldstateId, uint32 worldstateValue);
 
         virtual bool SetBossState(uint32 id, EncounterState state);
+        EncounterState GetBossState(uint32 id) const { return id < bosses.size() ? bosses[id].state : TO_BE_DECIDED; }
     protected:
         void SetBossNumber(uint32 number) { bosses.resize(number); }
         void LoadDoorData(const DoorData *data);

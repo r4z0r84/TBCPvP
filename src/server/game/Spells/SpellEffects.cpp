@@ -6294,29 +6294,54 @@ void Spell::EffectDispelMechanic(uint32 i)
 
 void Spell::EffectSummonDeadPet(uint32 /*i*/)
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-    Player *_player = m_caster->ToPlayer();
-    Pet *pet = _player->GetPet();
-    if (!pet)
-        return;
-    if (pet->isAlive())
-        return;
     if (damage < 0)
         return;
 
-    float x, y, z;
-    _player->GetPosition(x, y, z);
-    _player->GetMap()->CreatureRelocation(pet, x, y, z, _player->GetOrientation());
+    Player* player = m_caster->ToPlayer();
+    if (!player)
+        return;
 
-    pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
+    bool hadPet = true;
+
+    if (!player->GetPet())
+    {
+        player->SummonPet(0, 0.0f, 0.0f, 0.0f, 0.0f, SUMMON_PET, 0);
+        hadPet = false;
+    }
+
+    // Attempt to get current pet
+    Pet *pet = player->GetPet();
+    if (!pet || pet->isAlive())
+        return;
+
+    // If player did have a pet before reviving, teleport it
+    if (hadPet)
+    {
+        float x, y, z;
+        player->GetClosePoint(x, y, z, pet->GetObjectSize(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+        pet->NearTeleportTo(x, y, z, player->GetOrientation());
+        pet->Relocate(x, y, z, player->GetOrientation());
+    }
+
+    pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     pet->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     pet->setDeathState(ALIVE);
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
     pet->SetHealth(uint32(pet->GetMaxHealth()*(float(damage)/100)));
 
-    //pet->AIM_Initialize();
-    // _player->PetSpellInitialize(); -- action bar not removed at death and not required send at revive
+    CharmInfo* ci = pet->GetCharmInfo();
+    if (ci)
+    {
+        // In case the pet was at stay, we don't want it running back
+        ci->SaveStayPosition();
+        ci->SetIsAtStay(ci->HasCommandState(COMMAND_STAY));
+
+        ci->SetIsFollowing(false);
+        ci->SetIsCommandAttack(false);
+        ci->SetIsFollowing(false);
+        ci->SetIsReturning(false);
+    }
+
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 

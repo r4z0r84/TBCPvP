@@ -5591,7 +5591,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                     m_Spell->cancel();
                 }
                 // Check if target of channeled spell still in range
-                else if (m_Spell->CheckRange(true, false))
+                else if (m_Spell->CheckRange(false, false))
                     m_Spell->cancel();
             }
             // all other states

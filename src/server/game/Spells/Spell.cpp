@@ -4331,6 +4331,9 @@ uint8 Spell::CanCast(bool strict)
                         // only beneficial effects count
                         if (!IsPositiveSpell(spellInfo->Id))
                             continue;
+                        // skip shadowform
+                        if (spellInfo->SpellFamilyFlags & 0x0000080080000000LL)
+                            continue;
                         priest_buffs.push_back(spellInfo->Id);
                     }
                     if (!priest_buffs.empty())

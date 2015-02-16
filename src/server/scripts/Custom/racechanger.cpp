@@ -1,11 +1,17 @@
 // Race Changer NPC
-// Smolderforge 2014
+// Smolderforge 2014-2015
 
 #include "ScriptPCH.h"
 
 bool GossipHello_racechanger(Player *player, Creature *creature)
 {
-    if (player->HasItemCount(385846, 1, false) || player->isGameMaster())
+    if (player->GetTeam() == HORDE && sWorld->getConfig(CONFIG_FREE_ALLY_TRANSFER))
+    {
+        player->ADD_GOSSIP_ITEM_EXTENDED(0, "Yes, I am ready to proceed.", GOSSIP_SENDER_MAIN, 101, "Notice: Your professions will be reset by undergoing a race change.", 0, false);
+
+        player->SEND_GOSSIP_MENU(85, creature->GetGUID());
+    }
+    else if (player->HasItemCount(385846, 1, false) || player->isGameMaster())
     {
         // Check if player is aware and ready to proceed
         player->ADD_GOSSIP_ITEM_EXTENDED(0, "Yes, I am ready to proceed.", GOSSIP_SENDER_MAIN, 40, "Notice: By continuing your token will be deleted from your bag. If you close the NPC dialogue window your token will not be added back. Only proceed if you are ready. Please be advised your professions will be reset by undergoing a race change.", 0, false);
@@ -89,6 +95,7 @@ bool GossipSelect_racechanger(Player *player, Creature *creature, uint32 sender,
          * the correct value. (see default case)
          */
         case 100:
+        case 101:
         {
             switch (player->getClass())
             {
@@ -137,7 +144,8 @@ bool GossipSelect_racechanger(Player *player, Creature *creature, uint32 sender,
                     player->ADD_GOSSIP_ITEM(0, "Night Elf", GOSSIP_SENDER_MAIN, 4 + 500);
                     break;
             }
-            player->ADD_GOSSIP_ITEM(0, "« Back", GOSSIP_SENDER_MAIN, 76);
+            if (action == 100) // do not display if it's a free transfer
+                player->ADD_GOSSIP_ITEM(0, "« Back", GOSSIP_SENDER_MAIN, 76);
 
             player->SEND_GOSSIP_MENU(82, creature->GetGUID());
             break;

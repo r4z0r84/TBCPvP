@@ -1153,6 +1153,9 @@ void World::LoadConfigSettings(bool reload)
     MMAP::MMapFactory::implementPathFindingOnMaps(implementMMapIds.c_str());
     //MMAP-Changes
     sLog->outString("WORLD: Pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
+
+    // misc
+    m_configs[CONFIG_FREE_ALLY_TRANSFER] = ConfigMgr::GetBoolDefault("Transfer.FreeForAlliance", false);
 }
 
 // Initialize the World

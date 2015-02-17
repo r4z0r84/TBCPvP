@@ -5,18 +5,18 @@
 
 bool GossipHello_racechanger(Player *player, Creature *creature)
 {
-    if (player->GetTeam() == HORDE && sWorld->getConfig(CONFIG_FREE_ALLY_TRANSFER))
-    {
-        player->ADD_GOSSIP_ITEM_EXTENDED(0, "Yes, I am ready to proceed.", GOSSIP_SENDER_MAIN, 101, "Notice: Your professions will be reset by undergoing a race change.", 0, false);
-
-        player->SEND_GOSSIP_MENU(85, creature->GetGUID());
-    }
-    else if (player->HasItemCount(385846, 1, false) || player->isGameMaster())
+    if (player->HasItemCount(385846, 1, false) || player->isGameMaster())
     {
         // Check if player is aware and ready to proceed
         player->ADD_GOSSIP_ITEM_EXTENDED(0, "Yes, I am ready to proceed.", GOSSIP_SENDER_MAIN, 40, "Notice: By continuing your token will be deleted from your bag. If you close the NPC dialogue window your token will not be added back. Only proceed if you are ready. Please be advised your professions will be reset by undergoing a race change.", 0, false);
 
         player->SEND_GOSSIP_MENU(77, creature->GetGUID());
+    }
+    else if (player->GetTeam() == HORDE && sWorld->getConfig(CONFIG_FREE_ALLY_TRANSFER))
+    {
+        player->ADD_GOSSIP_ITEM_EXTENDED(0, "Yes, I am ready to proceed.", GOSSIP_SENDER_MAIN, 101, "Notice: Your professions will be reset by undergoing a race change.", 0, false);
+
+        player->SEND_GOSSIP_MENU(85, creature->GetGUID());
     }
     else
         player->SEND_GOSSIP_MENU(78, creature->GetGUID());

@@ -223,6 +223,8 @@ class Pet : public Guardian
         uint32 SetLastCommandTimer(uint32 time) { return m_lastCommandTimer = time; }
         uint32 GetLastSpellTimer() { return m_lastSpellTimer; }
         uint32 SetLastSpellTimer(uint32 time) { return m_lastSpellTimer = time; }
+        uint32 GetBlockAutoCastTimer() { return m_blockAutoCastTimer; }
+        uint32 SetBlockAutoCastTimer(uint32 time) { return m_blockAutoCastTimer = time; }
 
         uint64 GetAuraUpdateMask() { return m_auraUpdateMask; }
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
@@ -251,6 +253,7 @@ class Pet : public Guardian
         uint32  m_loyaltyTimer;
         uint32  m_lastCommandTimer;
         uint32  m_lastSpellTimer;
+        uint32  m_blockAutoCastTimer;
         PetType m_petType;
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_loyaltyPoints;

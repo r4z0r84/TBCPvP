@@ -4134,6 +4134,7 @@ void Spell::EffectSummonPet(uint32 i)
                 OldSummon->m_CreatureSpellCooldowns.clear();
                 OldSummon->m_CreatureCategoryCooldowns.clear();
                 OldSummon->m_GlobalCooldown = 0;
+                OldSummon->SetBlockAutoCastTimer(2000); // Only for Felhunter - Tainted Blood
             }
 
             if (owner->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled())
@@ -4163,6 +4164,7 @@ void Spell::EffectSummonPet(uint32 i)
     }
 
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    pet->SetBlockAutoCastTimer(2000); // Only for Felhunter - Tainted Blood
 
     // generate new name for summon pet
     std::string new_name=sObjectMgr->GeneratePetName(petentry);

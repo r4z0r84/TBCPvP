@@ -4665,6 +4665,14 @@ bool Spell::CanAutoCast(Unit* target)
             return false;
     }
 
+    // Tainted Blood, don't allow to auto cast before 2 seconds after summon
+    if (m_spellInfo->SpellIconID == 153 && m_spellInfo->SpellVisual == 799)
+    {
+        if (Pet* pet = m_caster->ToCreature()->ToPet())
+            if (pet->GetBlockAutoCastTimer() > 0)
+                return false;
+    }
+
     for (uint32 j = 0;j<3;j++)
     {
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA)

@@ -9461,7 +9461,7 @@ bool Unit::isTargetableForAttack() const
     return isAttackableByAOE() && !hasUnitState(UNIT_STAT_DIED);
 }
 
-bool Unit::canAttack(Unit const* target, bool force, bool stealthCheck) const
+bool Unit::canAttack(Unit const* target, bool force) const
 {
     ASSERT(target);
 
@@ -9487,7 +9487,15 @@ bool Unit::canAttack(Unit const* target, bool force, bool stealthCheck) const
     else if (target->hasUnitState(UNIT_STAT_DIED))
         return false;
 
-    if (stealthCheck && (m_invisibilityMask || target->m_invisibilityMask) && !canDetectInvisibilityOf(target))
+    // if owner can detect target return true of creature
+    if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
+        if (Player* owner = GetOwner()->ToPlayer())
+        {
+            if (owner->canDetectStealthOf(target, GetDistance(target)))
+                return true;
+        }
+
+    if ((m_invisibilityMask || target->m_invisibilityMask) && !canDetectInvisibilityOf(target))
         return false;
 
     if (target->GetVisibility() == VISIBILITY_GROUP_STEALTH && !canDetectStealthOf(target, GetDistance(target)))

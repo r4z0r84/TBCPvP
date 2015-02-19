@@ -1292,6 +1292,16 @@ bool Creature::canSeeOrDetect(Unit const* u, bool detect, bool inVisibleList, bo
     if (GetGUID() == u->GetCharmerOrOwnerGUID())
         return true;
 
+    // if owner can detect target return true of creature
+    if (GetOwner() && GetOwner()->GetTypeId() == TYPEID_PLAYER)
+        if (Player* owner = GetOwner()->ToPlayer())
+        {
+            if (owner->canSeeOrDetect(u, detect, inVisibleList, is3dDistance))
+                return true;
+            if (owner->canDetectStealthOf(u, GetDistance(u)))
+                return true;
+        }
+
     if (u->GetVisibility() == VISIBILITY_OFF) //GM
         return false;
 

@@ -90,6 +90,7 @@ m_declinedname(NULL), m_owner(owner)
     m_loyaltyTimer = 12000;
 
     m_lastCommandTimer = 0;
+    m_lastSpellTimer = 0;
 
     m_loyaltyPoints = 0;
     m_TrainingPoints = 0;
@@ -583,6 +584,11 @@ void Pet::Update(uint32 diff)
                 m_lastCommandTimer = 0;
             else
                 m_lastCommandTimer -= diff;
+
+            if (m_lastSpellTimer <= diff)
+                m_lastSpellTimer = 0;
+            else
+                m_lastSpellTimer -= diff;
 
             if (getPetType() != HUNTER_PET)
                 break;

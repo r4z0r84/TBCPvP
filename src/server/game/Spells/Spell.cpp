@@ -1163,8 +1163,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
 
     float speed = m_spellInfo->speed;
     // Recheck immune (only for delayed spells)
-    if ((m_delayMoment || speed) && !(m_spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) &&
-        (unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo), true) || unit->IsImmunedToSpell(m_spellInfo, true)))
+    if ((m_delayMoment || speed) && (unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo), true) || unit->IsImmunedToSpell(m_spellInfo, true)))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
         m_damage = 0;
@@ -1203,7 +1202,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
             bool isVisibleForHit = ((unit->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) || unit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE , SPELLFAMILYFLAG_ROGUE_VANISH)) && !unit->isVisibleForOrDetect(m_caster, true)) ? false : true;
 
             // for delayed spells ignore not visible explicit target
-            if ((m_delayMoment || speed) && unit == m_targets.getUnitTarget() && !isVisibleForHit)
+            if (m_delayMoment && unit == m_targets.getUnitTarget() && !isVisibleForHit)
             {
                 // Remove vanish when vanishing instant spells
                 if (!speed)
@@ -1237,10 +1236,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
 
             // assisting case, healing and resurrection
             if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
-            {
                 m_caster->SetContestedPvP();
-                //m_caster->UpdatePvP(true);
-            }
+
             if (unit->isInCombat() && IsAggressiveSpell(m_spellInfo, m_IsTriggeredSpell))
             {
                 m_caster->SetInCombatState(unit->GetCombatTimer() > 0, unit);

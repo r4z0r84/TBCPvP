@@ -94,7 +94,7 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
                 case COMMAND_STAY:                          //flat=1792  //STAY
                     if (Pet* cPet = pet->ToCreature()->ToPet())
                     {
-                        if (cPet->GetLastCommandTimer > 0)
+                        if (cPet->GetLastCommandTimer() > 0)
                             return;
 
                         cPet->SetLastCommandTimer(250);
@@ -113,7 +113,7 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
                 case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
                     if (Pet* cPet = pet->ToCreature()->ToPet())
                     {
-                        if (cPet->GetLastCommandTimer > 0)
+                        if (cPet->GetLastCommandTimer() > 0)
                             return;
 
                         cPet->SetLastCommandTimer(250);
@@ -132,7 +132,7 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
                 {
                     if (Pet* cPet = pet->ToCreature()->ToPet())
                     {
-                        if (cPet->GetLastCommandTimer > 0)
+                        if (cPet->GetLastCommandTimer() > 0)
                             return;
 
                         cPet->SetLastCommandTimer(250);

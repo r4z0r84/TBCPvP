@@ -92,10 +92,13 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
             switch (spellid)
             {
                 case COMMAND_STAY:                          //flat=1792  //STAY
-                    if (pet->ToCreature()->ToPet() && pet->ToCreature()->ToPet()->GetLastCommandTimer() > 0)
-                        return;
-                    if (pet->ToCreature()->ToPet())
-                        pet->ToCreature()->ToPet()->SetLastCommandTimer(250);
+                    if (Pet* cPet = pet->ToCreature()->ToPet())
+                    {
+                        if (cPet->GetLastCommandTimer > 0)
+                            return;
+
+                        cPet->SetLastCommandTimer(250);
+                    }
                     pet->AttackStop();
                     pet->InterruptNonMeleeSpells(false);
                     pet->GetMotionMaster()->MoveIdle();
@@ -108,10 +111,13 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
                     charmInfo->SaveStayPosition();
                     break;
                 case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
-                    if (pet->ToCreature()->ToPet() && pet->ToCreature()->ToPet()->GetLastCommandTimer() > 0)
-                        return;
-                    if (pet->ToCreature()->ToPet())
-                        pet->ToCreature()->ToPet()->SetLastCommandTimer(250);
+                    if (Pet* cPet = pet->ToCreature()->ToPet())
+                    {
+                        if (cPet->GetLastCommandTimer > 0)
+                            return;
+
+                        cPet->SetLastCommandTimer(250);
+                    }
                     pet->AttackStop();
                     pet->InterruptNonMeleeSpells(false);
                     pet->GetMotionMaster()->MoveFollow(_player, PET_FOLLOW_DIST, pet->GetFollowAngle());
@@ -124,10 +130,13 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
                     break;
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
                 {
-                    if (pet->ToCreature()->ToPet() && pet->ToCreature()->ToPet()->GetLastCommandTimer() > 0)
-                        return;
-                    if (pet->ToCreature()->ToPet())
-                        pet->ToCreature()->ToPet()->SetLastCommandTimer(250);
+                    if (Pet* cPet = pet->ToCreature()->ToPet())
+                    {
+                        if (cPet->GetLastCommandTimer > 0)
+                            return;
+
+                        cPet->SetLastCommandTimer(250);
+                    }
 
                     // Can't attack if owner is pacified
                     if (_player->HasAuraType(SPELL_AURA_MOD_PACIFY))
@@ -236,10 +245,13 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
         {
             Unit* unit_target = NULL;
 
-            if (pet->ToCreature()->ToPet() && pet->ToCreature()->ToPet()->GetLastSpellTimer() > 0)
-                return;
-            if (pet->ToCreature()->ToPet())
-                pet->ToCreature()->ToPet()->SetLastSpellTimer(100);
+            if (Pet* cPet = pet->ToCreature()->ToPet())
+            {
+                if (cPet->GetLastSpellTimer() > 0)
+                    return;
+
+                cPet->SetLastSpellTimer(100);
+            }
 
             if (pet->ToCreature()->GetGlobalCooldown() > 0)
                 return;

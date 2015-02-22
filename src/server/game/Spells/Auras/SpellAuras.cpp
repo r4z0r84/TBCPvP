@@ -5608,6 +5608,37 @@ void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
 
 void Aura::CleanupTriggeredSpells()
 {
+    if (m_spellProto->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellProto->SpellFamilyFlags & 0x0000001000000020LL)
+    {
+        // Blood Frenzy remove
+        if (!m_target->HasAuraTypeWithFamilyFlags(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARRIOR, (0x0000001000000020LL & ~m_spellProto->SpellFamilyFlags)))
+        {
+            m_target->RemoveAurasDueToSpell(30069);
+            m_target->RemoveAurasDueToSpell(30070);
+            return;
+        }
+    }
+
+    // Corruption/Seed of Corruption/Curse of Agony/Siphon Life - check if shadow embrace should be removed
+    if (m_spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellProto->SpellFamilyFlags & 0x0000001100000402LL)
+    {
+        if (!m_target->HasAuraTypeWithFamilyFlags(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, (0x0000001100000402LL & ~m_spellProto->SpellFamilyFlags)))
+        {
+            Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+            for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end();)
+            {
+                SpellEntry const* itr_spell = (*itr)->GetSpellProto();
+                if (itr_spell && itr_spell->SpellFamilyName == SPELLFAMILY_WARLOCK && (itr_spell->SpellFamilyFlags & 0x0000000080000000LL))
+                {
+                    m_target->RemoveAurasDueToSpell(itr_spell->Id);
+                    itr = auras.begin();
+                }
+                else
+                    itr++;
+            }
+        }
+    }
+
     uint32 tSpellId = m_spellProto->EffectTriggerSpell[GetEffIndex()];
     if (!tSpellId)
         return;

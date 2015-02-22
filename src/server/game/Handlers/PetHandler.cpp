@@ -130,14 +130,6 @@ void WorldSession::HandlePetActionHelper(Unit *pet, uint64 guid1, uint16 spellid
                     break;
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
                 {
-                    if (Pet* cPet = pet->ToCreature()->ToPet())
-                    {
-                        if (cPet->GetLastCommandTimer() > 0)
-                            return;
-
-                        cPet->SetLastCommandTimer(250);
-                    }
-
                     // Can't attack if owner is pacified
                     if (_player->HasAuraType(SPELL_AURA_MOD_PACIFY))
                     {

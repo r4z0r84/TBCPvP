@@ -1620,12 +1620,6 @@ void BattleGround::AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid
         return;
 
     plr->CastSpell(plr, SPELL_WAITING_FOR_RESURRECT, true);
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(SPELL_WAITING_FOR_RESURRECT);
-    if (spellInfo)
-    {
-        Aura *Aur = CreateAura(spellInfo, 0, NULL, plr);
-        plr->AddAura(Aur);
-    }
 }
 
 void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
@@ -1638,12 +1632,8 @@ void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
             {
                 (itr->second).erase(itr2);
 
-                Player *plr = sObjectMgr->GetPlayer(player_guid);
-                if (!plr)
-                    return;
-
-                plr->RemoveAurasDueToSpell(SPELL_WAITING_FOR_RESURRECT);
-
+                if (Player *plr = sObjectMgr->GetPlayer(player_guid))
+                    plr->RemoveAurasDueToSpell(SPELL_WAITING_FOR_RESURRECT);
                 return;
             }
         }

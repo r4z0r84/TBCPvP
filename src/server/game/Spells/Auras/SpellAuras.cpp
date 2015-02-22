@@ -895,6 +895,15 @@ void Aura::_AddAura()
     // not call total regen auras at adding
     switch (m_modifier.m_auraname)
     {
+        case SPELL_AURA_PERIODIC_DAMAGE:
+        case SPELL_AURA_PERIODIC_LEECH:
+            if (caster)
+                m_modifier.m_amount = caster->SpellDamageBonus(m_target, m_spellProto, m_modifier.m_amount, DOT);
+            break;
+        case SPELL_AURA_PERIODIC_HEAL:
+            if (caster)
+                m_modifier.m_amount = caster->SpellHealingBonus(m_spellProto, m_modifier.m_amount, DOT, m_target);
+            break;
         case SPELL_AURA_OBS_MOD_HEALTH:
         case SPELL_AURA_OBS_MOD_MANA:
         {
@@ -5809,7 +5818,7 @@ void Aura::PeriodicTick()
 
             if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
             {
-                pdamage = pCaster->SpellDamageBonus(m_target, GetSpellProto(), amount, DOT);
+                pdamage = amount;
 
                 // Calculate armor mitigation if it is a physical spell
                 // But not for bleed mechanic spells
@@ -5906,7 +5915,7 @@ void Aura::PeriodicTick()
 
             CleanDamage cleanDamage =  CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL);
 
-            pdamage = pCaster->SpellDamageBonus(m_target, GetSpellProto(), pdamage, DOT);
+            pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
             //Calculate armor mitigation if it is a physical spell
             if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL)

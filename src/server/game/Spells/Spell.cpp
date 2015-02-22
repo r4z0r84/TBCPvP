@@ -71,6 +71,9 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
     // Seal of Blood Judgement
     if (spellInfo->Id == 32220)
         return 750;
+    // Repentance
+    if (spellInfo->Id == 20066)
+        return 300;
 
     // Shaman ----------------------------------------------------------------
     // Windfury
@@ -108,6 +111,11 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
     // Mage --------------------------------------------------------------------
     // Polymorph
     if (spellInfo->SpellFamilyFlags & 0x1000000LL && spellInfo->SpellFamilyName == SPELLFAMILY_MAGE)
+        return 300;
+
+    // Warlock -----------------------------------------------------------------
+    // Shadowfury
+    if (spellInfo->SpellFamilyFlags & 0x0000100000000000LL && spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK)
         return 300;
 
     // Misc.
@@ -1205,7 +1213,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
             if (m_delayMoment && unit == m_targets.getUnitTarget() && !isVisibleForHit)
             {
                 // Remove vanish when vanishing instant spells
-                if (!speed)
+                if (shouldRemoveVanish())
                     unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
                 m_damage = 0;
@@ -5804,5 +5812,50 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
             m_spellValue->MaxAffectedTargets = (uint32)value;
             break;
     }
+}
+
+bool Spell::shouldRemoveVanish()
+{
+    float speed = m_spellInfo->speed;
+
+    switch (m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Charge, Intercept, remove Vanish
+            if (m_spellInfo->SpellFamilyFlags & 0x0000000040000001LL)
+                return true;
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Repentance, remove Vanish
+            if (m_spellInfo->SpellFamilyFlags & 0x0000000000000004LL)
+                return true;
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Scatter Shot, remove Vanish
+            if (m_spellInfo->SpellFamilyFlags & 0x0000000000040000LL)
+                return true;
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Shadowfury, stay in Vanish
+            if (m_spellInfo->SpellFamilyFlags & 0x0000100000000000LL)
+                return false;
+            break;
+        }
+        default:
+            break;
+    }
+
+    // Spells with no speed (visual flying spells) should remove Vanish
+    if (!speed)
+        return true;
+        
+    return false;
 }
 

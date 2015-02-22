@@ -466,6 +466,8 @@ class Spell
         void CleanupTargetList();
 
         void SetSpellValue(SpellValueMod mod, int32 value);
+
+        bool shouldRemoveVanish();
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);

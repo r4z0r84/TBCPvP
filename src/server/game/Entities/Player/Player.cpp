@@ -2452,20 +2452,21 @@ void Player::RegenerateAll()
 {
     if (m_regenTimer != 0)
         return;
+
     uint32 regenDelay = 2000;
 
+    Regenerate(POWER_ENERGY);
+    Regenerate(POWER_MANA);
+
     // Not in combat or they have regeneration
-    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
-        HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) || IsPolymorphed())
+    if (!isInCombat() || IsPolymorphed() ||
+        HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
+        HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT))
     {
         RegenerateHealth();
-        if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-            Regenerate(POWER_RAGE);
     }
-
-    Regenerate(POWER_ENERGY);
-
-    Regenerate(POWER_MANA);
+    
+    Regenerate(POWER_RAGE);
 
     if (IsPolymorphed())
         m_regenTimer = 1000;
@@ -2475,8 +2476,11 @@ void Player::RegenerateAll()
 
 void Player::Regenerate(Powers power)
 {
-    uint32 curValue = GetPower(power);
     uint32 maxValue = GetMaxPower(power);
+    if (!maxValue)
+        return;
+
+    uint32 curValue = GetPower(power);
 
     float addvalue = 0.0f;
 
@@ -2487,16 +2491,21 @@ void Player::Regenerate(Powers power)
             bool recentCast = IsUnderLastManaUseEffect();
             float ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA);
 
+            if (getLevel() < 15)
+                ManaIncreaseRate = sWorld->getRate(RATE_POWER_MANA) * (2.066f - (getLevel() * 0.066f));
+
             if (recentCast) // Trinity Updates Mana in intervals of 2s, which is correct
                 addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT) *  ManaIncreaseRate * 2.00f;
-
             else
                 addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN) * ManaIncreaseRate * 2.00f;
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
         {
-            float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
-            addvalue = 30 * RageDecreaseRate;               // 3 rage by tick
+            if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+            {
+                float RageDecreaseRate = sWorld->getRate(RATE_POWER_RAGE_LOSS);
+                addvalue = 20 * RageDecreaseRate;               // 2 rage by tick (= 2 seconds => 1 rage/sec)
+            }
         }   break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
         {
@@ -2516,7 +2525,7 @@ void Player::Regenerate(Powers power)
         AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
         for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue == power)
-                addvalue *= ((*i)->GetModifierValue() + 100) / 100.0f;
+                AddPct(addvalue, (*i)->GetModifierValue());
     }
 
     if (power != POWER_RAGE)

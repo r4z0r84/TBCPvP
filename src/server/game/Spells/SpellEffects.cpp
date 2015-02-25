@@ -6362,12 +6362,12 @@ void Spell::EffectDestroyAllTotems(uint32 /*i*/)
             if (spellInfo)
             {
                 mana += spellInfo->manaCost;
-                mana += int32(CalculatePctU(m_caster->GetCreateMana(), spellInfo->ManaCostPercentage));
+                mana += int32(CalculatePct(m_caster->GetCreateMana(), spellInfo->ManaCostPercentage));
             }
             ((Totem*)totem)->UnSummon();
         }
     }
-    ApplyPctN(mana, damage);
+    ApplyPct(mana, damage);
     if (mana)
         m_caster->CastCustomSpell(m_caster, 39104, &mana, NULL, NULL, true);
 }

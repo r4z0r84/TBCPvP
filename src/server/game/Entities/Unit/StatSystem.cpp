@@ -855,14 +855,14 @@ bool Guardian::UpdateStats(Stats stat)
     {
         // Warlock and Hunter pets gain 30% of owners stamina
         if (owner->getClass() == CLASS_WARLOCK && isPet() || isHunterPet())
-            ownersBonus = CalculatePctN(owner->GetStat(stat), 30);
+            ownersBonus = CalculatePct(owner->GetStat(stat), 30);
             value += ownersBonus;
     }
     else if (stat == STAT_INTELLECT)
     {
         // Warlock and Mage pets gain 30% of owners intellect
         if (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE)
-            ownersBonus = CalculatePctN(owner->GetStat(stat), 30);
+            ownersBonus = CalculatePct(owner->GetStat(stat), 30);
             value += ownersBonus;
     }
 
@@ -904,7 +904,7 @@ void Guardian::UpdateResistances(uint32 school)
 
         // hunter and warlock pets gain 40% of owner's resistance
         if (isHunterPet() || isPet() && m_owner->getClass() == CLASS_WARLOCK)
-            value += float(CalculatePctN(m_owner->GetResistance(SpellSchools(school)), 40));
+            value += float(CalculatePct(m_owner->GetResistance(SpellSchools(school)), 40));
 
         if (m_owner->HasAura(37386, 0))  // Void Star Talisman
            value += 130;
@@ -923,7 +923,7 @@ void Guardian::UpdateArmor()
 
     // hunter and warlock pets gain 35% of owner's armor value
     if (isHunterPet() || isPet() && m_owner->getClass() == CLASS_WARLOCK)
-        bonus_armor = float(CalculatePctN(m_owner->GetArmor(), 35));
+        bonus_armor = float(CalculatePct(m_owner->GetArmor(), 35));
 
     value  = GetModifierValue(unitMod, BASE_VALUE);
     value *= GetModifierValue(unitMod, BASE_PCT);

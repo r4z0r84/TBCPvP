@@ -9282,12 +9282,12 @@ void Unit::Unmount()
     }
 }
 
-void Unit::SetInCombatWith(Unit* enemy, uint32 spellId)
+void Unit::SetInCombatWith(Unit* enemy)
 {
     Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();
     if (eOwner->IsPvP())
     {
-        SetInCombatState(true, enemy, spellId);
+        SetInCombatState(true, enemy);
         return;
     }
 
@@ -9297,14 +9297,14 @@ void Unit::SetInCombatWith(Unit* enemy, uint32 spellId)
         Unit const* myOwner = GetCharmerOrOwnerOrSelf();
         if (eOwner->ToPlayer()->duel->opponent == myOwner)
         {
-            SetInCombatState(true, enemy, spellId);
+            SetInCombatState(true, enemy);
             return;
         }
     }
-    SetInCombatState(false, enemy, spellId);
+    SetInCombatState(false, enemy);
 }
 
-void Unit::CombatStart(Unit* target, bool initialAggro, uint32 spellId)
+void Unit::CombatStart(Unit* target, bool initialAggro)
 {
     if (initialAggro)
     {
@@ -9347,28 +9347,14 @@ void Unit::CombatStart(Unit* target, bool initialAggro, uint32 spellId)
     
 }
 
-void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 spellId)
+void Unit::SetInCombatState(bool PvP, Unit* enemy)
 {
     // only alive units can be in combat
     if (!isAlive())
         return;
 
     if (PvP)
-    {
-        m_CombatTimer = 5150;
-
-        // Apply latency to combat timer
-        uint32 latency = ((Player*)this)->GetSession()->GetLatency();
-        if (latency > 150)
-            latency = 150;
-
-        // Reduce combat timer by latency (max. 150 ms)
-        m_CombatTimer -= latency;
-
-        // Apply 1 second extra combat timer to gouge
-        if (spellId == 38764)
-            m_CombatTimer += 1000;
-    }
+        m_CombatTimer = 5000;
 
     if (GetTypeId() == TYPEID_PLAYER)
         if (Pet* pet = ToPlayer()->GetPet())

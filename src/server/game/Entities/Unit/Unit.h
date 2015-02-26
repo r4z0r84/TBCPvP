@@ -1068,9 +1068,9 @@ class Unit : public WorldObject
         bool isInFlight()  const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
 
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
-        void CombatStart(Unit* target, bool initialAggro = true, uint32 spellId = 0);
-        void SetInCombatState(bool PvP, Unit* enemy = NULL, uint32 spellId = 0);
-        void SetInCombatWith(Unit* enemy, uint32 spellId = 0);
+        void CombatStart(Unit* target, bool initialAggro = true);
+        void SetInCombatState(bool PvP, Unit* enemy = NULL);
+        void SetInCombatWith(Unit* enemy);
         void ClearInCombat();
         uint32 GetCombatTimer() const { return m_CombatTimer; }
 

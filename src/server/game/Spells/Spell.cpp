@@ -1149,7 +1149,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
     if (!m_caster->IsFriendlyTo(unit) && !IsPositiveSpell(m_spellInfo->Id) && IsAggressiveSpell(m_spellInfo, m_IsTriggeredSpell))
     {
-        m_caster->CombatStart(unit);
+        m_caster->CombatStart(unit, !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO), m_spellInfo->Id);
 
         if (m_customAttr & SPELL_ATTR_CU_AURA_CC)
             if (!unit->IsStandState())

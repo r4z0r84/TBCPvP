@@ -2642,12 +2642,6 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
                 return;
             }
 
-            int32 tickheal = targetAura->GetModifierValuePerStack();
-            if (Unit* auraCaster = targetAura->GetCaster())
-                tickheal = auraCaster->SpellHealingBonusHOT(targetAura->GetSpellProto(), tickheal, DOT, unitTarget);
-            //int32 tickheal = targetAura->GetSpellProto()->EffectBasePoints[idx] + 1;
-            //It is said that talent bonus should not be included
-            //int32 tickheal = targetAura->GetModifierValue();
             int32 tickcount = 0;
             if (targetAura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID)
             {
@@ -2657,11 +2651,8 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
                     case 0x40:  tickcount = 6;  break; // Regrowth
                 }
             }
-            addhealth += tickheal * tickcount;
+            addhealth += targetAura->GetModifierValuePerStack() *tickcount;
             unitTarget->RemoveAurasByCasterSpell(targetAura->GetId(), targetAura->GetCasterGUID());
-
-            //addhealth += tickheal * tickcount;
-            //addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth, HEAL, unitTarget);
         }
         else
             addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth, HEAL, unitTarget);

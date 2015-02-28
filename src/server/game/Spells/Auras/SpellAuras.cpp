@@ -902,7 +902,7 @@ void Aura::_AddAura()
             break;
         case SPELL_AURA_PERIODIC_HEAL:
             if (caster)
-                m_modifier.m_amount = caster->SpellHealingBonusHOT(m_spellProto, m_modifier.m_amount, DOT, m_target);
+                m_modifier.m_amount = caster->SpellHealingBonus(m_spellProto, m_modifier.m_amount, DOT, m_target);
             break;
         case SPELL_AURA_OBS_MOD_HEALTH:
         case SPELL_AURA_OBS_MOD_MANA:
@@ -6071,8 +6071,6 @@ void Aura::PeriodicTick()
 
             pdamage *= EffectModifier;
             pdamage *= GetStackAmount();
-
-            //pdamage = pCaster->SpellHealingBonus(GetSpellProto(), pdamage, DOT, m_target);
 
             sLog->outDetail("PeriodicTick: %u (TypeId: %u) heal of %u (TypeId: %u) for %u health inflicted by %u",
                 GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId());

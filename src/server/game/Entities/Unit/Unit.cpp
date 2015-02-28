@@ -4084,6 +4084,8 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
             new_aur->SetIsSingleTarget(false);
             // add the new aura to stealer
             stealer->AddAura(new_aur);
+            // add pre cast aura at aura apply
+            stealer->ApplyPreCastSpell(aur->GetSpellProto());
             // Remove aura as dispel
            if (iter->second->GetStackAmount() > 1)
             {
@@ -13188,6 +13190,36 @@ void Unit::UpdateObjectVisibility(bool forced)
         // call MoveInLineOfSight for nearby creatures
         Trinity::AIRelocationNotifier notifier(*this);
         VisitNearbyObject(GetMap()->GetVisibilityDistance(), notifier);
+    }
+}
+
+void Unit::ApplyPreCastSpell(const SpellEntry* spellInfo)
+{
+    // Negative buff should only be applied on players and pets
+    if (GetTypeId() == TYPEID_PLAYER || (GetTypeId() == TYPEID_UNIT && ToCreature()->isPet()))
+    {
+        if (!spellInfo)
+            return;
+
+        uint32 spellId = 0;
+        if (spellInfo->CasterAuraStateNot == AURA_STATE_WEAKENED_SOUL || spellInfo->TargetAuraStateNot == AURA_STATE_WEAKENED_SOUL)
+            spellId = 6788; // Weakened Soul
+        else if (spellInfo->CasterAuraStateNot == AURA_STATE_FORBEARANCE || spellInfo->TargetAuraStateNot == AURA_STATE_FORBEARANCE)
+            spellId = 25771; // Forbearance
+        else if (spellInfo->CasterAuraStateNot == AURA_STATE_HYPOTHERMIA)
+            spellId = 41425; // Hypothermia
+        else if (spellInfo->Mechanic == MECHANIC_BANDAGE)
+            spellId = 11196; // Recently Bandaged
+        else if ((spellInfo->AttributesEx & 0x20) && (spellInfo->AttributesEx2 & 0x20000))
+            spellId = 23230; // Blood Fury - Healing Reduction
+
+        SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
+        if (AdditionalSpellInfo)
+        {
+            // applied at target by target
+            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, NULL, this, this, 0);
+            AddAura(AdditionalAura);
+        }
     }
 }
 

@@ -2387,15 +2387,6 @@ void Spell::EffectApplyAura(uint32 i)
     if (!caster)
         return;
 
-    sLog->outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
-
-    if (m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL 
-        && m_spellInfo->Id != 28880 
-        && m_spellInfo->Id != 27813
-        && m_spellInfo->Id != 27817
-        && m_spellInfo->Id != 27818)    //HOTS gain static spellpower bonus on cast rather than on-tick
-        damage = m_caster->SpellHealingBonusStatic(m_spellInfo, 0, DOT, unitTarget) + m_spellInfo->EffectBasePoints[i];
-
     Aura* Aur = CreateAura(m_spellInfo, i, &damage, unitTarget, caster, m_CastItem);
 
     // Now Reduce spell duration using data received at spell hit
@@ -2434,56 +2425,7 @@ void Spell::EffectApplyAura(uint32 i)
     if (!Aur)
         return;
 
-    // TODO Make a way so it works for every related spell!
-    if (unitTarget->GetTypeId() == TYPEID_PLAYER ||(unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->ToCreature()->isPet()))              // Negative buff should only be applied on players
-    {
-        if (!m_spellInfo)
-            return;
-
-        uint32 spellId = 0;
-        if (m_spellInfo->CasterAuraStateNot == AURA_STATE_WEAKENED_SOUL || m_spellInfo->TargetAuraStateNot == AURA_STATE_WEAKENED_SOUL)
-            spellId = 6788;                                 // Weakened Soul
-        else if (m_spellInfo->CasterAuraStateNot == AURA_STATE_FORBEARANCE || m_spellInfo->TargetAuraStateNot == AURA_STATE_FORBEARANCE)
-            spellId = 25771;                                // Forbearance
-        else if (m_spellInfo->CasterAuraStateNot == AURA_STATE_HYPOTHERMIA)
-            spellId = 41425;                                // Hypothermia
-        else if (m_spellInfo->Mechanic == MECHANIC_BANDAGE) // Bandages
-            spellId = 11196;                                // Recently Bandaged
-        else if ((m_spellInfo->AttributesEx & 0x20) && (m_spellInfo->AttributesEx2 & 0x20000))
-            spellId = 23230;                                // Blood Fury - Healing Reduction
-
-        SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
-        if (AdditionalSpellInfo)
-        {
-            // applied at target by target
-            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, NULL, unitTarget, unitTarget, 0);
-            unitTarget->AddAura(AdditionalAura);
-            sLog->outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
-        }
-    }
-
-    switch (m_spellInfo->SpellFamilyName)
-    {
-        case SPELLFAMILY_GENERIC:
-            // Shadow Sight
-            if (m_spellInfo->Id == 34709)
-                unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            break;
-        case SPELLFAMILY_WARRIOR:
-            // Demoralizing Shout, Piercing Howl
-            if (m_spellInfo->SpellFamilyFlags & 0x0000002000020000LL)
-                unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            break;
-        case SPELLFAMILY_DRUID:
-            // Demoralizing Roar, Faerie Fire
-            if (m_spellInfo->SpellFamilyFlags & 0x0000000000000408LL)
-                unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            break;
-    }
-
-    // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && (m_spellInfo->SpellFamilyFlags & 0x00002000000000LL))
-        m_caster->CastSpell(unitTarget, 41637, true, NULL, Aur, m_originalCasterGUID);
+    unitTarget->ApplyPreCastSpell(m_spellInfo);
 }
 
 void Spell::EffectUnlearnSpecialization(uint32 i)

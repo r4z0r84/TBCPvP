@@ -6041,18 +6041,21 @@ bool ChatHandler::HandleServerPLimitCommand(const char *args)
         if (!param)
             return false;
 
-        int l = strlen(param);
+        int limit = strlen(param);
 
-        if (strncmp(param, "player", l) == 0)
+        if (strncmp(param, "player", limit) == 0)
             sWorld->SetPlayerSecurityLimit(SEC_PLAYER);
-        else if (strncmp(param, "moderator", l) == 0)
+        else if (strncmp(param, "moderator", limit) == 0)
             sWorld->SetPlayerSecurityLimit(SEC_MODERATOR);
-        else if (strncmp(param, "gamemaster", l) == 0)
+        else if (strncmp(param, "gamemaster", limit) == 0)
             sWorld->SetPlayerSecurityLimit(SEC_GAMEMASTER);
-        else if (strncmp(param, "administrator", l) == 0)
+        else if (strncmp(param, "administrator", limit) == 0)
             sWorld->SetPlayerSecurityLimit(SEC_ADMINISTRATOR);
-        else if (strncmp(param, "reset", l) == 0)
+        else if (strncmp(param, "reset", limit) == 0)
+        {
             sWorld->SetPlayerAmountLimit(ConfigMgr::GetIntDefault("PlayerLimit", 100));
+            sWorld->UpdateAllowedSecurity();
+        }
         else
         {
             int val = atoi(param);
@@ -6061,25 +6064,30 @@ bool ChatHandler::HandleServerPLimitCommand(const char *args)
             else
                 sWorld->SetPlayerAmountLimit(uint32(val));
         }
-
-        // kick all low security level players
-        if (sWorld->GetPlayerSecurityLimit() > SEC_PLAYER)
-            sWorld->KickAllLess(sWorld->GetPlayerSecurityLimit());
     }
 
-    uint32 pLimit = sWorld->GetPlayerAmountLimit();
+    uint32 playerAmountLimit = sWorld->GetPlayerAmountLimit();
     AccountTypes allowedAccountType = sWorld->GetPlayerSecurityLimit();
     char const* secName = "";
     switch (allowedAccountType)
     {
-        case SEC_PLAYER:        secName = "Player";        break;
-        case SEC_MODERATOR:     secName = "Moderator";     break;
-        case SEC_GAMEMASTER:    secName = "Gamemaster";    break;
-        case SEC_ADMINISTRATOR: secName = "Administrator"; break;
-        default:                secName = "<unknown>";     break;
+        case SEC_PLAYER:
+            secName = "Player";
+            break;
+        case SEC_MODERATOR:
+            secName = "Moderator";
+            break;
+        case SEC_GAMEMASTER:
+            secName = "Gamemaster";
+            break;
+        case SEC_ADMINISTRATOR:
+            secName = "Administrator";
+            break;
+        default:
+            secName = "<unknown>";
+            break;
     }
-
-    PSendSysMessage("Player limits: amount %u, min. security level %s.", pLimit, secName);
+    PSendSysMessage("Player limits: amount %u, min. security level %s.", playerAmountLimit, secName);
 
     return true;
 }

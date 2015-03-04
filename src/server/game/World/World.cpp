@@ -2443,10 +2443,16 @@ void World::UpdateAllowedSecurity()
 {
      QueryResult_AutoPtr result = LoginDatabase.PQuery("SELECT allowedSecurityLevel from realmlist WHERE id = '%d'", realmID);
      if (result)
-     {
-        m_allowedSecurityLevel = AccountTypes(result->Fetch()->GetUInt16());
-        sLog->outDebug("Allowed Level: %u Result %u", m_allowedSecurityLevel, result->Fetch()->GetUInt16());
-     }
+         SetPlayerSecurityLimit(AccountTypes(result->Fetch()->GetUInt16()));
+}
+
+void World::SetPlayerSecurityLimit(AccountTypes sec)
+{
+    AccountTypes _sec = sec < SEC_CONSOLE ? sec : SEC_PLAYER;
+    bool update = _sec > m_allowedSecurityLevel;
+    m_allowedSecurityLevel = _sec;
+    if (update)
+        KickAllLess(m_allowedSecurityLevel);
 }
 
 void World::ResetDailyQuests()

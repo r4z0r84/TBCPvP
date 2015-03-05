@@ -32,7 +32,7 @@ class ChannelMgr
 {
     public:
         uint32 team;
-        typedef std::map<std::wstring,Channel*> ChannelMap;
+        typedef UNORDERED_MAP<std::wstring, Channel*> ChannelMap;
         ChannelMgr() {team = 0;}
         ~ChannelMgr();
 

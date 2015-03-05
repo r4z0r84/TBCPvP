@@ -32,6 +32,7 @@
 
 #include <ace/Singleton.h>
 #include <map>
+#include <unordered_map>
 
 class Player;
 class Spell;
@@ -756,7 +757,7 @@ struct SpellLearnSkillNode
     uint32 maxvalue;                                        // 0  - max skill value for player level
 };
 
-typedef std::map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
+typedef std::unordered_map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
 
 struct SpellLearnSpellNode
 {

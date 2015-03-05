@@ -36,6 +36,7 @@
 #include <bitset>
 #include <list>
 #include <set>
+#include <unordered_set>
 
 class Unit;
 class WorldPacket;
@@ -488,7 +489,7 @@ class Map : public GridRefManager<NGridType>
 
         int32 m_VisibilityNotifyPeriod;
 
-        typedef std::set<WorldObject*> ActiveNonPlayers;
+        typedef std::unordered_set<WorldObject*> ActiveNonPlayers;
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
 
@@ -517,7 +518,7 @@ class Map : public GridRefManager<NGridType>
         void ProcessRelocationNotifies(const uint32 &diff);
 
         bool i_scriptLock;
-        std::set<WorldObject *> i_objectsToRemove;
+        std::unordered_set<WorldObject *> i_objectsToRemove;
         std::map<WorldObject*, bool> i_objectsToSwitch;
         std::set<WorldObject*> i_worldObjects;
         std::multimap<time_t, ScriptAction> m_scriptSchedule;

@@ -92,7 +92,7 @@ class GameEventMgr
     GameEventMgr();
     public:
         ~GameEventMgr() {};
-        typedef std::set<uint16> ActiveEvents;
+        typedef std::unordered_set<uint16> ActiveEvents;
         typedef std::vector<GameEventData> GameEventDataMap;
         ActiveEvents const& GetActiveEventList() const { return m_ActiveEvents; }
         GameEventDataMap const& GetEventMap() const { return mGameEvent; }

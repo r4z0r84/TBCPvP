@@ -258,6 +258,7 @@ void AddSC_boss_temporus();
 void AddSC_dark_portal();
 void AddSC_instance_dark_portal();
 void AddSC_boss_celebras_the_cursed();       //Maraudon
+void AddSC_npc_celebras_the_redeemed();
 void AddSC_boss_landslide();
 void AddSC_boss_noxxion();
 void AddSC_boss_ptheradras();
@@ -630,6 +631,7 @@ void AddScripts()
     AddSC_dark_portal();
     AddSC_instance_dark_portal();
     AddSC_boss_celebras_the_cursed();       //Maraudon
+    AddSC_npc_celebras_the_redeemed();
     AddSC_boss_landslide();
     AddSC_boss_noxxion();
     AddSC_boss_ptheradras();

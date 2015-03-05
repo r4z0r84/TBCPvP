@@ -3415,6 +3415,17 @@ void Unit::SetFacingToObject(WorldObject* pObject)
     SendMessageToSet(&data, false);
 }
 
+void Unit::SetFacingToOrientation(float orientation)
+{
+    // update orientation at server
+    SetOrientation(orientation);
+
+    // and client
+    WorldPacket data;
+    BuildHeartBeatMsg(&data);
+    SendMessageToSet(&data, false);
+}
+
 bool Unit::isInAccessiblePlaceFor(Creature const* c) const
 {
     if (IsInWater())

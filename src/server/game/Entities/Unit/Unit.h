@@ -1357,6 +1357,7 @@ class Unit : public WorldObject
         }
         bool isInBackInMap(Unit const* target, float distance, float arc = M_PI) const;
         void SetFacingToObject(WorldObject* pObject);
+        void SetFacingToOrientation(float orientation);
 
         // Visibility system
         UnitVisibility GetVisibility() const { return m_Visibility; }

@@ -39,6 +39,7 @@
 
 #include<string>
 #include<vector>
+#include <unordered_set>
 
 struct Mail;
 class Channel;
@@ -2143,7 +2144,8 @@ class Player : public Unit, public GridObject<Player>
 
         // currently visible objects at player client
         typedef std::set<uint64> ClientGUIDs;
-        ClientGUIDs m_clientGUIDs;
+        typedef std::unordered_set<uint64> ClientUnorderedGUIDs;
+        ClientUnorderedGUIDs m_clientGUIDs;
 
         bool HaveAtClient(WorldObject const* u) const { return u == this || m_clientGUIDs.find(u->GetGUID()) != m_clientGUIDs.end(); }
 

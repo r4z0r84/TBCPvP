@@ -53,7 +53,7 @@ VisibleNotifier::SendToSelf()
             }
         }
 
-    for (Player::ClientGUIDs::const_iterator it = vis_guids.begin();it != vis_guids.end(); ++it)
+    for (auto it = vis_guids.begin();it != vis_guids.end(); ++it)
     {
         i_player.m_clientGUIDs.erase(*it);
         i_data.AddOutOfRangeGUID(*it);

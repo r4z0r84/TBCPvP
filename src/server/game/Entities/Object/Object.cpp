@@ -1613,8 +1613,11 @@ void WorldObject::BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const*
 
 void WorldObject::SendMessageToSet(WorldPacket *data, bool /*fake*/)
 {
-    Trinity::MessageDistDeliverer notifier(this, data, GetMap()->GetVisibilityDistance());
-    VisitNearbyWorldObject(GetMap()->GetVisibilityDistance(), notifier);
+    if (IsInWorld())
+    {
+        Trinity::MessageDistDeliverer notifier(this, data, GetMap()->GetVisibilityDistance());
+        VisitNearbyWorldObject(GetMap()->GetVisibilityDistance(), notifier);
+    }
 }
 
 void WorldObject::SendMessageToSetInRange(WorldPacket *data, float dist, bool /*bToSelf*/)

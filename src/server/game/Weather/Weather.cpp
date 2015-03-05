@@ -185,27 +185,26 @@ bool Weather::ReGenerate()
 
 void Weather::SendWeatherUpdateToPlayer(Player* player)
 {
-    WorldPacket data(SMSG_WEATHER, (4+4+4));
+    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
 
-    data << uint32(GetWeatherState()) << (float)m_grade << uint8(0);
+    data << uint32(GetWeatherState());
+    data << (float)m_grade;
+    data << uint8(0);
     player->GetSession()->SendPacket(&data);
 }
 
 void Weather::SendFineWeatherUpdateToPlayer(Player* player)
 {
-    WorldPacket data(SMSG_WEATHER, (4+4+4));
-
-    data << (uint32)WEATHER_STATE_FINE << (float)0.0f << uint8(0);
+    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
+    data << (uint32)WEATHER_STATE_FINE;
+    data << (float)0.0f;
+    data << uint8(0);
     player->GetSession()->SendPacket(&data);
 }
 
 // Send the new weather to all players in the zone
 bool Weather::UpdateWeather()
 {
-    Player* player = sWorld->FindPlayerInZone(m_zone);
-    if (!player)
-        return false;
-
     // Send the weather packet to all players in this zone
     if (m_grade >= 1)
         m_grade = 0.9999f;
@@ -214,9 +213,12 @@ bool Weather::UpdateWeather()
 
     WeatherState state = GetWeatherState();
 
-    WorldPacket data(SMSG_WEATHER, (4+4+4));
-    data << uint32(state) << (float)m_grade << uint8(0);
-    player->SendMessageToSet(&data, true);
+    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
+    data << uint32(state);
+    data << (float)m_grade;
+    data << uint8(0);
+
+    sWorld->SendZoneMessage(m_zone, &data);
 
     // Log the event
     char const* wthstr;

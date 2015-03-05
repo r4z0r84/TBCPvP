@@ -218,7 +218,8 @@ bool Weather::UpdateWeather()
     data << (float)m_grade;
     data << uint8(0);
 
-    sWorld->SendZoneMessage(m_zone, &data);
+    if (!sWorld->SendZoneMessage(m_zone, &data))
+        return false;
 
     // Log the event
     char const* wthstr;

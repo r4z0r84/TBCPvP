@@ -32,6 +32,7 @@ npc_silva_filnaveth
 npc_clintar_spirit
 npc_clintar_dreamwalker
 npc_omen
+npc_keeper_remulos
 EndContentData */
 
 #include "ScriptPCH.h"
@@ -1578,6 +1579,320 @@ CreatureAI* GetAI_npc_giant_spotlight(Creature* creature)
     return new npc_giant_spotlightAI(creature);
 }
 
+#include "ScriptPCH.h"
+
+/*######
+## npc_keeper_remulos
+######*/
+
+enum Enums
+{
+    QUEST_WALKING_LEGENDS = 8447,
+
+    SPELL_THROW_NIGHTMARE_OBJECT = 25004,
+    SPELL_TELEPORT_VISUAL = 41232,
+
+    NPC_MALFURION = 17949,
+
+    SAY_REMULOS_1 = -1587001,
+    SAY_REMULOS_2 = -1587002,
+    SAY_REMULOS_3 = -1587003,
+    SAY_REMULOS_4 = -1587004,
+    SAY_REMULOS_5 = -1587005,
+    SAY_REMULOS_6 = -1587006,
+    SAY_REMULOS_7 = -1587007,
+    SAY_REMULOS_8 = -1587008,
+
+    SAY_MALFURION_1 = -1587009,
+    SAY_MALFURION_2 = -1587010,
+    SAY_MALFURION_3 = -1587011,
+    SAY_MALFURION_4 = -1587012,
+    SAY_MALFURION_5 = -1587013
+};
+
+static float P[10][4] =
+{
+    { 7828.5752f, -2246.8354f, 463.1559f, 0.0f },
+    { 7824.6440f, -2279.0273f, 459.3173f, 0.0f },
+    { 7814.1699f, -2302.2565f, 456.2227f, 0.0f },
+    { 7787.4604f, -2320.9807f, 454.5470f, 0.0f },
+    { 7754.7109f, -2308.7287f, 456.3067f, 3.5497f },
+    { 7787.4604f, -2320.9807f, 454.5470f, 0.0f },
+    { 7814.1699f, -2302.2565f, 456.2227f, 0.0f },
+    { 7824.6640f, -2279.0273f, 459.3173f, 0.0f },
+    { 7828.5752f, -2246.8354f, 463.5159f, 0.0f },
+    { 7848.3000f, -2216.3500f, 470.8880f, 3.9095f },
+};
+
+struct npc_keeper_remulosAI : public ScriptedAI
+{
+    npc_keeper_remulosAI(Creature *c) : ScriptedAI(c) {}
+
+    uint32 waitTimer;
+    uint8 currentPhase;
+    bool isMoving;
+    bool eventRunning;
+    Player* pInvoker = NULL;
+    Creature* cMalfurion = NULL;
+
+    void Reset()
+    {
+        waitTimer = 0;
+        currentPhase = 0;
+        isMoving = false;
+        eventRunning = false;
+        pInvoker = NULL;
+        cMalfurion = NULL;
+    };
+
+    void StartEvent(Player* _pInvoker)
+    {
+        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        me->AddUnitMovementFlag(MOVEFLAG_WALK_MODE);
+
+        pInvoker = _pInvoker;
+        currentPhase = 1;
+        eventRunning = true;
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (isMoving || !eventRunning)
+            return;
+
+        if (waitTimer)
+        {
+            if (waitTimer <= diff)
+            {
+                waitTimer = 0;
+                ++currentPhase;
+            }
+            else
+            {
+                waitTimer -= diff;
+                return;
+            }
+        }
+
+        if (currentPhase)
+        {
+            switch (currentPhase)
+            {
+            case 1:
+            {
+                waitTimer = 3000;
+                DoScriptText(SAY_REMULOS_1, me, pInvoker);
+                break;
+            }
+            case 2:
+            {
+                MovePoint(0, P[0][0], P[0][1], P[0][2]);
+                break;
+            }
+            case 3:
+            {
+                MovePoint(1, P[1][0], P[1][1], P[1][2]);
+                break;
+            }
+            case 4:
+            {
+                MovePoint(2, P[2][0], P[2][1], P[2][2]);
+                break;
+            }
+            case 5:
+            {
+                MovePoint(3, P[3][0], P[3][1], P[3][2]);
+                break;
+            }
+            case 6:
+            {
+                MovePoint(4, P[4][0], P[4][1], P[4][2]);
+                break;
+            }
+            case 7:
+            {
+                waitTimer = 3000;
+                break;
+            }
+            case 8:
+            {
+                DoScriptText(SAY_REMULOS_2, me, pInvoker);
+                waitTimer = 2000;
+                break;
+            }
+            case 9:
+            {
+                DoCast(SPELL_THROW_NIGHTMARE_OBJECT);
+                waitTimer = 10000;
+                break;
+            }
+            case 10:
+            {
+                cMalfurion = me->SummonCreature(NPC_MALFURION, 7730.5288f, -2318.8596f, 453.8706f, 0.1058f);
+                cMalfurion->CastSpell(cMalfurion, SPELL_TELEPORT_VISUAL, true);
+                waitTimer = 1000;
+                break;
+            }
+            case 11:
+            {
+                DoScriptText(SAY_REMULOS_3, me);
+                waitTimer = 2000;
+                break;
+            }
+            case 12:
+            {
+                cMalfurion->Say(SAY_MALFURION_1, LANG_UNIVERSAL, NULL);
+                waitTimer = 5000;
+                break;
+            }
+            case 13:
+            {
+                DoScriptText(SAY_REMULOS_4, me);
+                waitTimer = 5000;
+                break;
+            }
+            case 14:
+            {
+                cMalfurion->Say(SAY_MALFURION_2, LANG_UNIVERSAL, NULL);
+                waitTimer = 10000;
+                break;
+            }
+            case 15:
+            {
+                DoScriptText(SAY_REMULOS_5, me);
+                waitTimer = 5000;
+                break;
+            }
+            case 16:
+            {
+                cMalfurion->Say(SAY_MALFURION_3, LANG_UNIVERSAL, NULL);
+                waitTimer = 5000;
+                break;
+            }
+            case 17:
+            {
+                DoScriptText(SAY_REMULOS_6, me);
+                waitTimer = 7000;
+                break;
+            }
+            case 18:
+            {
+                cMalfurion->Say(SAY_MALFURION_4, LANG_UNIVERSAL, NULL);
+                waitTimer = 15000;
+                break;
+            }
+            case 19:
+            {
+                cMalfurion->Say(SAY_MALFURION_5, LANG_UNIVERSAL, NULL);
+                waitTimer = 5000;
+                break;
+            }
+            case 20:
+            {
+                DoScriptText(SAY_REMULOS_7, me);
+                waitTimer = 3000;
+                break;
+            }
+            case 21:
+            {
+                DoScriptText(SAY_REMULOS_8, me);
+                waitTimer = 1000;
+                break;
+            }
+            case 22:
+            {
+                cMalfurion->SetVisibility(VISIBILITY_OFF);
+                cMalfurion->RemoveFromWorld();
+                cMalfurion = NULL;
+
+                if (pInvoker)
+                {
+                    if (Group *pGroup = CAST_PLR(pInvoker)->GetGroup())
+                    {
+                        for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                        {
+                            Player *pGroupMember = itr->getSource();
+
+                            // for any leave or dead (with not released body) group member at appropriate distance
+                            if (pGroupMember && pGroupMember->IsAtGroupRewardDistance(me) && pGroupMember->GetQuestStatus(QUEST_WALKING_LEGENDS) == QUEST_STATUS_INCOMPLETE)
+                                pGroupMember->CompleteQuest(QUEST_WALKING_LEGENDS);
+                        }
+                    }
+                    else if (CAST_PLR(pInvoker)->GetQuestStatus(QUEST_WALKING_LEGENDS) == QUEST_STATUS_INCOMPLETE)
+                        CAST_PLR(pInvoker)->CompleteQuest(QUEST_WALKING_LEGENDS);
+                }
+
+                waitTimer = 1000;
+                break;
+            }
+            case 23:
+            {
+                MovePoint(5, P[5][0], P[5][1], P[5][2]);
+                break;
+            }
+            case 24:
+            {
+                MovePoint(6, P[6][0], P[6][1], P[6][2]);
+                break;
+            }
+            case 25:
+            {
+                MovePoint(7, P[7][0], P[7][1], P[7][2]);
+                break;
+            }
+            case 26:
+            {
+                MovePoint(8, P[8][0], P[8][1], P[8][2]);
+                break;
+            }
+            case 27:
+            {
+                MovePoint(9, P[9][0], P[9][1], P[9][2]);
+                break;
+            }
+            case 28:
+            {
+                me->Respawn(true);
+                break;
+            }
+            default:
+                break;
+            }
+        }
+    }
+
+    void MovePoint(uint32 id, float x, float y, float z)
+    {
+        isMoving = true;
+        me->GetMotionMaster()->MovePoint(id, x, y, z);
+    }
+
+    void MovementInform(uint32 uiType, uint32 uiId)
+    {
+        if (uiType != POINT_MOTION_TYPE)
+            return;
+
+        if (P[uiId][3] > 0.0f)
+            me->SetFacingToOrientation(P[uiId][3]);
+
+        ++currentPhase;
+        isMoving = false;
+    }
+};
+
+bool QuestAccept_npc_keeper_remulos(Player* player, Creature* creature, Quest const* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_WALKING_LEGENDS)
+        CAST_AI(npc_keeper_remulosAI, creature->AI())->StartEvent(player);
+
+    return true;
+}
+
+CreatureAI* GetAI_npc_keeper_remulos(Creature* creature)
+{
+    return new npc_keeper_remulosAI(creature);
+}
+
 void AddSC_moonglade()
 {
     Script *newscript;
@@ -1629,6 +1944,12 @@ void AddSC_moonglade()
     newscript = new Script;
     newscript->Name = "npc_giant_spotlight";
     newscript->GetAI = &GetAI_npc_giant_spotlight;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_keeper_remulos";
+    newscript->GetAI = &GetAI_npc_keeper_remulos;
+    newscript->pQuestAccept = &QuestAccept_npc_keeper_remulos;
     newscript->RegisterSelf();
 }
 

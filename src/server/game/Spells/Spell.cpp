@@ -4352,7 +4352,42 @@ uint8 Spell::CanCast(bool strict)
                 }
                 break;
             }
-            default:break;
+            default:
+            {
+                if (m_spellInfo->Id == 32307) // Plant Warmaul Ogre Banner
+                {
+                    bool targetCheck = false;
+                    bool rangeCheck = false;
+                    bool deadCheck = false;
+                    uint32 cEntry[4] = { 17146, 17147, 17148, 18658 };
+
+                    for (uint8 i = 0; i < 4; i++)
+                        if (Player* plCaster = m_caster->ToPlayer())
+                        {
+                            uint64 guid = plCaster->GetSelection();
+                            if (Creature* creature = plCaster->GetMap()->GetCreature(guid))
+                                if (creature->GetEntry() == cEntry[i])
+                                {
+                                    targetCheck = true;
+
+                                    if (plCaster->GetDistance2d(creature) < 5.0f)
+                                        rangeCheck = true;
+
+                                    if (!creature->isAlive())
+                                        deadCheck = true;
+                                }
+                        }
+
+                    if (!targetCheck)
+                        return SPELL_FAILED_BAD_TARGETS;
+                    if (!rangeCheck)
+                        return SPELL_FAILED_OUT_OF_RANGE;
+                    if (!deadCheck)
+                        return SPELL_FAILED_TARGET_NOT_DEAD;
+                    break;
+                }
+            }
+            break;
         }
     }
 

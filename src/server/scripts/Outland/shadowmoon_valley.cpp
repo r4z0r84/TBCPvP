@@ -1795,6 +1795,22 @@ bool GossipSelect_npc_grand_commander_ruusk(Player *player, Creature *_Creature,
     return true;
 }
 
+bool GOHello_go_forged_illidari_bane(Player* player, GameObject *pGO)
+{
+    ItemPosCountVec dest;
+    uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 30876, 1);
+    if (msg == EQUIP_ERR_OK)
+    {
+        if (Item* item = player->StoreNewItem(dest, 30876, true))
+            player->SendNewItem(item, 1, false, true);
+        else
+            player->SendEquipError(msg, NULL, NULL);
+    }
+
+    pGO->SetLootState(GO_JUST_DEACTIVATED);
+    return true;
+}
+
 void AddSC_shadowmoon_valley()
 {
     Script *newscript;
@@ -1890,6 +1906,11 @@ void AddSC_shadowmoon_valley()
     newscript->Name = "npc_grand_commander_ruusk";
     newscript->pGossipHello = &GossipHello_npc_grand_commander_ruusk;
     newscript->pGossipSelect = &GossipSelect_npc_grand_commander_ruusk;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "go_forged_illidari_bane";
+    newscript->pGOHello = &GOHello_go_forged_illidari_bane;
     newscript->RegisterSelf();
 }
 

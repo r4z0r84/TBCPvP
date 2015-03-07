@@ -1632,8 +1632,8 @@ struct npc_keeper_remulosAI : public ScriptedAI
     uint8 currentPhase;
     bool isMoving;
     bool eventRunning;
-    Player* pInvoker = NULL;
-    Creature* cMalfurion = NULL;
+    Player* pInvoker;
+    Creature* cMalfurion;
 
     void Reset()
     {
@@ -1641,8 +1641,8 @@ struct npc_keeper_remulosAI : public ScriptedAI
         currentPhase = 0;
         isMoving = false;
         eventRunning = false;
-        pInvoker = NULL;
-        cMalfurion = NULL;
+        pInvoker = 0;
+        cMalfurion = 0;
     };
 
     void StartEvent(Player* _pInvoker)
@@ -1741,7 +1741,7 @@ struct npc_keeper_remulosAI : public ScriptedAI
             }
             case 12:
             {
-                cMalfurion->Say(SAY_MALFURION_1, LANG_UNIVERSAL, NULL);
+                cMalfurion->Say(SAY_MALFURION_1, LANG_UNIVERSAL, 0);
                 waitTimer = 5000;
                 break;
             }
@@ -1753,7 +1753,7 @@ struct npc_keeper_remulosAI : public ScriptedAI
             }
             case 14:
             {
-                cMalfurion->Say(SAY_MALFURION_2, LANG_UNIVERSAL, NULL);
+                cMalfurion->Say(SAY_MALFURION_2, LANG_UNIVERSAL, 0);
                 waitTimer = 10000;
                 break;
             }
@@ -1765,7 +1765,7 @@ struct npc_keeper_remulosAI : public ScriptedAI
             }
             case 16:
             {
-                cMalfurion->Say(SAY_MALFURION_3, LANG_UNIVERSAL, NULL);
+                cMalfurion->Say(SAY_MALFURION_3, LANG_UNIVERSAL, 0);
                 waitTimer = 5000;
                 break;
             }
@@ -1777,13 +1777,13 @@ struct npc_keeper_remulosAI : public ScriptedAI
             }
             case 18:
             {
-                cMalfurion->Say(SAY_MALFURION_4, LANG_UNIVERSAL, NULL);
+                cMalfurion->Say(SAY_MALFURION_4, LANG_UNIVERSAL, 0);
                 waitTimer = 15000;
                 break;
             }
             case 19:
             {
-                cMalfurion->Say(SAY_MALFURION_5, LANG_UNIVERSAL, NULL);
+                cMalfurion->Say(SAY_MALFURION_5, LANG_UNIVERSAL, 0);
                 waitTimer = 5000;
                 break;
             }
@@ -1803,7 +1803,7 @@ struct npc_keeper_remulosAI : public ScriptedAI
             {
                 cMalfurion->SetVisibility(VISIBILITY_OFF);
                 cMalfurion->RemoveFromWorld();
-                cMalfurion = NULL;
+                cMalfurion = 0;
 
                 if (pInvoker)
                 {

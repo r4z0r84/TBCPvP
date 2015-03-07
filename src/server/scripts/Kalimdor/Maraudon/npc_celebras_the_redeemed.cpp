@@ -41,16 +41,16 @@ struct npc_celebras_the_redeemedAI : public ScriptedAI
     uint32 waitTimer;
     uint8 currentPhase;
     bool isMoving;
-    Player* pInvoker = NULL;
-    GameObject* gAura = NULL;
+    Player* pInvoker;
+    GameObject* gAura;
 
     void Reset()
     {
         waitTimer = 0;
         currentPhase = 0;
         isMoving = false;
-        pInvoker = NULL;
-        gAura = NULL;
+        pInvoker = 0;
+        gAura = 0;
     };
 
     void StartEvent(Player* _pInvoker)
@@ -184,7 +184,10 @@ struct npc_celebras_the_redeemedAI : public ScriptedAI
                         gStone->Use(me);
 
                     if (gAura)
+                    {
                         gAura->RemoveFromWorld();
+                        gAura = 0;
+                    }
 
                     MovePoint(6, P[6][0], P[6][1], P[6][2]);
                     break;

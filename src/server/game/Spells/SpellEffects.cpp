@@ -1205,6 +1205,16 @@ void Spell::EffectDummy(uint32 i)
 
                     return;
                 }
+                case 32146:                                 // Liquid Fire
+                {
+                    if (Creature *creature = unitTarget->FindNearestCreature(18240, 5.0f))
+                    {
+                        unitTarget->ToPlayer()->KilledMonsterCredit(18240, 0);
+                        creature->CastSpell(creature, 33802, true);
+                        creature->DisappearAndDie();
+                    }
+                    break;
+                }
                 case 33060:                                 // Make a Wish
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)

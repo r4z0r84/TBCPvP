@@ -21,7 +21,7 @@
 /* ScriptData
 SDName: Shadowmoon_Valley
 SD%Complete: 98
-SDComment: Quest support: 10519, 10583, 10601, 10814, 10804, 10854, 10458, 10481, 10480, 11082, 10781, 10451. Vendor Drake Dealer Hurlunk, 10563, 10596.
+SDComment: Quest support: 10519, 10583, 10601, 10814, 10804, 10854, 10458, 10481, 10480, 11082, 10781, 10451. Vendor Drake Dealer Hurlunk, 10563, 10596, 11082
 SDCategory: Shadowmoon Valley
 EndScriptData */
 
@@ -42,6 +42,7 @@ npc_lord_illidan_stormrage
 go_crystal_prison
 npc_enraged_spirit
 npc_jovaan
+npc_grand_commander_ruusk
 EndContentData */
 
 #include "ScriptPCH.h"
@@ -1744,6 +1745,56 @@ CreatureAI* GetAI_npc_jovaan(Creature* creature)
     return new npc_jovaanAI(creature);
 }
 
+/*######
+## npc_grand_commander_ruusk
+######*/
+
+enum
+{
+    QUEST_WHAT_ILLIDAN_WANTS_ILLIDAN_GETS = 10577,
+};
+
+bool GossipHello_npc_grand_commander_ruusk(Player *player, Creature *_Creature)
+{
+    if (player->GetQuestStatus(QUEST_WHAT_ILLIDAN_WANTS_ILLIDAN_GETS) == QUEST_STATUS_INCOMPLETE)
+        player->ADD_GOSSIP_ITEM(0, "I bring word from Lord Illidan.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+    player->SEND_GOSSIP_MENU(10401, _Creature->GetGUID());
+    return true;
+}
+
+bool GossipSelect_npc_grand_commander_ruusk(Player *player, Creature *_Creature, uint32 sender, uint32 action)
+{
+    switch (action)
+    {
+    case GOSSIP_ACTION_INFO_DEF + 1:
+        player->ADD_GOSSIP_ITEM(0, "The cipher fragment is to be moved. Have it delivered to Zuluhed.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        player->SEND_GOSSIP_MENU(10405, _Creature->GetGUID());
+        break;
+    case GOSSIP_ACTION_INFO_DEF + 2:
+        player->ADD_GOSSIP_ITEM(0, "Perhaps you did not hear me, Ruusk. I am giving you an order from Illidan himself!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+        player->SEND_GOSSIP_MENU(10406, _Creature->GetGUID());
+        break;
+    case GOSSIP_ACTION_INFO_DEF + 3:
+        player->ADD_GOSSIP_ITEM(0, "Very well. I will return to the Black Temple and notify Lord Illidan of your unwillingness to carry out his wishes. I suggest you make arrangements with your subordinates and let them know that you will soon be leaving this world.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+        player->SEND_GOSSIP_MENU(10407, _Creature->GetGUID());
+        break;
+    case GOSSIP_ACTION_INFO_DEF + 4:
+        player->ADD_GOSSIP_ITEM(0, "Do I need to go into all the gory details? I think we are both well aware of what Lord Illidan does with those that would oppose his word. Now, I must be going! Farewell, Ruusk! Forever...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+        player->SEND_GOSSIP_MENU(10408, _Creature->GetGUID());
+        break;
+    case GOSSIP_ACTION_INFO_DEF + 5:
+        player->ADD_GOSSIP_ITEM(0, "Ah, good of you to come around, Ruusk. Thank you and farewell.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+        player->SEND_GOSSIP_MENU(10409, _Creature->GetGUID());
+        break;
+    case GOSSIP_ACTION_INFO_DEF + 6:
+        player->CLOSE_GOSSIP_MENU();
+        player->AreaExploredOrEventHappens(QUEST_WHAT_ILLIDAN_WANTS_ILLIDAN_GETS);
+        break;
+    }
+    return true;
+}
+
 void AddSC_shadowmoon_valley()
 {
     Script *newscript;
@@ -1833,6 +1884,12 @@ void AddSC_shadowmoon_valley()
     newscript = new Script;
     newscript->Name = "npc_jovaan";
     newscript->GetAI = &GetAI_npc_jovaan;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_grand_commander_ruusk";
+    newscript->pGossipHello = &GossipHello_npc_grand_commander_ruusk;
+    newscript->pGossipSelect = &GossipSelect_npc_grand_commander_ruusk;
     newscript->RegisterSelf();
 }
 

@@ -22674,14 +22674,15 @@ Item* Player::GetEquippedItem(uint32 guidlow)
     return NULL;
 }
 
-void Player::SendTransmogPackets()
+void Player::SendTransmogPackets(Player* pInvoker)
 {
     std::vector<Item*> items = GetItemList();
     for (std::vector<Item*>::const_iterator itr = items.begin(); itr != items.end(); ++itr)
-        HandleItemTransmogQuery((*itr)->GetEntry(), (*itr)->GetGUIDLow());
+        HandleItemTransmogQuery(pInvoker, (*itr)->GetEntry(), (*itr)->GetGUIDLow());
+        
 }
 
-void Player::HandleItemTransmogQuery(uint32 entry, uint32 lowguid)
+void Player::HandleItemTransmogQuery(Player* pInvoker, uint32 entry, uint32 lowguid)
 {
     ItemPrototype const *pProto = sObjectMgr->GetItemPrototype(entry);
     ItemPrototype const *pFakeProto = 0;
@@ -22707,7 +22708,7 @@ void Player::HandleItemTransmogQuery(uint32 entry, uint32 lowguid)
         else
             Description = pProto->Description;
 
-        int loc_idx = GetSession()->GetSessionDbLocaleIndex();
+        int loc_idx = pInvoker->GetSession()->GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
             ItemLocale const *il = sObjectMgr->GetItemLocale(pProto->ItemId);
@@ -22838,13 +22839,13 @@ void Player::HandleItemTransmogQuery(uint32 entry, uint32 lowguid)
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
         data << uint32(0);                                  // added in 2.4.2.8209, duration (seconds)
-        GetSession()->SendPacket(&data);
+        pInvoker->GetSession()->SendPacket(&data);
     }
     else
     {
         sLog->outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE - NO item INFO! (ENTRY: %u)", entry);
         WorldPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 4);
         data << uint32(entry | 0x80000000);
-        GetSession()->SendPacket(&data);
+        pInvoker->GetSession()->SendPacket(&data);
     }
 }

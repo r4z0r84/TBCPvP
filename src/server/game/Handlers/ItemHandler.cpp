@@ -278,6 +278,12 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
     uint32 item;
     recv_data >> item;
 
+    if (Player* receiver = GetPlayer())
+    {
+        receiver->HandleItemTransmogQuery(item);
+        return;
+    }
+
     sLog->outDetail("STORAGE: Item Query = %u", item);
 
     ItemPrototype const *pProto = sObjectMgr->GetItemPrototype(item);

@@ -21104,7 +21104,7 @@ void Player::UpdateForQuestsGO()
 
     UpdateData udata;
     WorldPacket packet;
-    for (auto itr = m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)
+    for (ClientUnorderedGUIDs::iterator itr = m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)
     {
         if (IS_GAMEOBJECT_GUID(*itr))
         {

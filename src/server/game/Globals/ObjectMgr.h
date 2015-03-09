@@ -1046,8 +1046,8 @@ class ObjectMgr
         typedef UNORDERED_MAP<uint32, uint32> QuestAreaTriggerMap;
         typedef UNORDERED_MAP<uint32, uint32> BattleMastersMap;
         typedef UNORDERED_MAP<uint32, std::string> ItemTextMap;
-        typedef std::unordered_set<uint32> TavernAreaTriggerSet;
-        typedef std::unordered_set<uint32> GameObjectForQuestSet;
+        typedef UNORDERED_SET<uint32> TavernAreaTriggerSet;
+        typedef UNORDERED_SET<uint32> GameObjectForQuestSet;
 
         GroupSet            mGroupSet;
         GuildMap            mGuildMap;
@@ -1076,7 +1076,7 @@ class ObjectMgr
         PetCreateSpellMap   mPetCreateSpell;
 
         //character reserved names
-        typedef std::unordered_set<std::string> ReservedNamesMap;
+        typedef UNORDERED_SET<std::string> ReservedNamesMap;
         ReservedNamesMap    m_ReservedNames;
 
         std::set<uint32>    m_DisabledPlayerSpells;

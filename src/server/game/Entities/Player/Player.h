@@ -39,7 +39,7 @@
 
 #include<string>
 #include<vector>
-#include <unordered_set>
+#include "UnorderedSet.h"
 
 struct Mail;
 class Channel;
@@ -1157,7 +1157,7 @@ class Player : public Unit, public GridObject<Player>
         bool CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const;
         void QuickEquipItem(uint16 pos, Item *pItem);
         void VisualizeItem(uint8 slot, Item *pItem);
-        void SetVisibleItemSlot(uint8 slot, Item *pItem);
+        void SetVisibleItemSlot(uint8 slot, Item *pItem, bool fakeEntry = true);
         Item* BankItem(ItemPosCountVec const& dest, Item *pItem, bool update)
         {
             return StoreItem(dest, pItem, update);
@@ -2149,7 +2149,7 @@ class Player : public Unit, public GridObject<Player>
 
         // currently visible objects at player client
         typedef std::set<uint64> ClientGUIDs;
-        typedef std::unordered_set<uint64> ClientUnorderedGUIDs;
+        typedef UNORDERED_SET<uint64> ClientUnorderedGUIDs;
         ClientUnorderedGUIDs m_clientGUIDs;
 
         bool HaveAtClient(WorldObject const* u) const { return u == this || m_clientGUIDs.find(u->GetGUID()) != m_clientGUIDs.end(); }

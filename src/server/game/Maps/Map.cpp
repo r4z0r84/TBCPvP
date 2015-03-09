@@ -2123,7 +2123,7 @@ void Map::RemoveAllObjectsInRemoveList()
     //sLog->outDebug("Object remover 1 check.");
     while (!i_objectsToRemove.empty())
     {
-        std::unordered_set<WorldObject*>::iterator itr = i_objectsToRemove.begin();
+        UNORDERED_SET<WorldObject*>::iterator itr = i_objectsToRemove.begin();
         WorldObject* obj = *itr;
 
         switch (obj->GetTypeId())

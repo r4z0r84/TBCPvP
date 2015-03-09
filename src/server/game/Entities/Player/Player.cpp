@@ -66,6 +66,7 @@
 #include "Mail.h"
 #include "GameEventMgr.h"
 #include "TempEventMgr.h"
+#include "UnorderedSet.h"
 
 #include <cmath>
 #include <iomanip>
@@ -12013,7 +12014,7 @@ void Player::QuickEquipItem(uint16 pos, Item *pItem)
     }
 }
 
-void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
+void Player::SetVisibleItemSlot(uint8 slot, Item *pItem, bool fakeEntry)
 {
     // PLAYER_VISIBLE_ITEM_i_CREATOR    // Size: 2
     // PLAYER_VISIBLE_ITEM_i_0          // Size: 12
@@ -12029,7 +12030,7 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
         SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * MAX_VISIBLE_ITEM_OFFSET), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
 
         int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
-        if (pItem->GetFakeEntry())
+        if (fakeEntry && pItem->GetFakeEntry())
             SetUInt32Value(VisibleBase + 0, pItem->GetFakeEntry());
         else
             SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
@@ -20310,27 +20311,27 @@ bool Player::IsVisibleGloballyFor(Player* u) const
 }
 
 template<class T>
-inline void UpdateVisibilityOf_helper(std::unordered_set<uint64>& s64, T* target, std::set<Unit*>& /*v*/)
+inline void UpdateVisibilityOf_helper(UNORDERED_SET<uint64>& s64, T* target, std::set<Unit*>& /*v*/)
 {
     s64.insert(target->GetGUID());
 }
 
 template<>
-inline void UpdateVisibilityOf_helper(std::unordered_set<uint64>& s64, GameObject* target, std::set<Unit*>& /*v*/)
+inline void UpdateVisibilityOf_helper(UNORDERED_SET<uint64>& s64, GameObject* target, std::set<Unit*>& /*v*/)
 {
     if (!target->IsTransport())
         s64.insert(target->GetGUID());
 }
 
 template<>
-inline void UpdateVisibilityOf_helper(std::unordered_set<uint64>& s64, Creature* target, std::set<Unit*>& v)
+inline void UpdateVisibilityOf_helper(UNORDERED_SET<uint64>& s64, Creature* target, std::set<Unit*>& v)
 {
     s64.insert(target->GetGUID());
     v.insert(target);
 }
 
 template<>
-inline void UpdateVisibilityOf_helper(std::unordered_set<uint64>& s64, Player* target, std::set<Unit*>& v)
+inline void UpdateVisibilityOf_helper(UNORDERED_SET<uint64>& s64, Player* target, std::set<Unit*>& v)
 {
     s64.insert(target->GetGUID());
     v.insert(target);
@@ -22679,7 +22680,6 @@ void Player::SendTransmogPackets(Player* pInvoker)
     std::vector<Item*> items = GetItemList();
     for (std::vector<Item*>::const_iterator itr = items.begin(); itr != items.end(); ++itr)
         HandleItemTransmogQuery(pInvoker, (*itr)->GetEntry(), (*itr)->GetGUIDLow());
-        
 }
 
 void Player::HandleItemTransmogQuery(Player* pInvoker, uint32 entry, uint32 lowguid)

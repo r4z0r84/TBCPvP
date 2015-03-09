@@ -27,7 +27,7 @@
 
 #include <map>
 #include <vector>
-#include <unordered_set>
+#include "UnorderedSet.h"
 
 #define MAXGROUPSIZE 5
 #define MAXRAIDSIZE 40
@@ -148,7 +148,7 @@ class Group
         typedef UNORDERED_MAP< uint32 /*mapId*/, InstanceGroupBind> BoundInstancesMap;
     protected:
         typedef MemberSlotList::iterator member_witerator;
-        typedef std::unordered_set<Player*> InvitesList;
+        typedef UNORDERED_SET<Player*> InvitesList;
 
         typedef std::vector<Roll*> Rolls;
 

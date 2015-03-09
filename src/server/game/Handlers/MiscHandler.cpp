@@ -1054,8 +1054,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!plr)                                                // wrong player
         return;
 
-    plr->SendTransmogPackets(_player);
-
     uint32 talent_points = 0x3D;
     uint32 guid_size = plr->GetPackGUID().size();
     WorldPacket data(SMSG_INSPECT_TALENT, 4+talent_points);

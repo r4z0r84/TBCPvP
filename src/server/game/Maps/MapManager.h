@@ -117,7 +117,7 @@ class MapManager
 
         void LoadTransports();
 
-        typedef std::unordered_set<Transport *> TransportSet;
+        typedef UNORDERED_SET<Transport *> TransportSet;
         TransportSet m_Transports;
 
         typedef std::map<uint32, TransportSet> TransportMap;

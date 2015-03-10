@@ -38,10 +38,15 @@ void WorldSession::SendNameQueryOpcode(Player *p)
 {
     if (!p)
         return;
+
+    std::stringstream nameData;
+    //nameData << p->GetTitleString(); // prefix title
+    nameData << p->GetName();
+    //nameData << p->GetTitleString(); // suffix title
                                                             // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10));
     data << p->GetGUID();                                   // player guid
-    data << p->GetName();                                   // played name
+    data << nameData.str();                                 // played name
     data << uint8(0);                                       // realm name for cross realm BG usage
     data << uint32(p->getRace());
     data << uint32(p->getGender());

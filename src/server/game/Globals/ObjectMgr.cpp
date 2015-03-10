@@ -45,6 +45,7 @@
 #include "WaypointManager.h"
 #include "GossipDef.h"
 #include "InstanceScript.h"
+#include "Titles.h"
 
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
@@ -145,6 +146,15 @@ bool normalizePlayerName(std::string& name)
 
     wchar_t wstr_buf[MAX_INTERNAL_PLAYER_NAME+1];
     size_t wstr_len = MAX_INTERNAL_PLAYER_NAME;
+    
+    /*std::string earaseStr;
+    for (uint8 i = 0; i < MAX_TITLE_COUNT; ++i)
+    {
+        earaseStr = titleStrings[i];
+        std::string::size_type e = name.find(earaseStr);
+        if (e != std::string::npos)
+            name.erase(i, earaseStr.length());
+    }*/
 
     if (!Utf8toWStr(name, &wstr_buf[0], wstr_len))
         return false;

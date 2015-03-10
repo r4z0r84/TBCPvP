@@ -2189,6 +2189,10 @@ class Player : public Unit, public GridObject<Player>
         // Custom Mutligossip Vendor
         int32 m_currentVendorEntry;
 
+        const char* GetTitleString() const { return m_title.c_str(); }
+        void SetTitleString(const std::string& newtitle) { m_title = newtitle; }
+        std::string m_title;
+
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/

@@ -2532,6 +2532,21 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = 1;
             spellInfo->EffectImplicitTargetB[1] = 0;
             break;
+        case 30174: // Riding Turtle 100% speed
+            spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
+            spellInfo->EffectBasePoints[1] = 100;
+            break;
+        case 10787: // Panther
+        case 10788: // Leopard
+        case 10789: // Spotted Frostsaber
+        case 10790: // Bengal Tiger
+        case 42929: // [DNT] Test Mount
+            spellInfo->EffectBasePoints[1] = 100;
+            break;
+        case 32240: // Snowy Gryphon
+            spellInfo->EffectBasePoints[1] = 280;
+            break;
         case 18191: // Food that should act like Well Fed
         case 46687: // NOTE: Somebody needs to comment this
         case 5257:

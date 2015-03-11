@@ -26,7 +26,6 @@
 void AddSC_beastmaster();
 void AddSC_npc_template();
 void AddSC_npc_spirit_of_competition();
-void AddSC_custom_profession_vendor();
 
 //world
 void AddSC_areatrigger_scripts();
@@ -402,7 +401,6 @@ void AddScripts()
     AddSC_beastmaster();
     AddSC_npc_template();
     AddSC_npc_spirit_of_competition();
-    AddSC_custom_profession_vendor();
 
     AddSC_areatrigger_scripts();
     AddSC_boss_emeriss();

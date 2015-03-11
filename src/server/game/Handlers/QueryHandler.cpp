@@ -40,9 +40,7 @@ void WorldSession::SendNameQueryOpcode(Player *p)
         return;
 
     std::stringstream nameData;
-    //nameData << p->GetTitleString(); // prefix title
     nameData << p->GetName();
-    //nameData << p->GetTitleString(); // suffix title
                                                             // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10));
     data << p->GetGUID();                                   // player guid

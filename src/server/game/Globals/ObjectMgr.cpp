@@ -139,22 +139,29 @@ std::string ScriptInfo::GetDebugInfo() const
     return std::string(sz);
 }
 
-bool normalizePlayerName(std::string& name)
+bool normalizePlayerName(std::string& name, bool removeSpaces)
 {
     if (name.empty())
         return false;
 
     wchar_t wstr_buf[MAX_INTERNAL_PLAYER_NAME+1];
     size_t wstr_len = MAX_INTERNAL_PLAYER_NAME;
+
+    if (removeSpaces)
+        name.erase(std::remove(name.begin(), name.end(), ' '), name.end());
     
     for (uint8 i = 0; i < MAX_TITLE_COUNT; ++i)
     {
         std::string eraseStr = titleStrings[i];
-        std::string::size_type e = name.find(eraseStr);
-        if (e != std::string::npos)
+        if (!eraseStr.empty())
         {
-            name.erase(e, eraseStr.length());
-            break;
+            std::string::size_type e = name.find(eraseStr);
+            if (e != std::string::npos)
+            {
+                name.erase(e, eraseStr.length());
+                break;
+            }
+
         }
     }
 

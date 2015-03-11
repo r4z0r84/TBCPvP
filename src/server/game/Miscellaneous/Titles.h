@@ -3,7 +3,7 @@
 
 #include "Common.h"
 
-#define MAX_TITLE_COUNT 11
+#define MAX_TITLE_COUNT 81
 
 const std::string titleStrings[] =
 {

@@ -195,6 +195,7 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &fri
     uint32 security = player->GetSession()->GetSecurity();
     bool allowTwoSideWhoList = sWorld->getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
     bool gmInWhoList = sWorld->getConfig(CONFIG_GM_IN_WHO_LIST) || security > SEC_PLAYER;
+    bool fakeArenaMembersInWhoList = sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA);
 
     PlayerSocialMap::iterator itr = player->GetSocial()->m_playerSocialMap.find(friendGUID);
     if (itr != player->GetSocial()->m_playerSocialMap.end())
@@ -212,11 +213,18 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &fri
             friendInfo.Status = FRIEND_STATUS_AFK;
         if (pFriend->isDND())
             friendInfo.Status = FRIEND_STATUS_DND;
-        friendInfo.Area = pFriend->GetZoneId();
 
-        if (!player->isGameMaster() && sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA))
-            if (pFriend->InArena() && player->InArena())
-                friendInfo.Area = 440; // Tanaris
+        friendInfo.Area = 0;
+        if (fakeArenaMembersInWhoList && pFriend->InArena())
+        {
+            friendInfo.Area = sMapMgr->GetZoneId(
+                pFriend->GetBattleGroundEntryPoint().GetMapId(),
+                pFriend->GetBattleGroundEntryPoint().GetPositionX(),
+                pFriend->GetBattleGroundEntryPoint().GetPositionY(),
+                pFriend->GetBattleGroundEntryPoint().GetPositionZ());
+        }
+        else
+            friendInfo.Area = pFriend->GetZoneId();
 
         friendInfo.Level = pFriend->getLevel();
         friendInfo.Class = pFriend->getClass();

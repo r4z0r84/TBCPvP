@@ -158,17 +158,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     }
     m_lastWhoCommand = time(NULL);
 
-    // Disable Who in arena
-    if (GetPlayer()->InArena() && !GetPlayer()->isSpectator())
-    {
-        if (!GetPlayer()->isGameMaster() && sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA))
-        {
-            GetPlayer()->GetSession()->SendAreaTriggerMessage("You may not use the who list in arena.");
-            ChatHandler(this).PSendSysMessage("You may not use the who list in arena.");
-            return;
-        }
-    }
-
     uint32 clientcount = 0;
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
@@ -231,8 +220,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
 
     uint32 team = _player->GetTeam();
     uint32 security = GetSecurity();
-    bool allowTwoSideWhoList = sWorld->getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
-    bool gmInWhoList         = sWorld->getConfig(CONFIG_GM_IN_WHO_LIST);
+    bool allowTwoSideWhoList       = sWorld->getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+    bool gmInWhoList               = sWorld->getConfig(CONFIG_GM_IN_WHO_LIST);
+    bool fakeArenaMembersInWhoList = sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA);
 
     WorldPacket data(SMSG_WHO, 50);                         // guess size
     data << uint32(clientcount);                            // clientcount place holder, listed count
@@ -276,7 +266,18 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         if (!(racemask & (1 << race)))
             continue;
 
-        uint32 pzoneid = itr->second->GetZoneId();
+        uint32 pzoneid = 0;
+        if (fakeArenaMembersInWhoList && itr->second->InArena())
+        {
+            pzoneid = sMapMgr->GetZoneId(
+                itr->second->GetBattleGroundEntryPoint().GetMapId(),
+                itr->second->GetBattleGroundEntryPoint().GetPositionX(),
+                itr->second->GetBattleGroundEntryPoint().GetPositionY(),
+                itr->second->GetBattleGroundEntryPoint().GetPositionZ());
+        }
+        else
+            itr->second->GetZoneId();
+
         uint8 gender = itr->second->getGender();
 
         bool z_show = true;

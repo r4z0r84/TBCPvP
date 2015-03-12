@@ -766,15 +766,20 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
             data << uint8(pl->getLevel());
             data << uint8(pl->getClass());
             data << uint8(0);                               // new 2.4.0
-            if (!pl->isGameMaster() && sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA))
+
+            if (sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA) && pl->InArena())
             {
-                if (pl->InArena())
-                    data << uint32(440); // Tanaris
-                else 
-                    data << uint32(pl->GetZoneId());
+                uint32 zoneId = sMapMgr->GetZoneId(
+                    pl->GetBattleGroundEntryPoint().GetMapId(),
+                    pl->GetBattleGroundEntryPoint().GetPositionX(),
+                    pl->GetBattleGroundEntryPoint().GetPositionY(),
+                    pl->GetBattleGroundEntryPoint().GetPositionZ());
+
+                data << uint32(zoneId);
             }
             else
                 data << uint32(pl->GetZoneId());
+
             data << itr->second.Pnote;
             data << itr->second.OFFnote;
         }

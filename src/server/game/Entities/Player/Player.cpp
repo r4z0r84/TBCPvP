@@ -14483,7 +14483,8 @@ void Player::CompleteQuest(uint32 quest_id)
                 SendQuestComplete(quest_id);
         }
 
-        CheckAllElderQuestsDone();
+        if (sGameEventMgr->IsActiveEvent(WORLD_EVENT_LUNAR_FESTIVAL))
+            CheckAllElderQuestsDone();
     }
 }
 
@@ -22588,16 +22589,6 @@ uint32 Player::GetTalentSpecialization()
     return TALENT_SPECIALIZATION_NONE;
 }
 
-enum ElderRewards
-{
-    ITEM_GOLD_MEDALLION = 37297,
-};
-
-uint32 arrayLength(uint32 a[])
-{
-    return sizeof(a) / sizeof(a[0]);
-}
-
 void Player::CheckAllElderQuestsDone()
 {
     uint32 elderQuests[] = { 8619, 8635, 8636, 8643, 8644, 8645, 8646, 8647, 8648, 8649,
@@ -22606,10 +22597,10 @@ void Player::CheckAllElderQuestsDone()
         8716, 8717, 8718, 8719, 8720, 8721, 8722, 8723, 8724, 8725, 8726, 8727, 8866 };
 
     // Check for Gold Medallion
-    if (HasItemCount(ITEM_GOLD_MEDALLION, 1, true))
+    if (HasItemCount(37297, 1, true))
         return;
 
-    for (uint8 i = 0; i < arrayLength(elderQuests); i++)
+    for (uint8 i = 0; i < (sizeof(elderQuests) / sizeof(elderQuests[i])); i++)
     {
         if (!GetQuestRewardStatus(elderQuests[i]))
             return;
@@ -22624,10 +22615,10 @@ void Player::CheckAllElderQuestsDone()
     // attempt store
     ItemPosCountVec sDest;
     // store in main bag to simplify second pass (special bags can be not equipped yet at this moment)
-    uint8 msg = CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, ITEM_GOLD_MEDALLION, 1);
+    uint8 msg = CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, 37297, 1);
     if (msg == EQUIP_ERR_OK)
     {
-        StoreNewItem(sDest, ITEM_GOLD_MEDALLION, true, Item::GenerateItemRandomPropertyId(ITEM_GOLD_MEDALLION));
+        StoreNewItem(sDest, 37297, true);
         return;
     }
 

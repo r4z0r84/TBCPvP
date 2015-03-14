@@ -37,6 +37,23 @@ enum GameEventState
     GAMEEVENT_WORLD_FINISHED    // next events are started, unapply this one
 };
 
+enum WorldEvents
+{
+    WORLD_EVENT_MIDSUMMER_FIRE_FESTIVAL = 1,
+    WORLD_EVENT_WINTER_VEIL = 2,
+    WORLD_EVENT_DARKMOON_FAIRE_1 = 3, // Terokkar Forest
+    WORLD_EVENT_DARKMOON_FAIRE_2 = 4, // Elwynn Forest
+    WORLD_EVENT_DARKMOON_FAIRE_3 = 5, // Mulgore
+    WORLD_EVENT_NEW_YEARS_EVE = 6,
+    WORLD_EVENT_LUNAR_FESTIVAL = 7,
+    WORLD_EVENT_LOVE_IS_IN_THE_AIR = 8,
+    WORLD_EVENT_NOBLEGARDEN = 9,
+    WORLD_EVENT_CHILDRENS_WEEK = 10,
+    WORLD_EVENT_HARVEST_FESTIVAL = 11,
+    WORLD_EVENT_HALLOWS_END = 12,
+    WORLD_EVENT_BREWFEST = 26,
+};
+
 struct GameEventFinishCondition
 {
     float reqNum;  // required number // use float, since some events use percent

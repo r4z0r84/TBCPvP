@@ -240,6 +240,13 @@ void ScriptMgr::OnPVPKill(Player* killer, Player *killed)
     tmpscript->pOnPVPKill(killer, killed);
 }
 
+void ScriptMgr::OnGossipSelect(Player* player, uint32 uiMenuId, uint32 uiSender, uint32 uiAction)
+{
+    Script *tmpscript = m_scripts[GetScriptId("scripted_on_events")];
+    if (!tmpscript || !tmpscript->pOnGossipSelect) return;
+    tmpscript->pOnGossipSelect(player, uiMenuId, uiSender, uiAction);
+}
+
 char const* ScriptMgr::ScriptsVersion()
 {
     return "Integrated Trinity Scripts";
@@ -372,6 +379,15 @@ bool ScriptMgr::ItemQuestAccept(Player* player, Item* pItem, Quest const* pQuest
 
     player->PlayerTalkClass->ClearMenus();
     return tmpscript->pItemQuestAccept(player, pItem, pQuest);
+}
+
+bool ScriptMgr::ItemGossipSelect(Player* player, Item* pItem, uint32 uiSender, uint32 uiAction)
+{
+    Script *tmpscript = m_scripts[pItem->GetProto()->ScriptId];
+    if (!tmpscript || !tmpscript->pItemGossipSelect) return false;
+
+    player->PlayerTalkClass->ClearMenus();
+    return tmpscript->pItemGossipSelect(player, pItem, uiSender, uiAction);
 }
 
 bool ScriptMgr::GOHello(Player* player, GameObject* pGO)

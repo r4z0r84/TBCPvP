@@ -48,12 +48,12 @@ struct ItemPrototype;
 struct Script
 {
     Script() :
-        pOnLogin(NULL), pOnLogout(NULL), pOnPVPKill(NULL),
+        pOnLogin(NULL), pOnLogout(NULL), pOnPVPKill(NULL), pOnGossipSelect(NULL),
         pGossipHello(NULL), pQuestAccept(NULL), pGossipSelect(NULL), pGossipSelectWithCode(NULL),
         pQuestSelect(NULL), pQuestComplete(NULL), pNPCDialogStatus(NULL), pGODialogStatus(NULL),
         pChooseReward(NULL), pItemHello(NULL), pGOHello(NULL), pAreaTrigger(NULL), pItemQuestAccept(NULL),
-        pGOQuestAccept(NULL), pGOChooseReward(NULL), pItemUse(NULL), pEffectDummyCreature(NULL),
-        GetAI(NULL), GetInstanceScript(NULL)
+        pGOQuestAccept(NULL), pGOChooseReward(NULL), pItemUse(NULL), pItemGossipSelect(NULL),
+        pEffectDummyCreature(NULL), GetAI(NULL), GetInstanceScript(NULL)
     {}
 
     std::string Name;
@@ -62,6 +62,7 @@ struct Script
     void (*pOnLogin             )(Player*);
     void (*pOnLogout            )(Player*);
     void (*pOnPVPKill           )(Player*, Player*);
+    void(*pOnGossipSelect       )(Player*, uint32, uint32, uint32);
     bool (*pGossipHello         )(Player*, Creature*);
     bool (*pQuestAccept         )(Player*, Creature*, Quest const*);
     bool (*pGossipSelect        )(Player*, Creature*, uint32 , uint32);
@@ -80,6 +81,7 @@ struct Script
     bool (*pGOQuestAccept       )(Player*, GameObject*, Quest const*);
     bool (*pGOChooseReward      )(Player*, GameObject*, Quest const*, uint32);
     bool (*pItemUse             )(Player*, Item*, SpellCastTargets const&);
+    bool (*pItemGossipSelect     )(Player*, Item*, uint32, uint32);
     bool (*pEffectDummyCreature )(Unit*, uint32, uint32, Creature*);
 
     CreatureAI* (*GetAI)(Creature*);
@@ -108,6 +110,7 @@ public: /* Initialization */
         void OnLogin(Player* player);
         void OnLogout(Player* player);
         void OnPVPKill(Player* killer, Player *killed);
+        void OnGossipSelect(Player* player, uint32 uiMenuId, uint32 uiSender, uint32 uiAction);
         bool GossipHello (Player * player, Creature* creature);
         bool GossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction);
         bool GossipSelectWithCode(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction, const char* sCode);
@@ -121,6 +124,7 @@ public: /* Initialization */
         uint32 GODialogStatus(Player* player, GameObject* pGO);
         bool ItemHello(Player* player, Item* pItem, Quest const* pQuest);
         bool ItemQuestAccept(Player* player, Item* pItem, Quest const* pQuest);
+        bool ItemGossipSelect(Player* player, Item* pItem, uint32 uiSender, uint32 uiAction);
         bool GOHello(Player* player, GameObject* pGO);
         bool GOQuestAccept(Player* player, GameObject* pGO, Quest const* pQuest);
         bool GOChooseReward(Player* player, GameObject* pGO, Quest const* pQuest, uint32 opt);

@@ -1390,7 +1390,7 @@ void CreatureEventAI::ReceiveEmote(Player* player, uint32 text_emote)
         if ((*itr).Event.event_type == EVENT_T_RECEIVE_EMOTE)
         {
             if ((*itr).Event.receive_emote.emoteId != text_emote)
-                return;
+                continue;
 
             PlayerCondition pcon((*itr).Event.receive_emote.condition, (*itr).Event.receive_emote.conditionValue1, (*itr).Event.receive_emote.conditionValue2);
             if (pcon.Meets(player))

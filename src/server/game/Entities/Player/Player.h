@@ -1132,7 +1132,7 @@ class Player : public Unit, public GridObject<Player>
         }
         uint8 CanStoreItems(Item **pItem, int count) const;
         uint8 CanEquipNewItem(uint8 slot, uint16 &dest, uint32 item, bool swap) const;
-        uint8 CanEquipItem(uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true) const;
+        uint8 CanEquipItem(uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true, bool skipCastCheck = false) const;
         uint8 CanUnequipItems(uint32 item, uint32 count) const;
         uint8 CanUnequipItem(uint16 src, bool swap) const;
         uint8 CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item *pItem, bool swap, bool not_loading = true) const;

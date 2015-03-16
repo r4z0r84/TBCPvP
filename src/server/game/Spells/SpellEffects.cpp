@@ -3244,10 +3244,8 @@ void Spell::EffectSummonChangeItem(uint32 i)
         return;
 
     for (uint8 j = PERM_ENCHANTMENT_SLOT; j <= TEMP_ENCHANTMENT_SLOT; ++j)
-    {
         if (m_CastItem->GetEnchantmentId(EnchantmentSlot(j)))
             pNewItem->SetEnchantment(EnchantmentSlot(j), m_CastItem->GetEnchantmentId(EnchantmentSlot(j)), m_CastItem->GetEnchantmentDuration(EnchantmentSlot(j)), m_CastItem->GetEnchantmentCharges(EnchantmentSlot(j)));
-    }
 
     if (m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) < m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
     {
@@ -3273,7 +3271,7 @@ void Spell::EffectSummonChangeItem(uint32 i)
             return;
         }
     }
-    else if (player->IsBankPos (pos))
+    else if (player->IsBankPos(pos))
     {
         ItemPosCountVec dest;
         uint8 msg = player->CanBankItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true);
@@ -3291,10 +3289,10 @@ void Spell::EffectSummonChangeItem(uint32 i)
             return;
         }
     }
-    else if (player->IsEquipmentPos (pos))
+    else if (player->IsEquipmentPos(pos))
     {
         uint16 dest;
-        uint8 msg = player->CanEquipItem(m_CastItem->GetSlot(), dest, pNewItem, true);
+        uint8 msg = player->CanEquipItem(m_CastItem->GetSlot(), dest, pNewItem, true, true, true);
         if (msg == EQUIP_ERR_OK)
         {
             player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), true);

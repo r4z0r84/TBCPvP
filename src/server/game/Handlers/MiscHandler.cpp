@@ -298,7 +298,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
                 itr->second->GetBattleGroundEntryPoint().GetPositionZ());
         }
         else
-            itr->second->GetZoneId();
+            pzoneid = itr->second->GetZoneId();
 
         uint8 gender = itr->second->getGender();
 

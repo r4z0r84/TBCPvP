@@ -155,7 +155,7 @@ struct instance_blackrock_depths : public ScriptedInstance
             TombBossGUIDs[i] = 0;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

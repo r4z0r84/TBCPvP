@@ -133,7 +133,7 @@ struct instance_black_temple : public ScriptedInstance
         return NULL;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

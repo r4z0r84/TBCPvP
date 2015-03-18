@@ -153,7 +153,7 @@ struct instance_dark_portal : public ScriptedInstance
         player->SendUpdateWorldState(WORLD_STATE_BM, 0);
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         if (creature->GetEntry() == C_MEDIVH)
             MedivhGUID = creature->GetGUID();

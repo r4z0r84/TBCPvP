@@ -110,7 +110,7 @@ struct instance_arcatraz : public ScriptedInstance
         }
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         if (creature->GetEntry() == MELLICHAR)
             MellicharGUID = creature->GetGUID();

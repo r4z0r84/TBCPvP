@@ -57,7 +57,7 @@ struct instance_zulgurub : public ScriptedInstance
         return false;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

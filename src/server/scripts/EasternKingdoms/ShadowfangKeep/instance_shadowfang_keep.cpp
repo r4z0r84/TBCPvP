@@ -90,7 +90,7 @@ struct instance_shadowfang_keep : public ScriptedInstance
         uiTimer = 0;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

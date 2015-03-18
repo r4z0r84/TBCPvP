@@ -123,7 +123,7 @@ struct instance_mount_hyjal : public ScriptedInstance
         HandleGameObject(DoorGUID, open, NULL);
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

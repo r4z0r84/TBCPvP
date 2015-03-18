@@ -109,7 +109,7 @@ struct instance_steam_vault : public ScriptedInstance
         return NULL;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

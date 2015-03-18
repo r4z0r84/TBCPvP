@@ -79,7 +79,7 @@ struct instance_the_eye : public ScriptedInstance
         return false;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

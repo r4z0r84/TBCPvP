@@ -149,7 +149,7 @@ struct instance_shattered_halls : public ScriptedInstance
         }
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

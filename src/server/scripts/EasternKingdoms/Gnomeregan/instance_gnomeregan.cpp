@@ -69,7 +69,7 @@ struct instance_gnomeregan : public ScriptedInstance
         OUT_LOAD_INST_DATA_COMPLETE;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*bAdd*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

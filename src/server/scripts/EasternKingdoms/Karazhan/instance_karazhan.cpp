@@ -109,7 +109,7 @@ struct instance_karazhan : public ScriptedInstance
         return false;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

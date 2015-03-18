@@ -82,7 +82,7 @@ struct instance_shadow_labyrinth : public ScriptedInstance
         }
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

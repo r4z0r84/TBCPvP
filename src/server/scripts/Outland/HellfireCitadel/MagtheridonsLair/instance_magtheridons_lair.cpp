@@ -75,7 +75,7 @@ struct instance_magtheridons_lair : public ScriptedInstance
         return false;
     }
 
-    void OnCreatureCreate(Creature* creature, bool /*add*/)
+    void OnCreatureCreate(Creature* creature)
     {
         switch (creature->GetEntry())
         {

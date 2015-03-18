@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `spell1`='0', `spell2`='0', `flags_extra`='257' WHERE (`entry`='19516');

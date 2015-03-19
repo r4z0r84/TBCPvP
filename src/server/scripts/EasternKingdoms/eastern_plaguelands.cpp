@@ -186,42 +186,88 @@ enum PriestEpicQuest
 
     INJURED_PEASANT_COUNT = 10,
     PLAGUED_PEASANT_COUNT = 2,
+    SCOURGE_ARCHER_COUNT = 7,
 
     SPELL_DEATHS_DOOR = 23127,
     SPELL_SEETHING_PLAGUE = 23072,
 
     QUEST_THE_BALANCE_OF_LIGHT_AND_SHADOW = 7622,
+
+    SAY_SAVED1 = -1510000,
+    SAY_SAVED2 = -1510001,
+    SAY_SAVED3 = -1510002,
+    SAY_DIED1 = -1510003,
+    SAY_DIED2 = -1510004,
+    SAY_DIED3 = -1510005,
+    SAY_DIED4 = -1510006,
+    SAY_EMPOWER = -1510007,
+    SAY_COMPLETE = -1510008,
+    SAY_SPAWN1 = -1510009,
+    SAY_SPAWN2 = -1510010,
+    SAY_SPAWN3 = -1510011
 };
 
 int32 eventCreatures[] { 14486, 14489, 14484, 14485, 14493 };
+
+static float ArcherPosition[7][4]
+{
+    { 3347.865234f, -3070.707275f, 177.881882f, 1.645396f },
+    { 3357.144287f, -3063.327637f, 172.499222f, 1.841747f },
+    { 3371.682373f, -3067.965332f, 175.233582f, 2.144123f },
+    { 3379.904053f, -3059.370117f, 181.981873f, 2.646778f },
+    { 3334.646973f, -3053.084717f, 174.101074f, 0.400536f },
+    { 3368.005371f, -3022.475830f, 171.617966f, 4.268625f },
+    { 3327.000244f, -3021.307861f, 170.578796f, 5.584163f }
+};
 
 struct npc_priest_epic_quest_callerAI : public NullCreatureAI
 {
     npc_priest_epic_quest_callerAI(Creature *c) : NullCreatureAI(c) {}
 
     Player* pInvoker;
+
     uint8 SavedCount;
     uint8 KilledCount;
     uint8 currentPhase;
+
     bool eventRunning;
+    bool canSpawnSoldier;
+
     uint32 CheckTimer;
+    uint32 SoldierTimer;
+    uint32 waitTimer;
 
     void Reset()
     {
         pInvoker = 0;
+
         currentPhase = 0;
-        eventRunning = false;
         SavedCount = 0;
         KilledCount = 0;
+
+        eventRunning = false;
+        canSpawnSoldier = true;
+
         CheckTimer = 3000;
+        SoldierTimer = urand(5000, 15000);
+        waitTimer = 5000;
     }
 
     void StartEvent(Player* invoker)
     {
         pInvoker = invoker;
         eventRunning = true;
-        currentPhase = 1;
-        NextWave();
+        waitTimer = 5000;
+
+        for (uint8 i = 0; i < SCOURGE_ARCHER_COUNT; ++i)
+        {
+            if (Creature* pSummon = me->SummonCreature(NPC_SCOURGE_ARCHER, ArcherPosition[i][0], ArcherPosition[i][1], ArcherPosition[i][2], ArcherPosition[i][3]))
+            {
+                pSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
+                pSummon->SetReactState(REACT_AGGRESSIVE);
+            }
+        }
+            
     }
 
     void FinishEvent(bool success)
@@ -231,8 +277,11 @@ struct npc_priest_epic_quest_callerAI : public NullCreatureAI
 
         // Restore questgiver flag
         if (Creature* pTrigger = me->FindNearestCreature(NPC_PRIEST_EPIC_EVENT_CALLER, 100.0f))
+        {
             pTrigger->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
+            pTrigger->Yell(SAY_COMPLETE, LANG_UNIVERSAL, 0);
+        }
+           
         if (success)
             pInvoker->CompleteQuest(QUEST_THE_BALANCE_OF_LIGHT_AND_SHADOW);
         else
@@ -240,7 +289,7 @@ struct npc_priest_epic_quest_callerAI : public NullCreatureAI
             if (Creature* pTrigger = me->FindNearestCreature(NPC_ERIS_HAVENFIRE, 100.0f))
                 pTrigger->DisappearAndDie();
 
-            pInvoker->SetQuestStatus(QUEST_THE_BALANCE_OF_LIGHT_AND_SHADOW, QUEST_STATUS_FAILED);
+            pInvoker->FailQuest(QUEST_THE_BALANCE_OF_LIGHT_AND_SHADOW);
         }
 
         me->RemoveFromWorld();
@@ -249,10 +298,31 @@ struct npc_priest_epic_quest_callerAI : public NullCreatureAI
     void NextWave()
     {
         for (uint8 i = 0; i < INJURED_PEASANT_COUNT; ++i)
-            DoSummon(NPC_INJURED_PEASANT, me, 7.5f, 5000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+            DoSummon(NPC_INJURED_PEASANT, me, 10.5f, 5000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
 
         for (uint8 i = 0; i < PLAGUED_PEASANT_COUNT; ++i)
-            DoSummon(NPC_PLAGUED_PEASANT, me, 7.5f, 5000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+            DoSummon(NPC_PLAGUED_PEASANT, me, 10.5f, 5000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+
+        currentPhase++;
+        canSpawnSoldier = true;
+        SoldierTimer = urand(5000, 15000);
+    }
+
+    void SpawnSoldiers()
+    {
+        if (!pInvoker)
+            return;
+
+        Position pos;
+        pInvoker->GetPosition(&pos);
+
+        float randFac = float(urand(-5, 5));
+        uint8 amount = currentPhase * 2;
+        for (uint8 i = 0; i < (amount > 6 ? 6 : amount); ++i)
+            if (Creature* soilder = pInvoker->SummonCreature(NPC_SCOURGE_FOOTSOLDIER, pos.GetPositionX() + randFac, pos.GetPositionY() + randFac, pos.GetPositionZ() + 1.0f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
+                soilder->Attack(pInvoker, true);
+
+        canSpawnSoldier = false;
     }
 
     void DespawnSummons(uint32 entry)
@@ -280,6 +350,31 @@ struct npc_priest_epic_quest_callerAI : public NullCreatureAI
         if (!eventRunning)
             return;
 
+        if (waitTimer)
+        {
+            if (waitTimer <= diff)
+            {
+                NextWave();
+                waitTimer = 0;
+            }
+            else
+            {
+                waitTimer -= diff;
+                return;
+            }
+        }
+
+        if (canSpawnSoldier)
+        {
+            if (SoldierTimer < diff)
+            {
+                SpawnSoldiers();
+                SoldierTimer = 0;
+            }
+            else
+                SoldierTimer -= diff;
+        }
+
         if (CheckTimer < diff)
         {
             if (SavedCount >= 50)
@@ -289,10 +384,7 @@ struct npc_priest_epic_quest_callerAI : public NullCreatureAI
                 FinishEvent(false);
 
             if ((KilledCount + SavedCount) >= 12 * currentPhase)
-            {
-                currentPhase++;
                 NextWave();
-            }
 
             CheckTimer = 3000;
         }
@@ -367,6 +459,9 @@ struct npc_priest_quest_peasantAI : public ScriptedAI
                     if (roll_chance_i(40))
                         AddDisease();
 
+                    if (roll_chance_i(5))
+                        me->Yell(RAND(SAY_SPAWN1, SAY_SPAWN2, SAY_SPAWN3), LANG_UNIVERSAL, 0);
+
                     MovePoint(0, EscapePositions[0][0] + randomFac, EscapePositions[0][1] + randomFac, EscapePositions[0][2]);
                     break;
                 }
@@ -401,6 +496,9 @@ struct npc_priest_quest_peasantAI : public ScriptedAI
     {
         if (Creature* pTrigger = me->FindNearestCreature(NPC_PRIEST_EPIC_EVENT_CALLER, 100.0f))
             CAST_AI(npc_priest_epic_quest_callerAI, pTrigger->AI())->KilledCount++;
+
+        if (roll_chance_i(25))
+            me->Yell(RAND(SAY_DIED1, SAY_DIED2, SAY_DIED3), LANG_UNIVERSAL, 0);
     }
 
     void MovementInform(uint32 uiType, uint32 uiId)
@@ -412,6 +510,9 @@ struct npc_priest_quest_peasantAI : public ScriptedAI
         {
             if (Creature* pTrigger = me->FindNearestCreature(NPC_PRIEST_EPIC_EVENT_CALLER, 100.0f))
                 CAST_AI(npc_priest_epic_quest_callerAI, pTrigger->AI())->SavedCount++;
+
+            if (roll_chance_i(15))
+                me->Yell(RAND(SAY_SAVED1, SAY_SAVED2, SAY_SAVED3), LANG_UNIVERSAL, 0);
 
             me->DisappearAndDie();
         }

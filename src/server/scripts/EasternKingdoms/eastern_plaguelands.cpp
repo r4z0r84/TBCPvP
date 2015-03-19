@@ -162,7 +162,7 @@ bool GossipSelect_npc_tirion_fordring(Player* player, Creature* creature, uint32
 /*######
 ## npc_eris_havenfire
 ## This contains script for the quest "The Balance of Light and Shadow"
-## Enemy NPCs: Scourge Footsoldier (14486), Cursed Mage (8524), Scourge Archer (14489)
+## Enemy NPCs: Scourge Footsoldier (14486), Scourge Archer (14489)
 ## Friendly NPCs: Injured Peasant (14484), Plagued Peasant (14485)
 ## Unknown: Priest Epic Event Caller (14493), Invisible Trigger One (14495)
 ## Spells: Death's Door (23127) - on Injured, Seething Plague (23072)
@@ -179,50 +179,254 @@ enum PriestEpicQuest
 {
     NPC_SCOURGE_FOOTSOLDIER = 14486,
     NPC_SCOURGE_ARCHER = 14489,
-
     NPC_PRIEST_EPIC_EVENT_CALLER = 14493,
-
-    MAX_PEASANT_COUNT = 12,
+    NPC_ERIS_HAVENFIRE = 14494,
     NPC_INJURED_PEASANT = 14484,
     NPC_PLAGUED_PEASANT = 14485,
+
+    INJURED_PEASANT_COUNT = 10,
+    PLAGUED_PEASANT_COUNT = 2,
 
     SPELL_DEATHS_DOOR = 23127,
     SPELL_SEETHING_PLAGUE = 23072,
 
     QUEST_THE_BALANCE_OF_LIGHT_AND_SHADOW = 7622,
-
 };
 
-static float SpawnPositions[12][4]
-{
-    // 
-    { 3349.141846f, -3050.000488f, 164.789917f, 1.603000f },
-    { 3351.238037f, -3051.492432f, 165.248230f, 1.603000f },
-    { 3355.165039f, -3047.774902f, 164.961517f, 1.775788f },
-    { 3356.926758f, -3050.261963f, 165.239868f, 1.775788f },
-    { 3358.251953f, -3052.211426f, 165.419510f, 1.775788f },
-    { 3358.324219f, -3045.890869f, 165.264175f, 1.822912f },
-    { 3361.271240f, -3046.981934f, 165.156036f, 1.897524f },
-    { 3359.340576f, -3042.071289f, 164.130081f, 1.893597f },
-    { 3365.473877f, -3046.838135f, 165.095566f, 1.885743f },
-    { 3364.936768f, -3049.298096f, 165.206284f, 1.885743f },
-    { 3361.816895f, -3046.340088f, 165.083008f, 1.885743f },
-};
+int32 eventCreatures[] { 14486, 14489, 14484, 14485, 14493 };
 
 struct npc_priest_epic_quest_callerAI : public NullCreatureAI
 {
     npc_priest_epic_quest_callerAI(Creature *c) : NullCreatureAI(c) {}
 
-    void StartEvent()
+    Player* pInvoker;
+    uint8 SavedCount;
+    uint8 KilledCount;
+    uint8 currentPhase;
+    bool eventRunning;
+    uint32 CheckTimer;
+
+    void Reset()
     {
-        for (uint8 i = 0; i < MAX_PEASANT_COUNT; ++i)
+        pInvoker = 0;
+        currentPhase = 0;
+        eventRunning = false;
+        SavedCount = 0;
+        KilledCount = 0;
+        CheckTimer = 3000;
+    }
+
+    void StartEvent(Player* invoker)
+    {
+        pInvoker = invoker;
+        eventRunning = true;
+        currentPhase = 1;
+        NextWave();
+    }
+
+    void FinishEvent(bool success)
+    {
+        for (uint8 i = 0; i < 3; ++i)
+            DespawnSummons(eventCreatures[i]);
+
+        // Restore questgiver flag
+        if (Creature* pTrigger = me->FindNearestCreature(NPC_PRIEST_EPIC_EVENT_CALLER, 100.0f))
+            pTrigger->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+        if (success)
+            pInvoker->CompleteQuest(QUEST_THE_BALANCE_OF_LIGHT_AND_SHADOW);
+        else
+        {
+            if (Creature* pTrigger = me->FindNearestCreature(NPC_ERIS_HAVENFIRE, 100.0f))
+                pTrigger->DisappearAndDie();
+
+            pInvoker->SetQuestStatus(QUEST_THE_BALANCE_OF_LIGHT_AND_SHADOW, QUEST_STATUS_FAILED);
+        }
+
+        me->RemoveFromWorld();
+    }
+
+    void NextWave()
+    {
+        for (uint8 i = 0; i < INJURED_PEASANT_COUNT; ++i)
             DoSummon(NPC_INJURED_PEASANT, me, 7.5f, 5000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+
+        for (uint8 i = 0; i < PLAGUED_PEASANT_COUNT; ++i)
+            DoSummon(NPC_PLAGUED_PEASANT, me, 7.5f, 5000, TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+    }
+
+    void DespawnSummons(uint32 entry)
+    {
+        std::list<Creature*> tempList;
+        float x, y, z;
+        me->GetPosition(x, y, z);
+
+        CellPair pair(Trinity::ComputeCellPair(x, y));
+        Cell cell(pair);
+        cell.data.Part.reserved = ALL_DISTRICT;
+        cell.SetNoCreate();
+
+        Trinity::AllCreaturesOfEntryInRange check(me, entry, 100);
+        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(tempList, check);
+        TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, GridTypeMapContainer> cSearcher(searcher);
+        cell.Visit(pair, cSearcher, *(me->GetMap()));
+
+        for (std::list<Creature*>::const_iterator i = tempList.begin(); i != tempList.end(); ++i)
+            (*i)->RemoveFromWorld();
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (!eventRunning)
+            return;
+
+        if (CheckTimer < diff)
+        {
+            if (SavedCount >= 50)
+                FinishEvent(true);
+
+            if (KilledCount >= 15)
+                FinishEvent(false);
+
+            if ((KilledCount + SavedCount) >= 12 * currentPhase)
+            {
+                currentPhase++;
+                NextWave();
+            }
+
+            CheckTimer = 3000;
+        }
+        else
+            CheckTimer -= diff;
     }
 };
 
 CreatureAI* GetAI_npc_priest_epic_quest_caller(Creature* creature)
 {
     return new npc_priest_epic_quest_callerAI(creature);
+}
+
+static float EscapePositions[4][3]
+{
+    // Escape movement points for Peasants
+    { 3345.032227f, -3023.691162f, 161.178528f },
+    { 3340.042480f, -3004.720215f, 161.248352f },
+    { 3334.029053f, -2992.794189f, 161.143433f },
+    { 3331.889893f, -2975.391357f, 160.549240f }
+};
+
+struct npc_priest_quest_peasantAI : public ScriptedAI
+{
+    npc_priest_quest_peasantAI(Creature *c) : ScriptedAI(c) {}
+
+    bool isMoving;
+    uint8 currentPhase;
+    uint32 diseaseTimer;
+
+    void Reset()
+    {
+        isMoving = false;
+        currentPhase = 1;
+        diseaseTimer = 4000 + urand(6000, 22000);
+
+        me->AddUnitMovementFlag(MOVEFLAG_WALK_MODE);
+    };
+
+    void AddDisease()
+    {
+        me->RemoveAllAuras(); // Remove all auras (e.g. Shield and HOT spells)
+        me->AddAura(RAND(SPELL_DEATHS_DOOR, SPELL_SEETHING_PLAGUE), me);
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        // Only update disease timer when moving
+        if (isMoving)
+        {
+            if (diseaseTimer)
+            {
+                if (diseaseTimer < diff)
+                {
+                    AddDisease();           // Only reapply diseases once
+                    diseaseTimer = 0;
+                }
+                else
+                    diseaseTimer -= diff;
+            }
+
+            return;
+        }
+
+        if (currentPhase)
+        {
+            float randomFac = float(irand(-4, 4));
+            switch (currentPhase)
+            {
+                case 1:
+                {
+                    if (roll_chance_i(40))
+                        AddDisease();
+
+                    MovePoint(0, EscapePositions[0][0] + randomFac, EscapePositions[0][1] + randomFac, EscapePositions[0][2]);
+                    break;
+                }
+                case 2:
+                {
+                    MovePoint(1, EscapePositions[1][0] + randomFac, EscapePositions[1][1] + randomFac, EscapePositions[1][2]);
+                    break;
+                }
+                case 3:
+                {
+                    MovePoint(2, EscapePositions[2][0] + randomFac, EscapePositions[2][1] + randomFac, EscapePositions[2][2]);
+                    break;
+                }
+                case 4:
+                {
+                    MovePoint(3, EscapePositions[3][0] + randomFac, EscapePositions[3][1] + randomFac, EscapePositions[3][2]);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    }
+
+    void MovePoint(uint32 id, float x, float y, float z)
+    {
+        isMoving = true;
+        me->GetMotionMaster()->MovePoint(id, x, y, z);
+    }
+
+    void JustDied(Unit* /*killer*/)
+    {
+        if (Creature* pTrigger = me->FindNearestCreature(NPC_PRIEST_EPIC_EVENT_CALLER, 100.0f))
+            CAST_AI(npc_priest_epic_quest_callerAI, pTrigger->AI())->KilledCount++;
+    }
+
+    void MovementInform(uint32 uiType, uint32 uiId)
+    {
+        if (uiType != POINT_MOTION_TYPE)
+            return;
+
+        if (uiId == 3)
+        {
+            if (Creature* pTrigger = me->FindNearestCreature(NPC_PRIEST_EPIC_EVENT_CALLER, 100.0f))
+                CAST_AI(npc_priest_epic_quest_callerAI, pTrigger->AI())->SavedCount++;
+
+            me->DisappearAndDie();
+        }
+
+        if (EscapePositions[uiId][3] > 0.0f)
+            me->SetFacingToOrientation(EscapePositions[uiId][3]);
+
+        ++currentPhase;
+        isMoving = false;
+    }
+};
+
+CreatureAI* GetAI_npc_priest_quest_peasant(Creature* creature)
+{
+    return new npc_priest_quest_peasantAI(creature);
 }
 
 bool GossipHello_npc_eris_havenfire(Player* player, Creature* creature)
@@ -263,12 +467,15 @@ bool GossipSelect_npc_eris_havenfire(Player* player, Creature* creature, uint32 
     return true;
 }
 
-bool QuestAccept_npc_eris_havenfire(Player* /*player*/, Creature* creature, Quest const *quest)
+bool QuestAccept_npc_eris_havenfire(Player* player, Creature* creature, Quest const *quest)
 {
     if (quest->GetQuestId() == QUEST_THE_BALANCE_OF_LIGHT_AND_SHADOW)
     {
-        if (Creature* pTrigger = creature->FindNearestCreature(NPC_PRIEST_EPIC_EVENT_CALLER, 100.0f))
-            CAST_AI(npc_priest_epic_quest_callerAI, pTrigger->AI())->StartEvent();
+        // Only allow one active event
+        creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+        if (Creature* pTrigger = creature->SummonCreature(NPC_PRIEST_EPIC_EVENT_CALLER, 3360.2f, -3050.24f, 165.25f, 1.90f))
+            CAST_AI(npc_priest_epic_quest_callerAI, pTrigger->AI())->StartEvent(player);
     }
 
     return true;
@@ -311,6 +518,11 @@ void AddSC_eastern_plaguelands()
     newscript = new Script;
     newscript->Name = "npc_priest_epic_quest_caller";
     newscript->GetAI = &GetAI_npc_priest_epic_quest_caller;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_priest_quest_peasant";
+    newscript->GetAI = &GetAI_npc_priest_quest_peasant;
     newscript->RegisterSelf();
 }
 

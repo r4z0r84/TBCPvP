@@ -21,6 +21,10 @@
 #include "CombatAI.h"
 #include "SpellMgr.h"
 
+/////////////////
+// AggressorAI
+/////////////////
+
 int AggressorAI::Permissible(const Creature* creature)
 {
     // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
@@ -38,11 +42,9 @@ void AggressorAI::UpdateAI(const uint32 /*diff*/)
     DoMeleeAttackIfReady();
 }
 
-// some day we will delete these useless things
-int CombatAI::Permissible(const Creature* creature)
-{
-    return PERMIT_BASE_NO;
-}
+/////////////////
+// CombatAI
+/////////////////
 
 void CombatAI::InitializeAI()
 {
@@ -82,13 +84,6 @@ void CombatAI::UpdateAI(const uint32 diff)
         return;
 
     events.Update(diff);
-
-    // In patch 2.0.1 guardian combat AI should not break CC
-    if (me->getVictim() && me->getVictim()->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) && me->isGuardian())
-    {
-        me->InterruptNonMeleeSpells(false);
-        return;
-    }
 
     if (me->hasUnitState(UNIT_STAT_CASTING))
         return;
@@ -149,6 +144,12 @@ void CasterAI::UpdateAI(const uint32 diff)
 
     events.Update(diff);
 
+    if (me->getVictim() && me->getVictim()->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE))
+    {
+        me->InterruptNonMeleeSpells(false);
+        return;
+    }
+
     if (me->hasUnitState(UNIT_STAT_CASTING))
         return;
 
@@ -160,3 +161,47 @@ void CasterAI::UpdateAI(const uint32 diff)
     }
 }
 
+//////////////
+// ArcherAI
+//////////////
+
+ArcherAI::ArcherAI(Creature* c) : CreatureAI(c)
+{
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(me->m_spells[0]);
+    m_minRange = spellInfo ? GetSpellMinRange(spellInfo) : 0;
+
+    if (!m_minRange)
+        m_minRange = MELEE_RANGE;
+
+    me->m_CombatDistance = spellInfo ? GetSpellMaxRange(spellInfo) : 0;
+    me->m_SightDistance = me->m_CombatDistance;
+}
+
+void ArcherAI::AttackStart(Unit* who)
+{
+    if (!who)
+        return;
+
+    if (me->IsWithinCombatRange(who, m_minRange))
+    {
+        if (me->Attack(who, true))
+            me->GetMotionMaster()->MoveChase(who);
+    }
+    else
+    {
+        if (me->Attack(who, false))
+            me->GetMotionMaster()->MoveChase(who, me->m_CombatDistance);
+    }
+}
+
+void ArcherAI::UpdateAI(const uint32 /*diff*/)
+{
+    if (!UpdateVictim())
+        return;
+
+    sLog->outError("YELO");
+    if (!me->IsWithinCombatRange(me->getVictim(), m_minRange))
+        DoSpellAttackIfReady(me->m_spells[0]);
+    else
+        DoMeleeAttackIfReady();
+}

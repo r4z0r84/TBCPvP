@@ -47,7 +47,7 @@ class CombatAI : public CreatureAI
         void EnterCombat(Unit* who);
         void JustDied(Unit *killer);
         void UpdateAI(const uint32 diff);
-        static int Permissible(const Creature *);
+        static int Permissible(Creature const*) { return PERMIT_BASE_NO; }
     protected:
         EventMap events;
         SpellVct spells;
@@ -63,6 +63,19 @@ class CasterAI : public CombatAI
         void EnterCombat(Unit *who);
     private:
         float m_attackDist;
+};
+
+struct ArcherAI : public CreatureAI
+{
+    public:
+        explicit ArcherAI(Creature* c);
+        void AttackStart(Unit* who);
+        void UpdateAI(const uint32 diff);
+
+        static int Permissible(const Creature *) { return PERMIT_BASE_NO; }
+
+protected:
+    float m_minRange;
 };
 
 #endif

@@ -199,7 +199,6 @@ void ArcherAI::UpdateAI(const uint32 /*diff*/)
     if (!UpdateVictim())
         return;
 
-    sLog->outError("YELO");
     if (!me->IsWithinCombatRange(me->getVictim(), m_minRange))
         DoSpellAttackIfReady(me->m_spells[0]);
     else

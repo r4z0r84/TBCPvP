@@ -698,19 +698,9 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     if (!caster->HasSpell(spellid) || IsPassiveSpell(spellid))
         return;
 
-    if (spellInfo->StartRecoveryCategory > 0) //Check if spell is affected by GCD
-        if (caster->GetTypeId() == TYPEID_UNIT && caster->ToCreature()->GetGlobalCooldown() > 0)
-        {
-            caster->SendPetCastFail(spellid, SPELL_FAILED_NOT_READY);
-            return;
-        }
-
     SpellCastTargets targets;
 
     recvPacket >> targets.ReadForCaster(caster);
-
-    if (spellInfo->Id != 33395)
-        caster->clearUnitState(UNIT_STAT_FOLLOW);
 
     Spell *spell = new Spell(caster, spellInfo, false);
     spell->m_targets = targets;

@@ -4538,51 +4538,43 @@ int16 Spell::PetCanCast(Unit* target)
     if (m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_AFFECTING_COMBAT;
 
-    // For Water Elemental freeze
-    if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_dstPos.GetPositionX() != 0 && m_targets.m_dstPos.GetPositionY() != 0 && m_targets.m_dstPos.GetPositionZ() != 0)
+    //dead owner (pets still alive when owners ressed?)
+    if (Unit *owner = m_caster->GetCharmerOrOwner())
+        if (!owner->isAlive())
+            return SPELL_FAILED_CASTER_DEAD;
+
+    if (!target && m_targets.getUnitTarget())
+        target = m_targets.getUnitTarget();
+
+    for (uint32 i = 0; i < 3; ++i)
     {
-        SpellRangeEntry const* s_range = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-        float max_range = GetSpellMaxRange(s_range);
-        float dist = m_caster->GetDistance(m_targets.m_dstPos);
-
-        if (dist > max_range)
-            return SPELL_FAILED_OUT_OF_RANGE;
-
-        if (!m_caster->IsWithinLOS(m_targets.m_dstPos.GetPositionX(), m_targets.m_dstPos.GetPositionY(), m_targets.m_dstPos.GetPositionZ()))
-            return SPELL_FAILED_LINE_OF_SIGHT;
+        if (sSpellMgr->SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]] == TARGET_TYPE_UNIT_TARGET
+            || sSpellMgr->SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]] == TARGET_TYPE_DEST_TARGET)
+        {
+            if (!target)
+                return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+            m_targets.setUnitTarget(target);
+            break;
+        }
     }
-                                                            //dead owner (pets still alive when owners ressed?)
-        if (Unit *owner = m_caster->GetCharmerOrOwner())
-            if (!owner->isAlive())
-                return SPELL_FAILED_CASTER_DEAD;
 
-        if (!target && m_targets.getUnitTarget())
-            target = m_targets.getUnitTarget();
+    Unit* _target = m_targets.getUnitTarget();
 
-        for (uint32 i = 0; i < 3; ++i)
-        {
-            if (sSpellMgr->SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]] == TARGET_TYPE_UNIT_TARGET
-                || sSpellMgr->SpellTargetType[m_spellInfo->EffectImplicitTargetA[i]] == TARGET_TYPE_DEST_TARGET)
-            {
-                if (!target)
-                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                m_targets.setUnitTarget(target);
-                break;
-            }
-        }
+    if (_target)                                         //for target dead/target not valid
+    {
+        if (!_target->isAlive())
+            return SPELL_FAILED_BAD_TARGETS;
 
-        Unit* _target = m_targets.getUnitTarget();
+        if (!IsValidSingleTargetSpell(_target))
+            return SPELL_FAILED_BAD_TARGETS;
+    }
+    //cooldown
+    if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
+        return SPELL_FAILED_NOT_READY;
 
-        if (_target)                                         //for target dead/target not valid
-        {
-            if (!_target->isAlive())
-                return SPELL_FAILED_BAD_TARGETS;
-
-            if (!IsValidSingleTargetSpell(_target))
-                return SPELL_FAILED_BAD_TARGETS;
-        }
-                                                            //cooldown
-        if (m_caster->ToCreature()->HasSpellCooldown(m_spellInfo->Id))
+    // Check if spell is affected by GCD
+    if (m_spellInfo->StartRecoveryCategory > 0)
+        if (m_caster->ToCreature()->GetGlobalCooldown() > 0)
             return SPELL_FAILED_NOT_READY;
 
     uint16 result = CanCast(true);

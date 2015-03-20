@@ -246,6 +246,8 @@ Unit::Unit()
     m_extraAttacks = 0;
     m_canDualWield = false;
 
+    m_rootTimes = 0;
+
     m_state = 0;
     m_form = FORM_NONE;
     m_deathState = ALIVE;
@@ -12480,13 +12482,16 @@ void Unit::SetRooted(bool apply)
     uint32 apply_stat = UNIT_STAT_ROOT;
     if (apply)
     {
+        if (m_rootTimes > 0) // blizzard internal check?
+            m_rootTimes++;
+
         SetFlag(UNIT_FIELD_FLAGS, (apply_stat<<16)); // probably wrong
 
         if (GetTypeId() == TYPEID_PLAYER)
         {
             WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
             data << GetPackGUID();
-            data << (uint32)2;
+            data << m_rootTimes;
             SendMessageToSet(&data, true);
         }
         else
@@ -12502,7 +12507,7 @@ void Unit::SetRooted(bool apply)
             {
                 WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 10);
                 data << GetPackGUID();
-                data << (uint32)2;
+                data << ++m_rootTimes;
                 SendMessageToSet(&data, true);
             }
         }

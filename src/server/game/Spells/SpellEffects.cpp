@@ -1886,6 +1886,19 @@ void Spell::EffectDummy(uint32 i)
             break;
         case SPELLFAMILY_SHAMAN:
 
+            // Flametongue Weapon Proc
+            if (m_spellInfo->SpellFamilyFlags & 0x200000)
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                bool mainhand = m_CastItem && m_CastItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND;
+
+                bp = m_caster->GetAttackTime(mainhand ? BASE_ATTACK : OFF_ATTACK) * (m_spellInfo->EffectBasePoints[0] + 1) / 100000;
+                spell_id = 10444;
+                break;
+            }
+
             // Flametongue Totem Proc
             if (m_spellInfo->SpellFamilyFlags & 0x0000000400000000LL)
             {

@@ -8523,9 +8523,24 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
         if (!pEnchant) continue;
         for (int s = 0; s < 3; ++s)
         {
+            uint32 spellId = 0;
             if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
-                continue;
-
+            {
+                // Flametongue Weapon
+                switch (pEnchant->ID)
+                {
+                    case 3:    spellId = 8029;  break; // Rank 1
+                    case 4:    spellId = 8028;  break; // Rank 2
+                    case 5:    spellId = 8026;  break; // Rank 3
+                    case 523:  spellId = 10445; break; // Rank 4
+                    case 1665: spellId = 16343; break; // Rank 5
+                    case 1666: spellId = 16344; break; // Rank 6
+                    case 2634: spellId = 25488; break; // Rank 7
+                    default:
+                        continue;
+                }
+            }
+            
             SpellEnchantProcEntry const* entry =  sSpellMgr->GetSpellEnchantProcEvent(enchant_id);
             if (entry && entry->procEx)
             {
@@ -8540,10 +8555,13 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
                     continue;
             }
 
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(pEnchant->spellid[s]);
+            if (!spellId)
+                spellId = pEnchant->spellid[s];
+
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
             if (!spellInfo)
             {
-                sLog->outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
+                sLog->outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, spellId);
                 continue;
             }
 
@@ -8566,18 +8584,14 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
                 chance = entry->customChance;
 
             // Apply spell mods
-            ApplySpellMod(pEnchant->spellid[s], SPELLMOD_CHANCE_OF_SUCCESS, chance);
-
-            // Shiv
-            if (FindCurrentSpellBySpellId(5938) && spellInfo->SpellFamilyName == 8)
-                chance = 100.0f;
+            ApplySpellMod(spellId, SPELLMOD_CHANCE_OF_SUCCESS, chance);
 
             if (roll_chance_f(chance))
             {
-                if (IsPositiveSpell(pEnchant->spellid[s]))
-                    CastSpell(this, pEnchant->spellid[s], true, item);
+                if (IsPositiveSpell(spellId))
+                    CastSpell(this, spellId, true, item);
                 else
-                    CastSpell(target, pEnchant->spellid[s], true, item);
+                    CastSpell(target, spellId, true, item);
             }
         }
     }

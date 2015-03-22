@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='npc_skyguard_khatie' WHERE (`entry`='23335');

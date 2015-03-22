@@ -542,6 +542,45 @@ CreatureAI* GetAI_mob_aether_ray(Creature* creature)
     return new mob_aether_rayAI(creature);
 }
 
+/*######
+## npc_skyguard_khatie
+######*/
+
+enum eKhatie
+{
+    FACTION_SHATARI_SKYGUARD = 1031,
+    GOSSIP_TEXT_ENTRY1 = 10907,
+    GOSSIP_TEXT_ENTRY2 = 11001,
+    GOSSIP_TEXT_ENTRY3 = 11002,
+    GOSSIP_TEXT_ENTRY4 = 11004
+};
+
+bool GossipHello_npc_skyguard_khatie(Player* player, Creature* creature)
+{
+    if (creature->isQuestGiver())
+        player->PrepareQuestMenu(creature->GetGUID());
+
+    uint32 textEntry = 0;
+    switch (player->GetReputationRank(FACTION_SHATARI_SKYGUARD))
+    {
+        case REP_HONORED:
+            textEntry = GOSSIP_TEXT_ENTRY3;
+            break;
+        case REP_REVERED:
+            textEntry = GOSSIP_TEXT_ENTRY2;
+            break;
+        case REP_EXALTED:
+            textEntry = GOSSIP_TEXT_ENTRY4;
+            break;
+        default:
+            textEntry = GOSSIP_TEXT_ENTRY1;
+            break;
+    }
+
+    player->SEND_GOSSIP_MENU(textEntry, creature->GetGUID());
+    return true;
+}
+
 void AddSC_blades_edge_mountains()
 {
     Script *newscript;
@@ -586,5 +625,10 @@ void AddSC_blades_edge_mountains()
     newscript = new Script;
     newscript->Name = "mob_aether_ray";
     newscript->GetAI = &GetAI_mob_aether_ray;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_skyguard_khatie";
+    newscript->pGossipHello = &GossipHello_npc_skyguard_khatie;
     newscript->RegisterSelf();
 }

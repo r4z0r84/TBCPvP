@@ -2531,6 +2531,7 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         case 30174: // Riding Turtle 100% speed
             spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_CASTER;
             spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
             spellInfo->EffectBasePoints[1] = 100;
             break;

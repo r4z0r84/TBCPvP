@@ -456,6 +456,92 @@ bool GOUse_go_thunderspike(Player* player, GameObject* _GO)
     return false;
 }
 
+/*######
+## mob_aether_ray
+######*/
+
+#define EMOTE_WEAK "appears ready to be wrangled."
+enum eAetherRay
+{
+    SPELL_SUMMON_WRANGLED = 40917,
+    SPELL_ROPE_CHANNEL_VISUAL = 40926,
+    SPELL_CHANNEL = 40626,
+    QUEST_CREDIT = 23343
+};
+
+struct mob_aether_rayAI : public ScriptedAI
+{
+    mob_aether_rayAI(Creature* c) : ScriptedAI(c) {}
+
+    bool isWeak;
+    uint64 playerGUID;
+    uint32 checkTimer;
+
+    void Reset()
+    {
+        isWeak = false;
+        checkTimer = 3000;
+        playerGUID = 0;
+    }
+
+    void EnterCombat(Unit* who)
+    {
+        if (Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself())
+            playerGUID = player->GetGUID();
+    }
+
+    void JustSummoned(Creature* summoned)
+    {
+        if (Player* player = Unit::GetPlayer(*me, playerGUID))
+        {
+            player->CastSpell(summoned, SPELL_ROPE_CHANNEL_VISUAL, false);
+            summoned->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, me->GetFollowAngle());
+        }
+            
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (!UpdateVictim())
+            return;
+
+        // Support for quest 11066 and 11065
+        if (playerGUID) 
+        {
+            if (Player* target = Unit::GetPlayer(*me, playerGUID))
+            {
+                if (target && !isWeak && me->GetHealth() < (me->GetMaxHealth() / 100 * 40)
+                    && (target->GetQuestStatus(11066) == QUEST_STATUS_INCOMPLETE || target->GetQuestStatus(11065) == QUEST_STATUS_INCOMPLETE))
+                {
+                    me->MonsterTextEmote(EMOTE_WEAK, 0, false);
+                    isWeak = true;
+                }
+
+                if (checkTimer <= diff)
+                {
+                    if (isWeak && me->HasAura(40856, 0))
+                    {
+                        me->CastSpell(target, SPELL_SUMMON_WRANGLED, false);
+                        target->KilledMonsterCredit(QUEST_CREDIT, me->GetGUID());
+                        me->DisappearAndDie();
+                    }
+
+                    checkTimer = 5000;
+                }
+                else
+                    checkTimer -= diff;
+            }
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_mob_aether_ray(Creature* creature)
+{
+    return new mob_aether_rayAI(creature);
+}
+
 void AddSC_blades_edge_mountains()
 {
     Script *newscript;
@@ -495,5 +581,10 @@ void AddSC_blades_edge_mountains()
     newscript = new Script;
     newscript->Name = "go_thunderspike";
     newscript->pGOHello = &GOUse_go_thunderspike;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "mob_aether_ray";
+    newscript->GetAI = &GetAI_mob_aether_ray;
     newscript->RegisterSelf();
 }

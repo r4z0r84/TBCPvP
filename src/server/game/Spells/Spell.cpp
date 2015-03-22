@@ -4386,6 +4386,29 @@ uint8 Spell::CanCast(bool strict)
                         return SPELL_FAILED_TARGET_NOT_DEAD;
                     break;
                 }
+
+                if (m_spellInfo->Id == 40856) // Wrangling Rope
+                {
+                    bool targetCheck = false;
+                    bool healthCheck = false;
+
+                    if (Player* plCaster = m_caster->ToPlayer())
+                    {
+                        uint64 guid = plCaster->GetSelection();
+                        if (Creature* creature = plCaster->GetMap()->GetCreature(guid))
+                        {
+                            if (creature->GetEntry() == 22181) // Aether Ray
+                                targetCheck = true;
+
+                            if ((creature->GetHealth() * 100 / creature->GetMaxHealth()) < 40)
+                                healthCheck = true;
+                        }
+                    }
+
+                    if (!targetCheck || !healthCheck)
+                        return SPELL_FAILED_BAD_TARGETS;
+                    break;
+                }
             }
             break;
         }

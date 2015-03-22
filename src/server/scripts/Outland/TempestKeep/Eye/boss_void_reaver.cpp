@@ -135,7 +135,11 @@ struct boss_void_reaverAI : public ScriptedAI
         if (Pounding_Timer <= diff)
         {
             DoCast(me->getVictim(),SPELL_POUNDING);
-            DoScriptText(RAND(SAY_POUNDING1, SAY_POUNDING2), me);
+            switch (rand()%2)
+            {
+                case 0: DoScriptText(SAY_POUNDING1, me); break;
+                case 1: DoScriptText(SAY_POUNDING2, me); break;
+            }
 
              Pounding_Timer = 12000;
         }

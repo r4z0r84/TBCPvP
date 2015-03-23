@@ -598,13 +598,123 @@ bool GossipHello_npc_skyguard_khatie(Player* player, Creature* creature)
 
 bool QuestComplete_npc_skyguard_khatie(Player* player, Creature* creature, Quest const *_Quest)
 {
-    sLog->outError("Call");
     if (_Quest->GetQuestId() == QUEST_WRANGLE_MORE_AETHER_RAYS ||
         _Quest->GetQuestId() == QUEST_WRANGLE_SOME_AETHER_RAYS)
     {
-        sLog->outError("Call2");
+
         creature->MonsterSay(RAND(SAY1, SAY2, SAY3, SAY4, SAY5, SAY6, SAY7), LANG_UNIVERSAL, 0);
     }
+
+    return true;
+}
+
+/*######
+## npc_skyguard_windcharger
+######*/
+
+enum eASkyguardWindcharger
+{
+    SPELL_NET = 12024,
+    SAY_CHEER1 = -1580300,
+    SAY_CHEER2 = -1580301,
+    SAY_CHEER3 = -1580302,
+    SAY_CHEER4 = -1580303,
+    SAY_CHEER5 = -1580304,
+    SAY_CHEER6 = -1580305,
+    SAY_CHEER7 = -1580306
+};
+
+struct npc_skyguard_windchargerAI : public ScriptedAI
+{
+    npc_skyguard_windchargerAI(Creature* c) : ScriptedAI(c) {}
+
+    bool canSay;
+    uint32 sayTimer;
+    uint32 netTimer;
+
+    void Reset()
+    {
+        canSay = false;
+        netTimer = 1000;
+        sayTimer = urand(1000, 1 * HOUR * IN_MILLISECONDS);
+    }
+
+    void MoveInLineOfSight(Unit* who)
+    {
+        if (!canSay)
+            return;
+
+        if (Player* player = who->ToPlayer())
+        {
+            if (me->IsWithinDistInMap(player, 5.0f))
+            {
+                if (player->GetReputationRank(FACTION_SHATARI_SKYGUARD) >= REP_REVERED)
+                {
+                    me->MonsterSay(RAND(SAY_CHEER1, SAY_CHEER2, SAY_CHEER3, SAY_CHEER4, SAY_CHEER5, SAY_CHEER6, SAY_CHEER7), LANG_UNIVERSAL, player->GetGUID());
+                    canSay = false;
+                }
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (sayTimer <= diff)
+        {
+            canSay = true;
+            sayTimer = urand(1000, 1 * HOUR * IN_MILLISECONDS);
+        }
+        else
+            sayTimer -= diff;
+
+        if (!UpdateVictim())
+            return;
+
+        if (netTimer <= diff)
+        {
+            DoCastVictim(SPELL_NET, true);
+            netTimer = 7000;
+        }
+        else
+            netTimer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_skyguard_windcharger(Creature* creature)
+{
+    return new npc_skyguard_windchargerAI(creature);
+}
+
+/*######
+## npc_skyhandler_irena
+######*/
+
+#define GOSSIP_IRENA "Yes, I'd love a ride to Blackwind Landing."
+
+bool GossipHello_npc_skyhandler_irena(Player* player, Creature* creature)
+{
+    if (creature->isQuestGiver())
+        player->PrepareQuestMenu(creature->GetGUID());
+
+    uint32 textEntry = 0;
+    if (player->GetReputationRank(FACTION_SHATARI_SKYGUARD) >= REP_EXALTED)
+    {
+        textEntry = 10978;
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_IRENA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    }
+    else
+        textEntry = 10842;
+
+    player->SEND_GOSSIP_MENU(textEntry, creature->GetGUID());
+    return true;
+}
+
+bool GossipSelect_npc_skyhandler_irena(Player* player, Creature* creature, uint32 sender, uint32 action)
+{
+    if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        player->CastSpell(player, 41278, true);
 
     return true;
 }
@@ -659,5 +769,16 @@ void AddSC_blades_edge_mountains()
     newscript->Name = "npc_skyguard_khatie";
     newscript->pGossipHello = &GossipHello_npc_skyguard_khatie;
     newscript->pQuestComplete = &QuestComplete_npc_skyguard_khatie;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_skyguard_windcharger";
+    newscript->GetAI = &GetAI_npc_skyguard_windcharger;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_skyhandler_irena";
+    newscript->pGossipHello = &GossipHello_npc_skyhandler_irena;
+    newscript->pGossipSelect = &GossipSelect_npc_skyhandler_irena;
     newscript->RegisterSelf();
 }

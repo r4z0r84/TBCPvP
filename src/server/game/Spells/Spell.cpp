@@ -64,7 +64,7 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
     // Paladin ---------------------------------------------------------------
     // Hammer of Justice
     if (spellInfo->SpellVisual == 322 && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
-        return 300;
+        return 200;
     // Seal of Command Proc Attack
     if (spellInfo->Id == 20424)
         return 500;
@@ -73,7 +73,7 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
         return 750;
     // Repentance
     if (spellInfo->Id == 20066)
-        return 300;
+        return 200;
 
     // Shaman ----------------------------------------------------------------
     // Windfury
@@ -86,21 +86,21 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
     // Druids -----------------------------------------------------------------
     // Pounce
     if (spellInfo->SpellIconID == 495 && spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
-        return 150;
+        return 200;
 
     // Rogues ------------------------------------------------------------------
     // Gouge
     if (spellInfo->SpellVisual == 256 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 150;
+        return 200;
     // Blind
     if (spellInfo->SpellIconID == 48 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 300;
+        return 200;
     // Sap
     if (spellInfo->SpellIconID == 249 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 150;
+        return 200;
     // Cheap Shot
     if (spellInfo->SpellIconID == 244 && spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
-        return 150;
+        return 200;
     // Ruthlessness
     if (spellInfo->Id == 14157)
         return 100;
@@ -111,12 +111,12 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
     // Mage --------------------------------------------------------------------
     // Polymorph
     if (spellInfo->SpellFamilyFlags & 0x1000000LL && spellInfo->SpellFamilyName == SPELLFAMILY_MAGE)
-        return 300;
+        return 200;
 
     // Warlock -----------------------------------------------------------------
     // Shadowfury
     if (spellInfo->SpellFamilyFlags & 0x0000100000000000LL && spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK)
-        return 300;
+        return 200;
 
     // Misc.
     switch(spellInfo->Id)

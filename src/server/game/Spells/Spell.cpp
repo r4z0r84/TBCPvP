@@ -106,7 +106,7 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
         return 100;
     // Deadly Throw
     if (spellInfo->Id == 26679)
-        return 0;
+        return 50;
 
     // Mage --------------------------------------------------------------------
     // Polymorph

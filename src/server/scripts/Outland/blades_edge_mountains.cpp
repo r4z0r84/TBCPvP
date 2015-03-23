@@ -550,9 +550,21 @@ enum eKhatie
 {
     FACTION_SHATARI_SKYGUARD = 1031,
     GOSSIP_TEXT_ENTRY1 = 10907,
-    GOSSIP_TEXT_ENTRY2 = 11001,
-    GOSSIP_TEXT_ENTRY3 = 11002,
-    GOSSIP_TEXT_ENTRY4 = 11004
+    GOSSIP_TEXT_ENTRY2 = 10997,
+    GOSSIP_TEXT_ENTRY3 = 11001,
+    GOSSIP_TEXT_ENTRY4 = 11002,
+    GOSSIP_TEXT_ENTRY5 = 11004,
+
+    SAY1 = -1580200,
+    SAY2 = -1580201,
+    SAY3 = -1580202,
+    SAY4 = -1580203,
+    SAY5 = -1580204,
+    SAY6 = -1580205,
+    SAY7 = -1580206,
+
+    QUEST_WRANGLE_MORE_AETHER_RAYS = 11066,
+    QUEST_WRANGLE_SOME_AETHER_RAYS = 11065
 };
 
 bool GossipHello_npc_skyguard_khatie(Player* player, Creature* creature)
@@ -563,14 +575,17 @@ bool GossipHello_npc_skyguard_khatie(Player* player, Creature* creature)
     uint32 textEntry = 0;
     switch (player->GetReputationRank(FACTION_SHATARI_SKYGUARD))
     {
+        case REP_FRIENDLY:
+            textEntry = GOSSIP_TEXT_ENTRY2;
+            break;
         case REP_HONORED:
             textEntry = GOSSIP_TEXT_ENTRY3;
             break;
         case REP_REVERED:
-            textEntry = GOSSIP_TEXT_ENTRY2;
+            textEntry = GOSSIP_TEXT_ENTRY4;
             break;
         case REP_EXALTED:
-            textEntry = GOSSIP_TEXT_ENTRY4;
+            textEntry = GOSSIP_TEXT_ENTRY5;
             break;
         default:
             textEntry = GOSSIP_TEXT_ENTRY1;
@@ -578,6 +593,19 @@ bool GossipHello_npc_skyguard_khatie(Player* player, Creature* creature)
     }
 
     player->SEND_GOSSIP_MENU(textEntry, creature->GetGUID());
+    return true;
+}
+
+bool QuestComplete_npc_skyguard_khatie(Player* player, Creature* creature, Quest const *_Quest)
+{
+    sLog->outError("Call");
+    if (_Quest->GetQuestId() == QUEST_WRANGLE_MORE_AETHER_RAYS ||
+        _Quest->GetQuestId() == QUEST_WRANGLE_SOME_AETHER_RAYS)
+    {
+        sLog->outError("Call2");
+        creature->MonsterSay(RAND(SAY1, SAY2, SAY3, SAY4, SAY5, SAY6, SAY7), LANG_UNIVERSAL, 0);
+    }
+
     return true;
 }
 
@@ -630,5 +658,6 @@ void AddSC_blades_edge_mountains()
     newscript = new Script;
     newscript->Name = "npc_skyguard_khatie";
     newscript->pGossipHello = &GossipHello_npc_skyguard_khatie;
+    newscript->pQuestComplete = &QuestComplete_npc_skyguard_khatie;
     newscript->RegisterSelf();
 }

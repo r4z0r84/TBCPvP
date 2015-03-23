@@ -67,6 +67,7 @@
 #include "GameEventMgr.h"
 #include "TempEventMgr.h"
 #include "UnorderedSet.h"
+#include "ScriptMgr.h"
 
 #include <cmath>
 #include <iomanip>
@@ -14603,6 +14604,9 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
 
     if (announce)
         SendQuestReward(pQuest, XP, questGiver);
+
+    if (Creature* questNpc = questGiver->ToCreature())
+        sScriptMgr->QuestComplete(this, questNpc, pQuest);
 
     // cast spells after mark quest complete (some spells have quest completed state reqyurements in spell_area data)
     if (pQuest->GetRewSpellCast() > 0)

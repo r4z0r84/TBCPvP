@@ -688,12 +688,12 @@ CreatureAI* GetAI_npc_skyguard_windcharger(Creature* creature)
 }
 
 /*######
-## npc_skyhandler_irena
+## npc_skyguard_handler_irena
 ######*/
 
 #define GOSSIP_IRENA "Yes, I'd love a ride to Blackwind Landing."
 
-bool GossipHello_npc_skyhandler_irena(Player* player, Creature* creature)
+bool GossipHello_npc_skyguard_handler_irena(Player* player, Creature* creature)
 {
     if (creature->isQuestGiver())
         player->PrepareQuestMenu(creature->GetGUID());
@@ -711,7 +711,7 @@ bool GossipHello_npc_skyhandler_irena(Player* player, Creature* creature)
     return true;
 }
 
-bool GossipSelect_npc_skyhandler_irena(Player* player, Creature* creature, uint32 sender, uint32 action)
+bool GossipSelect_npc_skyguard_handler_irena(Player* player, Creature* creature, uint32 sender, uint32 action)
 {
     if (action == GOSSIP_ACTION_INFO_DEF + 1)
         player->CastSpell(player, 41278, true);
@@ -777,8 +777,8 @@ void AddSC_blades_edge_mountains()
     newscript->RegisterSelf();
 
     newscript = new Script;
-    newscript->Name = "npc_skyhandler_irena";
-    newscript->pGossipHello = &GossipHello_npc_skyhandler_irena;
-    newscript->pGossipSelect = &GossipSelect_npc_skyhandler_irena;
+    newscript->Name = "npc_skyguard_handler_irena";
+    newscript->pGossipHello = &GossipHello_npc_skyguard_handler_irena;
+    newscript->pGossipSelect = &GossipSelect_npc_skyguard_handler_irena;
     newscript->RegisterSelf();
 }

@@ -676,28 +676,31 @@ CreatureAI* GetAI_npc_akuno(Creature* creature)
 ## npc_skyguard_handler_deesak
 ######*/
 
-#define GOSSIP_SKYGUARD "Fly me to Ogri'la please"
+#define GOSSIP_DEESAK "Absolutely! Send me to the Skyguard Outpost."
 
 bool GossipHello_npc_skyguard_handler_deesak(Player* player, Creature* creature)
 {
     if (creature->isQuestGiver())
         player->PrepareQuestMenu(creature->GetGUID());
 
-    if (player->GetReputationRank(1031) >= REP_HONORED)
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SKYGUARD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+    uint32 textEntry = 0;
+    if (player->GetReputationRank(1031) >= REP_EXALTED) // Sha'tari Skyguard
+    {
+        textEntry = 10979;
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_DEESAK, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    }
+    else
+        textEntry = 10980;
 
-    player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-
+    player->SEND_GOSSIP_MENU(textEntry, creature->GetGUID());
     return true;
 }
 
-bool GossipSelect_npc_skyguard_handler_deesak(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
+bool GossipSelect_npc_skyguard_handler_deesak(Player* player, Creature* creature, uint32 sender, uint32 action)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
-    {
-        player->CLOSE_GOSSIP_MENU();
-        player->CastSpell(player, 41279, true);               //TaxiPath 705 (Taxi - Skettis to Skyguard Outpost)
-    }
+    if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        player->CastSpell(player, 41279, true);
+
     return true;
 }
 

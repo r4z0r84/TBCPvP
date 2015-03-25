@@ -1277,6 +1277,111 @@ CreatureAI* GetAI_npc_skyguard_prisoner(Creature* creature)
     return new npc_skyguard_prisonerAI(creature);
 }
 
+/*######
+## npc_severin
+######*/
+
+#define ADARIS_SAY1 "The arakkoa are hidden... everywhere!"
+#define SEVERIN_SAY1 "Rest now, Adaris. You need to recover your strength."
+
+enum eSeverin
+{
+    QUEST_WORLD_OF_SHADOWS = 11004,
+    NPC_SKY_COMMANDER_ADARIS =  23038
+};
+
+struct npc_severinAI : public ScriptedAI
+{
+    npc_severinAI(Creature* creature) : ScriptedAI(creature) { }
+
+    bool eventRunning;
+    uint32 waitTimer;
+    uint8 currentPhase;
+
+    void Reset()
+    {
+        eventRunning = false;
+        waitTimer = 0;
+        currentPhase = 0;
+    }
+
+    void StartEvent(Player* pInvoker)
+    {
+        if (eventRunning)
+            return;
+
+        eventRunning = true;
+        currentPhase = 1;
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (!eventRunning)
+            return;
+
+        if (waitTimer)
+        {
+            if (waitTimer <= diff)
+            {
+                currentPhase++;
+                waitTimer = 0;
+            }
+            else
+            {
+                waitTimer -= diff;
+                return;
+            }
+        }
+
+        if (currentPhase)
+        {
+            switch (currentPhase)
+            {
+                case 1:
+                    waitTimer = 1000;
+                    break;
+                case 2:
+                {
+                    if (Creature* Adaris = me->FindNearestCreature(NPC_SKY_COMMANDER_ADARIS, 5.0f))
+                    {
+                        Adaris->Say(ADARIS_SAY1, LANG_UNIVERSAL, 0);
+                        waitTimer = 5000;
+                    }
+                    break;
+                }
+                case 3:
+                {
+                    me->Say(SEVERIN_SAY1, LANG_UNIVERSAL, 0);
+                    me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    waitTimer = 10000;
+                    break;
+                }
+                case 4:
+                {
+                    me->SetStandState(UNIT_STAND_STATE_STAND);
+                    Reset();
+                    break;
+                }
+                default:
+                    break;
+            }
+        } 
+    }
+};
+
+CreatureAI* GetAI_npc_severin(Creature* creature)
+{
+    return new npc_severinAI(creature);
+}
+
+bool QuestAccept_npc_severin(Player* player, Creature* creature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_WORLD_OF_SHADOWS)
+        CAST_AI(npc_severinAI, creature->AI())->StartEvent(player);
+
+    return true;
+}
+
 void AddSC_terokkar_forest()
 {
     Script *newscript;
@@ -1373,6 +1478,12 @@ void AddSC_terokkar_forest()
     newscript->Name = "npc_skyguard_prisoner";
     newscript->GetAI = &GetAI_npc_skyguard_prisoner;
     newscript->pQuestAccept = &QuestAccept_npc_skyguard_prisoner;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_severin";
+    newscript->GetAI = &GetAI_npc_severin;
+    newscript->pQuestAccept = &QuestAccept_npc_severin;
     newscript->RegisterSelf();
 }
 

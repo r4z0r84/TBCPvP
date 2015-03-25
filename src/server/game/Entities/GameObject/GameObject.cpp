@@ -1084,6 +1084,7 @@ void GameObject::Use(Unit* user)
 
                 sScriptMgr->GOHello(player, this);
                 AddUniqueUse(player);
+                SwitchDoorOrButton(true);
 
                 player->CastedCreatureOrGO(info->id, GetGUID(), 0);
             }

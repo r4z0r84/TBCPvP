@@ -671,6 +671,13 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
     }
 }
 
+static ScriptInfo generateScriptCommand(ScriptCommands command)
+{
+    ScriptInfo si;
+    si.command = command;
+    return si;
+}
+
 void Spell::EffectDummy(uint32 i)
 {
     if (!unitTarget && !gameObjTarget && !itemTarget)
@@ -1254,6 +1261,33 @@ void Spell::EffectDummy(uint32 i)
 
                     int32 basepoints0 = 100;
                     m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, NULL, NULL, true);
+                    return;
+                }
+                // Skyguard Blasting Charge (Quest: Fires Over Skettis - 11008)
+                case 39844:
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (m_caster->ToPlayer()->GetQuestStatus(11008) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        if (unitTarget && unitTarget->GetEntry() == 22991) // Trigger NPC
+                        {
+                            std::list<GameObject*> goList;
+                            unitTarget->GetGameObjectListWithEntryInGrid(goList, 185549, 3.0f);
+
+                            if (!goList.empty())
+                            {
+                                static ScriptInfo activateCommand = generateScriptCommand(SCRIPT_COMMAND_ACTIVATE_OBJECT);
+                                for (std::list<GameObject*>::iterator itr = goList.begin(); itr != goList.end(); ++itr)
+                                { 
+                                    m_caster->DealDamage(unitTarget, unitTarget->GetMaxHealth());
+                                    (*itr)->GetMap()->ScriptCommandStart(activateCommand, 1, m_caster, *itr);
+                                    (*itr)->SetRespawnTime(180000);
+                                }
+                            }
+                        }
+                    }
                     return;
                 }
                 case 40109:                                 // Knockdown Fel Cannon: The Bolt
@@ -5694,19 +5728,12 @@ void Spell::EffectSummonPlayer(uint32 /*i*/)
     unitTarget->ToPlayer()->GetSession()->SendPacket(&data);
 }
 
-static ScriptInfo generateActivateCommand()
-{
-    ScriptInfo si;
-    si.command = SCRIPT_COMMAND_ACTIVATE_OBJECT;
-    return si;
-}
-
 void Spell::EffectActivateObject(uint32 effect_idx)
 {
     if (!gameObjTarget)
         return;
 
-    static ScriptInfo activateCommand = generateActivateCommand();
+    static ScriptInfo activateCommand = generateScriptCommand(SCRIPT_COMMAND_ACTIVATE_OBJECT);
 
     int32 delay_secs = m_spellInfo->EffectMiscValue[effect_idx];
 

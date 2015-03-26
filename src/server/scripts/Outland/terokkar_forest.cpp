@@ -1282,12 +1282,24 @@ CreatureAI* GetAI_npc_skyguard_prisoner(Creature* creature)
 ######*/
 
 #define ADARIS_SAY1 "The arakkoa are hidden... everywhere!"
+#define ADARIS_SAY2 "The elixir... give it to me, Severin!"
+#define ADARIS_SAY3 "I see them now... assassins from Skettis!"
+#define ADARIS_SAY4 "The arakkoa can send all the assassins they have... they will meet the same fate as these!"
+#define ADARIS_SAY5 "Is this... blood in my lungs? If I don't die to an assassin's blade, it'll be my old injuries that get me."
 #define SEVERIN_SAY1 "Rest now, Adaris. You need to recover your strength."
+#define SEVERIN_SAY2 "Adaris!"
+#define SEVERIN_SAY3 "Rest now, friend. You need your strength."
 
 enum eSeverin
 {
     QUEST_WORLD_OF_SHADOWS = 11004,
-    NPC_SKY_COMMANDER_ADARIS =  23038
+    NPC_SKY_COMMANDER_ADARIS =  23038,
+    NPC_SKETTIS_ASSASIN = 23207,
+
+    EVENT_ACCEPT_QUEST = 1,
+    EVENT_COMPLETE_QUEST = 2,
+
+    SPELL_CLEAVE = 36664
 };
 
 struct npc_severinAI : public ScriptedAI
@@ -1297,21 +1309,43 @@ struct npc_severinAI : public ScriptedAI
     bool eventRunning;
     uint32 waitTimer;
     uint8 currentPhase;
+    uint8 eventEntry;
+    Creature* Adaris;
+    Creature* assassinOne;
+    Creature* assassinTwo;
 
     void Reset()
     {
         eventRunning = false;
         waitTimer = 0;
         currentPhase = 0;
+        eventEntry = 0;
+        Adaris = 0;
+        assassinOne = 0;
+        assassinTwo = 0;
+
+        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    void StartEvent(Player* pInvoker)
+    void StartEvent(Player* pInvoker, uint32 eventId)
     {
         if (eventRunning)
             return;
 
         eventRunning = true;
         currentPhase = 1;
+        eventEntry = eventId;
+
+        me->RemoveUnitMovementFlag(MOVEFLAG_WALK_MODE);
+        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+        if (Adaris = me->FindNearestCreature(NPC_SKY_COMMANDER_ADARIS, 5.0f))
+        {
+            Adaris->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            Adaris->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        }
     }
 
     void UpdateAI(const uint32 diff)
@@ -1333,39 +1367,127 @@ struct npc_severinAI : public ScriptedAI
             }
         }
 
-        if (currentPhase)
+        if (currentPhase && eventEntry)
         {
-            switch (currentPhase)
+            switch (eventEntry)
             {
-                case 1:
-                    waitTimer = 1000;
-                    break;
-                case 2:
+                case EVENT_ACCEPT_QUEST:
                 {
-                    if (Creature* Adaris = me->FindNearestCreature(NPC_SKY_COMMANDER_ADARIS, 5.0f))
+                    switch (currentPhase)
                     {
-                        Adaris->Say(ADARIS_SAY1, LANG_UNIVERSAL, 0);
-                        waitTimer = 5000;
+                        case 1:
+                            waitTimer = 1000;
+                            break;
+                        case 2:
+                            Adaris->MonsterSay(ADARIS_SAY1, LANG_UNIVERSAL, 0);
+                            waitTimer = 5000;
+                            break;
+                        case 3:
+                            me->MonsterSay(SEVERIN_SAY1, LANG_UNIVERSAL, 0);
+                            me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                            waitTimer = 10000;
+                            break;
+                        case 4:
+                            me->SetStandState(UNIT_STAND_STATE_STAND);
+                            Reset();
+                            break;
+                        default:
+                            break;
                     }
                     break;
                 }
-                case 3:
+                case EVENT_COMPLETE_QUEST:
                 {
-                    me->Say(SEVERIN_SAY1, LANG_UNIVERSAL, 0);
-                    me->SetStandState(UNIT_STAND_STATE_KNEEL);
-                    waitTimer = 10000;
+                    switch (currentPhase)
+                    {
+                        case 1:
+                            waitTimer = 2000;
+                            break;
+                        case 2:
+                            Adaris->MonsterSay(ADARIS_SAY2, LANG_UNIVERSAL, 0);
+                            Adaris->SetStandState(UNIT_STAND_STATE_KNEEL);
+                            waitTimer = 4000;
+                            break;
+                        case 3:
+                            Adaris->SetStandState(UNIT_STAND_STATE_STAND);
+                            waitTimer = 1000;
+                            break;
+                        case 4:
+                            Adaris->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
+                            Adaris->MonsterSay(ADARIS_SAY3, LANG_UNIVERSAL, 0);
+                            waitTimer = 7000;
+                            break;
+                        case 5:
+                            Adaris->GetMotionMaster()->MovePoint(0, -3402.4777f, 3616.7644f, 277.0920f);
+                            waitTimer = 2000;
+                            break;
+                        case 6:
+                            me->GetMotionMaster()->MovePoint(0, -3401.7917f, 3619.8828f, 278.0560f);
+                            me->MonsterYell(SEVERIN_SAY2, LANG_UNIVERSAL, 0);
+                            assassinOne = Adaris->SummonCreature(NPC_SKETTIS_ASSASIN, -3401.7045f, 3614.4214f, 276.6273f, 2.3267f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
+                            Adaris->CastSpell(Adaris, SPELL_CLEAVE, true);
+                            Adaris->DealDamage(assassinOne, assassinOne->GetMaxHealth());
+                            waitTimer = 4000;
+                            break;
+                        case 7:
+                            assassinTwo = Adaris->SummonCreature(NPC_SKETTIS_ASSASIN, -3399.7294f, 3616.4116f, 276.4681f, 2.4131f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
+                            Adaris->CastSpell(Adaris, SPELL_CLEAVE, true);
+                            Adaris->DealDamage(assassinTwo, assassinTwo->GetMaxHealth());
+                            waitTimer = 3000;
+                            break;
+                        case 8:
+                            me->SetUnitMovementFlags(MOVEFLAG_WALK_MODE);
+                            me->GetMotionMaster()->MovePoint(1, -3407.5900f, 3624.5700f, 278.0750f);
+                            waitTimer = 4000;
+                            break;
+                        case 9:
+                            me->SetFacingToOrientation(4.5553f);
+                            Adaris->MonsterSay(ADARIS_SAY4, LANG_UNIVERSAL, 0);
+                            waitTimer = 4000;
+                            break;
+                        case 10:
+                            Adaris->SetUnitMovementFlags(MOVEFLAG_WALK_MODE);
+                            Adaris->GetMotionMaster()->MovePoint(1, -3408.5500f, 3622.6000f, 278.0719f);
+                            waitTimer = 4000;
+                            break;
+                        case 11:
+                            Adaris->SetFacingToOrientation(5.9429f);
+                            Adaris->SetStandState(UNIT_STAND_STATE_KNEEL);
+                            waitTimer = 4000;
+                            break;
+                        case 12:
+                            Adaris->MonsterSay(ADARIS_SAY5, LANG_UNIVERSAL, 0);
+                            waitTimer = 6000;
+                            break;
+                        case 13:
+                            Adaris->SetStandState(UNIT_STAND_STATE_SIT);
+                            waitTimer = 500;
+                            break;
+                        case 14:
+                            me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                            me->MonsterSay(SEVERIN_SAY3, LANG_UNIVERSAL, 0);
+                            waitTimer = 6000;
+                            break;
+                        case 15:
+                            me->SetStandState(UNIT_STAND_STATE_STAND);
+                            waitTimer = 4000;
+                            break;
+                        case 16:
+                            Adaris->RemoveUnitMovementFlag(MOVEFLAG_WALK_MODE);
+                            Adaris->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                            Adaris->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            Reset();
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 }
-                case 4:
-                {
-                    me->SetStandState(UNIT_STAND_STATE_STAND);
-                    Reset();
-                    break;
-                }
+                break;
                 default:
                     break;
             }
-        } 
+        }
     }
 };
 
@@ -1377,7 +1499,15 @@ CreatureAI* GetAI_npc_severin(Creature* creature)
 bool QuestAccept_npc_severin(Player* player, Creature* creature, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_WORLD_OF_SHADOWS)
-        CAST_AI(npc_severinAI, creature->AI())->StartEvent(player);
+        CAST_AI(npc_severinAI, creature->AI())->StartEvent(player, EVENT_ACCEPT_QUEST);
+
+    return true;
+}
+
+bool QuestComplete_npc_severin(Player* player, Creature* creature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_WORLD_OF_SHADOWS)
+        CAST_AI(npc_severinAI, creature->AI())->StartEvent(player, EVENT_COMPLETE_QUEST);
 
     return true;
 }
@@ -1484,6 +1614,7 @@ void AddSC_terokkar_forest()
     newscript->Name = "npc_severin";
     newscript->GetAI = &GetAI_npc_severin;
     newscript->pQuestAccept = &QuestAccept_npc_severin;
+    newscript->pQuestComplete = &QuestComplete_npc_severin;
     newscript->RegisterSelf();
 }
 

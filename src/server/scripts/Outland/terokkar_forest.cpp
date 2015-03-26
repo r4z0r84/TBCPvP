@@ -1156,7 +1156,10 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
 {
     npc_skyguard_prisonerAI(Creature* creature) : npc_escortAI(creature) {}
 
-    void Reset() {}
+    void Reset()
+    {
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+    }
 
     uint32 CalculateWaypointID()
     {
@@ -1188,6 +1191,7 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
 
     void StartEvent(Player* player, const Quest* pQuest)
     {
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         switch (CalculateWaypointID())
         {
         case 1:

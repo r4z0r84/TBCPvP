@@ -43,6 +43,7 @@ go_resonite_cask
 go_tablet_of_madness
 go_tablet_of_the_seven
 go_bashir_crystalforge
+go_ancient_skull_pile
 EndContentData */
 
 #include "ScriptPCH.h"
@@ -554,6 +555,45 @@ bool GOHello_go_hive_pod(Player* player, GameObject *pGO)
     return true;
 };
 
+/*######
+## go_ancient_skull_pile
+######*/
+
+enum eTerokk
+{
+    ITEM_TIME_LOST_OFFERING =  32720,
+    NPC_TEROKK = 21838
+};
+
+#define GOSSIP_SUMMON_TEROKK "<Call forth Terokk.>"
+
+bool GOHello_go_ancient_skull_pile(Player* player, GameObject *pGO)
+{
+    if (player->HasItemCount(ITEM_TIME_LOST_OFFERING, 1))
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_SUMMON_TEROKK, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+    player->SEND_GOSSIP_MENU(11058, pGO->GetGUID());
+
+    return true;
+}
+
+bool GOSelect_go_ancient_skull_pile(Player* player, GameObject *pGO, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    {
+        if (!player->HasItemCount(ITEM_TIME_LOST_OFFERING, 1))
+            return false;
+
+        player->DestroyItemCount(ITEM_TIME_LOST_OFFERING, 1, true);
+        player->SummonCreature(NPC_TEROKK, pGO->GetPositionX(), pGO->GetPositionY(), pGO->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN);
+        player->CLOSE_GOSSIP_MENU();
+        pGO->SetGoState(GO_STATE_ACTIVE);
+        pGO->SetRespawnTime(900000);
+    }
+
+    return true;
+}
+
 void AddSC_go_scripts()
 {
     Script *newscript;
@@ -669,5 +709,11 @@ void AddSC_go_scripts()
     newscript = new Script;
     newscript->Name = "go_hive_pod";
     newscript->pGOHello = &GOHello_go_hive_pod;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "go_ancient_skull_pile";
+    newscript->pGOHello = &GOHello_go_ancient_skull_pile;
+    newscript->pGOSelect = &GOSelect_go_ancient_skull_pile;
     newscript->RegisterSelf();
 }

@@ -43,8 +43,6 @@ void OnLogin(Player* player)
         player->SetSkill(SKILL_FIRST_AID, maxLevel, maxLevel);
         player->learnSkillAllSpells(SKILL_FIRST_AID, maxLevel);
     }
-
-    player->SendTransmogPackets();
 }
 
 //This function is called when the player logs out

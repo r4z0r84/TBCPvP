@@ -280,7 +280,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recv_data)
 
     if (Player* receiver = GetPlayer())
     {
-        receiver->HandleItemTransmogQuery(receiver, item);
+        receiver->HandleItemTransmogQuery(item);
         return;
     }
 

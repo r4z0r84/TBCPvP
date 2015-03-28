@@ -1605,7 +1605,7 @@ void Player::Update(uint32 p_time)
             }*/
         }
     }
-    else if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))    //Short delay for first swing when entering melee combat    
+    else if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))    //Short delay for first swing when entering melee combat
     {
         if (isInCombat())
             setAttackTimer(BASE_ATTACK, (GetAttackTime(BASE_ATTACK)/2 + 50));
@@ -1879,7 +1879,7 @@ bool Player::BuildCustomEnumData(WorldPacket * p_data)
                     break;
             }
             const ItemPrototype * proto = sObjectMgr->GetItemPrototype(item_id);
-            
+
             *p_data << uint32(proto->DisplayInfoID);
             *p_data << uint8(proto->InventoryType);
             *p_data << uint32(0);
@@ -2467,7 +2467,7 @@ void Player::RegenerateAll()
     {
         RegenerateHealth();
     }
-    
+
     Regenerate(POWER_RAGE);
 
     if (IsPolymorphed())
@@ -4135,7 +4135,7 @@ void Player::AutoLearnTalentsForLevel()
                 learnSpell(27264);          // Rank 5
             else if (pLevel >= 58)
                 learnSpell(18881);          // Rank 4
-        } 
+        }
         if (HasSpell(30108))                // Unstable Affliction Rank 1
         {
             if (pLevel == 70)
@@ -8541,7 +8541,7 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
                         continue;
                 }
             }
-            
+
             SpellEnchantProcEntry const* entry =  sSpellMgr->GetSpellEnchantProcEvent(enchant_id);
             if (entry && entry->procEx)
             {
@@ -12029,7 +12029,7 @@ void Player::QuickEquipItem(uint16 pos, Item *pItem)
     }
 }
 
-void Player::SetVisibleItemSlot(uint8 slot, Item *pItem, bool fakeEntry)
+void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
 {
     // PLAYER_VISIBLE_ITEM_i_CREATOR    // Size: 2
     // PLAYER_VISIBLE_ITEM_i_0          // Size: 12
@@ -12045,7 +12045,7 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem, bool fakeEntry)
         SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * MAX_VISIBLE_ITEM_OFFSET), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
 
         int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
-        if (fakeEntry && pItem->GetFakeEntry())
+        if (pItem->GetFakeEntry())
             SetUInt32Value(VisibleBase + 0, pItem->GetFakeEntry());
         else
             SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
@@ -18169,7 +18169,7 @@ bool Player::DoSpamCheck(std::string message)
     }
 
     // Repeating Messages System
-    
+
     // Check if we need to clear the cache when the time ran out.
     if ((time(NULL) - m_repeatTO) > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT))
     {
@@ -18181,10 +18181,10 @@ bool Player::DoSpamCheck(std::string message)
     if (MessageCache.find(message) == MessageCache.end())// Not found, add it
     {
         MessageCache.insert(message);
-        
+
         if (m_repeatTO == NULL)
             m_repeatTO = time(NULL);
-        
+
         // Double check if we need to reset the time in case of a fast spammer who would be able to say something twice.
         if ((time(NULL) - m_repeatTO) > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT)) // Reset the time
             m_repeatTO = time(NULL);
@@ -18197,9 +18197,9 @@ bool Player::DoSpamCheck(std::string message)
             time_t mutetime = time(NULL) + sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MUTE);
             GetSession()->m_muteTime = mutetime;
             ChatHandler(this).PSendSysMessage("Yor chat has been blocked for %u Seconds because you repeated youself for over %u times in a time of %u seconds.\n\n", sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES), sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES), sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT));
-            return false; 
+            return false;
         }
-       
+
         time_t TimeLeft = sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT) - (time(NULL) - m_repeatTO);
        ChatHandler(this).PSendSysMessage("Please don't repeat yourself. You are allowed to send 1 identical message every %u seconds. Please wait %u seconds before sending the same message again.\n\n", sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT), TimeLeft);
         return false;
@@ -18208,7 +18208,7 @@ bool Player::DoSpamCheck(std::string message)
 }
 
 bool Player::SpamCheckForType(uint32 Type, uint32 Lang)
-{    
+{
     if (GetSession()->GetSecurity() > SEC_PLAYER || Lang == LANG_ADDON)
         return false; // addon chatter is ignored
 
@@ -22574,7 +22574,7 @@ uint32 Player::GetTalentSpecialization()
         {
             if (HasSpell(20473) && !HasSpell(20218)) // Holy Shock && !Sanctity Aura
                 return TALENT_SPECIALIZATION_HEALER;
-            if (HasSpell(31935)) // Avenger's Shield 
+            if (HasSpell(31935)) // Avenger's Shield
                 return TALENT_SPECIALIZATION_TANK;
             break;
         }

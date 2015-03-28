@@ -4263,6 +4263,9 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             // Rupture
             if (m_spellProto->SpellFamilyFlags & 0x000000000000100000LL)
             {
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
                 // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
                 if (apply && !loading && caster)
                 {

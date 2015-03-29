@@ -1157,7 +1157,7 @@ class Player : public Unit, public GridObject<Player>
         bool CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const;
         void QuickEquipItem(uint16 pos, Item *pItem);
         void VisualizeItem(uint8 slot, Item *pItem);
-        void SetVisibleItemSlot(uint8 slot, Item *pItem, bool fakeEntry = true);
+        void SetVisibleItemSlot(uint8 slot, Item *pItem);
         Item* BankItem(ItemPosCountVec const& dest, Item *pItem, bool update)
         {
             return StoreItem(dest, pItem, update);

@@ -2033,11 +2033,6 @@ class Player : public Unit, public GridObject<Player>
 
         void CheckAllElderQuestsDone();
 
-        std::vector<Item*> GetItemList();
-        Item* GetEquippedItem(uint32 guidlow);
-        void SendTransmogPackets(Player* pInvoker);
-        void HandleItemTransmogQuery(Player* pInvoker, uint32 entry, uint32 lowguid = 0);
-
         /*********************************************************/
         /***               OUTDOOR PVP SYSTEM                  ***/
         /*********************************************************/

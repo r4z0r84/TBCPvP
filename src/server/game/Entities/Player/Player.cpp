@@ -1605,7 +1605,7 @@ void Player::Update(uint32 p_time)
             }*/
         }
     }
-    else if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))    //Short delay for first swing when entering melee combat    
+    else if (!hasUnitState(UNIT_STAT_MELEE_ATTACKING))    //Short delay for first swing when entering melee combat
     {
         if (isInCombat())
             setAttackTimer(BASE_ATTACK, (GetAttackTime(BASE_ATTACK)/2 + 50));
@@ -1879,7 +1879,7 @@ bool Player::BuildCustomEnumData(WorldPacket * p_data)
                     break;
             }
             const ItemPrototype * proto = sObjectMgr->GetItemPrototype(item_id);
-            
+
             *p_data << uint32(proto->DisplayInfoID);
             *p_data << uint8(proto->InventoryType);
             *p_data << uint32(0);
@@ -2467,7 +2467,7 @@ void Player::RegenerateAll()
     {
         RegenerateHealth();
     }
-    
+
     Regenerate(POWER_RAGE);
 
     if (IsPolymorphed())
@@ -4135,7 +4135,7 @@ void Player::AutoLearnTalentsForLevel()
                 learnSpell(27264);          // Rank 5
             else if (pLevel >= 58)
                 learnSpell(18881);          // Rank 4
-        } 
+        }
         if (HasSpell(30108))                // Unstable Affliction Rank 1
         {
             if (pLevel == 70)
@@ -8541,7 +8541,7 @@ void Player::CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 
                         continue;
                 }
             }
-            
+
             SpellEnchantProcEntry const* entry =  sSpellMgr->GetSpellEnchantProcEvent(enchant_id);
             if (entry && entry->procEx)
             {
@@ -12029,7 +12029,7 @@ void Player::QuickEquipItem(uint16 pos, Item *pItem)
     }
 }
 
-void Player::SetVisibleItemSlot(uint8 slot, Item *pItem, bool fakeEntry)
+void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
 {
     // PLAYER_VISIBLE_ITEM_i_CREATOR    // Size: 2
     // PLAYER_VISIBLE_ITEM_i_0          // Size: 12
@@ -12045,7 +12045,7 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem, bool fakeEntry)
         SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * MAX_VISIBLE_ITEM_OFFSET), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
 
         int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
-        if (fakeEntry && pItem->GetFakeEntry())
+        if (pItem->GetFakeEntry())
             SetUInt32Value(VisibleBase + 0, pItem->GetFakeEntry());
         else
             SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
@@ -18169,7 +18169,7 @@ bool Player::DoSpamCheck(std::string message)
     }
 
     // Repeating Messages System
-    
+
     // Check if we need to clear the cache when the time ran out.
     if ((time(NULL) - m_repeatTO) > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT))
     {
@@ -18181,10 +18181,10 @@ bool Player::DoSpamCheck(std::string message)
     if (MessageCache.find(message) == MessageCache.end())// Not found, add it
     {
         MessageCache.insert(message);
-        
+
         if (m_repeatTO == NULL)
             m_repeatTO = time(NULL);
-        
+
         // Double check if we need to reset the time in case of a fast spammer who would be able to say something twice.
         if ((time(NULL) - m_repeatTO) > sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT)) // Reset the time
             m_repeatTO = time(NULL);
@@ -18197,9 +18197,9 @@ bool Player::DoSpamCheck(std::string message)
             time_t mutetime = time(NULL) + sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MUTE);
             GetSession()->m_muteTime = mutetime;
             ChatHandler(this).PSendSysMessage("Yor chat has been blocked for %u Seconds because you repeated youself for over %u times in a time of %u seconds.\n\n", sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES), sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_MESSAGES), sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT));
-            return false; 
+            return false;
         }
-       
+
         time_t TimeLeft = sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT) - (time(NULL) - m_repeatTO);
        ChatHandler(this).PSendSysMessage("Please don't repeat yourself. You are allowed to send 1 identical message every %u seconds. Please wait %u seconds before sending the same message again.\n\n", sWorld->getConfig(CONFIG_CHATFLOOD_REPEAT_TIMEOUT), TimeLeft);
         return false;
@@ -18208,7 +18208,7 @@ bool Player::DoSpamCheck(std::string message)
 }
 
 bool Player::SpamCheckForType(uint32 Type, uint32 Lang)
-{    
+{
     if (GetSession()->GetSecurity() > SEC_PLAYER || Lang == LANG_ADDON)
         return false; // addon chatter is ignored
 
@@ -22574,7 +22574,7 @@ uint32 Player::GetTalentSpecialization()
         {
             if (HasSpell(20473) && !HasSpell(20218)) // Holy Shock && !Sanctity Aura
                 return TALENT_SPECIALIZATION_HEALER;
-            if (HasSpell(31935)) // Avenger's Shield 
+            if (HasSpell(31935)) // Avenger's Shield
                 return TALENT_SPECIALIZATION_TANK;
             break;
         }
@@ -22641,220 +22641,4 @@ void Player::CheckAllElderQuestsDone()
     }
 
     ChatHandler(this).SendSysMessage("WARNING: Your reward has disappeard into the Twisting Nether. Please report this!");
-}
-
-std::vector<Item*> Player::GetItemList()
-{
-    std::vector<Item*> itemlist;
-
-    // Copy paste from Player::GetItemByGuid(guid)
-    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            itemlist.push_back(pItem);
-
-    for (uint8 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
-        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            itemlist.push_back(pItem);
-
-    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BAG_END; ++i)
-        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            itemlist.push_back(pItem);
-
-    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-        if (Bag* pBag = GetBagByPos(i))
-            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-                if (Item* pItem = pBag->GetItemByPos(j))
-                    itemlist.push_back(pItem);
-
-    for (uint8 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
-        if (Bag* pBag = GetBagByPos(i))
-            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-                if (Item* pItem = pBag->GetItemByPos(j))
-                    itemlist.push_back(pItem);
-
-    return itemlist;
-}
-
-Item* Player::GetEquippedItem(uint32 guidlow)
-{
-    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            if (pItem->GetGUIDLow() == guidlow)
-                return pItem;
-    return NULL;
-}
-
-void Player::SendTransmogPackets(Player* pInvoker)
-{
-    std::vector<Item*> items = GetItemList();
-    for (std::vector<Item*>::const_iterator itr = items.begin(); itr != items.end(); ++itr)
-        HandleItemTransmogQuery(pInvoker, (*itr)->GetEntry(), (*itr)->GetGUIDLow());
-}
-
-void Player::HandleItemTransmogQuery(Player* pInvoker, uint32 entry, uint32 lowguid)
-{
-    ItemPrototype const *pProto = sObjectMgr->GetItemPrototype(entry);
-    ItemPrototype const *pFakeProto = 0;
-    if (lowguid)
-    {
-        ItemFakeEntryContainer::const_iterator itr = sObjectMgr->_itemFakeEntryStore.find(lowguid);
-        if (itr != sObjectMgr->_itemFakeEntryStore.end())
-            pFakeProto = sObjectMgr->GetItemPrototype((*itr).second);
-    }
-
-    if (pProto)
-    {
-        std::string Name = pProto->Name1;
-        std::string Description;
-
-        std::stringstream ss;
-        if (pFakeProto)
-        {
-            ss << "Transmogged into ";
-            ss << pFakeProto->Name1;
-            Description = ss.str();
-        }
-        else
-            Description = pProto->Description;
-
-        int loc_idx = pInvoker->GetSession()->GetSessionDbLocaleIndex();
-        if (loc_idx >= 0)
-        {
-            ItemLocale const *il = sObjectMgr->GetItemLocale(pProto->ItemId);
-            if (il)
-            {
-                if (il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
-                    Name = il->Name[loc_idx];
-                if (il->Description.size() > size_t(loc_idx) && !il->Description[loc_idx].empty())
-                    Description = il->Description[loc_idx];
-            }
-        }
-        // guess size
-        WorldPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);
-        data << pProto->ItemId;
-        data << pProto->Class;
-        data << pProto->SubClass;
-        data << uint32(-1);                                 // new 2.0.3, not exist in wdb cache?
-        data << Name;
-        data << uint8(0x00);                                //pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
-        data << uint8(0x00);                                //pProto->Name3; // blizz not send name there, just uint8(0x00);
-        data << uint8(0x00);                                //pProto->Name4; // blizz not send name there, just uint8(0x00);
-        data << pProto->DisplayInfoID;
-        data << pProto->Quality;
-        data << pProto->Flags;
-        data << pProto->BuyPrice;
-        data << pProto->SellPrice;
-        data << pProto->InventoryType;
-        data << pProto->AllowableClass;
-        data << pProto->AllowableRace;
-        data << pProto->ItemLevel;
-        data << pProto->RequiredLevel;
-        data << pProto->RequiredSkill;
-        data << pProto->RequiredSkillRank;
-        data << pProto->RequiredSpell;
-        data << pProto->RequiredHonorRank;
-        data << pProto->RequiredCityRank;
-        data << pProto->RequiredReputationFaction;
-        data << pProto->RequiredReputationRank;
-        data << pProto->MaxCount;
-        data << pProto->Stackable;
-        data << pProto->ContainerSlots;
-        for (int i = 0; i < 10; i++)
-        {
-            data << pProto->ItemStat[i].ItemStatType;
-            data << pProto->ItemStat[i].ItemStatValue;
-        }
-        for (int i = 0; i < 5; i++)
-        {
-            data << pProto->Damage[i].DamageMin;
-            data << pProto->Damage[i].DamageMax;
-            data << pProto->Damage[i].DamageType;
-        }
-
-        // resistances (7)
-        data << pProto->Armor;
-        data << pProto->HolyRes;
-        data << pProto->FireRes;
-        data << pProto->NatureRes;
-        data << pProto->FrostRes;
-        data << pProto->ShadowRes;
-        data << pProto->ArcaneRes;
-
-        data << pProto->Delay;
-        data << pProto->AmmoType;
-        data << pProto->RangedModRange;
-
-        for (int s = 0; s < 5; ++s)
-        {
-            // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
-            // use `item_template` or if not set then only use spell cooldowns
-            SpellEntry const* spell = sSpellStore.LookupEntry(pProto->Spells[s].SpellId);
-            if (spell)
-            {
-                bool db_data = pProto->Spells[s].SpellCooldown >= 0 || pProto->Spells[s].SpellCategoryCooldown >= 0;
-
-                data << pProto->Spells[s].SpellId;
-                data << pProto->Spells[s].SpellTrigger;
-                data << uint32(-abs(pProto->Spells[s].SpellCharges));
-
-                if (db_data)
-                {
-                    data << uint32(pProto->Spells[s].SpellCooldown);
-                    data << uint32(pProto->Spells[s].SpellCategory);
-                    data << uint32(pProto->Spells[s].SpellCategoryCooldown);
-                }
-                else
-                {
-                    data << uint32(spell->RecoveryTime);
-                    data << uint32(spell->Category);
-                    data << uint32(spell->CategoryRecoveryTime);
-                }
-            }
-            else
-            {
-                data << uint32(0);
-                data << uint32(0);
-                data << uint32(0);
-                data << uint32(-1);
-                data << uint32(0);
-                data << uint32(-1);
-            }
-        }
-        data << pProto->Bonding;
-        data << Description;
-        data << pProto->PageText;
-        data << pProto->LanguageID;
-        data << pProto->PageMaterial;
-        data << pProto->StartQuest;
-        data << pProto->LockID;
-        data << pProto->Material;
-        data << pProto->Sheath;
-        data << pProto->RandomProperty;
-        data << pProto->RandomSuffix;
-        data << pProto->Block;
-        data << pProto->ItemSet;
-        data << pProto->MaxDurability;
-        data << pProto->Area;
-        data << pProto->Map;                                // Added in 1.12.x & 2.0.1 client branch
-        data << pProto->BagFamily;
-        data << pProto->TotemCategory;
-        for (int s = 0; s < 3; ++s)
-        {
-            data << pProto->Socket[s].Color;
-            data << pProto->Socket[s].Content;
-        }
-        data << pProto->socketBonus;
-        data << pProto->GemProperties;
-        data << pProto->RequiredDisenchantSkill;
-        data << pProto->ArmorDamageModifier;
-        data << uint32(0);                                  // added in 2.4.2.8209, duration (seconds)
-        pInvoker->GetSession()->SendPacket(&data);
-    }
-    else
-    {
-        sLog->outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE - NO item INFO! (ENTRY: %u)", entry);
-        WorldPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 4);
-        data << uint32(entry | 0x80000000);
-        pInvoker->GetSession()->SendPacket(&data);
-    }
 }

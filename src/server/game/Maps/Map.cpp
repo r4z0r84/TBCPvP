@@ -608,52 +608,47 @@ void Map::Update(const uint32 &t_diff)
         }
     }
 
-    // non-player active objects
-    if (!m_activeNonPlayers.empty())
+    for (m_activeNonPlayersIter = m_activeNonPlayers.begin(); m_activeNonPlayersIter != m_activeNonPlayers.end();)
     {
-        for (m_activeNonPlayersIter = m_activeNonPlayers.begin(); m_activeNonPlayersIter != m_activeNonPlayers.end();)
+        // skip not in world
+        WorldObject* obj = *m_activeNonPlayersIter;
+        ++m_activeNonPlayersIter;
+
+        if (!obj || !obj->IsInWorld())
+            continue;
+
+        if (!obj->IsPositionValid())
+            continue;
+
+        CellPair standing_cell(Trinity::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY()));
+
+        // Check for correctness of standing_cell, it also avoids problems with update_cell
+        if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+            continue;
+
+        // the overloaded operators handle range checking
+        // so ther's no need for range checking inside the loop
+        CellPair begin_cell(standing_cell), end_cell(standing_cell);
+        begin_cell << 1; begin_cell -= 1;               // upper left
+        end_cell >> 1; end_cell += 1;                   // lower right
+
+        for (uint32 x = begin_cell.x_coord; x <= end_cell.x_coord; ++x)
         {
-            // skip not in world
-            WorldObject* obj = *m_activeNonPlayersIter;
-
-            // step before processing, in this case if Map::Remove remove next object we correctly
-            // step to next-next, and if we step to end() then newly added objects can wait next update.
-            ++m_activeNonPlayersIter;
-
-            if (!obj || !obj->IsInWorld())
-                continue;
-
-            CellPair standing_cell(Trinity::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY()));
-
-            // Check for correctness of standing_cell, it also avoids problems with update_cell
-            if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
-                continue;
-
-            // the overloaded operators handle range checking
-            // so ther's no need for range checking inside the loop
-            CellPair begin_cell(standing_cell), end_cell(standing_cell);
-            begin_cell << 1; begin_cell -= 1;               // upper left
-            end_cell >> 1; end_cell += 1;                   // lower right
-
-            for (uint32 x = begin_cell.x_coord; x <= end_cell.x_coord; ++x)
+            for (uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; ++y)
             {
-                for (uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; ++y)
-                {
-                    // marked cells are those that have been visited
-                    // don't visit the same cell twice
-                    uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
-                    if (!isCellMarked(cell_id))
-                    {
-                        markCell(cell_id);
-                        CellPair pair(x, y);
-                        Cell cell(pair);
-                        cell.data.Part.reserved = CENTER_DISTRICT;
-                        //cell.SetNoCreate();
-                        cell.Visit(pair, grid_object_update,  *this);
-                        cell.Visit(pair, world_object_update, *this);
-                    }
-                }
-            }
+                // marked cells are those that have been visited
+                // don't visit the same cell twice
+                uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
+                if (isCellMarked(cell_id))
+                    continue;
+
+                markCell(cell_id);
+                CellPair pair(x, y);
+                Cell cell(pair);
+                cell.data.Part.reserved = CENTER_DISTRICT;
+                cell.SetNoCreate();
+                cell.Visit(pair, grid_object_update, *this);
+                cell.Visit(pair, world_object_update, *this);
         }
     }
 

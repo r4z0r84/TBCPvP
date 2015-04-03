@@ -5238,6 +5238,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 case 12847:
                 case 12848:
                 {
+                    // Patch 2.3.0 (13-Nov-2007): Ignite: This talent is no longer triggered by damage dealt by Molten Armor.
+                    if (procSpell && procSpell->Id == 34913)
+                        return false;
+
                     switch (dummySpell->Id)
                     {
                         case 11119: basepoints0 = int32(0.04f*damage); break;

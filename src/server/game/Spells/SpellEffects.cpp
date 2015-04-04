@@ -2473,6 +2473,10 @@ void Spell::EffectApplyAura(uint32 i)
     if (!caster)
         return;
 
+    // Don't apply auras like Ice Block or Divine Shield to dead targets
+    if (!unitTarget->isAlive() && m_spellInfo->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
+        return;
+
     Aura* Aur = CreateAura(m_spellInfo, i, &damage, unitTarget, caster, m_CastItem);
 
     // Now Reduce spell duration using data received at spell hit
@@ -3577,7 +3581,8 @@ void Spell::EffectDispel(uint32 i)
     if (!unitTarget)
         return;
 
-    if (unitTarget->hasUnitState(UNIT_STAT_ISOLATED))
+    // UNIT_STAT_ISOLATED - but Banish should be dispelable by Mass Dispel 
+    if (unitTarget->HasAura(33786, 0))
         return;
 
     // Fill possible dispell list

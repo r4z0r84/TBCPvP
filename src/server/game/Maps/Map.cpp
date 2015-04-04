@@ -649,6 +649,7 @@ void Map::Update(const uint32 &t_diff)
                 cell.SetNoCreate();
                 cell.Visit(pair, grid_object_update, *this);
                 cell.Visit(pair, world_object_update, *this);
+            }
         }
     }
 

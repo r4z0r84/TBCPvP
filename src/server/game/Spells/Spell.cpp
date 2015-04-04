@@ -1460,7 +1460,8 @@ void Spell::SearchChainTarget(std::list<Unit*> &TagUnitMap, float max_range, uin
         if (TargetType == SPELL_TARGETS_CHAINHEAL)
         {
             next = tempUnitMap.begin();
-            while (cur->GetDistance(*next) > CHAIN_SPELL_JUMP_RADIUS || (!(m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS) && !cur->IsWithinLOSInMap(*next)))
+            while (cur->GetDistance(*next) > CHAIN_SPELL_JUMP_RADIUS || (!(m_spellInfo->AttributesEx2 & SPELL_ATTR_EX2_IGNORE_LOS) && !cur->IsWithinLOSInMap(*next))
+                || ((*next)->GetTypeId() == TYPEID_PLAYER && (*next)->ToPlayer()->duel))
             {
                 ++next;
                 if (next == tempUnitMap.end())

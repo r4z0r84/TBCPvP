@@ -1831,6 +1831,10 @@ void Spell::EffectDummy(uint32 i)
                     if (!unitTarget)
                         return;
 
+                    if (m_caster->GetGUID() != unitTarget->GetGUID() && m_caster->IsFriendlyTo(unitTarget) // Target is not self and friendly
+                        && (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->ToPlayer()->duel)) // Target is player and dueling
+                        unitTarget = m_caster; // Set target to self
+
                     int hurt = 0;
                     int heal = 0;
 

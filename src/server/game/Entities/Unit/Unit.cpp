@@ -12857,6 +12857,9 @@ void Unit::GetPartyMember(std::list<Unit*> &TagUnitMap, float radius)
             // IsHostileTo check duel and controlled by enemy
             if (Target && Target->GetSubGroup() == subgroup && !IsHostileTo(Target))
             {
+                if (Target->GetTypeId() == TYPEID_PLAYER && Target->ToPlayer()->duel && Target->ToPlayer()->duel->startTime != 0)
+                    continue;
+
                 if (Target->isAlive() && IsWithinDistInMap(Target, radius))
                     TagUnitMap.push_back(Target);
 

@@ -705,6 +705,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "unpossess",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnPossessCommand,           "", NULL },
         { "bindsight",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleBindSightCommand,           "", NULL },
         { "unbindsight",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnbindSightCommand,         "", NULL },
+        { "joinevent",     SEC_PLAYER,         false, &ChatHandler::HandleTempEventJoinCommand,       "", NULL },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };

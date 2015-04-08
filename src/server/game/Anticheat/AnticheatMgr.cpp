@@ -121,3 +121,21 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 
     BuildReport(player, FLY_HACK_REPORT);
 }
+
+void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* movementInfo */)
+{
+    uint32 key = player->GetGUIDLow();
+    if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEFLAG_WATERWALKING))
+        return;
+
+    // if we are a ghost we can walk on water
+    if (!player->isAlive())
+        return;
+
+    if (player->HasAuraType(SPELL_AURA_FEATHER_FALL) ||
+        player->HasAuraType(SPELL_AURA_SAFE_FALL) ||
+        player->HasAuraType(SPELL_AURA_WATER_WALK))
+        return;
+
+    BuildReport(player, WALK_WATER_HACK_REPORT);
+}

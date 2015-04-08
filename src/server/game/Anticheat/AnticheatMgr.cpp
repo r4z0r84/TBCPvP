@@ -16,7 +16,7 @@ void AnticheatMgr::HandlePlayerLogin(Player* player)
 void AnticheatMgr::HandlePlayerLogout(Player* player)
 {
     // Delete not needed data from the memory
-    m_Players.erase(player->GetGUIDLow());
+    //m_Players.erase(player->GetGUIDLow());
 }
 
 void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
@@ -39,6 +39,31 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     m_Players[key].SetLastOpcode(opcode);
 }
 
+void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
+{
+    uint32 key = player->GetGUIDLow();
+    uint32 actualTime = getMSTime();
+
+    if (!m_Players[key].GetTempReportsTimer(reportType))
+        m_Players[key].SetTempReportsTimer(actualTime,reportType);
+
+    if (getMSTimeDiff(m_Players[key].GetTempReportsTimer(reportType), actualTime) < 3000)
+    {
+        m_Players[key].SetTempReports(m_Players[key].GetTempReports(reportType) + 1, reportType);
+
+        if (m_Players[key].GetTempReports(reportType) < 3)
+        return;
+    }
+    else
+    {
+        m_Players[key].SetTempReportsTimer(actualTime, reportType);
+        m_Players[key].SetTempReports(1, reportType);
+        return;
+    }
+
+    sLog->outDebug("Anticheat: Player: %s GUID: %u kicked for ID: %u by AnticheatMgr.", player->GetName(), key, reportType); 
+    player->GetSession()->KickPlayer();
+};
 
 void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 {
@@ -78,8 +103,5 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 
     // we did the (uint32) cast to accept a margin of tolerance
     if (clientSpeedRate > speedRate)
-    {
-        sLog->outDebug("AnticheatMgr:: Speed-Hack detected player GUID (low) %u", player->GetGUIDLow());
-        player->GetSession()->KickPlayer();
-    }
+        BuildReport(player, SPEED_HACK_REPORT);
 }

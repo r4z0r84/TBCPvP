@@ -8,9 +8,16 @@
 
 class AnticheatData;
 
+enum ReportTypes
+{
+    SPEED_HACK_REPORT = 0,
+    FLY_HACK_REPORT
+};
+
 enum DetectionTypes
 {
-	SPEED_HACK_DETECTION = 1
+	SPEED_HACK_DETECTION = 1,
+    FLY_HACK_DETECTION   = 2,
 };
 
 // GUIDLow is the key
@@ -26,11 +33,14 @@ public:
     void HandlePlayerLogout(Player* player);
 
     void StartHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
-    void SpeedHackDetection(Player* player, MovementInfo movementInfo);
 
 private:
-    AnticheatPlayersDataMap m_Players;
+    void SpeedHackDetection(Player* player, MovementInfo movementInfo);
+    void FlyHackDetection(Player* player, MovementInfo movementInfo);
 
+    void BuildReport(Player* player,uint8 reportType);
+
+    AnticheatPlayersDataMap m_Players;
 };
 
 #define sAnticheatMgr ACE_Singleton<AnticheatMgr, ACE_Null_Mutex>::instance()

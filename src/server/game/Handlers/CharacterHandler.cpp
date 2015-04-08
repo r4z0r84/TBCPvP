@@ -45,6 +45,7 @@
 #include "SystemConfig.h"
 #include "ScriptMgr.h"
 #include "Battleground.h"
+#include "Anticheat\AnticheatMgr.h"
 
 class LoginQueryHolder : public SqlQueryHolder
 {
@@ -870,6 +871,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         }
     }
     pCurrChar->SaveToDB();
+
+    // Initialize anti-cheat module
+    sAnticheatMgr->HandlePlayerLogin(pCurrChar);
 
     delete holder;
 }

@@ -1,0 +1,85 @@
+#include "AnticheatMgr.h"
+#include "AnticheatData.h"
+#include "MapManager.h"
+
+AnticheatMgr::~AnticheatMgr()
+{
+    m_Players.clear();
+}
+
+void AnticheatMgr::HandlePlayerLogin(Player* player)
+{
+    // we initialize the pos of lastMovementPosition var
+    m_Players[player->GetGUIDLow()].SetPosition(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+}
+
+void AnticheatMgr::HandlePlayerLogout(Player* player)
+{
+    // Delete not needed data from the memory
+    m_Players.erase(player->GetGUIDLow());
+}
+
+void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
+{
+    if (player->isGameMaster())
+        return;
+
+    uint32 key = player->GetGUIDLow();
+
+    if (player->isInFlight() || player->GetTransport())
+    {
+        m_Players[key].SetLastMovementInfo(movementInfo);
+        m_Players[key].SetLastOpcode(opcode);
+        return;
+    }
+
+    SpeedHackDetection(player, movementInfo);
+
+    m_Players[key].SetLastMovementInfo(movementInfo);
+    m_Players[key].SetLastOpcode(opcode);
+}
+
+
+void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
+{
+    uint32 key = player->GetGUIDLow();
+
+    // We also must check the map because the movementFlag can be modified by the client
+    // If we just check the flag, they could always add that flag and always skip the speed hacking detection
+    // 369 == DEEPRUN TRAM
+    if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEFLAG_ONTRANSPORT) && player->GetMapId() == 369)
+        return;
+
+    uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
+    uint8 moveType = 0;
+
+    // we need to know HOW is the player moving
+    // TO-DO: Should we check the incoming movement flags?
+    if (player->HasUnitMovementFlag(MOVEFLAG_SWIMMING))
+        moveType = MOVE_SWIM;
+    else if (player->IsFlying())
+        moveType = MOVE_FLIGHT;
+    else if (player->HasUnitMovementFlag(MOVEFLAG_WALK_MODE))
+        moveType = MOVE_WALK;
+    else
+        moveType = MOVE_RUN;
+
+    // how many yards the player can do in one sec.
+    uint32 speedRate = (uint32)(player->GetSpeed(UnitMoveType(moveType)) + movementInfo.j_xyspeed);
+
+    // how long the player took to move to here.
+    uint32 timeDiff = getMSTimeDiff(m_Players[key].GetLastMovementInfo().time, movementInfo.time);
+
+    if (!timeDiff)
+        timeDiff = 1;
+
+    // this is the distance doable by the player in 1 sec, using the time done to move to this point.
+    uint32 clientSpeedRate = distance2D * 1000 / timeDiff;
+
+    // we did the (uint32) cast to accept a margin of tolerance
+    if (clientSpeedRate > speedRate)
+    {
+        sLog->outDebug("AnticheatMgr:: Speed-Hack detected player GUID (low) %u", player->GetGUIDLow());
+        player->GetSession()->KickPlayer();
+    }
+}

@@ -207,9 +207,9 @@ enum PriestEpicQuest
     SAY_SPAWN3 = -1510011
 };
 
-int32 eventCreatures[] { 14486, 14489, 14484, 14485, 14493 };
+uint32 eventCreatures[] = { 14486, 14489, 14484, 14485, 14493 };
 
-static float ArcherPosition[7][4]
+static float ArcherPosition[7][4] =
 {
     { 3347.865234f, -3070.707275f, 177.881882f, 1.645396f },
     { 3357.144287f, -3063.327637f, 172.499222f, 1.841747f },
@@ -398,7 +398,7 @@ CreatureAI* GetAI_npc_priest_epic_quest_caller(Creature* creature)
     return new npc_priest_epic_quest_callerAI(creature);
 }
 
-static float EscapePositions[4][3]
+static float EscapePositions[4][3] =
 {
     // Escape movement points for Peasants
     { 3345.032227f, -3023.691162f, 161.178528f },

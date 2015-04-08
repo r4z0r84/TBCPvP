@@ -40,6 +40,7 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 #include "TempEventMgr.h"
+#include "Anticheat\AnticheatMgr.h"
 
 // WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
@@ -457,6 +458,9 @@ void WorldSession::LogoutPlayer(bool Save)
 
     //Hook for OnLogout Event
     sScriptMgr->OnLogout(_player);
+
+    // Deinitialize of anti-cheat module
+    sAnticheatMgr->HandlePlayerLogout(_player);
 
     m_playerLogout = false;
     m_playerSave = false;

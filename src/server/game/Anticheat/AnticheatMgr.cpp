@@ -105,3 +105,17 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
     if (clientSpeedRate > speedRate)
         BuildReport(player, SPEED_HACK_REPORT);
 }
+
+void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
+{
+    uint32 key = player->GetGUIDLow();
+    if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEFLAG_FLYING))
+        return;
+
+    if (player->HasAuraType(SPELL_AURA_FLY) ||
+        player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED) ||
+        player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED))
+        return;
+
+    BuildReport(player, FLY_HACK_REPORT);
+}

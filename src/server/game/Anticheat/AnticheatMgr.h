@@ -16,8 +16,8 @@ enum ReportTypes
 
 enum DetectionTypes
 {
-	SPEED_HACK_DETECTION = 1,
-    FLY_HACK_DETECTION   = 2,
+    SPEED_HACK_DETECTION = 1,
+    FLY_HACK_DETECTION   = 2
 };
 
 // GUIDLow is the key

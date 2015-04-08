@@ -35,6 +35,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 
     SpeedHackDetection(player, movementInfo);
     FlyHackDetection(player, movementInfo);
+    WalkOnWaterHackDetection(player, movementInfo);
 
     m_Players[key].SetLastMovementInfo(movementInfo);
     m_Players[key].SetLastOpcode(opcode);

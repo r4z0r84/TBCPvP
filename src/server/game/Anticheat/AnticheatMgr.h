@@ -11,13 +11,15 @@ class AnticheatData;
 enum ReportTypes
 {
     SPEED_HACK_REPORT = 0,
-    FLY_HACK_REPORT
+    FLY_HACK_REPORT,
+    WALK_WATER_HACK_REPORT
 };
 
 enum DetectionTypes
 {
-    SPEED_HACK_DETECTION = 1,
-    FLY_HACK_DETECTION   = 2
+    SPEED_HACK_DETECTION      = 1,
+    FLY_HACK_DETECTION        = 2,
+    WALK_WATER_HACK_DETECTION = 3
 };
 
 // GUIDLow is the key
@@ -37,6 +39,7 @@ public:
 private:
     void SpeedHackDetection(Player* player, MovementInfo movementInfo);
     void FlyHackDetection(Player* player, MovementInfo movementInfo);
+    void WalkOnWaterHackDetection(Player* player, MovementInfo movementInfo);
 
     void BuildReport(Player* player,uint8 reportType);
 

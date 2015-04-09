@@ -30,7 +30,7 @@
 #include "Battleground.h"
 #include "WaypointMovementGenerator.h"
 #include "InstanceSaveMgr.h"
-#include "Anticheat\AnticheatMgr.h"
+#include "AnticheatMgr.h"
 
 void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket & /*recv_data*/)
 {

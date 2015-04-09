@@ -45,7 +45,7 @@
 #include "SystemConfig.h"
 #include "ScriptMgr.h"
 #include "Battleground.h"
-#include "Anticheat\AnticheatMgr.h"
+#include "AnticheatMgr.h"
 
 class LoginQueryHolder : public SqlQueryHolder
 {

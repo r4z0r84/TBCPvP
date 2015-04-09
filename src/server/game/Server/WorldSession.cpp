@@ -40,7 +40,7 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 #include "TempEventMgr.h"
-#include "Anticheat\AnticheatMgr.h"
+#include "AnticheatMgr.h"
 
 // WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :

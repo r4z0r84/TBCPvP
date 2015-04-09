@@ -28,49 +28,54 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "the_eye.h"
 
-#define SAY_AGGRO                           -1550007
-#define SAY_SUMMON1                         -1550008
-#define SAY_SUMMON2                         -1550009
-#define SAY_KILL1                           -1550010
-#define SAY_KILL2                           -1550011
-#define SAY_KILL3                           -1550012
-#define SAY_DEATH                           -1550013
-#define SAY_VOIDA                           -1550014
-#define SAY_VOIDB                           -1550015
+enum Yells
+{
+    SAY_AGGRO                           = -1550007,
+    SAY_SUMMON1                         = -1550008,
+    SAY_SUMMON2                         = -1550009,
+    SAY_KILL1                           = -1550010,
+    SAY_KILL2                           = -1550011,
+    SAY_KILL3                           = -1550012,
+    SAY_DEATH                           = -1550013,
+    SAY_VOIDA                           = -1550014,
+    SAY_VOIDB                           = -1550015
+};
 
-#define SPELL_ARCANE_MISSILES                 33031
-#define SPELL_MARK_OF_THE_ASTROMANCER         33045
-#define MARK_OF_SOLARIAN                      33023
-#define SPELL_BLINDING_LIGHT                  33009
-#define SPELL_FEAR                            29321
-#define SPELL_VOID_BOLT                       39329
-#define SPELL_SPOTLIGHT                       25824
-#define SPELL_WRATH_OF_THE_ASTROMANCER        42783
+enum Spells
+{
+    SPELL_ARCANE_MISSILES               = 33031,
+    SPELL_MARK_OF_THE_ASTROMANCER       = 33045,
+    SPELL_WRATH_OF_THE_ASTROMANCER      = 42783,
+    MARK_OF_SOLARIAN                    = 33023,
+    SPELL_BLINDING_LIGHT                = 33009,
+    SPELL_FEAR                          = 29321,
+    SPELL_VOID_BOLT                     = 39329,
 
-#define CENTER_X                             432.909f
-#define CENTER_Y                             -373.424f
-#define CENTER_Z                             17.9608f
-#define CENTER_O                             1.06421f
-#define SMALL_PORTAL_RADIUS                  12.6f
-#define LARGE_PORTAL_RADIUS                  26.0f
-#define PORTAL_Z                             17.005f
+    SPELL_SPOTLIGHT                     = 25824,
 
-#define SOLARIUM_AGENT                       18925
-#define SOLARIUM_PRIEST                      18806
-#define ASTROMANCER_SOLARIAN_SPOTLIGHT       18928
+    SPELL_GREATER_HEAL                  = 41378,
+    SPELL_HOLY_SMITE                    = 31740,
+    SPELL_SILENCE                       = 37160
+};
 
-#define MODEL_HUMAN                          18239
-#define MODEL_VOIDWALKER                     18988
+enum Creatures
+{
+    NPC_SOLARIUM_AGENT                  = 18925,
+    NPC_SOLARIUM_PRIEST                 = 18806,
+    NPC_ASTROMANCER_SOLARIAN_SPOTLIGHT  = 18928
+};
 
-#define SOLARIUM_HEAL                        41378
-#define SOLARIUM_SMITE                       31740
-#define SOLARIUM_SILENCE                     37160
+enum DisplayIds
+{
+    DISPLAY_ID_HUMAN                    = 18239,
+    DISPLAY_ID_VOIDWALKER               = 18988
+};
 
-#define WV_ARMOR                    31000
 #define MIN_RANGE_FOR_DOT_JUMP      20.0f
 
-                             // x,          y,      z,         o
-static float SolarianPos[4] = {432.909f, -373.424f, 17.9608f, 1.06421f};
+static float portalRadius[3] = { 12.6f, 26.0f, 17.005f }; // Small  Large  Z-Position
+static float centerPos[4] = { 432.909f, -373.424f, 17.9608f, 1.06421f };
+
 
 struct boss_high_astromancer_solarianAI : public ScriptedAI
 {
@@ -132,7 +137,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         me->SetVisibility(VISIBILITY_ON);
         me->SetFloatValue(OBJECT_FIELD_SCALE_X, defaultsize);
-        me->SetDisplayId(MODEL_HUMAN);
+        me->SetDisplayId(DISPLAY_ID_HUMAN);
 
         Summons.DespawnAll();
     }
@@ -147,18 +152,13 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
 
     void KilledUnit(Unit *victim)
     {
-        switch (rand()%3)
-        {
-        case 0: DoScriptText(SAY_KILL1, me); break;
-        case 1: DoScriptText(SAY_KILL2, me); break;
-        case 2: DoScriptText(SAY_KILL3, me); break;
-        }
+        DoScriptText(RAND(SAY_KILL1, SAY_KILL2, SAY_KILL2), me);
     }
 
     void JustDied(Unit *victim)
     {
         me->SetFloatValue(OBJECT_FIELD_SCALE_X, defaultsize);
-        me->SetDisplayId(MODEL_HUMAN);
+        me->SetDisplayId(DISPLAY_ID_HUMAN);
         DoScriptText(SAY_DEATH, me);
 
         if (instance)
@@ -187,7 +187,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
         if ((rand()%2) == 1)
             radius = -radius;
 
-        return (radius * (float)(rand()%100)/100.0f + CENTER_X);
+        return (radius * (float)(rand()%100)/100.0f + centerPos[0]);
     }
 
     float Portal_Y(float x, float radius)
@@ -199,7 +199,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
             case 0: z = 1; break;
             case 1: z = -1; break;
         }
-        return (z*sqrt(radius*radius - (x - CENTER_X)*(x - CENTER_X)) + CENTER_Y);
+        return (z*sqrt(radius*radius - (x - centerPos[0])*(x - centerPos[0])) + centerPos[1]);
     }
 
     void UpdateAI(const uint32 diff)
@@ -277,33 +277,33 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                 Phase1_Timer = 50000;
                 //After these 50 seconds she portals to the middle of the room and disappears, leaving 3 light portals behind.
                 me->GetMotionMaster()->Clear();
-                me->GetMap()->CreatureRelocation(me, SolarianPos[0], SolarianPos[1], SolarianPos[2], SolarianPos[3]);
+                me->GetMap()->CreatureRelocation(me, centerPos[0], centerPos[1], centerPos[2], centerPos[3]);
                 for (int i = 0; i <= 2; ++i)
                 {
                     if (!i)
                     {
-                        Portals[i][0] = Portal_X(SMALL_PORTAL_RADIUS);
-                        Portals[i][1] = Portal_Y(Portals[i][0], SMALL_PORTAL_RADIUS);
-                        Portals[i][2] = CENTER_Z;
+                        Portals[i][0] = Portal_X(portalRadius[0]);
+                        Portals[i][1] = Portal_Y(Portals[i][0], portalRadius[0]);
+                        Portals[i][2] = centerPos[2];
                     }
                     else
                     {
-                        Portals[i][0] = Portal_X(LARGE_PORTAL_RADIUS);
-                        Portals[i][1] = Portal_Y(Portals[i][0], LARGE_PORTAL_RADIUS);
-                        Portals[i][2] = PORTAL_Z;
+                        Portals[i][0] = Portal_X(portalRadius[1]);
+                        Portals[i][1] = Portal_Y(Portals[i][0], portalRadius[1]);
+                        Portals[i][2] = centerPos[2];
                     }
                 }
                 if ((abs(Portals[2][0] - Portals[1][0]) < 7) && (abs(Portals[2][1] - Portals[1][1]) < 7))
                 {
                     int i=1;
-                    if (abs(CENTER_X + 26.0f - Portals[2][0]) < 7)
+                    if (abs(portalRadius[0] + 26.0f - Portals[2][0]) < 7)
                         i = -1;
                     Portals[2][0] = Portals[2][0]+7*i;
-                    Portals[2][1] = Portal_Y(Portals[2][0], LARGE_PORTAL_RADIUS);
+                    Portals[2][1] = Portal_Y(Portals[2][0], portalRadius[1]);
                 }
                 for (int i = 0; i <= 2; i++)
                 {
-                    Creature* Summoned = me->SummonCreature(ASTROMANCER_SOLARIAN_SPOTLIGHT, Portals[i][0], Portals[i][1], Portals[i][2], CENTER_O, TEMPSUMMON_TIMED_DESPAWN, Phase2_Timer+Phase3_Timer+AppearDelay_Timer+1700);
+                    Creature* Summoned = me->SummonCreature(NPC_ASTROMANCER_SOLARIAN_SPOTLIGHT, Portals[i][0], Portals[i][1], Portals[i][2], 0.0f, TEMPSUMMON_TIMED_DESPAWN, Phase2_Timer+Phase3_Timer+AppearDelay_Timer+1700);
                     if (Summoned)
                     {
                         Summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -323,7 +323,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                 Phase = 3;
                 for (int i = 0; i <= 2; i++)
                     for (int j = 1; j <= 4; j++)
-                        SummonMinion(SOLARIUM_AGENT, Portals[i][0], Portals[i][1], Portals[i][2]);
+                        SummonMinion(NPC_SOLARIUM_AGENT, Portals[i][0], Portals[i][1], Portals[i][2]);
 
                 DoScriptText(SAY_SUMMON1, me);
                 Phase2_Timer = 10000;
@@ -342,11 +342,11 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                 //15 seconds later Solarian reappears out of one of the 3 portals. Simultaneously, 2 healers appear in the two other portals.
                 int i = rand()%3;
                 me->GetMotionMaster()->Clear();
-                me->GetMap()->CreatureRelocation(me, Portals[i][0], Portals[i][1], Portals[i][2], CENTER_O);
+                me->GetMap()->CreatureRelocation(me, Portals[i][0], Portals[i][1], Portals[i][2], centerPos[4]);
 
                 for (int j=0; j<=2; j++)
                     if (j != i)
-                        SummonMinion(SOLARIUM_PRIEST, Portals[j][0], Portals[j][1], Portals[j][2]);
+                        SummonMinion(NPC_SOLARIUM_PRIEST, Portals[j][0], Portals[j][1], Portals[j][2]);
 
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 me->SetVisibility(VISIBILITY_ON);
@@ -383,9 +383,9 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
             me->SetVisibility(VISIBILITY_ON);
             DoScriptText(SAY_VOIDA, me);
             DoScriptText(SAY_VOIDB, me);
-            me->SetArmor(WV_ARMOR);
-            me->SetDisplayId(MODEL_VOIDWALKER);
-            me->SetFloatValue(OBJECT_FIELD_SCALE_X, defaultsize*2.5f);
+            me->SetArmor(31000);
+            me->SetDisplayId(DISPLAY_ID_VOIDWALKER);
+            me->SetFloatValue(OBJECT_FIELD_SCALE_X, defaultsize * 2.5f);
         }
 
         DoMeleeAttackIfReady();
@@ -438,20 +438,20 @@ struct mob_solarium_priestAI : public ScriptedAI
 
             if (pTarget)
             {
-                DoCast(pTarget, SOLARIUM_HEAL);
+                DoCast(pTarget, SPELL_GREATER_HEAL);
                 healTimer = 9000;
             }
         } else healTimer -= diff;
 
         if (holysmiteTimer <= diff)
         {
-            DoCast(me->getVictim(), SOLARIUM_SMITE);
+            DoCast(me->getVictim(), SPELL_HOLY_SMITE);
             holysmiteTimer = 4000;
         } else holysmiteTimer -= diff;
 
         if (aoesilenceTimer <= diff)
         {
-            DoCast(me->getVictim(), SOLARIUM_SILENCE);
+            DoCast(me->getVictim(), SPELL_SILENCE);
             aoesilenceTimer = 13000;
         } else aoesilenceTimer -= diff;
 

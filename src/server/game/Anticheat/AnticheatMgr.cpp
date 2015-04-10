@@ -36,6 +36,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     SpeedHackDetection(player, movementInfo);
     FlyHackDetection(player, movementInfo);
     WalkOnWaterHackDetection(player, movementInfo);
+    TeleportHackDetection(player, movementInfo);
 
     m_Players[key].SetLastMovementInfo(movementInfo);
     m_Players[key].SetLastOpcode(opcode);
@@ -116,7 +117,9 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
 
     if (player->HasAuraType(SPELL_AURA_FLY) ||
         player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED) ||
-        player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED))
+        player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED) ||
+        player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED_STACKING) ||
+        player->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED_NOT_STACKING))
         return;
 
     BuildReport(player, FLY_HACK_REPORT);
@@ -138,4 +141,11 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* move
         return;
 
     BuildReport(player, WALK_WATER_HACK_REPORT);
+}
+
+void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementInfo)
+{
+    uint32 key = player->GetGUIDLow();
+    if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEFLAG_NONE))
+        return;
 }

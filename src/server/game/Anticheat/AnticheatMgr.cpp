@@ -157,3 +157,27 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo movementInfo, 
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && opcode == MSG_MOVE_JUMP)
         BuildReport(player, JUMP_HACK_REPORT);
 }
+
+void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo)
+{
+    uint32 key = player->GetGUIDLow();
+
+    if (m_Players[key].GetLastMovementInfo().pos.GetPositionZ() != 0 ||
+        movementInfo.pos.GetPositionZ() != 0)
+        return;
+
+    if (movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
+        return;
+
+    if (player->getDeathState() == DEAD_FALLING)
+        return;
+
+    float x, y, z;
+    player->GetPosition(x, y, z);
+    float ground_Z = player->GetMap()->GetHeight(x, y, z);
+    float z_diff = fabs(ground_Z - z);
+
+    // we are not really walking there
+    if (z_diff > 1.0f)
+        BuildReport(player, TELEPORTPLANE_HACK_REPORT);
+}

@@ -3530,15 +3530,15 @@ void Spell::TakePower()
     else
       m_caster->ModifyPower(powerType, -irand(0, m_powerCost/4));
 
-	// Check if we have enough power to cast next queued spell (SPELL_ATTR_ON_NEXT_SWING_1)
-	if (Spell* queuedSpell = m_caster->GetCurrentSpell(CURRENT_MELEE_SPELL))
-	{
-		uint32 curPower = m_caster->GetPower(m_caster->getPowerType());
-		int32 reqPower = queuedSpell->GetPowerCost();
+    // Check if we have enough power to cast next queued spell (SPELL_ATTR_ON_NEXT_SWING_1)
+    if (Spell* queuedSpell = m_caster->GetCurrentSpell(CURRENT_MELEE_SPELL))
+    {
+        uint32 curPower = m_caster->GetPower(m_caster->getPowerType());
+        int32 reqPower = queuedSpell->GetPowerCost();
 
-		if (queuedSpell->m_spellInfo->Attributes & SPELL_ATTR_ON_NEXT_SWING_1 && curPower < reqPower)
-			m_caster->InterruptSpell(CURRENT_MELEE_SPELL);
-	}
+        if (queuedSpell->m_spellInfo->Attributes & SPELL_ATTR_ON_NEXT_SWING_1 && curPower < reqPower)
+            m_caster->InterruptSpell(CURRENT_MELEE_SPELL);
+    }
 
     // Set the five second timer
     if (powerType == POWER_MANA && m_powerCost > 0)

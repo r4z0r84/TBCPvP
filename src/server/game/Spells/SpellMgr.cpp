@@ -2980,6 +2980,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Nature's Grasp trigger
             if (spellproto->SpellFamilyFlags & 0x00000000200LL && spellproto->Attributes == 0x49010000)
                 return DIMINISHING_CONTROL_ROOT;
+            // Feral Charge (Root Effect)
+            if (spellproto->Id == 45334)
+                return DIMINISHING_NONE;
             break;
         }
         case SPELLFAMILY_WARRIOR:

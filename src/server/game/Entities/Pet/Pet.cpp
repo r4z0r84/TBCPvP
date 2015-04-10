@@ -507,8 +507,8 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
             // lose happiness when died and not in BG/Arena
-            if (!GetMap()->IsBattleGroundOrArena())
-                ModifyPower(POWER_HAPPINESS, -HAPPINESS_LEVEL_SIZE);
+            /*if (!GetMap()->IsBattleGroundOrArena())
+                ModifyPower(POWER_HAPPINESS, -HAPPINESS_LEVEL_SIZE);*/
         }
     }
     else if (getDeathState() == ALIVE)
@@ -610,7 +610,7 @@ void Pet::Update(uint32 diff)
 
             if (m_happinessTimer <= diff)
             {
-                LooseHappiness();
+                //LooseHappiness();
                 m_happinessTimer = 7500;
             }
             else
@@ -618,7 +618,7 @@ void Pet::Update(uint32 diff)
 
             if (m_loyaltyTimer <= diff)
             {
-                TickLoyaltyChange();
+                //TickLoyaltyChange();
                 m_loyaltyTimer = 12000;
             }
             else
@@ -905,8 +905,8 @@ void Pet::GivePetXP(uint32 xp)
 
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, newXP);
 
-    if (getPetType() == HUNTER_PET)
-        KillLoyaltyBonus(level);
+    /*if (getPetType() == HUNTER_PET)
+        KillLoyaltyBonus(level);*/
 }
 
 void Pet::GivePetLevel(uint32 level)
@@ -956,7 +956,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetDisplayId(creature->GetDisplayId());
     SetNativeDisplayId(creature->GetNativeDisplayId());
     SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
-    SetPower(POWER_HAPPINESS, 166500);
+    SetPower(POWER_HAPPINESS, 1050000);
     setPowerType(POWER_FOCUS);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
@@ -970,7 +970,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     else
         SetName(creature->GetName());
 
-    m_loyaltyPoints = 1000;
+    m_loyaltyPoints = 39500;
     if (cinfo->type == CREATURE_TYPE_BEAST)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0, 0x02020100);
@@ -979,7 +979,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_ALLOWED);
 
         SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED));
-        SetLoyaltyLevel(REBELLIOUS);
+        SetLoyaltyLevel(BEST_FRIEND);
     }
     return true;
 }

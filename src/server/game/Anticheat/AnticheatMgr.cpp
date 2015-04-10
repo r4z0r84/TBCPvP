@@ -37,6 +37,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     FlyHackDetection(player, movementInfo);
     WalkOnWaterHackDetection(player, movementInfo);
     TeleportHackDetection(player, movementInfo);
+    JumpHackDetection(player, movementInfo, opcode);
 
     m_Players[key].SetLastMovementInfo(movementInfo);
     m_Players[key].SetLastOpcode(opcode);
@@ -148,4 +149,11 @@ void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementIn
     uint32 key = player->GetGUIDLow();
     if (!m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEFLAG_NONE))
         return;
+}
+
+void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode)
+{
+    uint32 key = player->GetGUIDLow();
+    if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && opcode == MSG_MOVE_JUMP)
+        BuildReport(player, JUMP_HACK_REPORT);
 }

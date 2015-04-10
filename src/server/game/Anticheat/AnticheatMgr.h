@@ -13,7 +13,8 @@ enum ReportTypes
     SPEED_HACK_REPORT = 0,
     FLY_HACK_REPORT,
     WALK_WATER_HACK_REPORT,
-    TELEPORT_HACK_REPORT
+    TELEPORT_HACK_REPORT,
+    JUMP_HACK_REPORT
 };
 
 enum DetectionTypes
@@ -21,7 +22,8 @@ enum DetectionTypes
     SPEED_HACK_DETECTION      = 1,
     FLY_HACK_DETECTION        = 2,
     WALK_WATER_HACK_DETECTION = 3,
-    TELEPORT_HACK_DETECTION   = 4
+    TELEPORT_HACK_DETECTION   = 4,
+    JUMP_HACK_DETECTION       = 5
 };
 
 // GUIDLow is the key
@@ -43,6 +45,7 @@ private:
     void FlyHackDetection(Player* player, MovementInfo movementInfo);
     void WalkOnWaterHackDetection(Player* player, MovementInfo movementInfo);
     void TeleportHackDetection(Player* player, MovementInfo movementInfo);
+    void JumpHackDetection(Player* player, MovementInfo movementInfo, uint32 opcode);
 
     void BuildReport(Player* player,uint8 reportType);
 

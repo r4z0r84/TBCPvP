@@ -26,7 +26,8 @@ enum DetectionTypes
     WALK_WATER_HACK_DETECTION    = 3,
     TELEPORT_HACK_DETECTION      = 4,
     JUMP_HACK_DETECTION          = 5,
-    CLIMB_HACK_DETECTION         = 6,
+    TELEPORTPLANE_HACK_DETECTION = 6,
+    CLIMB_HACK_DETECTION         = 7
 };
 
 // GUIDLow is the key

@@ -4089,6 +4089,10 @@ void Spell::EffectTameCreature(uint32 /*i*/)
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel());
 
+    //
+    pet->GivePetLevel(70);
+    pet->SetTP(350);
+
     // caster have pet now
     m_caster->SetMinion(pet, true);
 

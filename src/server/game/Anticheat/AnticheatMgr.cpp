@@ -65,7 +65,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         return;
     }
 
-    sLog->outDebug("Anticheat: Player: %s GUID: %u kicked for ID: %u by AnticheatMgr.", player->GetName(), key, reportType); 
+    sLog->outDebug("Anticheat: Player: %s (GUID: %u, Latency: %u) kicked for report ID: %u by AnticheatMgr.", player->GetName(), key, reportType, player->GetSession()->GetLatency()); 
     player->GetSession()->KickPlayer();
 };
 
@@ -180,4 +180,32 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
     // we are not really walking there
     if (z_diff > 1.0f)
         BuildReport(player, TELEPORTPLANE_HACK_REPORT);
+}
+
+void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo, uint32 opcode)
+{
+    uint32 key = player->GetGUIDLow();
+
+    if (m_Players[key].GetLastOpcode() != MSG_MOVE_HEARTBEAT || 
+        opcode != MSG_MOVE_HEARTBEAT)
+        return;
+
+    // in this case we don't care if they are "legal" flags, they are handled in another parts of the Anticheat Manager.
+    if (player->IsInWater() ||
+        player->IsFlying())
+        return;
+
+    if (movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
+        return;
+
+    Position playerPos;
+    player->GetPosition(&playerPos);
+
+    float deltaZ = fabs(playerPos.GetPositionZ() - movementInfo.pos.GetPositionZ());
+    float deltaXY = movementInfo.pos.GetExactDist2d(&playerPos);
+
+    float angle = sMapMgr->NormalizeOrientation(tan(deltaZ / deltaXY));
+
+    if (angle > 1.9f)
+        BuildReport(player, CLIMB_HACK_REPORT);
 }

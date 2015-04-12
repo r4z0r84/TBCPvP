@@ -1,6 +1,7 @@
 #include "AnticheatMgr.h"
 #include "AnticheatData.h"
 #include "MapManager.h"
+#include "AccountMgr.h"
 
 AnticheatMgr::~AnticheatMgr()
 {
@@ -44,7 +45,7 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
     m_Players[key].SetLastOpcode(opcode);
 }
 
-void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
+void AnticheatMgr::BuildReport(Player* player, uint8 reportType, uint8 reportAction)
 {
     uint32 key = player->GetGUIDLow();
     uint32 actualTime = getMSTime();
@@ -66,7 +67,23 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
         return;
     }
 
-    sLog->outDebug("Anticheat: Player: %s (GUID: %u, Latency: %u) kicked for report ID: %u by AnticheatMgr.", player->GetName(), key, reportType, player->GetSession()->GetLatency()); 
+    std::string accName;
+    switch (reportAction)
+    {
+        case ACTION_NOTIFY:
+            break;
+        case ACTION_KICK:
+            player->GetSession()->KickPlayer();
+            break;
+        case ACTION_BAN:
+            sAccountMgr->GetName(player->GetSession()->GetAccountId(), accName);
+            sWorld->BanAccount(BAN_ACCOUNT, accName, "-1", "Anticheat", "AnticheatMgr");
+            break;
+        default:
+            break;
+    }
+
+    sLog->outDebug("Anticheat: Player: %s (GUID: %u, Latency: %u) triggered AnticheatMgr report ID: %u.", player->GetName(), key, reportType, player->GetSession()->GetLatency()); 
     player->GetSession()->KickPlayer();
 };
 
@@ -108,7 +125,7 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 
     // we did the (uint32) cast to accept a margin of tolerance
     if (clientSpeedRate > speedRate)
-        BuildReport(player, SPEED_HACK_REPORT);
+        BuildReport(player, SPEED_HACK_REPORT, ACTION_NOTIFY);
 }
 
 void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
@@ -125,7 +142,7 @@ void AnticheatMgr::FlyHackDetection(Player* player, MovementInfo movementInfo)
         return;
 
     uint8 reportType = m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEFLAG_FLYING) ? FLY_HACK_REPORT : MAELSTROM_FLY_HACK_REPORT;
-    BuildReport(player, reportType);
+    BuildReport(player, reportType, ACTION_NOTIFY);
 }
 
 void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* movementInfo */)
@@ -143,7 +160,7 @@ void AnticheatMgr::WalkOnWaterHackDetection(Player* player, MovementInfo /* move
         player->HasAuraType(SPELL_AURA_WATER_WALK))
         return;
 
-    BuildReport(player, WALK_WATER_HACK_REPORT);
+    BuildReport(player, WALK_WATER_HACK_REPORT, ACTION_KICK);
 }
 
 void AnticheatMgr::TeleportHackDetection(Player* player, MovementInfo movementInfo)
@@ -157,7 +174,7 @@ void AnticheatMgr::JumpHackDetection(Player* player, MovementInfo movementInfo, 
 {
     uint32 key = player->GetGUIDLow();
     if (m_Players[key].GetLastOpcode() == MSG_MOVE_JUMP && opcode == MSG_MOVE_JUMP)
-        BuildReport(player, JUMP_HACK_REPORT);
+        BuildReport(player, JUMP_HACK_REPORT, ACTION_KICK);
 }
 
 void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo)
@@ -181,7 +198,7 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
 
     // we are not really walking there
     if (z_diff > 1.0f)
-        BuildReport(player, TELEPORTPLANE_HACK_REPORT);
+        BuildReport(player, TELEPORTPLANE_HACK_REPORT, ACTION_KICK);
 }
 
 void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo, uint32 opcode)
@@ -209,5 +226,5 @@ void AnticheatMgr::ClimbHackDetection(Player *player, MovementInfo movementInfo,
     float angle = sMapMgr->NormalizeOrientation(tan(deltaZ / deltaXY));
 
     if (angle > 1.9f)
-        BuildReport(player, CLIMB_HACK_REPORT);
+        BuildReport(player, CLIMB_HACK_REPORT, ACTION_KICK);
 }

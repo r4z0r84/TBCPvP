@@ -31,6 +31,13 @@ enum DetectionTypes
     CLIMB_HACK_DETECTION         = 7
 };
 
+enum ReportAction
+{
+    ACTION_NOTIFY = 0,
+    ACTION_KICK,
+    ACTION_BAN
+};
+
 // GUIDLow is the key
 typedef std::map<uint32, AnticheatData> AnticheatPlayersDataMap;
 
@@ -54,7 +61,7 @@ private:
     void TeleportPlaneHackDetection(Player* player, MovementInfo movementInfo);
     void ClimbHackDetection(Player *player, MovementInfo movementInfo, uint32 opcode);
 
-    void BuildReport(Player* player,uint8 reportType);
+    void BuildReport(Player* player,uint8 reportType, uint8 reportAction);
 
     AnticheatPlayersDataMap m_Players;
 };

@@ -7778,12 +7778,12 @@ void Player::UpdateZone(uint32 newZone)
     if (!zone)
         return;
 
-    if (newZone == 876) // GM Island
-        if (GetSession()->GetSecurity() < SEC_MODERATOR)
-        {
-            TeleportToHomebind();
-            return;
-        }
+    // GM Island
+    if (newZone == 876 && GetSession()->GetSecurity() < SEC_MODERATOR)
+    {
+        TeleportToHomebind();
+        return;
+    }
 
     // inform outdoor pvp
     if (oldZoneId != m_zoneUpdateId)

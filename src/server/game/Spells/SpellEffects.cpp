@@ -5448,7 +5448,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     return;
                 uint32 spellId2 = 0;
 
-                // all seals have aura dummy
+                // all seals have aura dumm
                 Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
                 {

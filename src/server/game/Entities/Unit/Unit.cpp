@@ -7767,14 +7767,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     AuraList const& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
     for (AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
         if ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto))
-        {
-            if (Player* plrVictim = pVictim->ToPlayer())
-            {
-                int32 baseValue = (*i)->GetModifierValue();
-                plrVictim->ApplySpellMod((*i)->GetId(), SPELLMOD_EFFECT2, baseValue);
-                TakenTotalMod *= (baseValue + 100.0f) / 100.0f;
-            }
-        }
+            TakenTotalMod *= ((*i)->GetModifierValue() +100.0f)/100.0f;
 
     // .. taken pct: scripted (increases damage of * against targets *)
     AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
@@ -8794,16 +8787,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
         AuraList const& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
         for (AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask())
-            {
-                if (Player* plrVictim = pVictim->ToPlayer())
-                {
-                    int32 baseValue = (*i)->GetModifierValue();
-                    plrVictim->ApplySpellMod((*i)->GetId(), SPELLMOD_EFFECT2, baseValue);
-                    TakenTotalMod *= (baseValue + 100.0f) / 100.0f;
-                    sLog->outError("Damage mod reduce: %i", baseValue);
-                }
-            }
-                
+                TakenTotalMod *= ((*i)->GetModifierValue()+100.0f)/100.0f;
 
         int bleed_bonus = 0;
         // .. taken pct: dummy auras

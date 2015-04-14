@@ -1389,11 +1389,6 @@ void GameObject::Use(Unit* user)
                 BattleGround *bg = player->GetBattleGround();
                 if (!bg)
                     return;
-
-                // Rocket Boots Engaged
-                if (player->HasAura(30452, 0))
-                    return;
-
                 // BG flag dropped
                 // WS:
                 // 179785 - Silverwing Flag

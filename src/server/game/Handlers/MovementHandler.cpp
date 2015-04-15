@@ -45,45 +45,68 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         return;
 
     // get the teleport destination
-    WorldLocation &loc = GetPlayer()->GetTeleportDest();
+    WorldLocation oldLoc;
+    GetPlayer()->GetPosition(&oldLoc);
+    WorldLocation &newLoc = GetPlayer()->GetTeleportDest();
 
     GetPlayer()->SetSemaphoreTeleportFar(false);
 
     // possible errors in the coordinate validity check
-    if (!sMapMgr->IsValidMapCoord(loc))
+    if (!sMapMgr->IsValidMapCoord(newLoc))
     {
         LogoutPlayer(false);
         return;
     }
 
     // get the destination map entry, not the current one, this will fix homebind and reset greeting
-    MapEntry const* mEntry = sMapStore.LookupEntry(loc.GetMapId());
-    InstanceTemplate const* mInstance = sObjectMgr->GetInstanceTemplate(loc.GetMapId());
+    MapEntry const* mEntry = sMapStore.LookupEntry(newLoc.GetMapId());
+
+    Map * oldMap = GetPlayer()->GetMap();
+    Map * newMap = NULL;
+
+    // prevent crash at attempt landing to not existed battleground instance
+    if (mEntry->IsBattleGroundOrArena())
+    {
+        if (GetPlayer()->GetBattleGroundId())
+            newMap = sMapMgr->FindMap(newLoc.GetMapId(), GetPlayer()->GetBattleGroundId());
+
+        if (!newMap)
+        {
+            if (!GetPlayer()->TeleportTo(oldLoc))
+                GetPlayer()->TeleportToHomebind();
+
+            return;
+        }
+    }
+
+    InstanceTemplate const* mInstance = sObjectMgr->GetInstanceTemplate(newLoc.GetMapId());
 
     // reset instance validity, except if going to an instance inside an instance
     if (GetPlayer()->m_InstanceValid == false && !mInstance)
         GetPlayer()->m_InstanceValid = true;
 
-    Map * oldMap = GetPlayer()->GetMap();
-    Map * newMap = sMapMgr->CreateMap(loc.GetMapId(), GetPlayer(), 0);
-
     if (GetPlayer()->IsInWorld())
     {
-        sLog->outCrash("Player is still in world when teleported from map %u! to new map %u", oldMap->GetId(), loc.GetMapId());
+        sLog->outCrash("Player is still in world when teleported from map %u! to new map %u", oldMap->GetId(), newLoc.GetMapId());
         oldMap->Remove(GetPlayer(), false);
     }
+
+    if (!newMap)
+        newMap = sMapMgr->CreateMap(newLoc.GetMapId(), GetPlayer(), 0);
 
     // relocate the player to the teleport destination
     // the CanEnter checks are done in TeleporTo but conditions may change
     // while the player is in transit, for example the map may get full
-    if (!newMap || !newMap->CanEnter(GetPlayer()))
+    if (!newMap->CanEnter(GetPlayer()))
     {
-        sLog->outError("Map %d could not be created for player %d, porting player to homebind", loc.GetMapId(), GetPlayer()->GetGUIDLow());
-        GetPlayer()->TeleportToHomebind();
+        sLog->outError("Map %d could not be created for player %d, porting player to homebind", newLoc.GetMapId(), GetPlayer()->GetGUIDLow());
+        if (!GetPlayer()->TeleportTo(oldLoc))
+            GetPlayer()->TeleportToHomebind();
+
         return;
     }
 
-    GetPlayer()->Relocate(&loc);
+    GetPlayer()->Relocate(&newLoc);
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
 
@@ -93,10 +116,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     if (!GetPlayer()->GetMap()->Add(GetPlayer()))
     {
-        sLog->outError("WORLD: failed to teleport player %s (%d) to map %d because of unknown reason!", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.GetMapId());
-        GetPlayer()->ResetMap();
-        GetPlayer()->SetMap(oldMap);
-        GetPlayer()->TeleportToHomebind();
+        sLog->outError("WORLD: failed to teleport player %s (%d) to map %d because of unknown reason!", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), newLoc.GetMapId());
+        if (!GetPlayer()->TeleportTo(oldLoc))
+            GetPlayer()->TeleportToHomebind();
+
         return;
     }
 

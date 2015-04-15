@@ -7769,6 +7769,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto))
             TakenTotalMod *= ((*i)->GetModifierValue() +100.0f)/100.0f;
 
+    // ..taken from SpellMod - Righteous Fury
+    if (pVictim->ToPlayer()->HasAura(25780, 0))
+    {
+        uint32 impRighteousFury[] = { 20470, 20469, 20468 };
+        uint32 talentId = pVictim->GetMaxRankSpellFromArray(impRighteousFury, 2);
+
+        if (Aura* spellModAura = pVictim->GetAura(talentId, 0))
+            TakenTotalMod *= (spellModAura->GetSpellProto()->EffectBasePoints[1] + 100.0f) / 100.0f;
+    }
+
     // .. taken pct: scripted (increases damage of * against targets *)
     AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for (AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
@@ -8787,7 +8797,17 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
         AuraList const& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
         for (AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask())
-                TakenTotalMod *= ((*i)->GetModifierValue()+100.0f)/100.0f;
+                TakenTotalMod *= ((*i)->GetModifierValue() + 100.0f) / 100.0f;
+
+        // ..taken from SpellMod - Righteous Fury
+        if (pVictim->ToPlayer()->HasAura(25780, 0))
+        {
+            uint32 impRighteousFury[] = { 20470, 20469, 20468 };
+            uint32 talentId = pVictim->GetMaxRankSpellFromArray(impRighteousFury, 2);
+
+            if (Aura* spellModAura = pVictim->GetAura(talentId, 0))
+                TakenTotalMod *= (spellModAura->GetSpellProto()->EffectBasePoints[1] + 100.0f) / 100.0f;
+        }
 
         int bleed_bonus = 0;
         // .. taken pct: dummy auras
@@ -13019,5 +13039,25 @@ void CharmInfo::SetIsReturning(bool val)
 bool CharmInfo::IsReturning()
 {
     return m_isReturning;
+}
+
+// This function get high ranked spelld from array
+// found in spells learned/talented by player
+// info: spells must be sorted from high ranks to low
+// ex: array[] = {rank3, rank2, rank1 };
+uint32 Unit::GetMaxRankSpellFromArray(uint32 array[], uint8 count)
+{
+    // if array is empty return no rank
+    if (!count) return 0;
+
+    for (uint8 i = 0; i < count; i++)
+        if (ToPlayer()->HasSpell(array[i]))
+        {
+            uint32 spellId = array[i];
+            return spellId;
+        }
+
+    // no spell found, return no rank
+    return 0;
 }
 

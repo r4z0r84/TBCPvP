@@ -7770,7 +7770,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             TakenTotalMod *= ((*i)->GetModifierValue() +100.0f)/100.0f;
 
     // ..taken from SpellMod - Righteous Fury
-    if (pVictim->ToPlayer()->HasAura(25780, 0))
+    if (pVictim->ToPlayer() && pVictim->ToPlayer()->HasAura(25780, 0))
     {
         uint32 impRighteousFury[] = { 20470, 20469, 20468 };
         uint32 talentId = pVictim->GetMaxRankSpellFromArray(impRighteousFury, 2);
@@ -8800,7 +8800,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage, WeaponAttackType att
                 TakenTotalMod *= ((*i)->GetModifierValue() + 100.0f) / 100.0f;
 
         // ..taken from SpellMod - Righteous Fury
-        if (pVictim->ToPlayer()->HasAura(25780, 0))
+        if (pVictim->ToPlayer() && pVictim->ToPlayer()->HasAura(25780, 0))
         {
             uint32 impRighteousFury[] = { 20470, 20469, 20468 };
             uint32 talentId = pVictim->GetMaxRankSpellFromArray(impRighteousFury, 2);

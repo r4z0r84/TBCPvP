@@ -463,9 +463,10 @@ enum ConditionType
     CONDITION_NO_AURA               = 11,                   // spell_id     effindex
     CONDITION_ACTIVE_EVENT          = 12,                   // event_id
     CONDITION_INSTANCE_DATA         = 13,                   // entry        data
+    CONDITION_CLASS                 = 14                    // class_id
 };
 
-#define MAX_CONDITION                 14                    // maximum value in ConditionType enum
+#define MAX_CONDITION                 15                    // maximum value in ConditionType enum
 
 struct PlayerCondition
 {

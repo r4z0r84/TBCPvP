@@ -6599,6 +6599,8 @@ bool PlayerCondition::Meets(Player const * player) const
             if (map && map->IsDungeon() && ((InstanceMap*)map)->GetInstanceScript())
                 return ((InstanceMap*)map)->GetInstanceScript()->GetData(value1) == value2;
         }
+        case CONDITION_CLASS:
+            return player->getClass() == value1;
         default:
             return false;
     }
@@ -6746,6 +6748,15 @@ bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 val
         case CONDITION_INSTANCE_DATA:
             //TODO: need some check
             break;
+        case CONDITION_CLASS:
+        {
+            if (!sChrClassesStore.LookupEntry(value1))
+            {
+                sLog->outErrorDb("Class condition has invalid class (Id: %d), skipped", value1);
+                return false;
+            }
+            break;
+        }
     }
     return true;
 }

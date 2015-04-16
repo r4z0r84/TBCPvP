@@ -310,6 +310,7 @@ struct SpellImmune
 };
 
 typedef std::list<SpellImmune> SpellImmuneList;
+typedef std::vector <Aura *> dispel_list;
 
 enum UnitModifierType
 {
@@ -1073,6 +1074,8 @@ class Unit : public WorldObject
         void SetInCombatWith(Unit* enemy, uint32 spellId = 0);
         void ClearInCombat();
         uint32 GetCombatTimer() const { return m_CombatTimer; }
+
+        void GetDispellableAuraList(Unit* caster, uint32 dispelMask, dispel_list& dispelList);
 
         bool HasAuraType(AuraType auraType) const;
         bool HasAuraTypeWithFamilyFlags(AuraType auraType, uint32 familyName,  uint64 familyFlags) const;

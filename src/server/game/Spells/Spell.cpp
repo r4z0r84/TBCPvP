@@ -4371,6 +4371,36 @@ uint8 Spell::CanCast(bool strict)
                         return SPELL_FAILED_ITEM_NOT_READY;
                 break;
             }
+            case SPELL_EFFECT_DISPEL:
+            {
+                if (Unit* target = m_targets.getUnitTarget())
+                {
+                    if (target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Create dispel mask by dispel type
+                        bool hasOtherEffects = false;
+                        uint32 dispelMask = 0;
+
+                        for (uint8 i = 0; i < 3; ++i)
+                        {
+                            if (m_spellInfo->Effect[i] == SPELL_EFFECT_DISPEL)
+                            {
+                                // itr through all dispel types and add them to mask
+                                dispelMask |= GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[i]));
+                            }
+                            else
+                                hasOtherEffects = true;
+                        }
+
+                        // check if dispel makes sense
+                        std::vector <Aura *> dispel_list;
+                        target->GetDispellableAuraList(m_caster, dispelMask, dispel_list);
+                        if (dispel_list.empty() && !hasOtherEffects)
+                            return SPELL_FAILED_NOTHING_TO_DISPEL;
+                    }
+                }
+                break;
+            }
             default:
             {
                 if (m_spellInfo->Id == 32307) // Plant Warmaul Ogre Banner

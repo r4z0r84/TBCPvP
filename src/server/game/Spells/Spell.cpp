@@ -4363,6 +4363,14 @@ uint8 Spell::CanCast(bool strict)
                 }
                 break;
             }
+            case SPELL_EFFECT_HEAL:
+            {
+                // Vial of the Sunwell - Vessel of the Naaru
+                if (m_spellInfo->Id == 45064)
+                    if (!m_caster->HasAura(45062, 0))
+                        return SPELL_FAILED_ITEM_NOT_READY;
+                break;
+            }
             default:
             {
                 if (m_spellInfo->Id == 32307) // Plant Warmaul Ogre Banner

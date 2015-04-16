@@ -104,9 +104,6 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
     // Ruthlessness
     if (spellInfo->Id == 14157)
         return 100;
-    // Deadly Throw
-    if (spellInfo->Id == 26679)
-        return 50;
 
     // Mage --------------------------------------------------------------------
     // Polymorph

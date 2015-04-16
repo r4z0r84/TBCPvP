@@ -3863,34 +3863,10 @@ uint8 Spell::CanCast(bool strict)
         if (m_spellInfo->Effect[i] == SPELL_EFFECT_DISPEL &&
             m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK)
         {
-            if (target)
+            if (Unit* target = m_targets.getUnitTarget())
             {
-                // Fill possible dispell list
                 std::vector <Aura *> dispel_list;
-
-                Unit::AuraMap const& auras = target->GetAuras();
-                for (Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                {
-                    Aura *aur = (*itr).second;
-                    if (aur && (1 << aur->GetSpellProto()->Dispel) & dispelMask)
-                    {
-                        if (aur->GetSpellProto()->Dispel == DISPEL_MAGIC)
-                        {
-                            bool positive = true;
-                            if (!aur->IsPositive())
-                                positive = false;
-
-                            // do not remove positive auras if friendly target
-                            //               negative auras if non-friendly target
-                            if (aur->IsPositive() == target->IsFriendlyTo(m_caster))
-                                continue;
-                        }
-                        // Add every aura stack to dispel list
-                        for (uint32 stack_amount = 0; stack_amount < aur->GetStackAmount(); ++stack_amount)
-                            dispel_list.push_back(aur);
-                    }
-                }
-
+                target->GetDispellableAuraList(m_caster, dispelMask, dispel_list);
                 if (dispel_list.empty())
                     return SPELL_FAILED_NOTHING_TO_DISPEL;
             }

@@ -640,6 +640,70 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                     if (!ch)
                         *data << m_uint32Values[ index ];
                 }
+                // Health should show up as pct value for non-friendly player case and general creature case
+                else if (index == UNIT_FIELD_HEALTH)
+                {
+                    if (target != this)
+                    {
+                        if (GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (!target->IsFriendlyTo(ToPlayer()))
+                            {
+                                float healthPct = ToPlayer()->GetHealth() * 100.0f / ToPlayer()->GetMaxHealth();
+                                *data << uint32(healthPct);
+                            }
+                            else
+                                *data << m_uint32Values[index];
+                        }
+                        else if (GetTypeId() == TYPEID_UNIT)
+                        {
+                            if (ToCreature()->isPet())
+                            {
+                                if (target->IsFriendlyTo(ToCreature()) && target->IsInSameGroupWith(ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself()))
+                                    *data << m_uint32Values[index];
+                                else
+                                {
+                                    float healthPct = ToCreature()->GetHealth() * 100.0f / ToCreature()->GetMaxHealth();
+                                    *data << uint32(healthPct);
+                                }
+                            }
+                            else
+                            {
+                                float healthPct = ToCreature()->GetHealth() * 100.0f / ToCreature()->GetMaxHealth();
+                                *data << uint32(healthPct);
+                            }
+                        }
+                    }
+                    else
+                        *data << m_uint32Values[index];
+                }
+                else if (index == UNIT_FIELD_MAXHEALTH)
+                {
+                    if (target != this)
+                    {
+                        if (GetTypeId() == TYPEID_PLAYER)
+                        {
+                            if (!target->IsFriendlyTo(ToPlayer()))
+                                *data << 100;
+                            else
+                                *data << m_uint32Values[index];
+                        }
+                        else if (GetTypeId() == TYPEID_UNIT)
+                        {
+                            if (ToCreature()->isPet())
+                            {
+                                if (target->IsFriendlyTo(ToCreature()) && target->IsInSameGroupWith(ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself()))
+                                    *data << m_uint32Values[index];
+                                else
+                                    *data << 100;
+                            }
+                            else
+                                *data << 100;
+                        }       
+                    }
+                    else
+                        *data << m_uint32Values[index];
+                }
                 else
                 {
                     // send in current format (float as float, uint32 as uint32)

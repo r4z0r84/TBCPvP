@@ -60,6 +60,12 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
     // Sword Specialisation Proc
     if (spellInfo->SpellIconID == 1462 && spellInfo->SpellVisual == 6560 && spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR)
         return 500;
+    // Charge Stun
+    if (spellInfo->SpellFamilyFlags & 0x1000000 && spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR)
+        return 200;
+    // Intercept Stun, Mace Stun Effect (Improved Concussive Shot - Hunter)
+    if (spellInfo->SpellVisual == 2816 && spellInfo->SpellIconID == 15)
+        return 200;
 
     // Paladin ---------------------------------------------------------------
     // Hammer of Justice
@@ -4025,8 +4031,36 @@ uint8 Spell::CanCast(bool strict)
                 if (m_caster->hasUnitState(UNIT_STAT_ROOT))
                     return SPELL_FAILED_ROOTED;
                 if (Unit* target = m_targets.getUnitTarget())
-                    if (!m_caster->CanMakePathTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 50.0f))
+                {
+                    SpellRangeEntry const* spellRange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+                    float maxRange = GetSpellMaxRange(spellRange);
+                    if (!m_caster->CanMakePathTo(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), maxRange + 10.0f))
                         return SPELL_FAILED_NOPATH;
+                }
+
+                /* Blades Edge Arena:
+                Even with MMAP on you cannot charge from ground to the top of the stone pillar vise versa
+                So we check for caster and for target
+                Example: http://i.imgur.com/ItVSaLm.jpg */
+                bool fail = false;
+                if (m_caster->GetMapId() == 562)
+                {
+                    // Stone Pillar 1 (see example above)
+                    if (target && m_caster)
+                    {
+                        if (((target->GetDistance2d(6249.0f, 275.0f) < 6.5f) && m_caster->GetPositionZ() < 8.0f) ||
+                            (m_caster->GetDistance2d(6249.0f, 275.0f) < 6.5f) && target->GetPositionZ() < 8.0f)
+                            fail = true;
+
+                        // Stone Pillar 2 (see example above)
+                        if (((target->GetDistance2d(6228.5f, 249.0f) < 6.5f) && m_caster->GetPositionZ() < 8.0f) ||
+                            (m_caster->GetDistance2d(6228.5f, 249.0f) < 6.5f) && target->GetPositionZ() < 8.0f)
+                            fail = true;
+                    }
+                }
+                if (fail)
+                    return SPELL_FAILED_NOPATH;
+                    
                 break;
             }
             case SPELL_EFFECT_SKINNING:

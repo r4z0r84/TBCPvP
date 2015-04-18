@@ -519,7 +519,6 @@ bool Unit::CanMakePathTo(float x, float y, float z, float maxLen) const
     return true;
 }
 
-
 void Unit::BuildHeartBeatMsg(WorldPacket *data) const
 {
     data->Initialize(MSG_MOVE_HEARTBEAT, 32);
@@ -2657,7 +2656,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
     {
         uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell->Id)*100.0f);
 
-        if (IsAreaOfEffectSpell(spell))
+        if (IsAreaOfEffectSpell(spell) && !IsFriendlyTo(pVictim))
             missChance += (pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE)*100.0f);
         // Roll miss
         tmp += missChance;
@@ -2789,7 +2788,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     modHitChance+= pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
 
     // Reduce spell hit chance for Area of effect spells from victim SPELL_AURA_MOD_AOE_AVOIDANCE aura
-    if (IsAreaOfEffectSpell(spell))
+    if (IsAreaOfEffectSpell(spell) && !IsFriendlyTo(pVictim))
         modHitChance-=pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
     // Reduce spell hit chance for dispel mechanic spells from victim SPELL_AURA_MOD_DISPEL_RESIST
     if (IsDispelSpell(spell))

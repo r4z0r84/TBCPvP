@@ -2511,11 +2511,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 15712: // Linken's Boomerang
             spellInfo->AttributesEx4 |= SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA;
             break;
-        case 46784: // Shadowsong Panther trinket on use effect
-            spellInfo->Effect[1] = 0;
-            spellInfo->EffectApplyAuraName[1] = 0;
-            spellInfo->EffectBasePoints[1] = 0;
-            break;
         case 32375: // Mass Dispel
         case 32592: // Mass Dispel.
         case 39897: // Mass Dispel

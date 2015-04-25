@@ -4087,17 +4087,14 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit
             // Unstable Affliction
             if (aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (aur->GetSpellProto()->SpellFamilyFlags & 0x010000000000LL))
             {
-                int32 damage = aur->GetModifier()->m_amount*9;
+                int32 damage = aur->GetModifier()->m_amount * 9;
                 uint64 caster_guid = aur->GetCasterGUID();
-                Unit* caster = aur->GetCaster();
 
                 // Remove aura
                 RemoveAura(iter, AURA_REMOVE_BY_DISPEL);
 
                 // backfire damage and silence
-                int32 bonusdamage = caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
-                damage += (bonusdamage*1.8);
-                caster->CastCustomSpell(dispeler, 31117, &damage, NULL, NULL, true, NULL, NULL, caster_guid);
+                dispeler->CastCustomSpell(dispeler, 31117, &damage, NULL, NULL, true, NULL, NULL, caster_guid);
 
                 iter = m_Auras.begin();                     // iterator can be invalidate at cast if self-dispel
             }

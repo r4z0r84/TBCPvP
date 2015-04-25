@@ -802,26 +802,44 @@ void Unit::GetDispellableAuraList(Unit* caster, uint32 dispelMask, dispel_list& 
 }
 
 /* Called by DealDamage for auras that have a chance to be dispelled on damage taken. */
-void Unit::RemoveSpellbyDamageTaken(uint32 damage, uint32 spell)
+void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype)
 {
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
-    uint32 max_dmg = getLevel() > 8 ? 30 * getLevel() - 100 : 50;
-    float chance = float(damage) / max_dmg * 100.0f;
+    // auras can't break from self damage
+    if (damagetype == (NODAMAGE | SELF_DAMAGE))
+        return;
 
-    AuraList::iterator i, next;
-    for (i = m_ccAuras.begin(); i != m_ccAuras.end(); i = next)
+    // don't increase damageTakenCounter when not having correct auratype
+    if (!HasAuraType(auraType))
+        return;
+
+    m_damageTakenCounter[auraType] += damage;
+
+    // The chance to dispel an aura depends on the damage taken with respect to the casters level.
+    uint32 calcDmg = getLevel() > 8 ? 25 * getLevel() + 150 : 50;
+    uint32 maxDmg = getLevel() > 8 ? 50 * getLevel() : 50;
+    uint32 minDmg = getLevel() > 8 ? 7 * getLevel() + 10 : 10;
+    bool canBreak = true;
+
+    switch (auraType)
     {
-        next = i;
-        ++next;
+    case SPELL_AURA_MOD_FEAR:
+    case SPELL_AURA_MOD_ROOT:
+        if (damagetype == DOT && m_damageTakenCounter[auraType] >= minDmg)
+            canBreak = false;
+        if (damagetype == DIRECT_DAMAGE)
+            damage *= 1.5f;
+        break;
+    default:
+        break;
+    }
 
-        if (*i && (!spell || (*i)->GetId() != spell) && roll_chance_f(chance))
-        {
-            RemoveAurasDueToSpell((*i)->GetId());
-            if (!m_ccAuras.empty())
-                next = m_ccAuras.begin();
-            else
-                return;
-        }
+    float chance = float(damage) / calcDmg * 100.0f;
+
+    if (canBreak && (roll_chance_f(chance) || m_damageTakenCounter[auraType] >= maxDmg))
+    {
+        m_damageTakenCounter[auraType] = 0;
+        RemoveSpellsCausingAura(auraType);
     }
 }
 
@@ -895,7 +913,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         else
             pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, 0);
 
-        pVictim->RemoveSpellbyDamageTaken(damage, spellProto ? spellProto->Id : 0);
+        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, damagetype);
+        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype);
+
          // Rage from physical damage received
         if (!damage)
         {

@@ -2754,11 +2754,7 @@ void Spell::SendSpellCooldown()
     if (rec <= 0 && catrec <= 0 && (cat == 76 || cat == 351))
         rec = _player->GetAttackTime(RANGED_ATTACK);
 
-    /*
     // Now we have cooldown data (if found any), time to apply mods
-    if (rec > 0)
-        _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec, this);
-        */
     if (rec > 0)
     {
         _player->SendArenaSpectatorSpellCooldown(m_spellInfo->Id, rec * 0.001);
@@ -3666,8 +3662,8 @@ void Spell::TriggerSpell()
 uint8 Spell::CanCast(bool strict)
 {
     // check cooldowns to prevent cheating
-    if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER && (m_caster->ToPlayer()->HasSpellCooldown(m_spellInfo->Id) || strict && m_caster->ToPlayer()->HasGlobalCooldown(m_spellInfo)))
-            return SPELL_FAILED_NOT_READY;
+    if (!m_CastItem  && !m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER && (m_caster->ToPlayer()->HasSpellCooldown(m_spellInfo->Id)))
+        return SPELL_FAILED_NOT_READY;
 
     if (m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_INTERRUPTED_COMBAT;

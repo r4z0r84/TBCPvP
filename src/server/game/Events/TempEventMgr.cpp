@@ -224,20 +224,27 @@ char *raceString(uint8 playerRace)
 
 void TempEventMgr::SendEventInfoString(Player* pInvoker)
 {
+    if (GetEventStatus() == EVENT_STATUS_INACTIVE)
+    {
+        ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_NO_ACTIVE_EVENTS);
+        return;
+    }
+
     MapEntry const* mapEntry;
     AreaTableEntry const* zoneEntry;
     
     ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO);
     ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_STATUS, GetStatusString(GetEventStatus()));
     
+    int loc = pInvoker->GetSession() ? pInvoker->GetSession()->GetSessionDbcLocale() : sWorld->GetDefaultDbcLocale();
     if (HasEventLocation())
     {
         mapEntry = sMapStore.LookupEntry(eventLoc.mapId);
         zoneEntry = GetAreaEntryByAreaID(eventLoc.zoneId);
 
         ChatHandler(pInvoker).PSendSysMessage(LANG_TEMPEVENT_INFO_LOCATION, 
-            mapEntry->name[0], 
-            zoneEntry->area_name[0]);
+            mapEntry->name[loc], 
+            zoneEntry->area_name[loc]);
     }
 
     if (HasPlayerLimit())
@@ -254,8 +261,8 @@ void TempEventMgr::SendEventInfoString(Player* pInvoker)
             (*itr)->GetName(),
             raceString((*itr)->getRace()),
             classString((*itr)->getClass()),
-            mapEntry->name[0],
-            zoneEntry->area_name[0]);
+            mapEntry->name[loc],
+            zoneEntry->area_name[loc]);
     }
 
 }

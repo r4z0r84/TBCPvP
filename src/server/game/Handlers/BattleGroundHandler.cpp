@@ -448,11 +448,22 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode(WorldPacket &recv_data)
             sLog->outError("Battleground: Invalid player queue info!");
             return;
         }
-        // if player is trying to enter battleground (not arena) and he has deserter debuff, we must just remove him from queue
-        if (arenatype == 0 && !_player->CanJoinToBattleground())
+        // some checks if player isn't cheating - it is not exactly cheating, but we cannot allow it
+        if (action == 1  && arenatype == 0)
         {
-            sLog->outDebug("Battleground: player %s (%u) has a deserter debuff, do not port him to battleground!", _player->GetName(), _player->GetGUIDLow());
-            action = 0;
+            //if player is trying to enter battleground (not arena!) and he has deserter debuff, we must just remove him from queue
+            if (!_player->CanJoinToBattleground())
+            {
+                SendBattleGroundOrArenaJoinError(BG_JOIN_ERR_GROUP_DESERTER);
+                sLog->outDebug("Battleground: Player %s (%u) has a deserter debuff, do not port him to battleground!", _player->GetName(), _player->GetGUIDLow());
+                action = 0;
+            }
+            // if player don't match battleground max level, then do not allow him to enter! (this might happen when player leveled up during his waiting in queue
+            if (_player->getLevel() > bg->GetMaxLevel())
+            {
+                sLog->outDebug("Battleground: Player %s (%u) has level (%u) higher than maxlevel (%u) of battleground (%u)! Do not port him to battleground!", _player->GetName(), _player->GetGUIDLow(), _player->getLevel(), bg->GetMaxLevel(), bg->GetTypeID());
+                action = 0;
+            }
         }
         WorldPacket data;
         switch (action)

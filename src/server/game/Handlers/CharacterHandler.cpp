@@ -822,7 +822,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
                     {
                         case 71: // Vengeful Gladiator
                         case 62: // Merciless Gladiator
-                        case 51: // Gladiator
+                        case 42: // Gladiator
                             CharacterDatabase.PExecute("UPDATE season_titles SET earnedSeason = %u, numKeepSeasons = 0 WHERE guid ='%u'", earnedSeason + 1, pCurrChar->GetGUIDLow());
                             break;
                     }

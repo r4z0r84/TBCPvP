@@ -791,7 +791,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
                     case 42:
                     case 62:
                     case 71:
-                        CharacterDatabase.PExecute("INSERT INTO `mail_external` (receiver, subject, message, item, item_count) VALUES (%u, 'Arena Rewards', 'You recent efforts in rated arena have placed you at the top 3 for season %u! Attached below are your exclusive mounts to ride upon for the next two seasons, and your tabard which you may keep permanently.', '3910%u', 1)", pCurrChar->GetGUIDLow(), currentSeason, title);
+                        CharacterDatabase.PExecute("INSERT INTO `mail_external` (receiver, subject, message, item, item_count) VALUES (%u, 'Arena Rewards', 'You recent efforts in rated arena have placed you at the top 3 for season %u! Attached below are your exclusive mounts to ride upon for the next two seasons, and your tabard which you may keep permanently.', '3910%u', 1)", pCurrChar->GetGUIDLow(), currentSeason-1, title);
                         CharacterDatabase.PExecute("UPDATE `season_titles` SET awarded = 1, numKeepSeasons = 1 WHERE guid = %u", pCurrChar->GetGUIDLow());
                         break;
                     default: // non-glads
@@ -822,7 +822,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
                     {
                         case 71: // Vengeful Gladiator
                         case 62: // Merciless Gladiator
-                        case 51: // Gladiator
+                        case 42: // Gladiator
                             CharacterDatabase.PExecute("UPDATE season_titles SET earnedSeason = %u, numKeepSeasons = 0 WHERE guid ='%u'", earnedSeason + 1, pCurrChar->GetGUIDLow());
                             break;
                     }

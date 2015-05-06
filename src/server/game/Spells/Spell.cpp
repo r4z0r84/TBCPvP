@@ -4446,6 +4446,9 @@ uint8 Spell::CanCast(bool strict)
 
                     if (Player* plCaster = m_caster->ToPlayer())
                     {
+                        if (target->GetTypeId() == TYPEID_PLAYER)
+                            targetCheck = true;
+
                         uint64 guid = plCaster->GetSelection();
                         if (Creature* creature = plCaster->GetMap()->GetCreature(guid))
                         {

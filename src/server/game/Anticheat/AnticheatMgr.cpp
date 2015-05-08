@@ -77,13 +77,13 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType, uint8 reportAct
             break;
         case ACTION_BAN:
             sAccountMgr->GetName(player->GetSession()->GetAccountId(), accName);
-            sWorld->BanAccount(BAN_ACCOUNT, accName, "-1", "Anticheat", "AnticheatMgr");
+            sWorld->BanAccount(BAN_ACCOUNT, accName, "1d", "Anticheat violation. See Characters.log file for more information.", "Anticheat");
             break;
         default:
             break;
     }
 
-    sLog->outDebug("Anticheat: Player: %s (GUID: %u, Latency: %u) triggered AnticheatMgr report ID: %u.", player->GetName(), key, reportType, player->GetSession()->GetLatency()); 
+    sLog->outWarden("Anticheat: Player: %s (GUID: %u, Latency: %u) triggered AnticheatMgr report ID: %u.", player->GetName(), key, reportType, player->GetSession()->GetLatency()); 
     player->GetSession()->KickPlayer();
 };
 

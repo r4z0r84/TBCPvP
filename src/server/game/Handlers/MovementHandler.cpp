@@ -49,11 +49,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->GetPosition(&oldLoc);
     WorldLocation &newLoc = GetPlayer()->GetTeleportDest();
 
-    GetPlayer()->SetSemaphoreTeleportFar(false);
-
     // possible errors in the coordinate validity check
     if (!sMapMgr->IsValidMapCoord(newLoc))
     {
+        GetPlayer()->SetSemaphoreTeleportFar(false);
         LogoutPlayer(false);
         return;
     }
@@ -72,6 +71,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
         if (!newMap)
         {
+            GetPlayer()->SetSemaphoreTeleportFar(false);
+
             if (!GetPlayer()->TeleportTo(oldLoc))
                 GetPlayer()->TeleportToHomebind();
 
@@ -84,6 +85,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // reset instance validity, except if going to an instance inside an instance
     if (GetPlayer()->m_InstanceValid == false && !mInstance)
         GetPlayer()->m_InstanceValid = true;
+
+
 
     if (GetPlayer()->IsInWorld())
     {
@@ -106,9 +109,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         return;
     }
 
-    GetPlayer()->Relocate(&newLoc);
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
+    GetPlayer()->Relocate(newLoc);
 
     // check this before Map::Add(player), because that will create the instance save!
     bool reset_notify = (GetPlayer()->GetBoundInstance(GetPlayer()->GetMapId(), GetPlayer()->GetDifficulty()) == NULL);

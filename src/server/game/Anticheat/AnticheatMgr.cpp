@@ -83,7 +83,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType, uint8 reportAct
             break;
     }
 
-    sLog->outDebug("Anticheat: Player: %s (GUID: %u, Latency: %u) triggered AnticheatMgr report ID: %u.", player->GetName(), key, reportType, player->GetSession()->GetLatency()); 
+    sLog->outWarden("Anticheat: Player: %s (GUID: %u, Latency: %u) triggered AnticheatMgr report ID: %u.", player->GetName(), key, reportType, player->GetSession()->GetLatency()); 
     player->GetSession()->KickPlayer();
 };
 

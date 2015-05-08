@@ -900,10 +900,6 @@ void Aura::_AddAura()
             if (caster)
                 m_modifier.m_amount = caster->SpellDamageBonus(m_target, m_spellProto, m_modifier.m_amount, DOT);
             break;
-        case SPELL_AURA_PERIODIC_HEAL:
-            if (caster)
-                m_modifier.m_amount = caster->SpellHealingBonus(m_spellProto, m_modifier.m_amount, DOT, m_target);
-            break;
         case SPELL_AURA_OBS_MOD_HEALTH:
         case SPELL_AURA_OBS_MOD_MANA:
         {
@@ -6056,7 +6052,7 @@ void Aura::PeriodicTick()
                     EffectModifier *= (100.0f + negativeMod) / 100.0f;
             }
             else
-                pdamage = amount;
+                pdamage = pCaster->SpellDamageBonus(m_target, GetSpellProto(), pdamage, DOT);
 
             if (pCaster->getClass() == CLASS_HUNTER)    //Improved Mend pet periodic dispell
             {

@@ -643,66 +643,63 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                 // Health should show up as pct value for non-friendly player case and general creature case
                 else if (index == UNIT_FIELD_HEALTH)
                 {
+                    bool showPctValue = false;
                     if (target != this)
                     {
                         if (GetTypeId() == TYPEID_PLAYER)
                         {
                             if (!target->IsFriendlyTo(ToPlayer()))
-                            {
-                                float healthPct = ToPlayer()->GetHealth() * 100.0f / ToPlayer()->GetMaxHealth();
-                                *data << uint32(healthPct);
-                            }
-                            else
-                                *data << m_uint32Values[index];
+                                showPctValue = true;
                         }
                         else if (GetTypeId() == TYPEID_UNIT)
                         {
                             if (ToCreature()->isPet())
                             {
-                                if (target->IsFriendlyTo(ToCreature()) && target->IsInSameGroupWith(ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself()))
-                                    *data << m_uint32Values[index];
-                                else
-                                {
-                                    float healthPct = ToCreature()->GetHealth() * 100.0f / ToCreature()->GetMaxHealth();
-                                    *data << uint32(healthPct);
-                                }
-                            }
-                            else
-                            {
-                                float healthPct = ToCreature()->GetHealth() * 100.0f / ToCreature()->GetMaxHealth();
-                                *data << uint32(healthPct);
+                                if (!target->IsFriendlyTo(ToCreature()) && !target->IsInSameGroupWith(ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself()))
+                                    showPctValue = true;
                             }
                         }
+                    }
+
+                    if (showPctValue)
+                    {
+                        float healthPct = 0.0f;
+                        switch (GetTypeId())
+                        {
+                            case TYPEID_PLAYER:
+                                healthPct = ToPlayer()->GetHealth() * 100.0f / ToPlayer()->GetMaxHealth();
+                                break;
+                            case TYPEID_UNIT:
+                                healthPct = ToCreature()->GetHealth() * 100.0f / ToCreature()->GetMaxHealth();
+                                break;
+                        }
+
+                        *data << uint32(healthPct);
                     }
                     else
                         *data << m_uint32Values[index];
                 }
                 else if (index == UNIT_FIELD_MAXHEALTH)
                 {
+                    bool showPctValue = false;
                     if (target != this)
                     {
                         if (GetTypeId() == TYPEID_PLAYER)
                         {
                             if (!target->IsFriendlyTo(ToPlayer()))
-                                *data << 100;
-                            else
-                                *data << m_uint32Values[index];
+                                showPctValue = true;
                         }
                         else if (GetTypeId() == TYPEID_UNIT)
                         {
                             if (ToCreature()->isPet())
                             {
-                                if (target->IsFriendlyTo(ToCreature()) && target->IsInSameGroupWith(ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself()))
-                                    *data << m_uint32Values[index];
-                                else
-                                    *data << 100;
+                                if (!target->IsFriendlyTo(ToCreature()) && !target->IsInSameGroupWith(ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself()))
+                                    showPctValue = true;
                             }
-                            else
-                                *data << 100;
                         }       
                     }
-                    else
-                        *data << m_uint32Values[index];
+
+                    showPctValue ? *data << uint32(100) : *data << m_uint32Values[index];
                 }
                 else
                 {

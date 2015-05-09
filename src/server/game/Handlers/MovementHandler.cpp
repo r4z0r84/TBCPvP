@@ -68,16 +68,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     {
         if (GetPlayer()->GetBattleGroundId())
             newMap = sMapMgr->FindMap(newLoc.GetMapId(), GetPlayer()->GetBattleGroundId());
-
-        if (!newMap)
-        {
-            GetPlayer()->SetSemaphoreTeleportFar(false);
-
-            if (!GetPlayer()->TeleportTo(oldLoc))
-                GetPlayer()->TeleportToHomebind();
-
-            return;
-        }
     }
 
     InstanceTemplate const* mInstance = sObjectMgr->GetInstanceTemplate(newLoc.GetMapId());
@@ -86,7 +76,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     if (GetPlayer()->m_InstanceValid == false && !mInstance)
         GetPlayer()->m_InstanceValid = true;
 
-
+    GetPlayer()->SetSemaphoreTeleportFar(false);
 
     if (GetPlayer()->IsInWorld())
     {
@@ -109,9 +99,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         return;
     }
 
+    GetPlayer()->Relocate(&newLoc);
     GetPlayer()->ResetMap();
     GetPlayer()->SetMap(newMap);
-    GetPlayer()->Relocate(newLoc);
 
     // check this before Map::Add(player), because that will create the instance save!
     bool reset_notify = (GetPlayer()->GetBoundInstance(GetPlayer()->GetMapId(), GetPlayer()->GetDifficulty()) == NULL);

@@ -2583,6 +2583,11 @@ void SpellMgr::LoadSpellCustomAttr()
         case 1953: // Blink
             spellInfo->DurationIndex = 328; // 250ms
             break;
+        case 14748: // Improved Power Word: Shield (Rank 1) Implemented in Aura::HandleSchoolAbsorb
+        case 14768: // Improved Power Word: Shield (Rank 2) Implemented in Aura::HandleSchoolAbsorb
+        case 14769: // Improved Power Word: Shield (Rank 3) Implemented in Aura::HandleSchoolAbsorb
+            spellInfo->EffectItemType[0] = 0;
+            break;
         default:
             break;
         }

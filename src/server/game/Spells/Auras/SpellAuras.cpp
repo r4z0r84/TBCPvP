@@ -5722,8 +5722,17 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
             }
 
             DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
-
             m_modifier.m_amount += (int32)DoneActualBenefit;
+
+            if (caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                // bonus from Improved Power Word: Shield should be added after +healing bonus
+                uint32 impPWS[] = { 14769, 14768, 14748 };
+                uint32 talentId = caster->GetMaxRankSpellFromArray(impPWS, 2);
+
+                if (Aura* spellModAura = caster->GetAura(talentId, 0))
+                    m_modifier.m_amount *= (spellModAura->GetSpellProto()->EffectBasePoints[0] + 100.0f) / 100.0f;
+            }
         }
     }
 }

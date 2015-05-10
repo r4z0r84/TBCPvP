@@ -339,8 +339,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
         sAnticheatMgr->StartHackDetection(plMover, movementInfo, opcode);
 
     /* process position-change */
-    recv_data.put<uint32>(5, getMSTime());                  // offset flags(4) + unk(1)
+    uint32 mstime = getMSTime();
+    if (m_clientTimeDelay == 0)
+        SetClientTimeDelay(mstime - movementInfo.time);
+
     WorldPacket data(opcode, mover->GetPackGUID().size() + recv_data.size());
+    movementInfo.time = movementInfo.time + m_clientTimeDelay;
     data << mover->GetPackGUID();
     data.append(recv_data.contents(), recv_data.size());
     if (mover->isCharmed() && mover->GetCharmer())

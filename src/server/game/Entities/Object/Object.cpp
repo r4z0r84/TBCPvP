@@ -655,8 +655,11 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                         {
                             if (ToCreature()->isPet())
                             {
-                                if (!target->IsFriendlyTo(ToCreature()) && !target->IsInSameGroupWith(ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself()))
-                                    showPctValue = true;
+                                if (Player* owner = ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                                {
+                                    if (!target->IsFriendlyTo(ToCreature()) && !target->IsInSameGroupWith(owner))
+                                        showPctValue = true;
+                                }   
                             }
                         }
                     }

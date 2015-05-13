@@ -655,11 +655,14 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                         {
                             if (ToCreature()->isPet())
                             {
-                                if (Player* owner = ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                                if (const Creature* pPet = ToCreature())
                                 {
-                                    if (!target->IsFriendlyTo(ToCreature()) && !target->IsInSameGroupWith(owner))
-                                        showPctValue = true;
-                                }   
+                                    if (Unit* pOwner = pPet->GetCharmerOrOwner())
+                                    {
+                                        if (pOwner->ToPlayer() && !pOwner->ToPlayer()->IsInSameRaidWith(target))
+                                            showPctValue = true;
+                                    }
+                                }
                             }
                         }
                     }
@@ -696,10 +699,13 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                         {
                             if (ToCreature()->isPet())
                             {
-                                if (Player* owner = ToCreature()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                                if (const Creature* pPet = ToCreature())
                                 {
-                                    if (!target->IsFriendlyTo(ToCreature()) && !target->IsInSameGroupWith(owner))
-                                        showPctValue = true;
+                                    if (Unit* pOwner = pPet->GetCharmerOrOwner())
+                                    {
+                                        if (pOwner->ToPlayer() && !pOwner->ToPlayer()->IsInSameRaidWith(target))
+                                            showPctValue = true;
+                                    }
                                 }
                             }
                         }       

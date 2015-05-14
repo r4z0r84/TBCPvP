@@ -643,13 +643,12 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                 // Health should show up as pct value for non-friendly player case and general creature case
                 else if (index == UNIT_FIELD_HEALTH)
                 {
-                    bool showPctValue = false;
+                    bool revealActualHealth = true;
                     if (target != this)
                     {
-                        if (GetTypeId() == TYPEID_PLAYER)
+                        if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->IsInSameRaidWith(target))
                         {
-                            if (!target->IsFriendlyTo(ToPlayer()))
-                                showPctValue = true;
+                            revealActualHealth = false;
                         }
                         else if (GetTypeId() == TYPEID_UNIT)
                         {
@@ -660,14 +659,14 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                                     if (Unit* pOwner = pPet->GetCharmerOrOwner())
                                     {
                                         if (pOwner->ToPlayer() && !pOwner->ToPlayer()->IsInSameRaidWith(target))
-                                            showPctValue = true;
+                                            revealActualHealth = false;
                                     }
                                 }
                             }
                         }
                     }
 
-                    if (showPctValue)
+                    if (!revealActualHealth)
                     {
                         float healthPct = 0.0f;
                         switch (GetTypeId())
@@ -687,31 +686,27 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                 }
                 else if (index == UNIT_FIELD_MAXHEALTH)
                 {
-                    bool showPctValue = false;
-                    if (target != this)
+                    bool revealActualHealth = true;
+                    if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->IsInSameRaidWith(target))
                     {
-                        if (GetTypeId() == TYPEID_PLAYER)
+                        revealActualHealth = false;
+                    }
+                    else if (GetTypeId() == TYPEID_UNIT)
+                    {
+                        if (ToCreature()->isPet())
                         {
-                            if (!target->IsFriendlyTo(ToPlayer()))
-                                showPctValue = true;
-                        }
-                        else if (GetTypeId() == TYPEID_UNIT)
-                        {
-                            if (ToCreature()->isPet())
+                            if (const Creature* pPet = ToCreature())
                             {
-                                if (const Creature* pPet = ToCreature())
+                                if (Unit* pOwner = pPet->GetCharmerOrOwner())
                                 {
-                                    if (Unit* pOwner = pPet->GetCharmerOrOwner())
-                                    {
-                                        if (pOwner->ToPlayer() && !pOwner->ToPlayer()->IsInSameRaidWith(target))
-                                            showPctValue = true;
-                                    }
+                                    if (pOwner->ToPlayer() && !pOwner->ToPlayer()->IsInSameRaidWith(target))
+                                        revealActualHealth = false;
                                 }
                             }
-                        }       
+                        }
                     }
 
-                    showPctValue ? *data << uint32(100) : *data << m_uint32Values[index];
+                    revealActualHealth ? *data << m_uint32Values[index] : *data << uint32(100);
                 }
                 else
                 {

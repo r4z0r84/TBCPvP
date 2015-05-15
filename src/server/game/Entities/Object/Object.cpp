@@ -672,13 +672,12 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                         switch (GetTypeId())
                         {
                             case TYPEID_PLAYER:
-                                healthPct = ToPlayer()->GetHealth() * 100.0f / ToPlayer()->GetMaxHealth();
+                                healthPct = ceil(ToPlayer()->GetHealth() * 100.0f / ToPlayer()->GetMaxHealth());
                                 break;
                             case TYPEID_UNIT:
-                                healthPct = ToCreature()->GetHealth() * 100.0f / ToCreature()->GetMaxHealth();
+                                healthPct = ceil(ToCreature()->GetHealth() * 100.0f / ToCreature()->GetMaxHealth());
                                 break;
                         }
-
                         *data << uint32(healthPct);
                     }
                     else

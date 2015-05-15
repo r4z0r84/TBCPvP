@@ -683,7 +683,6 @@ class WorldSession
         bool m_forceExit;
 
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
-        uint32 m_lastWhoCommand;
 };
 #endif
 

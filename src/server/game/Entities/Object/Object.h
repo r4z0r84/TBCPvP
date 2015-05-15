@@ -328,6 +328,8 @@ class Object
         virtual void BuildUpdate(UpdateDataMapType&) {}
         void BuildFieldsUpdate(Player *, UpdateDataMapType &) const;
 
+        void MarkForClientUpdate();
+
         // FG: some hacky helpers
         void ForceValuesUpdateAtIndex(uint32);
 

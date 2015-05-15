@@ -371,6 +371,9 @@ void Group::Disband(bool hideDestroy)
         if (!player)
             continue;
 
+        // call update for all party members
+        SendPlayerUpdateToMembers(player);
+
         // we cannot call _removeMember because it would invalidate member iterator
         // if we are removing player from battleground raid
         if (isBGGroup())
@@ -406,6 +409,7 @@ void Group::Disband(bool hideDestroy)
 
         _homebindIfInstance(player);
     }
+
     RollId.clear();
     m_memberSlots.clear();
 
@@ -908,6 +912,8 @@ void Group::SendUpdate()
         if (!player || !player->GetSession() || player->GetGroup() != this)
             continue;
 
+        // call update for all party members
+        SendPlayerUpdateToMembers(player);
                                                             // guess size
         WorldPacket data(SMSG_GROUP_LIST, (1+1+1+1+8+4+GetMembersCount()*20));
         data << (uint8)m_groupType;                         // group type
@@ -1631,6 +1637,25 @@ void Group::BroadcastGroupUpdate(void)
             pp->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
             pp->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
             sLog->outDebug("-- Forced group value update for '%s'", pp->GetName());
+        }
+    }
+}
+
+void Group::SendPlayerUpdateToMembers(Player* player)
+{
+    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        if (player = sObjectMgr->GetPlayer(citr->guid))
+        {
+            // call update for all party members
+            for (member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
+            {
+                if (citr->guid == citr2->guid)
+                    continue;
+
+                if (Player* member = sObjectMgr->GetPlayer(citr2->guid))
+                    player->SendUpdateToPlayer(member);
+            }
         }
     }
 }

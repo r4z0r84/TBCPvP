@@ -64,6 +64,12 @@ enum PartyResult
     PARTY_RESULT_INVITE_RESTRICTED    = 13
 };
 
+struct PacketCounter
+{
+    time_t lastReceiveTime;
+    uint32 amountCounter;
+};
+
 // Player session in the World
 class WorldSession
 {
@@ -657,6 +663,13 @@ class WorldSession
         // logging helper
         void LogUnexpectedOpcode(WorldPacket *packet, const char * reason);
         void LogUnprocessedTail(WorldPacket *packet);
+
+        // antidos protection
+        bool EvaluateOpcode(WorldPacket& p, time_t time);
+        uint32 GetMaxPacketCounterAllowed(uint16 opcode) const;
+        typedef UNORDERED_MAP<uint16, PacketCounter> PacketThrottlingMap;
+        // mark this member as "mutable" so it can be modified even in const functions
+        mutable PacketThrottlingMap _PacketThrottlingMap;
 
         Player *_player;
         WorldSocket *m_Socket;

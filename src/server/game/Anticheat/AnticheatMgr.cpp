@@ -83,8 +83,8 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType, uint8 reportAct
             break;
     }
 
-    sLog->outWarden("Anticheat: Player: %s (GUID: %u, Latency: %u) triggered AnticheatMgr report ID: %u.", player->GetName(), key, reportType, player->GetSession()->GetLatency()); 
-    player->GetSession()->KickPlayer();
+    sLog->outWarden("AntiCheat: Player: %s (GUID: %u, Account: %u, Ping: %u, IP: %u) triggered AnticheatMgr report ID: %u.", 
+    player->GetName(), key, player->GetSession()->GetAccountId(), player->GetSession()->GetLatency(), player->GetSession()->GetRemoteAddress().c_str(), reportType);
 };
 
 void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)

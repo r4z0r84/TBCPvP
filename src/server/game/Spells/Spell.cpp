@@ -1038,16 +1038,35 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
                             // Slice and Dice, relentless strikes, eviscerate
     //bool canEffectTrigger = (m_spellInfo->AttributesEx4 & (SPELL_ATTR_EX4_CANT_PROC_FROM_SELFCAST | SPELL_ATTR_EX4_UNK4) ? m_caster != unitTarget : true)
     //    && m_canTrigger;
+    Unit* spellHitTarget = NULL;
 
     if (missInfo == SPELL_MISS_NONE)                        // In case spell hit target, do all effect on that target
-        missInfo = DoSpellHitOnUnit(unit, mask);
+        spellHitTarget = unit;
     else if (missInfo == SPELL_MISS_REFLECT)                // In case spell reflect from target, do all effect on caster (if hit)
-    {
+    {       
         // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
         // Note - Spell reflect must be removed on target effect (allows reflect of more than one spell)
         m_caster->ProcDamageAndSpell(unitTarget, PROC_FLAG_NONE, PROC_FLAG_TAKEN_NEGATIVE_SPELL_HIT, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo);
         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
-            DoSpellHitOnUnit(m_caster, mask);
+        {
+            // Don't set new target for channeled spells, they should just cancel when reflected
+            if (!IsChanneledSpell(m_spellInfo))
+                spellHitTarget = m_caster;
+        }
+    }
+
+    if (spellHitTarget)
+    {
+        SpellMissInfo missInfo2 = DoSpellHitOnUnit(spellHitTarget, mask);
+        if (missInfo2 != SPELL_MISS_NONE)
+        {
+            if (missInfo2 != SPELL_MISS_MISS)
+                m_caster->SendSpellMiss(unit, m_spellInfo->Id, missInfo2);
+
+            m_damage = 0;
+            m_healing = 0;
+            spellHitTarget = NULL;
+        }
     }
 
     // All calculated do it!

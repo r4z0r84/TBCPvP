@@ -2083,7 +2083,7 @@ void WorldObject::PlayDirectSound(uint32 sound_id, Player* target /*= NULL*/)
         SendMessageToSet(&data, true);
 }
 
-void WorldObject::DestroyForNearbyPlayers()
+void WorldObject::DestroyForNearbyPlayers(bool exceptGroup)
 {
     if (!IsInWorld())
         return;
@@ -2103,6 +2103,9 @@ void WorldObject::DestroyForNearbyPlayers()
             continue;
 
         if (isType(TYPEMASK_UNIT) && ((Unit*)this)->GetCharmerGUID() == plr->GetGUID()) // TODO: this is for puppet
+            continue;
+
+        if (exceptGroup && isType(TYPEMASK_UNIT) && plr->IsInRaidWith(ToUnit()))
             continue;
 
         DestroyForPlayer(plr);

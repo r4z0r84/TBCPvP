@@ -58,7 +58,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType, uint8 reportAct
         m_Players[key].SetTempReports(m_Players[key].GetTempReports(reportType) + 1, reportType);
 
         if (m_Players[key].GetTempReports(reportType) < 3)
-        return;
+            return;
     }
     else
     {
@@ -72,19 +72,22 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType, uint8 reportAct
     {
         case ACTION_NOTIFY:
             break;
-        case ACTION_KICK:
+        /*case ACTION_KICK:
             player->GetSession()->KickPlayer();
             break;
         case ACTION_BAN:
             sAccountMgr->GetName(player->GetSession()->GetAccountId(), accName);
             sWorld->BanAccount(BAN_ACCOUNT, accName, "1d", "Anticheat violation. See Characters.log file for more information.", "Anticheat");
-            break;
+            break;*/
         default:
             break;
     }
 
     sLog->outWarden("AntiCheat: Player: %s (GUID: %u, Account: %u, Ping: %u, IP: %u) triggered AnticheatMgr report ID: %u.", 
     player->GetName(), key, player->GetSession()->GetAccountId(), player->GetSession()->GetLatency(), player->GetSession()->GetRemoteAddress().c_str(), reportType);
+
+    sLog->outWarden("AntiCheat Detail: Player: %s, report ID: %u, moveFlags: %u, moveFlags2: %u, opcode: %u",
+        player->GetName(), reportType, m_Players[key].GetLastMovementInfo().moveFlags, m_Players[key].GetLastMovementInfo().moveFlags2, m_Players[key].GetLastOpcode());
 };
 
 void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)

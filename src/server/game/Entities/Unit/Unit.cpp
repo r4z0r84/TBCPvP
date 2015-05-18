@@ -825,7 +825,7 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
     {
     case SPELL_AURA_MOD_FEAR:
     case SPELL_AURA_MOD_ROOT:
-        if (damagetype == DOT && m_damageTakenCounter[auraType] >= minDmg)
+        if (damagetype == DOT && m_damageTakenCounter[auraType] <= minDmg)
             canBreak = false;
         if (damagetype == DIRECT_DAMAGE)
             damage *= 1.5f;

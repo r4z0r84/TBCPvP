@@ -813,7 +813,8 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
     if (!HasAuraType(auraType))
         return;
 
-    m_damageTakenCounter[auraType] += damage;
+    uint32 damageMultiplier = damage *= (damagetype == DIRECT_DAMAGE ? 1.5f : 1.0f);
+    m_damageTakenCounter[auraType] += damageMultiplier;
 
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
     uint32 calcDmg = getLevel() > 8 ? 25 * getLevel() + 150 : 50;
@@ -827,8 +828,6 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
     case SPELL_AURA_MOD_ROOT:
         if (damagetype == DOT && m_damageTakenCounter[auraType] <= minDmg)
             canBreak = false;
-        if (damagetype == DIRECT_DAMAGE)
-            damage *= 1.5f;
         break;
     default:
         break;

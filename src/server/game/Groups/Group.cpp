@@ -372,7 +372,7 @@ void Group::Disband(bool hideDestroy)
             continue;
 
         // call update for all party members
-        SendPlayerUpdateToMembers(player);
+        SendObjectUpdateToMembers(player);
 
         // we cannot call _removeMember because it would invalidate member iterator
         // if we are removing player from battleground raid
@@ -913,7 +913,7 @@ void Group::SendUpdate()
             continue;
 
         // call update for all party members
-        SendPlayerUpdateToMembers(player);
+        SendObjectUpdateToMembers(player);
                                                             // guess size
         WorldPacket data(SMSG_GROUP_LIST, (1+1+1+1+8+4+GetMembersCount()*20));
         data << (uint8)m_groupType;                         // group type
@@ -1641,7 +1641,7 @@ void Group::BroadcastGroupUpdate(void)
     }
 }
 
-void Group::SendPlayerUpdateToMembers(Player* player)
+void Group::SendObjectUpdateToMembers(Player* player)
 {
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
@@ -1654,7 +1654,11 @@ void Group::SendPlayerUpdateToMembers(Player* player)
                     continue;
 
                 if (Player* member = sObjectMgr->GetPlayer(citr2->guid))
+                {
                     player->SendUpdateToPlayer(member);
+                    if (Pet* pet = player->GetPet())
+                        pet->SendUpdateToPlayer(member);
+                }
             }
         }
     }

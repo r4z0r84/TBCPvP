@@ -166,7 +166,7 @@ class Group
         bool   AddLeaderInvite(Player* player);
         bool   AddMember(const uint64 &guid, const char* name);
 
-        void   SendPlayerUpdateToMembers(Player* player);
+        void   SendObjectUpdateToMembers(Player* player);
                                                             // method: 0=just remove, 1=kick
         uint32 RemoveMember(const uint64 &guid, const uint8 &method);
         void   ChangeLeader(const uint64 &guid);

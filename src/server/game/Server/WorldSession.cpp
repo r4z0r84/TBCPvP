@@ -639,8 +639,8 @@ bool WorldSession::EvaluateOpcode(WorldPacket& p, time_t time)
     if (++packetCounter.amountCounter <= maxPacketCounterAllowed)
         return true;
 
-    sLog->outWarden("AntiDOS: Player: %s (GUID: %u, Account: %u, Ping: %u, IP: %s) flooding packet (opc: %s (0x%X), count: %u)",
-        GetPlayerName(), _player->GetGUID(), GetAccountId(), GetLatency(), GetRemoteAddress().c_str(),
+    sLog->outWarden("AntiDOS: Player: %s, Account: %u, Ping: %u, IP: %s flooding packet (opc: %s (0x%X), count: %u)",
+        GetPlayerName(), GetAccountId(), GetLatency(), GetRemoteAddress().c_str(),
         opcodeTable[p.GetOpcode()].name, p.GetOpcode(), packetCounter.amountCounter);
 
     KickPlayer();

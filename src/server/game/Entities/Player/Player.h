@@ -113,6 +113,12 @@ struct PlayerSpell
     bool disabled          : 1;
 };
 
+struct PlayerTalent
+{
+    PlayerSpellState state : 8;
+    uint8 spec : 8;
+};
+
 // Spell modifier (used for modify other spells)
 struct SpellModifier
 {
@@ -126,6 +132,7 @@ struct SpellModifier
     Spell const* lastAffected;
 };
 
+typedef UNORDERED_MAP<uint32, PlayerTalent*> PlayerTalentMap;
 typedef UNORDERED_MAP<uint16, PlayerSpell*> PlayerSpellMap;
 typedef std::list<SpellModifier*> SpellModList;
 
@@ -158,6 +165,7 @@ struct ActionButton
     ActionButton(uint16 _action, uint8 _type, uint8 _misc) : action(_action), type(_type), misc(_misc), uState(ACTIONBUTTON_NEW) {}
 
     uint16 action;
+    uint8 spec;
     uint8 type;
     uint8 misc;
     ActionButtonUpdateState uState;
@@ -744,6 +752,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADARENAINFO            = 18,
     PLAYER_LOGIN_QUERY_LOADBGDATA               = 19,
     PLAYER_LOGIN_QUERY_LOADSKILLS               = 20,
+    PLAYER_LOGIN_QUERY_LOADTALENTS              = 21,
 
     MAX_PLAYER_LOGIN_QUERY
 };
@@ -1484,6 +1493,7 @@ class Player : public Unit, public GridObject<Player>
         void PossessSpellInitialize();
         void SendRemoveControlBar();
         bool HasSpell(uint32 spell) const;
+        bool HasTalent(uint32 spell, uint8 spec) const;
         TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell) const;
         bool IsSpellFitByClassAndRace(uint32 spell_id) const;
 
@@ -1499,6 +1509,8 @@ class Player : public Unit, public GridObject<Player>
         void learnQuestRewardedSpells();
         void learnQuestRewardedSpells(Quest const* quest);
         void learnSpellHighRank(uint32 spellid);
+
+        void addTalent(uint32 spellId, uint8 spec, bool learning);
 
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
         void SetFreeTalentPoints(uint32 points) { SetUInt32Value(PLAYER_CHARACTER_POINTS1, points); }
@@ -1546,6 +1558,20 @@ class Player : public Unit, public GridObject<Player>
         bool HasGlobalCooldown(SpellEntry const *spellInfo) const;
         void RemoveGlobalCooldown(SpellEntry const *spellInfo);
 
+        // dual spec
+        uint8 m_activeSpec;
+        uint8 m_specsCount;
+
+        void ActivateSpec(uint8 spec);
+        uint8 GetActiveSpec() { return m_activeSpec; }
+        void SetActiveSpec(uint8 spec) { m_activeSpec = spec; }
+        uint8 GetSpecsCount() { return m_specsCount; }
+        void SetSpecsCount(uint8 count) { m_specsCount = count; }
+
+        std::string GetSpecName(uint8 spec);
+        void SetSpecName(uint8 spec, const char* specName);
+        std::string specName;
+
         void setResurrectRequestData(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
         {
             m_resurrectGUID = guid;
@@ -1572,7 +1598,8 @@ class Player : public Unit, public GridObject<Player>
 
         void addActionButton(uint8 button, uint16 action, uint8 type, uint8 misc);
         void removeActionButton(uint8 button);
-        void SendInitialActionButtons();
+        void SendInitialActionButtons() const { SendActionButtons(1); };
+        void SendActionButtons(uint32 state) const;
 
         PvPInfo pvpInfo;
         void UpdatePvPState(bool onlyFFA = false);
@@ -2299,6 +2326,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadGroup(QueryResult_AutoPtr result);
         void _LoadReputation(QueryResult_AutoPtr result);
         void _LoadSkills(QueryResult_AutoPtr result);
+        void _LoadTalents(QueryResult_AutoPtr result);
         void _LoadSpells(QueryResult_AutoPtr result);
         void _LoadTutorials(QueryResult_AutoPtr result);
         void _LoadFriendList(QueryResult_AutoPtr result);
@@ -2319,6 +2347,7 @@ class Player : public Unit, public GridObject<Player>
         void _SaveDailyQuestStatus();
         void _SaveReputation();
         void _SaveSkills();
+        void _SaveTalents();
         void _SaveSpells();
         void _SaveTutorials();
         void _SaveBGData();
@@ -2371,6 +2400,7 @@ class Player : public Unit, public GridObject<Player>
 
         PlayerMails m_mail;
         PlayerSpellMap m_spells;
+        PlayerTalentMap m_talents[MAX_TALENT_SPECS];
         SpellCooldowns m_spellCooldowns;
         std::map<uint32, uint32> m_globalCooldowns; // whole start recovery category stored in one
 

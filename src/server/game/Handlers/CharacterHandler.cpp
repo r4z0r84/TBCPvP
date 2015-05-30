@@ -79,7 +79,8 @@ bool LoginQueryHolder::Initialize()
         "arenaPoints, totalHonorPoints, todayHonorPoints, "
         "yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, "
         "chosenTitle, watchedFaction, drunk, health, "
-        "powerMana, powerRage, powerFocus, powerEnergy, powerHappiness, instance_id "
+        "powerMana, powerRage, powerFocus, powerEnergy, powerHappiness, instance_id, "
+        "specCount, activeSpec "
         "FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT leaderGuid FROM group_member WHERE memberGuid ='%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(m_guid));
@@ -90,7 +91,7 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADTUTORIALS,       "SELECT tut0, tut1, tut2, tut3, tut4, tut5, tut6, tut7 FROM character_tutorial WHERE account = '%u' AND realmid = '%u'", GetAccountId(), realmID);
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADREPUTATION,      "SELECT faction, standing, flags FROM character_reputation WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADINVENTORY,       "SELECT data, bag, slot, item, item_template FROM character_inventory JOIN item_instance ON character_inventory.item = item_instance.guid WHERE character_inventory.guid = '%u' ORDER BY bag, slot", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADACTIONS,         "SELECT button, action, type, misc FROM character_action WHERE guid = '%u' ORDER BY button", GUID_LOPART(m_guid));
+    //res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADACTIONS,         "SELECT button, action, type, misc FROM character_action WHERE guid = '%u' ORDER BY button", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILCOUNT,       "SELECT COUNT(id) FROM mail WHERE receiver = '%u' AND (checked & 1)=0 AND deliver_time <= '" UI64FMTD "'", GUID_LOPART(m_guid), (uint64)time(NULL));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILDATE,        "SELECT MIN(deliver_time) FROM mail WHERE receiver = '%u' AND (checked & 1)=0", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSOCIALLIST,      "SELECT friend, flags, note FROM character_social WHERE guid = '%u' LIMIT 255", GUID_LOPART(m_guid));
@@ -103,6 +104,7 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADARENAINFO,       "SELECT arenateamid, played_week, played_season, personal_rating FROM arena_team_member WHERE guid='%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBGDATA,          "SELECT instance_id, team, join_x, join_y, join_z, join_o, join_map, taxi_start, taxi_end, mount_spell FROM character_battleground_data WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSKILLS,          "SELECT skill, value, max FROM character_skills WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADTALENTS,         "SELECT spell, spec FROM character_talent WHERE guid = '%u'", GUID_LOPART(m_guid));
 
     return res;
 }

@@ -17848,7 +17848,7 @@ void Player::_SaveActions()
                 break;
             case ACTIONBUTTON_CHANGED:
                 CharacterDatabase.PExecute("UPDATE character_action  SET action = '%u', type = '%u', misc= '%u' WHERE guid= '%u' AND button= '%u' AND spec= '%u'",
-                    (uint32)itr->second.action, (uint32)m_activeSpec, (uint32)itr->second.type, (uint32)itr->second.misc, GetGUIDLow(), (uint32)itr->first);
+                    (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc, GetGUIDLow(), (uint32)itr->first, (uint32)m_activeSpec);
                 itr->second.uState = ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;

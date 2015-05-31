@@ -1,11 +1,9 @@
 DROP TABLE IF EXISTS `character_talent`;
 CREATE TABLE `character_talent` (
-    `guid` INT(11) UNSIGNED NULL DEFAULT '0',
-    `spell` INT(11) UNSIGNED NULL DEFAULT '0',
-    `spec` TINYINT(3) UNSIGNED NULL DEFAULT '0'
-)
-COLLATE='latin1_swedish_ci'
-ENGINE=InnoDB;
+  `guid` int(11) unsigned DEFAULT '0',
+  `spell` int(11) unsigned DEFAULT '0',
+  `spec` tinyint(3) unsigned DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `character_action`
     ADD COLUMN `spec` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0' AFTER `guid`,
@@ -15,3 +13,10 @@ ALTER TABLE `character_action`
 ALTER TABLE `characters`
     ADD COLUMN `specCount` TINYINT(3) UNSIGNED NOT NULL DEFAULT '1' AFTER `latency`,
     ADD COLUMN `activeSpec` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0' AFTER `specCount`;
+
+CREATE TABLE `character_talent_name` (
+      `guid` int(11) unsigned NOT NULL DEFAULT '0',
+      `spec` tinyint(3) unsigned NOT NULL DEFAULT '0',
+      `name` varchar(255) NOT NULL DEFAULT '',
+      PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

@@ -598,6 +598,13 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                 false,  NULL,												"", NULL }
     };
 
+    static ChatCommand customTitleCommandTable[] =
+    {
+        { "enable",        SEC_PLAYER,         false,  &ChatHandler::HandleCustomTitleEnableCommand,		"", NULL },
+        { "off",           SEC_PLAYER,         false,  &ChatHandler::HandleCustomTitleOffCommand,			"", NULL },
+        { NULL,             0,                 false,  NULL,												"", NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "account",       SEC_PLAYER,         true,  NULL,                                           "", accountCommandTable  },
@@ -615,6 +622,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "gobject",       SEC_GAMEMASTER,     false, NULL,                                           "", gobjectCommandTable  },
         { "honor",         SEC_GAMEMASTER,     false, NULL,                                           "", honorCommandTable    },
         { "tempevent",     SEC_PLAYER,         false, NULL,                                           "", tempEventCommandTable},
+        { "customtitle",   SEC_PLAYER,         false, NULL,                                           "", customTitleCommandTable },
 
         //wp commands
         { "path",          SEC_GAMEMASTER,     false, NULL,                                           "", wpCommandTable },

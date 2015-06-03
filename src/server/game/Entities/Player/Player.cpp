@@ -678,6 +678,8 @@ Player::Player (WorldSession *session): Unit()
     m_activeSpec = 0;
     m_specsCount = 1;
 
+    m_customTitleActive = 0;
+
     // players always accept
     if (GetSession()->GetSecurity() == SEC_PLAYER)
         SetAcceptWhispers(true);

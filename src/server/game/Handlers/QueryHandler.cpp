@@ -39,6 +39,11 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     if (!p)
         return;
 
+    std::stringstream nameData;
+    if (!p->GetUInt32Value(PLAYER_CHOSEN_TITLE)) // Only add if no real title selected
+        nameData << TitleStrings[p->GetActiveCustomTitle()];
+    nameData << p->GetName();
+
     // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10));
     data << p->GetGUID();                                   // player guid

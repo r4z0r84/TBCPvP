@@ -353,3 +353,30 @@ bool ChatHandler::HandleTempEventInfoCommand(const char* args)
     sTempEventMgr->SendEventInfoString(plr);
     return true;
 }
+
+bool ChatHandler::HandleCustomTitleEnableCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr || *args)
+        return false;
+
+    std::string argstr = (char*)args;
+
+    if (atoi(argstr.c_str()) > MAX_TITLE_COUNT)
+        return false;
+
+    plr->SetActiveCustomTitle(TitleEntry(atoi(argstr.c_str())));
+    return true;
+}
+
+bool ChatHandler::HandleCustomTitleOffCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr)
+        return false;
+
+    plr->SetActiveCustomTitle(TitleEntry(0));
+    return true;
+}

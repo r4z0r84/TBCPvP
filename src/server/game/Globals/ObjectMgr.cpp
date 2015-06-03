@@ -152,7 +152,7 @@ bool normalizePlayerName(std::string& name, bool removeSpaces)
     
     for (uint8 i = 0; i < MAX_TITLE_COUNT; ++i)
     {
-        std::string eraseStr = titleStrings[i];
+        std::string eraseStr = TitleStrings[i];
         if (!eraseStr.empty())
         {
             std::string::size_type e = name.find(eraseStr);

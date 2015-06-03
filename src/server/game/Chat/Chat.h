@@ -544,6 +544,11 @@ class ChatHandler
         bool HandleTempEventResetCommand(const char* args);
         bool HandleTempEventTeleportCommand(const char* args);
 
+        // Custom Title system
+        bool HandleCustomTitleListCommand(const char* args);
+        bool HandleCustomTitleEnableCommand(const char* args);
+        bool HandleCustomTitleOffCommand(const char* args);
+
         Player*   getSelectedPlayer();
         Creature* getSelectedCreature();
         Unit*     getSelectedUnit();

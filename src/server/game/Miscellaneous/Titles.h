@@ -3,14 +3,31 @@
 
 #include "Common.h"
 
-#define MAX_TITLE_COUNT 81
+#define MAX_TITLE_COUNT 82 // Will be removed and replaced by titleEntry enum end TITLE_ENUM_END
 
-const std::string titleStrings[] =
+enum TitleEntry
+{
+    TITLE_START = 0,
+    TITLE_BREWMASTER,
+    TITLE_ELDER,
+    TITLE_FLAME_KEEPER,
+    TITLE_FLAME_WARDEN,
+    TITLE_MATRON,
+    TITLE_MERRYMAKER,
+    TITLE_THE_NOBLE,
+    TITLE_PATRON,
+    TITLE_THE_PILGRIM,
+    TITLE_THE_HALLOWED,
+    TITLE_THE_LOVE_FOOL
+};
+
+const std::string TitleStrings[MAX_TITLE_COUNT] =
 {
     // World Events
+    "",
     "Brewmaster",
     "Elder",
-    "FlameKepper",
+    "FlameKeeper",
     "FlameWarden",
     "Matron",
     "Merrymaker",

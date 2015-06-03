@@ -36,6 +36,7 @@
 #include "Pet.h"
 #include "MapReference.h"
 #include "Util.h"                                           // for Tokens typedef
+#include "Titles.h"
 
 #include<string>
 #include<vector>
@@ -2211,10 +2212,6 @@ class Player : public Unit, public GridObject<Player>
         // Custom Mutligossip Vendor
         int32 m_currentVendorEntry;
 
-        const char* GetTitleString() const { return m_title.c_str(); }
-        void SetTitleString(const std::string& newtitle) { m_title = newtitle; }
-        std::string m_title;
-
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/
@@ -2279,6 +2276,9 @@ class Player : public Unit, public GridObject<Player>
         void SetTitle(CharTitlesEntry const* title, bool lost = false);
 
         uint32 SuitableForTransmogrification(Item* oldItem, Item* newItem);
+
+        uint32 GetActiveCustomTitle() { return m_customTitleActive; }
+        void SetActiveCustomTitle(TitleEntry titleEntry) { m_customTitleActive = titleEntry; }
 
     protected:
 
@@ -2549,6 +2549,8 @@ class Player : public Unit, public GridObject<Player>
         // Temporary removed pet cache
         uint32 m_temporaryUnsummonedPetNumber;
         uint32 m_oldpetspell;
+
+        uint32 m_customTitleActive;
 };
 
 void AddItemsSetItem(Player*player, Item *item);

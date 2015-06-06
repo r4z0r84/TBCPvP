@@ -7892,23 +7892,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     TakenTotalMod *= (mod+100.0f)/100.0f;
                 }
                 break;
-            //This is changed in WLK, using aura 255
-            //Mangle
-            case 2312:
-            case 44955:
-                // don't apply mod twice
-                if (hasmangle)
-                    break;
-                hasmangle=true;
-                for (int j=0;j<3;j++)
-                {
-                    if (GetEffectMechanic(spellProto, j) == MECHANIC_BLEED)
-                    {
-                        TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
-                        break;
-                    }
-                }
-                break;
         }
     }
 

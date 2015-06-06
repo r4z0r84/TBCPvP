@@ -5842,6 +5842,21 @@ void Aura::PeriodicTick()
                     pdamage = pdamageReductedArmor;
                 }
 
+                // Increase bleed effects from Mangle
+                if (GetEffectMechanic(GetSpellProto(), m_effIndex) == MECHANIC_BLEED)
+                {
+                    Unit::AuraList const& mDummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                    for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                    {
+                        SpellEntry const* spellProto = (*i)->GetSpellProto();
+                        if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellFamilyFlags & 0x44000000000)
+                        {
+                            pdamage *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+                            break;
+                        }
+                    }
+                }
+
                 //pdamage = pCaster->SpellDamageBonus(m_target, GetSpellProto(), pdamage, DOT);
 
                 // Curse of Agony damage-per-tick calculation

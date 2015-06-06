@@ -358,7 +358,7 @@ bool ChatHandler::HandleCustomTitleEnableCommand(const char* args)
 {
     Player *plr = m_session->GetPlayer();
 
-    if (!plr || *args)
+    if (!plr || !*args)
         return false;
 
     std::string argstr = (char*)args;

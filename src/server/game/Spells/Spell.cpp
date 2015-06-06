@@ -1712,10 +1712,12 @@ void Spell::SetTargetMap(uint32 i, uint32 cur)
                     break;
                 case TARGET_UNIT_TARGET_ALLY:
                 case TARGET_UNIT_TARGET_RAID:
-                case TARGET_UNIT_TARGET_ANY: // SelectMagnetTarget()?
                 case TARGET_UNIT_TARGET_PARTY:
                 case TARGET_UNIT_MINIPET:
                     AddUnitTarget(target, i);
+                    break;
+                case TARGET_UNIT_TARGET_ANY: // SelectMagnetTarget()?
+                    AddUnitTarget(SelectMagnetTarget(), i);
                     break;
                 case TARGET_UNIT_PARTY_TARGET:
                 case TARGET_UNIT_CLASS_TARGET:
@@ -5552,7 +5554,7 @@ Unit* Spell::SelectMagnetTarget()
 {
     Unit* target = m_targets.getUnitTarget();
 
-    if ((target && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
+    if ((target && m_caster->IsHostileTo(target) && m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC
         && !(m_spellInfo->Attributes & SPELL_ATTR_ABILITY || m_spellInfo->AttributesEx & SPELL_ATTR_EX_CANT_BE_REDIRECTED || m_spellInfo->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) // Patch 1.2 notes: Spell Reflection no longer reflects abilities
         && target->HasAuraType(SPELL_AURA_SPELL_MAGNET)) || (m_spellInfo->SpellIconID == 225 && m_spellInfo->SpellVisual == 262))
     {

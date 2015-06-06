@@ -12041,6 +12041,15 @@ Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget, uint32 spell_id)
     return pet;
 }
 
+bool isAlwaysTriggeredAuraAtSpellProcEvent(Aura* aura)
+{
+    // Seal of Righteousness
+    if (aura->GetSpellProto()->SpellFamilyFlags & 0x000000008000000LL && aura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PALADIN)
+        return true;
+
+    return false;
+}
+
 bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura* aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const*& spellProcEvent )
 {
     SpellEntry const *spellProto = aura->GetSpellProto();
@@ -12068,7 +12077,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura* aura, SpellEntry con
         return false;
 
     // Check spellProcEvent data requirements
-    if (!SpellMgr::IsSpellProcEventCanTriggeredBy(spellProcEvent, EventProcFlag, procSpell, procFlag, procExtra, active))
+    if (!isAlwaysTriggeredAuraAtSpellProcEvent(aura) && !SpellMgr::IsSpellProcEventCanTriggeredBy(spellProcEvent, EventProcFlag, procSpell, procFlag, procExtra, active))
         return false;
 
     // In most cases req get honor or XP from kill

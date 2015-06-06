@@ -11461,6 +11461,18 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
                 if (procSpell == NULL || procSpell->Mechanic != auraModifier->m_miscvalue)
                     continue;
                 break;
+            case SPELL_AURA_ADD_FLAT_MODIFIER:
+                // Don't cusume charges for SPELLMOD_COST if zero manacost
+                if (spellInfo->EffectMiscValue[effIndex] == SPELLMOD_COST)
+                    if (procSpell->manaCost <= 0 || procSpell->ManaCostPercentage <= 0)
+                        continue;
+                break;
+            case SPELL_AURA_ADD_PCT_MODIFIER:
+                // Don't cusume charges for SPELLMOD_COST if zero manacost
+                if (spellInfo->EffectMiscValue[effIndex] == SPELLMOD_COST)
+                    if (procSpell->manaCost <= 0 || procSpell->ManaCostPercentage <= 0)
+                        continue;
+                break;
             default:
                 // nothing do, just charges counter
                 break;

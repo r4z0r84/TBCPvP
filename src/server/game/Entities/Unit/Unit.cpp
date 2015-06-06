@@ -918,13 +918,18 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         if (spellProto)
         {
             if (!(spellProto->AttributesEx4 & SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS))
+            {
+                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, damagetype);
+                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype);
                 pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, spellProto->Id);
+            }
         }
         else
+        {
+            pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, damagetype);
+            pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype);
             pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, 0);
-
-        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, damagetype);
-        pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype);
+        }
 
          // Rage from physical damage received
         if (!damage)

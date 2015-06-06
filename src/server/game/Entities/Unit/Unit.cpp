@@ -4152,7 +4152,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
             // add the new aura to stealer
             stealer->AddAura(new_aur);
             // add pre cast aura at aura apply
-            stealer->ApplyPreCastSpell(aur->GetSpellProto());
+            stealer->ApplyPreCastSpell(stealer, aur->GetSpellProto());
             // Remove aura as dispel
            if (iter->second->GetStackAmount() > 1)
             {
@@ -12988,7 +12988,7 @@ void Unit::UpdateObjectVisibility(bool forced)
     }
 }
 
-void Unit::ApplyPreCastSpell(const SpellEntry* spellInfo)
+void Unit::ApplyPreCastSpell(Unit* caster, const SpellEntry* spellInfo)
 {
     // Negative buff should only be applied on players and pets
     if (GetTypeId() == TYPEID_PLAYER || (GetTypeId() == TYPEID_UNIT && ToCreature()->isPet()))
@@ -13012,7 +13012,7 @@ void Unit::ApplyPreCastSpell(const SpellEntry* spellInfo)
         if (AdditionalSpellInfo)
         {
             // applied at target by target
-            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, NULL, this, this, 0);
+            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, NULL, this, caster, 0);
             AddAura(AdditionalAura);
         }
     }

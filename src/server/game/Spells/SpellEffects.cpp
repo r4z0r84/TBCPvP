@@ -2515,7 +2515,7 @@ void Spell::EffectApplyAura(uint32 i)
     if (!Aur)
         return;
 
-    unitTarget->ApplyPreCastSpell(m_spellInfo);
+    unitTarget->ApplyPreCastSpell(caster, m_spellInfo);
 }
 
 void Spell::EffectUnlearnSpecialization(uint32 i)

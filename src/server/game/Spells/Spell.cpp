@@ -460,6 +460,10 @@ Spell::Spell(Unit* Caster, SpellEntry const *info, bool triggered, uint64 origin
             if (m_spellInfo->Effect[j] == 0)
                 continue;
 
+            // Can't reflect Wand spell
+            if (m_spellInfo->Category == 351)
+                continue;
+
             if (!IsPositiveTarget(m_spellInfo->EffectImplicitTargetA[j], m_spellInfo->EffectImplicitTargetB[j]))
                 m_canReflect = true;
 

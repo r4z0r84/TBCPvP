@@ -2588,6 +2588,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 14769: // Improved Power Word: Shield (Rank 3) Implemented in Aura::HandleSchoolAbsorb
             spellInfo->EffectItemType[0] = 0;
             break;
+        case 20511: // Intimidating Shout (STUN SPELL)
+            spellInfo->Mechanic = MECHANIC_STUN;
+            break;
         default:
             break;
         }

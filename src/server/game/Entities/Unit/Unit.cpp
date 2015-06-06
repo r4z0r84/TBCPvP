@@ -2853,15 +2853,15 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode() && this != pVictim)
         return SPELL_MISS_EVADE;
 
-    // Check for immune (use charges)
-    if (pVictim->IsImmunedToSpell(spell, true))
-        return SPELL_MISS_IMMUNE;
-
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
     if (IsPositiveSpell(spell->Id)
-        &&(!IsHostileTo(pVictim)))  //prevent from affecting enemy by "positive" spell
+        && (!IsHostileTo(pVictim)))  //prevent from affecting enemy by "positive" spell
         return SPELL_MISS_NONE;
+
+    // Check for immune (use charges)
+    if (pVictim->IsImmunedToSpell(spell, true))
+        return SPELL_MISS_IMMUNE;
 
     // Check for immune (use charges)
     // Check if Spell cannot be immuned

@@ -1193,7 +1193,9 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
 
     float speed = m_spellInfo->speed;
     // Recheck immune (only for delayed spells)
-    if ((m_delayMoment || speed) && (unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo), true) || unit->IsImmunedToSpell(m_spellInfo, true)))
+    if (m_caster->IsHostileTo(unit) && !IsPositiveSpell(m_spellInfo->Id) &&
+        (m_delayMoment || speed) &&
+        (unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo), true) || unit->IsImmunedToSpell(m_spellInfo, true)))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
         m_damage = 0;

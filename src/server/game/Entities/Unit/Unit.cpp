@@ -8366,10 +8366,15 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
 
     // Healing Done
     float TotalHealPct = 1.0f;
-    float minval = pVictim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-    if (minval)
-        TotalHealPct *= (100.0f + minval) / 100.0f;
 
+    // Implemented in PeriodicTick()
+    if (damagetype != DOT)
+    {
+        float minval = pVictim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+        if (minval)
+            TotalHealPct *= (100.0f + minval) / 100.0f;
+    }
+    
     float maxval = pVictim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
     if (maxval)
         TotalHealPct *= (100.0f + maxval) / 100.0f;

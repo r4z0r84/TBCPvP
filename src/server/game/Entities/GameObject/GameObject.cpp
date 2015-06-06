@@ -1466,7 +1466,10 @@ void GameObject::CastSpell(Unit* target, uint32 spell)
     if (spell == 34709)
     {
         if (target)
+        {
             target->CastSpell(target, 34709, true);
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+        }
         return;
     }
 

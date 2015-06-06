@@ -2332,6 +2332,7 @@ void Spell::cancel()
         {
             SendInterrupted(0);
             SendCastResult(SPELL_FAILED_INTERRUPTED);
+            m_caster->ToPlayer()->RestoreSpellMods(this);
         } break;
 
         case SPELL_STATE_CASTING:
@@ -2353,6 +2354,11 @@ void Spell::cancel()
             SendChannelUpdate(0);
             SendInterrupted(0);
             SendCastResult(SPELL_FAILED_INTERRUPTED);
+
+            // spell is canceled-take mods and clear list
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                m_caster->ToPlayer()->RemoveSpellMods(this);
+
         } break;
 
         default:
@@ -2429,6 +2435,7 @@ void Spell::cast(bool skipCheck)
             SendCastResult(castResult);
             finish(false);
             SetExecutedCurrently(false);
+            m_caster->ToPlayer()->RestoreSpellMods(this);
             return;
         }
 
@@ -2448,6 +2455,7 @@ void Spell::cast(bool skipCheck)
                         SendInterrupted(0);
                         finish(false);
                         SetExecutedCurrently(false);
+                        m_caster->ToPlayer()->RestoreSpellMods(this);
                         return;
                     }
                 }
@@ -2459,6 +2467,7 @@ void Spell::cast(bool skipCheck)
 
     if (m_spellState == SPELL_STATE_FINISHED)                // stop cast if spell marked as finish somewhere in Take*/FillTargetMap
     {
+        m_caster->ToPlayer()->RestoreSpellMods(this);
         SetExecutedCurrently(false);
         return;
     }

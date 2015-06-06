@@ -2591,6 +2591,20 @@ void SpellMgr::LoadSpellCustomAttr()
         case 20511: // Intimidating Shout (STUN SPELL)
             spellInfo->Mechanic = MECHANIC_STUN;
             break;
+        case 6789: // Death Coil
+        case 17925:
+        case 17926:
+        case 27223:
+        case 23694: // Improved Hamstring
+        case 19229: // Improved Wing Clip
+        case 44041: // Chastise
+        case 44043:
+        case 44044:
+        case 44045:
+        case 44046:
+        case 44047:
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_DONT_BREAK_ON_DAMAGE;
+            break;
         default:
             break;
         }

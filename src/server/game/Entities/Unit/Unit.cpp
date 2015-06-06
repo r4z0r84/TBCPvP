@@ -813,6 +813,17 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
     if (!HasAuraType(auraType))
         return;
 
+    // don't increase damageTakenCounter when having aura that should not break on damage
+    AuraList const& mRemoveAuraList = GetAurasByType(auraType);
+    for (AuraList::const_iterator iter = mRemoveAuraList.begin(); iter != mRemoveAuraList.end(); ++iter)
+    {
+        if (SpellEntry const* iterSpellProto = (*iter)->GetSpellProto())
+        {
+            if (sSpellMgr->GetSpellCustomAttr(iterSpellProto->Id) & SPELL_ATTR_CU_DONT_BREAK_ON_DAMAGE)
+                return;
+        }
+    }
+
     uint32 damageMultiplier = damage *= (damagetype == DIRECT_DAMAGE ? 1.5f : 1.0f);
     m_damageTakenCounter[auraType] += damageMultiplier;
 

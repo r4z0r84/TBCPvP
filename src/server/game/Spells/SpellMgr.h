@@ -802,6 +802,7 @@ inline bool IsProfessionSkill(uint32 skill)
 #define SPELL_ATTR_CU_MOVEMENT_IMPAIR   0x00004000
 #define SPELL_ATTR_CU_IGNORE_ARMOR      0x00008000
 #define SPELL_ATTR_CU_WELL_FED          0x00010000
+#define SPELL_ATTR_CU_DONT_BREAK_ON_DAMAGE 0x00020000
 
 typedef std::vector<uint32> SpellCustomAttribute;
 

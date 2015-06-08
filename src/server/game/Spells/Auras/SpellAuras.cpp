@@ -5832,6 +5832,26 @@ void Aura::PeriodicTick()
             {
                 pdamage = amount;
 
+                // ..done
+                Unit::AuraList const& mModDamagePercentDone = pCaster->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                for (Unit::AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+                {
+                    if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(GetSpellProto())) &&
+                        (*i)->GetSpellProto()->EquippedItemClass == -1 &&
+                        // -1 == any item class (not wand then)
+                        (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
+                        // 0 == any inventory type (not wand then)
+                    {
+                        pdamage *= ((*i)->GetModifierValue() + 100.0f) / 100.0f;
+                    }
+                }
+
+                // ..taken
+                Unit::AuraList const& mModDamagePercentTaken = m_target->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
+                for (Unit::AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
+                    if ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(GetSpellProto()))
+                        pdamage *= ((*i)->GetModifierValue() + 100.0f) / 100.0f;
+
                 // Calculate armor mitigation if it is a physical spell
                 // But not for bleed mechanic spells
                 if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL &&
@@ -6076,6 +6096,9 @@ void Aura::PeriodicTick()
             float negativeMod = m_target->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
             if (negativeMod)
                 EffectModifier *= (100.0f + negativeMod) / 100.0f;
+            float positiveMod = m_target->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+            if (negativeMod)
+                EffectModifier *= (100.0f + positiveMod) / 100.0f;
 
             if (pCaster->getClass() == CLASS_HUNTER)    //Improved Mend pet periodic dispell
             {

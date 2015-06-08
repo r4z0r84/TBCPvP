@@ -1445,6 +1445,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const * spellP
             // Check (if set) for school (melee attack have Normal school)
             if (spellProcEvent->schoolMask && (spellProcEvent->schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0)
                 return false;
+            active = true; // Spell added manualy -> so its active spell    
         }
         else // For spells need check school/spell family/family mask
         {

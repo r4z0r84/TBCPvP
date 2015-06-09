@@ -15928,8 +15928,8 @@ bool Player::LoadFromDB(uint32 guid, SqlQueryHolder *holder)
     //"resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty, "
     // 40           41                42                43                    44          45          46              47           48               49              50
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, "
-    // 51      52         53         54          55           56             57           58         59
-    //"health, powerMana, powerRage, powerFocus, powerEnergy, powerHapiness, instance_id, specCount, activeSpec FROM characters WHERE guid = '%u'", guid);
+    // 51      52         53         54          55           56             57           58         59          60
+    //"health, powerMana, powerRage, powerFocus, powerEnergy, powerHapiness, instance_id, specCount, activeSpec, activeCustomTitle FROM characters WHERE guid = '%u'", guid);
     QueryResult_AutoPtr result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if (!result)
@@ -16385,6 +16385,9 @@ bool Player::LoadFromDB(uint32 guid, SqlQueryHolder *holder)
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         m_deathState = DEAD;
 
+    m_specsCount = fields[57].GetUInt32();
+    m_activeSpec = fields[58].GetUInt32();
+
     _LoadTalents(holder->GetResult(PLAYER_LOGIN_QUERY_LOADTALENTS));
     _LoadSpells(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
 
@@ -16405,9 +16408,6 @@ bool Player::LoadFromDB(uint32 guid, SqlQueryHolder *holder)
 
     // update items with duration and realtime
     UpdateItemDuration(time_diff, true);
-
-    m_specsCount = fields[57].GetUInt32();
-    m_activeSpec = fields[58].GetUInt32();
 
     QueryResult_AutoPtr actionResult = CharacterDatabase.PQuery("SELECT button, action, type, misc FROM character_action WHERE guid = '%u' AND spec = '%u' ORDER BY button", GetGUIDLow(), m_activeSpec);
     _LoadActions(actionResult);
@@ -16498,6 +16498,8 @@ bool Player::LoadFromDB(uint32 guid, SqlQueryHolder *holder)
                 break;
         }
     }
+
+    m_customTitleActive = fields[59].GetUInt32();
 
     _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
@@ -17676,7 +17678,7 @@ void Player::SaveToDB()
         "trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, "
         "death_expire_time, taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, "
         "totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, "
-        "powerMana, powerRage, powerFocus, powerEnergy, powerHappiness, latency, specCount, activeSpec) VALUES ("
+        "powerMana, powerRage, powerFocus, powerEnergy, powerHappiness, latency, specCount, activeSpec, activeCustomTitle) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << sql_name << "', "
@@ -17788,6 +17790,8 @@ void Player::SaveToDB()
     ss << uint32(m_specsCount);
     ss << ", ";
     ss << uint32(m_activeSpec);
+    ss << ", ";
+    ss << uint32(m_customTitleActive);
     ss << ")";
 
     CharacterDatabase.BeginTransaction();

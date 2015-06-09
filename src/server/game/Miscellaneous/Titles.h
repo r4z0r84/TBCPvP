@@ -5,6 +5,13 @@
 
 #define MAX_TITLE_COUNT 82 // Will be removed and replaced by titleEntry enum end TITLE_ENUM_END
 
+struct Titles
+{
+    uint32          titleEntry;
+    std::string     titleName;
+    bool            isPrefixTitle;
+};
+
 enum TitleEntry
 {
     TITLE_START = 0,
@@ -124,6 +131,16 @@ const std::string TitleStrings[MAX_TITLE_COUNT] =
     "Professor",
     "AssistantProfessor",
     "AssociateProfessor"
+};
+
+// Titles with Whitespaces here
+static Titles titleTable[MAX_TITLE_COUNT] =
+{
+    // titleEntry,              titleName,                  isPrefixTitle             
+    { TITLE_START,              "",                         true  },
+    { TITLE_BREWMASTER,         "Brewmaster ",              true  },
+    { TITLE_ELDER,              "Elder ",                   true  },
+    { TITLE_THE_NOBLE,          " the Noble",               false }
 };
 
 #endif

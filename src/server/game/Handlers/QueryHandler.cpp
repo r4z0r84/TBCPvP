@@ -41,8 +41,20 @@ void WorldSession::SendNameQueryOpcode(Player *p)
 
     std::stringstream nameData;
     if (!p->GetUInt32Value(PLAYER_CHOSEN_TITLE)) // Only add if no real title selected
-        nameData << TitleStrings[p->GetActiveCustomTitle()];
-    nameData << p->GetName();
+    {
+        if (titleTable[p->GetActiveCustomTitle()].isPrefixTitle)
+        {
+            nameData << titleTable[p->GetActiveCustomTitle()].titleName;
+            nameData << p->GetName();
+        }
+        else
+        {
+            nameData << p->GetName();
+            nameData << titleTable[p->GetActiveCustomTitle()].titleName;
+        }
+    }
+    else
+        nameData << p->GetName();
 
     // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10));

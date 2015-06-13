@@ -2334,7 +2334,8 @@ void Spell::cancel()
         {
             SendInterrupted(0);
             SendCastResult(SPELL_FAILED_INTERRUPTED);
-            m_caster->ToPlayer()->RestoreSpellMods(this);
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                m_caster->ToPlayer()->RestoreSpellMods(this);
         } break;
 
         case SPELL_STATE_CASTING:
@@ -2437,7 +2438,8 @@ void Spell::cast(bool skipCheck)
             SendCastResult(castResult);
             finish(false);
             SetExecutedCurrently(false);
-            m_caster->ToPlayer()->RestoreSpellMods(this);
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                m_caster->ToPlayer()->RestoreSpellMods(this);
             return;
         }
 
@@ -2469,7 +2471,8 @@ void Spell::cast(bool skipCheck)
 
     if (m_spellState == SPELL_STATE_FINISHED)                // stop cast if spell marked as finish somewhere in Take*/FillTargetMap
     {
-        m_caster->ToPlayer()->RestoreSpellMods(this);
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            m_caster->ToPlayer()->RestoreSpellMods(this);
         SetExecutedCurrently(false);
         return;
     }

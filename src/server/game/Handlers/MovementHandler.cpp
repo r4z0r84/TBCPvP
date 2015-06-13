@@ -93,7 +93,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // relocate the player to the teleport destination
     // the CanEnter checks are done in TeleporTo but conditions may change
     // while the player is in transit, for example the map may get full
-    if (!newMap->CanEnter(GetPlayer()))
+    if (!newMap || !newMap->CanEnter(GetPlayer()))
     {
         sLog->outError("Map %d could not be created for player %d, porting player to homebind", newLoc.GetMapId(), GetPlayer()->GetGUIDLow());
         if (!GetPlayer()->TeleportTo(oldLoc))

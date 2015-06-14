@@ -4081,6 +4081,7 @@ uint8 Spell::CanCast(bool strict)
                 Even with MMAP on you cannot charge from ground to the top of the stone pillar vise versa
                 So we check for caster and for target
                 Example: http://i.imgur.com/ItVSaLm.jpg */
+                /*
                 bool fail = false;
                 if (m_caster->GetMapId() == 562)
                 {
@@ -4099,6 +4100,7 @@ uint8 Spell::CanCast(bool strict)
                 }
                 if (fail)
                     return SPELL_FAILED_NOPATH;
+                */
                     
                 break;
             }

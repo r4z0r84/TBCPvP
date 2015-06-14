@@ -7785,6 +7785,9 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         }
     }
 
+    if (sSpellMgr->GetSpellCustomAttr(spellProto->Id) & SPELL_ATTR_CU_FIXED_DAMAGE)
+        return pdamage;
+
     // Damage Done
     uint32 CastingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
 
@@ -7878,10 +7881,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     {
         switch ((*i)->GetModifier()->m_miscvalue)
         {
-            //Molten Fury
-            case 4920: case 4919:
+            // Molten Fury
+            case 4920:
+            case 4919:
                 if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
-                    TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f; break;
+                    TakenTotalMod *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+                break;
         }
     }
 
@@ -7892,17 +7897,17 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         switch ((*i)->GetSpellProto()->SpellIconID)
         {
             // Cheat Death
-            case 2109:
-                if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)))
-                {
-                    if (pVictim->GetTypeId() != TYPEID_PLAYER)
-                        continue;
-                    float mod = pVictim->ToPlayer()->GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*(-8.0f);
-                    if (mod < (*i)->GetModifier()->m_amount)
-                        mod = (*i)->GetModifier()->m_amount;
-                    TakenTotalMod *= (mod+100.0f)/100.0f;
-                }
-                break;
+        case 2109:
+            if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)))
+            {
+                if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                    continue;
+                float mod = pVictim->ToPlayer()->GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*(-8.0f);
+                if (mod < (*i)->GetModifier()->m_amount)
+                    mod = (*i)->GetModifier()->m_amount;
+                TakenTotalMod *= (mod + 100.0f) / 100.0f;
+            }
+            break;
         }
     }
 
@@ -7920,32 +7925,20 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         }
     }
 
+    if (sSpellMgr->GetSpellCustomAttr(spellProto->Id) & SPELL_ATTR_CU_NO_SPELL_DMG_COEFF)
+        CastingTime = 0;
+
     switch (spellProto->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
-            // Siphon Essence - 0%
-            if (spellProto->AttributesEx == 268435456 && spellProto->SpellIconID == 2027)
-            {
-                CastingTime = 0;
-            }
-            // Goblin Rocket Launcher - 0%
-            else if (spellProto->SpellIconID == 184 && spellProto->Attributes == 4259840)
-            {
-                CastingTime = 0;
-            }
             // Darkmoon Card: Vengeance - 0.1%
-            else if (spellProto->SpellVisual == 9850 && spellProto->SpellIconID == 2230)
+            if (spellProto->SpellVisual == 9850 && spellProto->SpellIconID == 2230)
             {
                 CastingTime = 3.5;
             }
         case SPELLFAMILY_MAGE:
-            // Ignite - do not modify, it is (8*Rank)% damage of procing Spell
-            if (spellProto->Id == 12654)
-            {
-                return pdamage;
-            }
             // Cone of Cold - 13.57% of Frost Damage
-            else if ((spellProto->SpellFamilyFlags & 1573376) && spellProto->SpellIconID == 35)
+            if ((spellProto->SpellFamilyFlags & 1573376) && spellProto->SpellIconID == 35)
             {
                 CastingTime = 474;
             }
@@ -7967,11 +7960,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 CastingTime = 3500;
                 DotFactor = damagetype == DOT ? 0.0f : 1.0f;
-            }
-            // Molten armor
-            else if (spellProto->SpellFamilyFlags & 0x0000000800000000LL)
-            {
-                CastingTime = 0;
             }
             // Arcane Missiles triggered spell
             else if ((spellProto->SpellFamilyFlags & 0x200000LL) && spellProto->SpellIconID == 225)
@@ -8008,11 +7996,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             else if ((spellProto->SpellFamilyFlags & 0x0000000400LL) && spellProto->SpellIconID == 544)
             {
                 DotFactor = 1.2f;
-            }
-            // Drain Mana - 0% of Shadow Damage
-            else if ((spellProto->SpellFamilyFlags & 0x10LL) && spellProto->SpellIconID == 548)
-            {
-                CastingTime = 0;
             }
             // Drain Soul 214.3%
             else if ((spellProto->SpellFamilyFlags & 0x4000LL) && spellProto->SpellIconID == 113)
@@ -8069,16 +8052,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 CastingTime = 175;
             }
-            // Blessing of Sanctuary - 0%
-            else if ((spellProto->SpellFamilyFlags & 0x10000000LL) && spellProto->SpellIconID == 29)
-            {
-                CastingTime = 0;
-            }
-            // Seal of Righteousness trigger - already computed for parent spell
-            else if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && spellProto->SpellIconID == 25 && spellProto->AttributesEx4 & 0x00800000LL)
-            {
-                return pdamage;
-            }
             break;
         case  SPELLFAMILY_SHAMAN:
             // totem attack
@@ -8094,20 +8067,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             // Lightning Shield (and proc shield from T2 8 pieces bonus) 33% per charge
             else if ((spellProto->SpellFamilyFlags & 0x00000000400LL) || spellProto->Id == 23552)
                 CastingTime = 1155;                         // ignore CastingTimePenalty and use as modifier
-            // Flametongue Weapon - 10%
-            else if (spellProto->SpellFamilyFlags & 0x00000200000LL)
-            {
-                CastingTime = 350;
-            }
             break;
         case SPELLFAMILY_PRIEST:
-            // Mana Burn - 0% of Shadow Damage
-            if ((spellProto->SpellFamilyFlags & 0x10LL) && spellProto->SpellIconID == 212)
-            {
-                CastingTime = 0;
-            }
             // Mind Flay - 57.1% of Shadow Damage
-            else if ((spellProto->SpellFamilyFlags & 0x800000LL) && spellProto->SpellIconID == 548)
+            if ((spellProto->SpellFamilyFlags & 0x800000LL) && spellProto->SpellIconID == 548)
             {
                 CastingTime = 2000;
             }
@@ -8127,11 +8090,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 CastingTime = 350;
             }
-            // Reflective Shield (back damage) - 0% (other spells fit to check not have damage effects/auras)
-            else if (spellProto->SpellFamilyFlags == 0 && spellProto->SpellIconID == 566)
-            {
-                CastingTime = 0;
-            }
             // Holy Nova - 16%
             else if ((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 1874)
             {
@@ -8150,26 +8108,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 CastingTime = 500;
             }
             break;
-        
-        case SPELLFAMILY_WARRIOR:
-        case SPELLFAMILY_HUNTER:
-        case SPELLFAMILY_ROGUE:
-            CastingTime = 0;
-            break;
         default:
             break;
     }
 
-    if (spellProto->Id == 32221 || spellProto->Id == 32220)   // Fix for Seal of Blood reflective damage (no family mask)
-        CastingTime = 0.0f;
-
     float LvlPenalty = CalculateLevelPenalty(spellProto);
 
     // Spellmod SpellDamage
-    //float SpellModSpellDamage = 100.0f;
     float CoefficientPtc = DotFactor * 100.0f;
     if (spellProto->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
-        CoefficientPtc *= ((float)CastingTime/3500.0f);
+        CoefficientPtc *= ((float)CastingTime / 3500.0f);
 
     if (Player* modOwner = GetSpellModOwner())
         //modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPELL_BONUS_DAMAGE, SpellModSpellDamage);
@@ -8177,8 +8125,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
     //SpellModSpellDamage /= 100.0f;
     CoefficientPtc /= 100.0f;
-
-    //float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * DotFactor * SpellModSpellDamage * LvlPenalty;
 
     float DoneActualBenefit = DoneAdvertisedBenefit * CoefficientPtc * LvlPenalty;
     float TakenActualBenefit = TakenAdvertisedBenefit * DotFactor * LvlPenalty;
@@ -8500,6 +8446,8 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
 
         // distribute healing to all effects, reduce AoE damage
         CastingTime = GetCastingTimeForBonus(spellProto, damagetype, CastingTime);
+        if (sSpellMgr->GetSpellCustomAttr(spellProto->Id) & SPELL_ATTR_CU_NO_SPELL_DMG_COEFF)
+            CastingTime = 0;
 
         // 0% bonus for damage and healing spells for leech spells from healing bonus
         for (int j = 0; j < 3; ++j)
@@ -8576,11 +8524,6 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                     CastingTime = 3500;
                     DotFactor = 2.875f;
                 }
-                break;
-            case SPELLFAMILY_WARRIOR:
-            case SPELLFAMILY_ROGUE:
-            case SPELLFAMILY_HUNTER:
-                CastingTime = 0;
                 break;
         }
 

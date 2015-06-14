@@ -1958,6 +1958,10 @@ void Spell::EffectDummy(uint32 i)
                 bool mainhand = m_CastItem && m_CastItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND;
                 bp = m_caster->GetAttackTime(mainhand ? BASE_ATTACK : OFF_ATTACK) * (m_spellInfo->EffectBasePoints[0] + 1) / 100000;
 
+                int32 fireDamage = int32(m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - m_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+                if (fireDamage > 0)
+                    bp += (fireDamage * 0.1f);
+
                 uint32 elementalWeapons[] = { 29080, 29079, 16266 };
                 uint32 talentId = m_caster->GetMaxRankSpellFromArray(elementalWeapons, 2);
 

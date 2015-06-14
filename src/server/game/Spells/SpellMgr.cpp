@@ -2337,19 +2337,114 @@ void SpellMgr::LoadSpellCustomAttr()
 
         if (spellInfo->SpellVisual == 3879)
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_CONE_BACK;
+
+        if ((spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && spellInfo->SpellFamilyFlags & 0x1000LL && spellInfo->SpellIconID == 494) || spellInfo->Id == 33745 /* Lacerate */)
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
+
+        // Modify SchoolMask to allow them critically heal
+        // Healthstones
+        if (spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo->SpellFamilyFlags & 0x10000LL)
+            spellInfo->SchoolMask = SPELL_SCHOOL_MASK_SHADOW;
+
         if (spellInfo->AttributesEx2 & SPELL_ATTR_EX2_HEALTH_FUNNEL && spellInfo->SpellIconID == 153)    // Fix Health Funnel
-        {
             spellInfo->SpellVisual = 9219;
+
+        switch (spellInfo->SpellFamilyName)
+        {
+            case SPELLFAMILY_GENERIC:
+            {
+                 if (spellInfo->Id == 52009)
+                     spellInfo->EffectMiscValue[0] = 20865;
+                 // Goblin Rocket Launcher
+                 else if (spellInfo->SpellIconID == 184 && spellInfo->Attributes == 4259840)
+                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                 // Dragonbreath Chili
+                 else if (spellInfo->Id == 15852)
+                     spellInfo->Dispel = DISPEL_NONE;
+                 // Crab Disguise
+                 else if (spellInfo->Id == 46337)
+                     spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CAST;
+                 else if (spellInfo->SpellIconID == 2367) // remove flag from steam tonk & crashin trashin racers
+                     spellInfo->AttributesEx4 &= ~SPELL_ATTR_EX4_FORCE_TRIGGERED;
+                 break;
+            }
+            case SPELLFAMILY_SHAMAN:
+            {
+                // Flametongue Weapon
+                if (spellInfo->SpellFamilyFlags & 2097152 && spellInfo->SpellVisual == 0)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Flametongue Totem
+                if (spellInfo->Id == 16368)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                break;
+            }
+            case SPELLFAMILY_PALADIN:
+            {
+                // Judgement & seal of Light
+                if (spellInfo->SpellFamilyFlags & 0x100040000LL)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Seal of Righteousness trigger - already computed for parent spell
+                else if (spellInfo->SpellIconID == 25 && spellInfo->AttributesEx4 & 0x00800000LL)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_FIXED_DAMAGE;
+                // Blessing of Sanctuary
+                else if (spellInfo->SpellFamilyFlags & 0x10000000LL && spellInfo->SpellIconID == 29)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Eye for an Eye
+                else if (spellInfo->Id == 25997)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Seal of Blood (Backlash damage)
+                else if (spellInfo->Id == 32221 || spellInfo->Id == 32220)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                break;
+            }
+            case SPELLFAMILY_PRIEST:
+            {
+                // Mana Burn
+                if (spellInfo->SpellFamilyFlags & 0x10LL && spellInfo->SpellIconID == 212)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Health Link T5 Hunter / Warlock bonus
+                else if (spellInfo->Id == 37382)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Reflective Shield
+                else if (!spellInfo->SpellFamilyFlags && spellInfo->SpellIconID == 566)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Retributive Smite
+                else if (!spellInfo->SpellFamilyFlags && spellInfo->SpellIconID == 237)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Surge of Light
+                else if (spellInfo->Id == 33151)
+                    spellInfo->EffectApplyAuraName[2] = SPELLMOD_FLAT;
+                break;
+            }
+            case SPELLFAMILY_MAGE:
+            {
+                // Molten Armor
+                if (spellInfo->SpellFamilyFlags & 0x800000000LL)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Ignite
+                else if (spellInfo->Id == 12654)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_FIXED_DAMAGE;
+                break;
+            }
+            case SPELLFAMILY_WARLOCK:
+            {
+                // Drain Mana
+                if (spellInfo->SpellFamilyFlags & 0x10LL && spellInfo->SpellIconID == 548)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Healthstone
+                else if (spellInfo->SpellFamilyFlags & 0x10000LL)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                break;
+            }
+            case SPELLFAMILY_WARRIOR:
+            case SPELLFAMILY_HUNTER:
+            case SPELLFAMILY_ROGUE:
+                mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                break;
         }
 
         switch (i)
         {
-        case 32221: //Seal of Blood self damage proc
-            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_SPELL_BONUS;
-            break;
-        case 32220: //Judgement of Blood self damage proc
-            spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_SPELL_BONUS;
-            break;
         case 41635: // Prayer of Mending
             spellInfo->MaxAffectedTargets = 1;
             break;
@@ -2499,9 +2594,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 31242: // Find Weakness rank 5
             spellInfo->procFlags = 87376;
             break;
-        case 33745: // Lacerate
-            mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
-            break;
         case 35685: // Electro Shock Therapy - Limit to netherstorm
             spellInfo->AreaId = 3523;
             break;
@@ -2606,18 +2698,32 @@ void SpellMgr::LoadSpellCustomAttr()
         case 44047:
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_DONT_BREAK_ON_DAMAGE;
             break;
+        case 16614: // Storm Gauntlets
+        case 7714:  // Fiery Plate Gauntlets
+        case 40471: // Enduring Light - T6 proc
+        case 40472: // Enduring Judgement - T6 proc
+        case 32221: // Seal of Blood
+        case 32220: // Judgement of Blood
+        case 28715: // Flame Cap
+        case 37284: // Scalding Water
+        case 6297:  // Fiery Blaze
+        case 46579: // Deathfrost
+        case 28734: // Mana Tap
+        case 32409: // SW: Death
+        case 45297: // Chain Lightning
+        case 23102: // Frostbolt
+        case 9487:  // Fireball
+        case 45429: // Shattered Sun Pendant of Acumen: Scryers ex proc
+        case 27655: // Heart of Wyrmthalak: Flame Lash proc
+        case 45055: // Shadow Bolt (Timbal's Focusing Crystal)
+        case 37661: // The Lightning Capacitor, lightning bolt spell
+        case 28733: // Arcane Torrent
+        case 43731: // Lightning Zap on critters (Stormchops)
+        case 43733: // Lightning Zap on others (Stormchops)
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+            break;
         default:
             break;
-        }
-
-        switch (spellInfo->SpellFamilyName)
-        {
-            case SPELLFAMILY_DRUID:
-                if (spellInfo->SpellFamilyFlags & 0x00000000200LL)
-                    spellInfo->InterruptFlags &= ~SPELL_INTERRUPT_FLAG_MOVEMENT;
-                else if (spellInfo->SpellFamilyFlags & 0x1000LL)
-                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_IGNORE_ARMOR;
-                break;
         }
     }
     CreatureAI::FillAISpellInfo();

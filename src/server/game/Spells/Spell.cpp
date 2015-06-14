@@ -1174,13 +1174,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     }
 
     if (!m_caster->IsFriendlyTo(unit) && !IsPositiveSpell(m_spellInfo->Id) && IsAggressiveSpell(m_spellInfo, m_IsTriggeredSpell))
-    {
         m_caster->CombatStart(unit, !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO), m_spellInfo->Id);
-
-        if (m_customAttr & SPELL_ATTR_CU_AURA_CC)
-            if (!unit->IsStandState())
-                unit->SetStandState(UNIT_STAND_STATE_STAND);
-    }
 
     // if target is flagged for pvp also flag caster if a player
     if (unit->IsPvP())
@@ -1252,8 +1246,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
             if (m_spellInfo->Id != 1725)
                 unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
 
-            if (m_customAttr & SPELL_ATTR_CU_AURA_CC)
-                unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
+            unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
 
             // Remove Stealth and Invisibility on negative spell hit
             if (!unit->IsFriendlyTo(m_caster) && isSpellBreakStealth(m_spellInfo))

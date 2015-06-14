@@ -3790,8 +3790,8 @@ void Player::addTalent(uint32 spellId, uint8 spec, bool learning)
         return;
     }
 
-    PlayerTalentMap::iterator itr = m_talents[spec]->find(spellId);
-    if (itr != m_talents[spec]->end())
+    PlayerTalentMap::iterator itr = m_talents[spec].find(spellId);
+    if (itr != m_talents[spec].end())
         itr->second->state = PLAYERSPELL_UNCHANGED;
     else if (TalentSpellPos const* talentPos = GetTalentSpellPos(spellId))
     {
@@ -3804,8 +3804,8 @@ void Player::addTalent(uint32 spellId, uint8 spec, bool learning)
                 if (!rankSpellId || rankSpellId == spellId)
                     continue;
 
-                itr = m_talents[spec]->find(rankSpellId);
-                if (itr != m_talents[spec]->end())
+                itr = m_talents[spec].find(rankSpellId);
+                if (itr != m_talents[spec].end())
                     itr->second->state = PLAYERSPELL_REMOVED;
             }
         }
@@ -4443,8 +4443,8 @@ bool Player::resetTalents(bool no_cost)
                 {
                     removeSpell(itr->first, !IsPassiveSpell(itr->first));
                     // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
-                    PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec]->find(talentInfo->RankID[j]);
-                    if (plrTalent != m_talents[m_activeSpec]->end())
+                    PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec].find(talentInfo->RankID[j]);
+                    if (plrTalent != m_talents[m_activeSpec].end())
                         plrTalent->second->state = PLAYERSPELL_REMOVED;
                     itr = GetSpellMap().begin();
                     continue;
@@ -4699,8 +4699,8 @@ bool Player::HasSpell(uint32 spell) const
 
 bool Player::HasTalent(uint32 spell, uint8 spec) const
 {
-    PlayerTalentMap::const_iterator itr = m_talents[spec]->find(spell);
-    return (itr != m_talents[spec]->end() && itr->second->state != PLAYERSPELL_REMOVED);
+    PlayerTalentMap::const_iterator itr = m_talents[spec].find(spell);
+    return (itr != m_talents[spec].end() && itr->second->state != PLAYERSPELL_REMOVED);
 }
 
 TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell) const
@@ -18160,7 +18160,7 @@ void Player::_SaveTalents()
 {
     for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
     {
-        for (PlayerTalentMap::const_iterator itr = m_talents[i]->begin(); itr != m_talents[i]->end();)
+        for (PlayerTalentMap::const_iterator itr = m_talents[i].begin(); itr != m_talents[i].end();)
         {
             if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->state == PLAYERSPELL_CHANGED)
                 CharacterDatabase.PExecute("DELETE FROM character_talent WHERE guid = '%u' and spell = '%u' and spec = '%u'", GetGUIDLow(), itr->first, itr->second->spec);
@@ -18170,7 +18170,7 @@ void Player::_SaveTalents()
             if (itr->second->state == PLAYERSPELL_REMOVED)
             {
                 delete itr->second;
-                m_talents[i]->erase(itr++);
+                m_talents[i].erase(itr++);
             }
             else
             {

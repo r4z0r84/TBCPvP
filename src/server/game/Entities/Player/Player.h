@@ -2400,7 +2400,7 @@ class Player : public Unit, public GridObject<Player>
 
         PlayerMails m_mail;
         PlayerSpellMap m_spells;
-        PlayerTalentMap* m_talents[MAX_TALENT_SPECS];
+        PlayerTalentMap m_talents[MAX_TALENT_SPECS];
         SpellCooldowns m_spellCooldowns;
         std::map<uint32, uint32> m_globalCooldowns; // whole start recovery category stored in one
 

@@ -1956,8 +1956,14 @@ void Spell::EffectDummy(uint32 i)
                     return;
 
                 bool mainhand = m_CastItem && m_CastItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND;
-
                 bp = m_caster->GetAttackTime(mainhand ? BASE_ATTACK : OFF_ATTACK) * (m_spellInfo->EffectBasePoints[0] + 1) / 100000;
+
+                uint32 elementalWeapons[] = { 29080, 29079, 16266 };
+                uint32 talentId = m_caster->GetMaxRankSpellFromArray(elementalWeapons, 2);
+
+                if (Aura* spellModAura = m_caster->GetAura(talentId, 1))
+                    bp *= (spellModAura->GetSpellProto()->EffectBasePoints[1] + 100.0f) / 100.0f;
+
                 spell_id = 10444;
                 break;
             }

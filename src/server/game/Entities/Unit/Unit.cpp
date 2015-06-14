@@ -8094,6 +8094,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             // Lightning Shield (and proc shield from T2 8 pieces bonus) 33% per charge
             else if ((spellProto->SpellFamilyFlags & 0x00000000400LL) || spellProto->Id == 23552)
                 CastingTime = 1155;                         // ignore CastingTimePenalty and use as modifier
+            // Flametongue Weapon - 10%
+            else if (spellProto->SpellFamilyFlags & 0x00000200000LL)
+            {
+                CastingTime = 350;
+            }
             break;
         case SPELLFAMILY_PRIEST:
             // Mana Burn - 0% of Shadow Damage
@@ -8185,9 +8190,13 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // Add flat bonus from spell damage versus
     tmpDamage += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask);
 
-    // apply spellmod to Done damage
-    if (Player* modOwner = GetSpellModOwner())
-        modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
+    // SPELLMOD_DOT will be applied in AuraEffect::HandlePeriodicDamageAurasTick.
+    if (damagetype != DOT)
+    {
+        // apply spellmod to Done damage
+        if (Player* modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
+    }
 
     tmpDamage = (tmpDamage+TakenActualBenefit)*TakenTotalMod;
 
@@ -8600,9 +8609,13 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     for (AuraList::const_iterator i = mHealingDonePct.begin();i != mHealingDonePct.end(); ++i)
         heal *= (100.0f + (*i)->GetModifierValue()) / 100.0f;
 
-    // apply spellmod to Done amount
-    if (Player* modOwner = GetSpellModOwner())
-        modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, heal);
+    // SPELLMOD_DOT will be applied in 
+    if (damagetype != DOT)
+    {
+        // apply spellmod to Done amount
+        if (Player* modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, heal);
+    }
 
     // Healing Wave cast
     if (spellProto->SpellFamilyName == SPELLFAMILY_SHAMAN && spellProto->SpellFamilyFlags & 0x0000000000000040LL)

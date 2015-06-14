@@ -5851,6 +5851,9 @@ void Aura::PeriodicTick()
                 for (Unit::AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
                     if ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(GetSpellProto()))
                         pdamage *= ((*i)->GetModifierValue() + 100.0f) / 100.0f;
+                
+                if (Player* modOwner = pCaster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(m_spellProto->Id, SPELLMOD_DOT, pdamage);
 
                 // Calculate armor mitigation if it is a physical spell
                 // But not for bleed mechanic spells
@@ -6097,8 +6100,11 @@ void Aura::PeriodicTick()
             if (negativeMod)
                 EffectModifier *= (100.0f + negativeMod) / 100.0f;
             float positiveMod = m_target->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-            if (negativeMod)
+            if (positiveMod)
                 EffectModifier *= (100.0f + positiveMod) / 100.0f;
+
+            if (Player* modOwner = pCaster->GetSpellModOwner())
+                modOwner->ApplySpellMod(m_spellProto->Id, SPELLMOD_DOT, pdamage);
 
             if (pCaster->getClass() == CLASS_HUNTER)    //Improved Mend pet periodic dispell
             {

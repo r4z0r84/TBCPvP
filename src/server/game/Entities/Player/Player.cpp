@@ -871,9 +871,8 @@ Player::~Player()
 
     for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
     {
-        for (PlayerTalentMap::const_iterator itr = m_talents[i]->begin(); itr != m_talents[i]->end(); ++itr)
+        for (PlayerTalentMap::const_iterator itr = m_talents[i].begin(); itr != m_talents[i].end(); ++itr)
             delete itr->second;
-        delete m_talents[i];
     }
 
     //all mailed items should be deleted, also all mail should be deallocated
@@ -3817,7 +3816,7 @@ void Player::addTalent(uint32 spellId, uint8 spec, bool learning)
         newtalent->state = state;
         newtalent->spec = spec;
 
-        (*m_talents[spec])[spellId] = newtalent;
+        (m_talents[spec])[spellId] = newtalent;
     }
 }
 
@@ -22806,7 +22805,7 @@ void Player::ActivateSpec(uint8 spec)
     UnsummonAllTotems();
 
     // REMOVE TALENTS
-    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); talentId++)
+    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
     {
         TalentEntry const *talentInfo = sTalentStore.LookupEntry(talentId);
 
@@ -22824,29 +22823,15 @@ void Player::ActivateSpec(uint8 spec)
         if ((getClassMask() & talentTabInfo->ClassMask) == 0)
             continue;
 
-        for (int8 rank = 0; rank < 5; rank++)
+        for (int8 rank = MAX_TALENT_RANK - 1; rank >= 0; --rank)
         {
-            for (PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();)
-            {
-                if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled)
-                {
-                    ++itr;
-                    continue;
-                }
-
-                // remove learned spells (all ranks)
-                uint32 itrFirstId = sSpellMgr->GetFirstSpellInChain(itr->first);
-
-                // unlearn if first rank is talent or learned by talent
-                if (itrFirstId == talentInfo->RankID[rank] || sSpellMgr->IsSpellLearnToSpell(talentInfo->RankID[rank], itrFirstId))
-                {
-                    removeSpell(itr->first, true);
-                    itr = GetSpellMap().begin();
-                    continue;
-                }
-                else
-                    ++itr;
-            }
+            if (talentInfo->RankID[rank] == 0)
+                continue;
+            removeSpell(talentInfo->RankID[rank], true); // removes the talent, and all dependant, learned, and chained spells..
+            if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[rank]))
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)                  // search through the SpellInfo for valid trigger spells
+                    if (spellInfo->EffectTriggerSpell[i] > 0 && spellInfo->Effect[i] == SPELL_EFFECT_LEARN_SPELL)
+                        removeSpell(spellInfo->EffectTriggerSpell[i], true); // and remove any spells that the talent teaches
         }
     }
 
@@ -22854,7 +22839,7 @@ void Player::ActivateSpec(uint8 spec)
     uint32 spentTalents = 0;
 
     // ADD TALENTS
-    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); talentId++)
+    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
     {
         TalentEntry const *talentInfo = sTalentStore.LookupEntry(talentId);
 
@@ -22886,9 +22871,6 @@ void Player::ActivateSpec(uint8 spec)
 
     m_usedTalentCount = spentTalents;
     InitTalentForLevel();
-
-    // Need to relog player ???: TODO fix packet sending
-    GetSession()->LogoutPlayer(true);
 }
 
 std::string Player::GetSpecName(uint8 spec)

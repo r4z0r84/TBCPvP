@@ -237,11 +237,10 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     bool gmInWhoList               = sWorld->getConfig(CONFIG_GM_IN_WHO_LIST);
     bool fakeArenaMembersInWhoList = sWorld->getConfig(CONFIG_ENABLE_FAKE_WHO_ON_ARENA);
 
-    uint32 matchcount = 0;
     uint32 displaycount = 0;
 
     WorldPacket data(SMSG_WHO, 50);                         // guess size
-    data << uint32(matchcount);                             // placeholder, count of players matching criteria
+    data << uint32(displaycount);                           // placeholder, count of players matching criteria
     data << uint32(displaycount);                           // placeholder, count of players displayed
 
     ACE_GUARD(ACE_Thread_Mutex, g, *HashMapHolder<Player>::GetLock());
@@ -350,11 +349,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         if (!s_show)
             continue;
 
-        // 49 is maximum player count sent to client
-        ++matchcount;
-        if (matchcount > 49)
-            continue;
-
         ++displaycount;
 
         data << pname;                                      // player name
@@ -364,10 +358,15 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         data << uint32(race);                               // player race
         data << uint8(gender);                              // player gender
         data << uint32(pzoneid);                            // player zone id
+
+        // 49 is maximum player count sent to client - can be overridden
+        // through config, but is unstable
+        if ((++displaycount) == sWorld->getConfig(CONFIG_MAX_WHO))
+            break;
     }
 
     data.put(0, displaycount);                              // insert right count, count displayed
-    data.put(4, matchcount);                                // insert right count, count of matches
+    data.put(4, displaycount);                                // insert right count, count of matches
 
     SendPacket(&data);
     sLog->outDebug("WORLD: Send SMSG_WHO Message");
@@ -1302,7 +1301,7 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recv_data)
             recv_data >> description;        // spam description string (messagetype, channel name, player name, message)
             break;
     }
-    
+
 
     // NOTE: all chat messages from this spammer automatically ignored by spam reporter until logout in case chat spam.
     // if it's mail spam - ALL mails from this spammer automatically removed by client
@@ -1547,4 +1546,3 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket & recv_data)
 
     sLog->outDebug("Client used \"/timetest %d\" command", mode);
 }
-

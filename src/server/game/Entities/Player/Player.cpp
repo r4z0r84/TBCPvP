@@ -15937,8 +15937,8 @@ bool Player::LoadFromDB(uint32 guid, SqlQueryHolder *holder)
     //"resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty, "
     // 40           41                42                43                    44          45          46              47           48               49              50
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, "
-    // 51      52         53         54          55           56             57           58         59          60
-    //"health, powerMana, powerRage, powerFocus, powerEnergy, powerHapiness, instance_id, specCount, activeSpec, activeCustomTitle FROM characters WHERE guid = '%u'", guid);
+    // 51      52         53         54          55           56             57           58         59          60                 61
+    //"health, powerMana, powerRage, powerFocus, powerEnergy, powerHapiness, instance_id, specCount, activeSpec, activeCustomTitle, knownCustomTitle FROM characters WHERE guid = '%u'", guid);
     QueryResult_AutoPtr result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if (!result)
@@ -17688,7 +17688,7 @@ void Player::SaveToDB()
         "trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, "
         "death_expire_time, taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, "
         "totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, "
-        "powerMana, powerRage, powerFocus, powerEnergy, powerHappiness, latency, specCount, activeSpec, activeCustomTitle) VALUES ("
+        "powerMana, powerRage, powerFocus, powerEnergy, powerHappiness, latency, specCount, activeSpec, activeCustomTitle, knownCustomTitle) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << sql_name << "', "

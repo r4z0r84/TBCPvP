@@ -679,6 +679,7 @@ Player::Player (WorldSession *session): Unit()
     m_specsCount = 1;
 
     m_customTitleActive = 0;
+    m_customTitleKnown = 0;
 
     // players always accept
     if (GetSession()->GetSecurity() == SEC_PLAYER)
@@ -16508,6 +16509,7 @@ bool Player::LoadFromDB(uint32 guid, SqlQueryHolder *holder)
     }
 
     m_customTitleActive = fields[59].GetUInt32();
+    m_customTitleKnown  = fields[60].GetUInt32();
 
     _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
@@ -17799,7 +17801,9 @@ void Player::SaveToDB()
     ss << ", ";
     ss << uint32(m_activeSpec);
     ss << ", ";
-    ss << uint32(m_customTitleActive);
+    ss << m_customTitleActive;
+    ss << ", ";
+    ss << m_customTitleKnown;
     ss << ")";
 
     CharacterDatabase.BeginTransaction();

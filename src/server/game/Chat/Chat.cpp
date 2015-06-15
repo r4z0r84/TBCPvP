@@ -602,6 +602,7 @@ ChatCommand * ChatHandler::getCommandTable()
     {
         { "enable",        SEC_PLAYER,         false,  &ChatHandler::HandleCustomTitleEnableCommand,		"", NULL },
         { "off",           SEC_PLAYER,         false,  &ChatHandler::HandleCustomTitleOffCommand,			"", NULL },
+        { "list",          SEC_PLAYER,         false,  &ChatHandler::HandleCustomTitleListCommand,          "", NULL },
         { NULL,             0,                 false,  NULL,												"", NULL }
     };
 

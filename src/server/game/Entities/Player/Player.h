@@ -2279,6 +2279,8 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 GetActiveCustomTitle() { return m_customTitleActive; }
         void SetActiveCustomTitle(TitleEntry titleEntry) { m_customTitleActive = titleEntry; }
+        uint32 GetCustomTitleMask() { return m_customTitleKnown; }
+        void SetCustomTitleMask(TitleEntry titleEntry) { m_customTitleKnown = titleEntry; }
 
     protected:
 
@@ -2551,6 +2553,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_oldpetspell;
 
         uint32 m_customTitleActive;
+        uint32 m_customTitleKnown;
 };
 
 void AddItemsSetItem(Player*player, Item *item);

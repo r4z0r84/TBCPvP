@@ -380,3 +380,21 @@ bool ChatHandler::HandleCustomTitleOffCommand(const char* args)
     plr->SetActiveCustomTitle(TitleEntry(0));
     return true;
 }
+
+bool ChatHandler::HandleCustomTitleListCommand(const char* args)
+{
+    Player *plr = m_session->GetPlayer();
+
+    if (!plr)
+        return false;
+
+    if (uint32 titleMask = plr->GetCustomTitleMask())
+    {
+        for (uint32 titleEntry = (TITLE_START + 1); titleEntry < MAX_TITLE_COUNT; ++titleEntry)
+        {
+            if (((1 << (titleEntry - 1)) & titleMask))
+                ChatHandler(plr).PSendSysMessage("[ID: %u] TitleName: %s", titleEntry, titleTable[titleMask].titleName);
+        }
+    }
+    return true;
+}

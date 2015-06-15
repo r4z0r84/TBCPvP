@@ -14,18 +14,18 @@ struct Titles
 
 enum TitleEntry
 {
-    TITLE_START = 0,
-    TITLE_BREWMASTER,
-    TITLE_ELDER,
-    TITLE_FLAME_KEEPER,
-    TITLE_FLAME_WARDEN,
-    TITLE_MATRON,
-    TITLE_MERRYMAKER,
-    TITLE_THE_NOBLE,
-    TITLE_PATRON,
-    TITLE_THE_PILGRIM,
-    TITLE_THE_HALLOWED,
-    TITLE_THE_LOVE_FOOL
+    TITLE_START                         = 0x00000001,
+    TITLE_BREWMASTER                    = 0x00000002,
+    TITLE_ELDER                         = 0x00000004,
+    TITLE_FLAME_KEEPER                  = 0x00000008,
+    TITLE_FLAME_WARDEN                  = 0x00000010,
+    TITLE_MATRON                        = 0x00000020,
+    TITLE_MERRYMAKER                    = 0x00000040,
+    TITLE_THE_NOBLE                     = 0x00000080,
+    TITLE_PATRON                        = 0x00000100,
+    TITLE_THE_PILGRIM                   = 0x00000200,
+    TITLE_THE_HALLOWED                  = 0x00000400,
+    TITLE_THE_LOVE_FOOL                 = 0x00000800
 };
 
 const std::string TitleStrings[MAX_TITLE_COUNT] =

@@ -1074,6 +1074,7 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_VMAP_INDOOR_CHECK] = enableIndoor;
     m_configs[CONFIG_PET_LOS] = enablePetLOS;
     m_configs[CONFIG_VMAP_TOTEM] = ConfigMgr::GetBoolDefault("vmap.totem", false);
+    m_configs[CONFIG_MAX_WHO] = ConfigMgr::GetIntDefault("MaxWhoListReturns", 49);
 
     m_configs[CONFIG_BG_START_MUSIC] = ConfigMgr::GetBoolDefault("MusicInBattleground", false);
     m_configs[CONFIG_START_ALL_SPELLS] = ConfigMgr::GetBoolDefault("PlayerStart.AllSpells", false);
@@ -2487,4 +2488,3 @@ void World::LoadDBVersion()
     else
         m_DBVersion = "unknown world database";
 }
-

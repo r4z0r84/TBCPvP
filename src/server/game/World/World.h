@@ -228,6 +228,7 @@ enum WorldConfigs
     CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS,
     CONFIG_ENABLE_FAKE_WHO_ON_ARENA,
     CONFIG_ARENA_LOG_EXTENDED_INFO,
+    CONFIG_MAX_WHO,
     CONFIG_BG_START_MUSIC,
     CONFIG_START_ALL_SPELLS,
     CONFIG_HONOR_AFTER_DUEL,
@@ -729,4 +730,3 @@ extern uint32 realmID;
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
 #endif
-

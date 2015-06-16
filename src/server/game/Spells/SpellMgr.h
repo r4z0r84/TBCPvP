@@ -805,6 +805,7 @@ inline bool IsProfessionSkill(uint32 skill)
 #define SPELL_ATTR_CU_DONT_BREAK_ON_DAMAGE  0x00020000
 #define SPELL_ATTR_CU_FIXED_DAMAGE          0x00040000
 #define SPELL_ATTR_CU_NO_SPELL_DMG_COEFF    0x00080000
+#define SPELL_ATTR_CU_DONT_BREAK_STEALTH    0x00100000
 
 typedef std::vector<uint32> SpellCustomAttribute;
 

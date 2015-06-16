@@ -2609,7 +2609,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 39897: // Mass Dispel
         case 3600:  // Earthbind Totem
         case 1725:  // Distract
-            spellInfo->AttributesEx |= SPELL_ATTR_EX_NOT_BREAK_STEALTH;
+            mSpellCustomAttr[i] = SPELL_ATTR_CU_DONT_BREAK_STEALTH;
             break;
         case 43730: // Stormchops effect
             spellInfo->EffectTriggerSpell[0] = 43733;

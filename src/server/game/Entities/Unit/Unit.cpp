@@ -2658,10 +2658,6 @@ int32 Unit::GetMechanicResistChance(const SpellEntry *spell)
 // Melee based spells hit result calculations
 SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, bool cMiss)
 {
-    // Check for immune
-    if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
-        return SPELL_MISS_IMMUNE;
-
     if (spell->AttributesEx3 & SPELL_ATTR_EX3_IGNORE_HIT_RESULT)
         return SPELL_MISS_NONE;
 
@@ -2795,10 +2791,6 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
             return SPELL_MISS_BLOCK;
     }
 
-    // Check for immune
-    if (pVictim->IsImmunedToSpell(spell))
-        return SPELL_MISS_IMMUNE;
-
     return SPELL_MISS_NONE;
 }
 
@@ -2809,10 +2801,6 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     // Can`t miss on dead target (on skinning for example)
     if (!pVictim->isAlive())
         return SPELL_MISS_NONE;
-
-    // Check for immune
-    if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
-        return SPELL_MISS_IMMUNE;
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
@@ -2864,10 +2852,6 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     if (IsBinaryResistable(spell) && CalcBinaryResist(pVictim, schoolMask))
         return SPELL_MISS_RESIST;
 
-    // Check for immune
-    if (pVictim->IsImmunedToSpell(spell))
-        return SPELL_MISS_IMMUNE;
-
     return SPELL_MISS_NONE;
 }
 
@@ -2889,9 +2873,13 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode() && this != pVictim)
         return SPELL_MISS_EVADE;
 
+    // Check for immune (use charges)
+    if (pVictim->IsImmunedToSpell(spell, true))
+        return SPELL_MISS_IMMUNE;
+
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
-    if (IsPositiveSpell(spell->Id) && !IsHostileTo(pVictim) && !pVictim->hasUnitState(UNIT_STAT_ISOLATED))  //prevent from affecting enemy by "positive" spell
+    if (IsPositiveSpell(spell->Id) && (!IsHostileTo(pVictim)) && !pVictim->hasUnitState(UNIT_STAT_ISOLATED))  //prevent from affecting enemy by "positive" spell
         return SPELL_MISS_NONE;
 
     // Check for immune (use charges)

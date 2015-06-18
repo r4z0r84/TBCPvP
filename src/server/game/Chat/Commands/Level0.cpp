@@ -362,12 +362,12 @@ bool ChatHandler::HandleCustomTitleEnableCommand(const char* args)
     if (!plr || !*args)
         return false;
 
-    std::string argstr = (char*)args;
+    uint32 titleEntry = atoi((char*)args);
 
-    if (atoi(argstr.c_str()) > MAX_TITLE_COUNT)
+    if (titleEntry > MAX_TITLE_COUNT)
         return false;
 
-    plr->SetActiveCustomTitle(titleTable[atoi(argstr.c_str())].titleMask);
+    plr->SetActiveCustomTitle((1 << titleEntry));
     return true;
 }
 
@@ -391,9 +391,9 @@ bool ChatHandler::HandleCustomTitleListCommand(const char* args)
 
     if (uint32 titleMask = plr->GetCustomTitleMask())
     {
-        for (uint32 titleEntry = (TITLE_START + 1); titleEntry < MAX_TITLE_COUNT; ++titleEntry)
+        for (uint32 titleEntry = 0; titleEntry < MAX_TITLE_COUNT; ++titleEntry)
         {
-            if (((1 << (titleEntry - 1)) & titleMask))
+            if (titleMask & (1 << titleEntry))
                 ChatHandler(plr).PSendSysMessage("[ID: %u] TitleName: %s", titleEntry, titleTable[titleMask].titleName);
         }
     }

@@ -42,21 +42,17 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     std::stringstream nameData;
     if (!p->GetUInt32Value(PLAYER_CHOSEN_TITLE)) // Only add if no real title selected
     {
-        for (uint32 i = 0; i < MAX_TITLE_COUNT; ++i)
-            if (titleTable[i].titleMask == p->GetActiveCustomTitle())
-            {
-                if (titleTable[i].isPrefixTitle)
-                {
-                    nameData << titleTable[i].titleName;
-                    nameData << p->GetName();
-                }
-                else
-                {
-                    nameData << p->GetName();
-                    nameData << titleTable[i].titleName;
-                }
-                break;
-            }
+        uint32 titleEntry = log2(p->GetActiveCustomTitle());
+        if (titleTable[titleEntry].isPrefixTitle)
+        {
+            nameData << titleTable[titleEntry].titleName;
+            nameData << p->GetName();
+        }
+        else
+        {
+            nameData << p->GetName();
+            nameData << titleTable[titleEntry].titleName;
+        }
     }
     else
         nameData << p->GetName();

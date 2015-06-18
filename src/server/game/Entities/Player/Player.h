@@ -2278,9 +2278,9 @@ class Player : public Unit, public GridObject<Player>
         uint32 SuitableForTransmogrification(Item* oldItem, Item* newItem);
 
         uint32 GetActiveCustomTitle() { return m_customTitleActive; }
-        void SetActiveCustomTitle(TitleEntry titleEntry) { m_customTitleActive = titleEntry; }
+        void SetActiveCustomTitle(uint32 titleEntry) { m_customTitleActive = titleEntry; }
         uint32 GetCustomTitleMask() { return m_customTitleKnown; }
-        void SetCustomTitleMask(TitleEntry titleEntry) { m_customTitleKnown = titleEntry; }
+        void SetCustomTitleMask(uint32 titleEntry) { m_customTitleKnown = titleEntry; }
 
     protected:
 

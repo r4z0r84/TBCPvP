@@ -35,6 +35,7 @@
 #include "Util.h"
 #include "BattlegroundMgr.h"
 #include "TempEventMgr.h"
+#include "Titles.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
@@ -366,7 +367,7 @@ bool ChatHandler::HandleCustomTitleEnableCommand(const char* args)
     if (atoi(argstr.c_str()) > MAX_TITLE_COUNT)
         return false;
 
-    plr->SetActiveCustomTitle(TitleEntry(atoi(argstr.c_str())));
+    plr->SetActiveCustomTitle(titleTable[atoi(argstr.c_str())].titleMask);
     return true;
 }
 

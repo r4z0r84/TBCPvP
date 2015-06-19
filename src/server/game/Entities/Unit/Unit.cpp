@@ -10497,6 +10497,8 @@ void Unit::SetPower(Powers power, uint32 val)
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        ToPlayer()->m_arenaSpectatorFlags |= ARENASPEC_POWER;
+
         if (ToPlayer()->GetGroup())
             ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
     }

@@ -2292,8 +2292,11 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
         {
+            int32 castTime = 0;
+            castTime =  IsChanneledSpell(m_spellInfo) ? -(GetSpellDuration(m_spellInfo)) : m_casttime;
+
             if (!m_IsTriggeredSpell)
-                ((Player*)m_caster)->SendArenaSpectatorSpell(m_spellInfo->Id, m_casttime);
+                m_caster->ToPlayer()->SendArenaSpectatorSpell(m_spellInfo->Id, castTime);
 
             if (m_spellInfo->Id == 42292)
                 m_caster->ToPlayer()->SendGladdyNotification();
@@ -2321,14 +2324,18 @@ void Spell::cancel()
     switch (oldState)
     {
         case SPELL_STATE_PREPARING:
+        {
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                m_caster->ToPlayer()->RemoveGlobalCooldown(m_spellInfo);
+        }
         case SPELL_STATE_DELAYED:
         {
             SendInterrupted(0);
             SendCastResult(SPELL_FAILED_INTERRUPTED);
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 m_caster->ToPlayer()->RestoreSpellMods(this);
-        } break;
-
+        }
+        break;
         case SPELL_STATE_CASTING:
         {
             for (std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
@@ -2352,13 +2359,13 @@ void Spell::cancel()
             // spell is canceled-take mods and clear list
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 m_caster->ToPlayer()->RemoveSpellMods(this);
-
-        } break;
-
-        default:
-        {
-        } break;
+        }
+        break;
+        default: break;
     }
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->ToPlayer()->SendArenaSpectatorSpell(m_spellInfo->Id, 99999);
 
     m_caster->RemoveDynObject(m_spellInfo->Id);
     m_caster->RemoveGameObject(m_spellInfo->Id, true);
@@ -5346,6 +5353,9 @@ void Spell::Delayed() // only called in DealDamage()
     else
         m_timer += delaytime;
 
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->ToPlayer()->SendArenaSpectatorSpellPushback(m_spellInfo->Id, delaytime);
+
     sLog->outDetail("Spell %u partially interrupted for (%d) ms at damage", m_spellInfo->Id, delaytime);
 
     WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
@@ -5376,6 +5386,9 @@ void Spell::DelayedChannel()
     }
     else
         m_timer -= delaytime;
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->ToPlayer()->SendArenaSpectatorSpellPushback(m_spellInfo->Id, (0 - delaytime));
 
     sLog->outDebug("Spell %u partially interrupted for %i ms, new duration: %u ms", m_spellInfo->Id, delaytime, m_timer);
 

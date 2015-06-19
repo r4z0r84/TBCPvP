@@ -249,33 +249,6 @@ void Player::setSpectator(bool on)
     m_isArenaSpectator = on;
 }
 
-void Player::SendArenaSpectatorAura(int32 remove, uint32 stack, int32 expiration, int32 duration, int32 id, int32 nevim2, bool nevim, int32 caster)
-{
-    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
-        return;
-
-    ArenaSpecUpdate update(this);
-    update.Appendaur("AUR", remove);
-    update.Append(stack);
-    update.Append(expiration);
-    update.Append(duration);
-    update.Append(id);
-    update.Append(nevim2);
-    update.Append(nevim);
-    update.Appendlast(caster);
-    SendAddonMessage(update.msg, "ARENASPEC");
-}
-
-void Player::SendArenaSpectatorSpellCooldown(uint32 spell, uint32 cooldown)
-{
-    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
-        return;
-
-    ArenaSpecUpdate update(this);
-    update.Append("CD", spell, cooldown);
-    SendAddonMessage(update.msg, "ARENASPEC");
-}
-
 void Player::BuildArenaSpectatorUpdate()
 {
     if (!m_arenaSpectatorFlags)
@@ -316,7 +289,7 @@ void Player::BuildArenaSpectatorUpdate()
         update.Append("CPW", power);
     }
 
-    Unit *selection = GetUnit(*m_session->GetPlayer(),GetSelection());
+    Unit *selection = GetUnit(*m_session->GetPlayer(), GetSelection());
     const char* name = "0";
     if (selection)
         if (selection->GetTypeId() == TYPEID_PLAYER)
@@ -335,6 +308,58 @@ void Player::BuildArenaSpectatorUpdate()
     SendAddonMessage(update.msg, "ARENASPEC");
 }
 
+void Player::BuildArenaSpectatorInitialAuraUpdate()
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    for (Unit::AuraMap::const_iterator itr = GetAuras().begin(); itr != GetAuras().end(); ++itr)
+    {
+        Aura* aura = itr->second;
+        if (aura->GetAuraSlot() >= MAX_AURAS || aura->IsPassive())
+            continue;
+
+        SendArenaSpectatorAura(false, aura->GetStackAmount(), aura->GetAuraDuration(), aura->GetAuraMaxDuration(), aura->GetId(), aura->IsPeriodic(), aura->IsPositive(), aura->GetCaster()->ToPlayer()->GetGUID());
+    }
+}
+
+void Player::SendArenaSpectatorAura(int32 remove, uint32 stack, int32 expiration, int32 duration, int32 id, int32 nevim2, bool nevim, int32 caster)
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+    update.Appendaur("AUR", remove);
+    update.Append(stack);
+    update.Append(expiration);
+    update.Append(duration);
+    update.Append(id);
+    update.Append(nevim2);
+    update.Append(nevim);
+    update.Appendlast(caster);
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
+void Player::SendArenaSpectatorAuraRemove(uint32 spell, uint32 cooldown)
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+    update.Append("RES", spell, cooldown);
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
+void Player::SendArenaSpectatorSpellCooldown(uint32 spell, uint32 cooldown)
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+    update.Append("CD", spell, cooldown);
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
 void Player::SendArenaSpectatorSpell(uint32 id, uint32 time)
 {
     if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
@@ -342,6 +367,26 @@ void Player::SendArenaSpectatorSpell(uint32 id, uint32 time)
 
     ArenaSpecUpdate update(this);
     update.Append("SPE", id, time);
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
+void Player::SendArenaSpectatorSpellPushback(uint32 id, int32 time)
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+    update.Append("SPB", id, time);
+    SendAddonMessage(update.msg, "ARENASPEC");
+}
+
+void Player::SendArenaSpectatorSendEndTime(uint32 time)
+{
+    if (!InArena() || GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS || isGameMaster() || isSpectator())
+        return;
+
+    ArenaSpecUpdate update(this);
+    update.Append("TIM", time);
     SendAddonMessage(update.msg, "ARENASPEC");
 }
 

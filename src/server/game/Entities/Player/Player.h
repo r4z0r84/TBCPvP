@@ -1092,8 +1092,12 @@ class Player : public Unit, public GridObject<Player>
         void setSpectator(bool on);
         void BuildArenaSpectatorUpdate();
         void SendArenaSpectatorSpell(uint32 id, uint32 time);
+        void SendArenaSpectatorSpellPushback(uint32 id, int32 time);
+        void BuildArenaSpectatorInitialAuraUpdate();
         void SendArenaSpectatorSpellCooldown(uint32 spell, uint32 cooldown);
         void SendArenaSpectatorAura(int32 remove,uint32 stack,int32 expiration,int32 duration,int32 id,int32 nevim2,bool nevim,int32 caster);
+        void SendArenaSpectatorAuraRemove(uint32 spell, uint32 cooldown);
+        void SendArenaSpectatorSendEndTime(uint32 time);
         void SendAddonMessage(std::string& text, char* prefix);
         void SendGladdyNotification();
 

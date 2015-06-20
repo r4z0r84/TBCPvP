@@ -64,7 +64,7 @@ void AddItemsEnchantsGemsTalents(Player* player, uint32 items[], uint32 sockets[
     for (uint32 talent_i = 0; talent_i < talentsCount; talent_i++)
 {
         player->learnSpell(talents[talent_i]);
-        player->addTalent(spellid, player->GetActiveSpec(), true);
+        player->addTalent(talents[talent_i], player->GetActiveSpec(), true);
 }
 
     // remove all talents points

@@ -62,7 +62,10 @@ void AddItemsEnchantsGemsTalents(Player* player, uint32 items[], uint32 sockets[
 
     // learn talents from array
     for (uint32 talent_i = 0; talent_i < talentsCount; talent_i++)
+{
         player->learnSpell(talents[talent_i]);
+        player->addTalent(spellid, player->GetActiveSpec(), true);
+}
 
     // remove all talents points
     player->SetFreeTalentPoints(0);
@@ -209,7 +212,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3115, 3115, 3139},
                 { 3115, 3115, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3139, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },
@@ -248,7 +251,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3115, 3115, 3139},
                 { 3115, 3115, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3139, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },
@@ -287,7 +290,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3115, 3115, 3139},
                 { 3115, 3115, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3139, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },
@@ -443,7 +446,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3281, 3281, 3144},
                 { 0, 0, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3144, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },
@@ -523,7 +526,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3116, 3116, 3144},
                 { 0, 0, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3144, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },
@@ -758,7 +761,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3115, 3115, 3139},
                 { 0, 0, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3139, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },
@@ -953,7 +956,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3282, 3131, 3131},
                 { 3282, 3282, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3131, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },
@@ -1070,7 +1073,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3282, 3140, 3140},
                 { 3140, 3140, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3140, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },
@@ -1109,7 +1112,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 3282, 3282, 3287},
                 { 0, 0, 0 },
                 { 0, 0, 0 },
-                { 0, 0, 0 },	
+                { 0, 0, 0 },
                 { 3282, 0, 0 },
                 { 0, 0, 0 },
                 { 0, 0, 0 },

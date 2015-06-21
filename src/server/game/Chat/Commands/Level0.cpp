@@ -367,6 +367,10 @@ bool ChatHandler::HandleCustomTitleEnableCommand(const char* args)
     if (titleEntry > MAX_TITLE_COUNT)
         return false;
 
+    // Don't have title
+    if (!(plr->GetCustomTitleMask() & (1 << titleEntry)))
+        return false;
+
     plr->SetActiveCustomTitle((1 << titleEntry));
     return true;
 }

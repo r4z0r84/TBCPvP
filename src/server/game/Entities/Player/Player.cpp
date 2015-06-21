@@ -5008,6 +5008,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             CharacterDatabase.PExecute("DELETE FROM character_skills WHERE guid = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM character_spell_cooldown WHERE guid = '%u'", guid);
+            CharacterDatabase.PExecute("DELETE FROM character_talent WHERE guid = '%u'", guid);
+            CharacterDatabase.PExecute("DELETE FROM character_talent_name WHERE guid = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM gm_tickets WHERE playerGuid = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM item_instance WHERE owner_guid = '%u'", guid);
             CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' OR friend='%u'", guid, guid);

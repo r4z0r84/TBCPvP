@@ -398,7 +398,7 @@ bool ChatHandler::HandleCustomTitleListCommand(const char* args)
         for (uint32 titleEntry = 0; titleEntry < MAX_TITLE_COUNT; ++titleEntry)
         {
             if (titleMask & (1 << titleEntry))
-                ChatHandler(plr).PSendSysMessage("[ID: %u] TitleName: %s", titleEntry, titleTable[titleMask].titleName);
+                ChatHandler(plr).PSendSysMessage("[ID: %u] TitleName: %s", titleEntry, titleTable[titleMask].titleName.c_str());
         }
     }
     return true;

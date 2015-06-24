@@ -1271,23 +1271,24 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
             }
         }
+    }
 
-        // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
-        if (m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell))
+    // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
+    if (m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell))
+    {
+        m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
+        // send immunity message if target is immune
+        if (m_diminishLevel == DIMINISHING_LEVEL_IMMUNE)
         {
-            m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
-            // send immunity message if target is immune
-            if (m_diminishLevel == DIMINISHING_LEVEL_IMMUNE)
-            {
-                m_caster->SendSpellMiss(unitTarget, m_spellInfo->Id, SPELL_MISS_IMMUNE);
-                return SPELL_MISS_IMMUNE;
-            }
-
-            DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
-            // Increase Diminishing on unit, current informations for actually casts will use values above
-            if ((type == DRTYPE_PLAYER && (unit->GetTypeId() == TYPEID_PLAYER || unit->ToCreature()->isPet() || unit->ToCreature()->isPossessedByPlayer())) || type == DRTYPE_ALL)
-                unit->IncrDiminishing(m_diminishGroup);
+            m_caster->SendSpellMiss(unitTarget, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+            return SPELL_MISS_IMMUNE;
         }
+
+        DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
+        // Increase Diminishing on unit, current informations for actually casts will use values above
+        if ((type == DRTYPE_PLAYER && (unit->GetTypeId() == TYPEID_PLAYER || unit->ToCreature()->isPet() || unit->ToCreature()->isPossessedByPlayer())) || type == DRTYPE_ALL)
+            if ((m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags & 0x0000000000200000LL) && m_caster != unit) // Don't apply Kidney Shot DR to self
+                unit->IncrDiminishing(m_diminishGroup);
     }
 
     for (uint32 effectNumber = 0; effectNumber < 3; effectNumber++)

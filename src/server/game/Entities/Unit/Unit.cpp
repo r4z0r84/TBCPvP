@@ -9123,6 +9123,13 @@ void Unit::CombatStart(Unit* target, bool initialAggro, uint32 spellId)
         me->UpdatePvP(true);
         me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
     }
+
+    if (GetTypeId() != TYPEID_PLAYER && ToCreature()->isPet())
+    {
+        if (Unit *owner = GetOwner())
+            for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+                SetSpeed(UnitMoveType(i), GetSpeedRate(UnitMoveType(i)), true);
+    }
 }
 
 void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 spellId)
@@ -9217,6 +9224,18 @@ void Unit::ClearInCombat()
 
         clearUnitState(UNIT_STAT_ATTACK_PLAYER);
     }
+
+    if (GetTypeId() != TYPEID_PLAYER && ToCreature()->isPet())
+    {
+        if (Unit *owner = GetOwner())
+            for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+            {
+                if (owner->GetSpeedRate(UnitMoveType(i)) > GetSpeedRate(UnitMoveType(i)))
+                    SetSpeed(UnitMoveType(i), owner->GetSpeedRate(UnitMoveType(i)) * 1.10f, true);
+            }
+    }
+    else if (!isCharmed())
+        return;
 
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }

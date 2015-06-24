@@ -8220,8 +8220,8 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
 
     switch (spellProto->DmgClass)
     {
-        case SPELL_DAMAGE_CLASS_NONE:  // Exception for Earth Shield and Lifebloom Final Bloom
-            if (spellProto->Id != 379 && spellProto->Id != 33778) // We need more spells to find a general way (if there is any)
+        case SPELL_DAMAGE_CLASS_NONE:  // Exception for Earth Shield, Lifebloom Final Bloom, Vessel of the Naaru
+            if (spellProto->Id != 379 && spellProto->Id != 33778 && spellProto->Id != 45064) // We need more spells to find a general way (if there is any)
                 return false;
         case SPELL_DAMAGE_CLASS_MAGIC:
         {

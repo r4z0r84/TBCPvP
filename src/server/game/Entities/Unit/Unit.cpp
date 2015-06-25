@@ -6631,6 +6631,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         }
         case 45054: // Timbal's Focusing Crystal
         {
+            if (!isAlive() || !pVictim->isAlive())
+                return false;
             // Prohibit proc from Health Funnel
             if (procSpell->AttributesEx2 & SPELL_ATTR_EX2_HEALTH_FUNNEL)
                 return false;

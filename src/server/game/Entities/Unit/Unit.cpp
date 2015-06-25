@@ -8342,11 +8342,10 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         float minval = pVictim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
         if (minval)
             TotalHealPct *= (100.0f + minval) / 100.0f;
+        float maxval = pVictim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+        if (maxval)
+            TotalHealPct *= (100.0f + maxval) / 100.0f;
     }
-    
-    float maxval = pVictim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-    if (maxval)
-        TotalHealPct *= (100.0f + maxval) / 100.0f;
 
     // Some spells are not healing spells itself, but they just trigger other healing spell (with fixed amount of healing)
     // Don't apply SPELL_AURA_MOD_HEALING_PCT on them (it will be applied on triggered spell)

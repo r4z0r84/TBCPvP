@@ -2880,7 +2880,10 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
     if (IsPositiveSpell(spell->Id) && (!IsHostileTo(pVictim)) && !pVictim->hasUnitState(UNIT_STAT_ISOLATED))  //prevent from affecting enemy by "positive" spell
-        return SPELL_MISS_NONE;
+        if (spell->Id == 33778)
+            sLog->outDebug("Report to robinsch: Lifebloom Final tick trys to heal while victim is Isolated!");
+        else
+            return SPELL_MISS_NONE;
 
     // Check for immune (use charges)
     // Check if Spell cannot be immuned

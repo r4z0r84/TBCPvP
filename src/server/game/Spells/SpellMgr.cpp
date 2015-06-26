@@ -2543,9 +2543,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 1833:                        // Cheap Shot
             spellInfo->EffectMechanic[0] = MECHANIC_STUN;
             break;
-        case 12051:                       // Evocation
-            spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
-            break;
         case 41013:     // Parasitic Shadowfiend Passive
             spellInfo->EffectApplyAuraName[0] = 4; // proc debuff, and summon infinite fiends
             break;

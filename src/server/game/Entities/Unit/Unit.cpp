@@ -704,22 +704,12 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
     {
         Aura *aur = *iter;
         ++iter;
-
-        //sLog->outDetail("auraflag:%u flag:%u = %u", aur->GetSpellProto()->AuraInterruptFlags, flag, aur->GetSpellProto()->AuraInterruptFlags & flag);
-
-        if (aur && (aur->GetSpellProto()->AuraInterruptFlags & flag))
+        if ((aur->GetSpellProto()->AuraInterruptFlags & flag) && (!except || aur->GetId() != except))
         {
-            if (aur->IsInUse())
-                sLog->outError("Aura %u is trying to remove itself! Flag %u. May cause crash!", aur->GetId(), flag);
-
-            else if (!except || aur->GetId() != except)
-            {
-                uint32 removedAuras = m_removedAurasCount;
-
-                RemoveAurasDueToSpell(aur->GetId());
-                if (m_removedAurasCount > removedAuras + 1)
-                    iter = m_interruptableAuras.begin();
-            }
+            uint32 removedAuras = m_removedAurasCount;
+            RemoveAurasDueToSpell(aur->GetId());
+            if (m_removedAurasCount > removedAuras + 1)
+                iter = m_interruptableAuras.begin();
         }
     }
 
@@ -737,10 +727,8 @@ void Unit::UpdateInterruptMask()
 {
     m_interruptMask = 0;
     for (AuraList::iterator i = m_interruptableAuras.begin(); i != m_interruptableAuras.end(); ++i)
-    {
-        if (*i)
             m_interruptMask |= (*i)->GetSpellProto()->AuraInterruptFlags;
-    }
+
     if (Spell* spell = m_currentSpells[CURRENT_CHANNELED_SPELL])
         if (spell->getState() == SPELL_STATE_CASTING)
             m_interruptMask |= spell->m_spellInfo->ChannelInterruptFlags;
@@ -1184,7 +1172,7 @@ void Unit::CastStop(uint32 except_spellid)
 {
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
         if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id != except_spellid)
-            InterruptSpell(CurrentSpellTypes(i), false, false);
+            InterruptSpell(CurrentSpellTypes(i), false);
 }
 
 void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem, Aura* triggeredByAura, uint64 originalCaster)
@@ -12511,6 +12499,8 @@ void Unit::SetStunned(bool apply)
         data << GetPackGUID();
         data << uint32(0);
         SendMessageToSet(&data, true);
+
+        CastStop();
     }
     else
     {

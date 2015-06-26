@@ -1245,8 +1245,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
             // Distract should not remove vanish
             if (m_spellInfo->Id != 1725)
                 unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
-
-            unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CAST);
             
             // Remove Stealth and Invisibility on negative spell hit
             if (!(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR_CU_DONT_BREAK_STEALTH))
@@ -2572,7 +2570,7 @@ void Spell::handle_immediate()
     if (IsChanneledSpell(m_spellInfo))
     {
         int32 duration = GetSpellDuration(m_spellInfo);
-        if (duration)
+        if (duration > 0)
         {
             if (m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_HASTE_AFFECT_DURATION)
             {
@@ -2581,13 +2579,22 @@ void Spell::handle_immediate()
                     DiminishingGroup DRgroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, false);
                     m_targets.getUnitTarget()->ApplyDiminishingToDuration(DRgroup, duration, m_caster, m_targets.getUnitTarget()->GetDiminishing(DRgroup));
                 }
+
                 // First apply duration mod and then haste
                 // Apply duration mod
                 if (Player* modOwner = m_caster->GetSpellModOwner())
                     modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
+
                 // Apply haste mods
                 m_caster->ModSpellCastTime(m_spellInfo, duration, this);
             }
+
+            m_spellState = SPELL_STATE_CASTING;
+            m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
+            SendChannelStart(duration);
+        }
+        else if (duration == -1)
+        {
             m_spellState = SPELL_STATE_CASTING;
             m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
             SendChannelStart(duration);

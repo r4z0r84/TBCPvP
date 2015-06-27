@@ -76,10 +76,13 @@ uint64 GetCustomSpellDelay(SpellEntry const *spellInfo)
         return 500;
     // Seal of Blood Judgement
     if (spellInfo->Id == 32220)
-        return 750;
+        return 1000;
     // Repentance
     if (spellInfo->Id == 20066)
         return 200;
+    // Seal of Blood Proc
+    if (spellInfo->Id == 31893)
+        return 500;
 
     // Shaman ----------------------------------------------------------------
     // Windfury

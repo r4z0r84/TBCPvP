@@ -4450,7 +4450,7 @@ uint8 Spell::CanCast(bool strict)
                                 // itr through all dispel types and add them to mask
                                 dispelMask |= GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[i]));
                             }
-                            else
+                            else if (m_spellInfo->Effect[i] > 0)
                                 hasOtherEffects = true;
                         }
 

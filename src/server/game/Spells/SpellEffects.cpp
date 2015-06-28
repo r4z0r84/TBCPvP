@@ -2729,7 +2729,7 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
             for (Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
             {
                 if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
-                    && ((*i)->GetSpellProto()->SpellFamilyFlags == 0x40 || (*i)->GetSpellProto()->SpellFamilyFlags == 0x10))
+                    && (*i)->GetSpellProto()->SpellFamilyFlags & 0x50)
                 {
                     if (!targetAura || (*i)->GetAuraDuration() < targetAura->GetAuraDuration())
                         targetAura = *i;
@@ -2742,20 +2742,32 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
                 return;
             }
 
-            int32 tickcount = 0;
-            if (targetAura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID)
-            {
-                switch (targetAura->GetSpellProto()->SpellFamilyFlags)//TODO: proper spellfamily for 3.0.x
-                {
-                    case 0x10:  tickcount = 4;  break; // Rejuvenation
-                    case 0x40:  tickcount = 6;  break; // Regrowth
-                }
-            }
-            addhealth += targetAura->GetModifierValuePerStack() *tickcount;
+            int32 tickHeal = targetAura->GetModifierValuePerStack() > 0 ? targetAura->GetModifierValuePerStack() : 0;
+
+            if (Player* modOwner = caster->GetSpellModOwner())
+                modOwner->ApplySpellMod(targetAura->GetSpellProto()->Id, SPELLMOD_DOT, tickHeal);
+
+            int32 tickCount = 0;
+            if (targetAura->GetSpellProto()->SpellFamilyFlags & 0x10) // Rejuvenation
+                tickCount = 4;
+            else // Regrowth
+                tickCount = 6;
+
+            addhealth += tickHeal * tickCount;
             unitTarget->RemoveAurasByCasterSpell(targetAura->GetId(), targetAura->GetCasterGUID());
         }
         else
             addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth, HEAL, unitTarget);
+
+        float EffectModifier = 1.0f;
+        float negativeMod = unitTarget->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+        if (negativeMod)
+            EffectModifier *= (100.0f + negativeMod) / 100.0f;
+        float positiveMod = unitTarget->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+        if (positiveMod)
+            EffectModifier *= (100.0f + positiveMod) / 100.0f;
+
+        addhealth *= EffectModifier;
 
         m_damage -= addhealth;
     }

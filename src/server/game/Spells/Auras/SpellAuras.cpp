@@ -6107,6 +6107,9 @@ void Aura::PeriodicTick()
             if (Player* modOwner = pCaster->GetSpellModOwner())
                 modOwner->ApplySpellMod(m_spellProto->Id, SPELLMOD_DOT, pdamage);
 
+            pdamage *= EffectModifier;
+            pdamage *= GetStackAmount();
+
             if (pCaster->getClass() == CLASS_HUNTER)    //Improved Mend pet periodic dispell
             {
                 if (GetSpellProto()->SpellVisual == 652)
@@ -6120,9 +6123,6 @@ void Aura::PeriodicTick()
                         pCaster->CastSpell(m_target, 24406, true, NULL, this);
                 }
             }
-
-            pdamage *= EffectModifier;
-            pdamage *= GetStackAmount();
 
             sLog->outDetail("PeriodicTick: %u (TypeId: %u) heal of %u (TypeId: %u) for %u health inflicted by %u",
                 GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId());

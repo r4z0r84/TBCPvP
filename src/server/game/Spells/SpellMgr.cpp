@@ -2691,6 +2691,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 44045:
         case 44046:
         case 44047:
+        case 45334: // Feral Charge Effect
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_DONT_BREAK_ON_DAMAGE;
             break;
         case 16614: // Storm Gauntlets

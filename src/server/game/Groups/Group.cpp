@@ -371,9 +371,6 @@ void Group::Disband(bool hideDestroy)
         if (!player)
             continue;
 
-        // call update for all party members
-        SendObjectUpdateToMembers(player);
-
         // we cannot call _removeMember because it would invalidate member iterator
         // if we are removing player from battleground raid
         if (isBGGroup())
@@ -911,9 +908,6 @@ void Group::SendUpdate()
         player = sObjectMgr->GetPlayer(citr->guid);
         if (!player || !player->GetSession() || player->GetGroup() != this)
             continue;
-
-        // call update for all party members
-        SendObjectUpdateToMembers(player);
                                                             // guess size
         WorldPacket data(SMSG_GROUP_LIST, (1+1+1+1+8+4+GetMembersCount()*20));
         data << (uint8)m_groupType;                         // group type
@@ -1625,42 +1619,30 @@ void Group::_homebindIfInstance(Player* player)
     }
 }
 
-void Group::BroadcastGroupUpdate(void)
+void Group::BroadcastGroupUpdate()
 {
     // FG: HACK: force flags update on group leave - for values update hack
     // -- not very efficient but safe
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
-        Player *pp = sObjectMgr->GetPlayer(citr->guid);
-        if (pp && pp->IsInWorld())
+        if (Player *pp = sObjectMgr->GetPlayer(citr->guid))
         {
+            pp->ForceValuesUpdateAtIndex(UNIT_FIELD_HEALTH);
+            pp->ForceValuesUpdateAtIndex(UNIT_FIELD_MAXHEALTH);
             pp->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
             pp->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+
+            if (Pet* pet = pp->GetPet())
+            {
+                pet->ForceValuesUpdateAtIndex(UNIT_FIELD_HEALTH);
+                pet->ForceValuesUpdateAtIndex(UNIT_FIELD_MAXHEALTH);
+                pet->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+                pet->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+            }
+
             sLog->outDebug("-- Forced group value update for '%s'", pp->GetName());
         }
     }
 }
 
-void Group::SendObjectUpdateToMembers(Player* player)
-{
-    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
-    {
-        if (player = sObjectMgr->GetPlayer(citr->guid))
-        {
-            // call update for all party members
-            for (member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
-            {
-                if (citr->guid == citr2->guid)
-                    continue;
-
-                if (Player* member = sObjectMgr->GetPlayer(citr2->guid))
-                {
-                    player->SendUpdateToPlayer(member);
-                    if (Pet* pet = player->GetPet())
-                        pet->SendUpdateToPlayer(member);
-                }
-            }
-        }
-    }
-}
 

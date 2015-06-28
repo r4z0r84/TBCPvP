@@ -643,69 +643,29 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                 // Health should show up as pct value for non-friendly player case and general creature case
                 else if (index == UNIT_FIELD_HEALTH)
                 {
-                    bool revealActualHealth = true;
-                    if (target != this)
+                    if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER)
                     {
-                        if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->IsInSameRaidWith(target))
-                        {
-                            revealActualHealth = false;
-                        }
-                        else if (GetTypeId() == TYPEID_UNIT)
-                        {
-                            if (ToCreature()->isPet())
-                            {
-                                if (const Creature* pPet = ToCreature())
-                                {
-                                    if (Unit* pOwner = pPet->GetCharmerOrOwner())
-                                    {
-                                        if (pOwner->ToPlayer() && !pOwner->ToPlayer()->IsInSameRaidWith(target))
-                                            revealActualHealth = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (!revealActualHealth)
-                    {
-                        float healthPct = 0.0f;
-                        switch (GetTypeId())
-                        {
-                            case TYPEID_PLAYER:
-                                healthPct = ceil(ToPlayer()->GetHealth() * 100.0f / ToPlayer()->GetMaxHealth());
-                                break;
-                            case TYPEID_UNIT:
-                                healthPct = ceil(ToCreature()->GetHealth() * 100.0f / ToCreature()->GetMaxHealth());
-                                break;
-                        }
-                        *data << uint32(healthPct);
+                        const Unit* me = reinterpret_cast<const Unit*>(this);
+                        if (me->ShouldRevealHealthTo(target))
+                            *data << m_uint32Values[index];
+                        else
+                            *data << uint32(std::ceil(me->GetHealth() * 100.0f / me->GetMaxHealth()));
                     }
                     else
                         *data << m_uint32Values[index];
                 }
                 else if (index == UNIT_FIELD_MAXHEALTH)
                 {
-                    bool revealActualHealth = true;
-                    if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->IsInSameRaidWith(target))
+                    if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER)
                     {
-                        revealActualHealth = false;
+                        const Unit* me = reinterpret_cast<const Unit*>(this);
+                        if (me->ShouldRevealHealthTo(target))
+                            *data << m_uint32Values[index];
+                        else
+                            *data << uint32(100);
                     }
-                    else if (GetTypeId() == TYPEID_UNIT)
-                    {
-                        if (ToCreature()->isPet())
-                        {
-                            if (const Creature* pPet = ToCreature())
-                            {
-                                if (Unit* pOwner = pPet->GetCharmerOrOwner())
-                                {
-                                    if (pOwner->ToPlayer() && !pOwner->ToPlayer()->IsInSameRaidWith(target))
-                                        revealActualHealth = false;
-                                }
-                            }
-                        }
-                    }
-
-                    revealActualHealth ? *data << m_uint32Values[index] : *data << uint32(100);
+                    else
+                        *data << m_uint32Values[index];
                 }
                 else
                 {

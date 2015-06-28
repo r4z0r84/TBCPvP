@@ -165,8 +165,6 @@ class Group
         void   RemoveAllInvites();
         bool   AddLeaderInvite(Player* player);
         bool   AddMember(const uint64 &guid, const char* name);
-
-        void   SendObjectUpdateToMembers(Player* player);
                                                             // method: 0=just remove, 1=kick
         uint32 RemoveMember(const uint64 &guid, const uint8 &method);
         void   ChangeLeader(const uint64 &guid);
@@ -337,7 +335,7 @@ class Group
         BoundInstancesMap& GetBoundInstances(uint8 difficulty) { return m_boundInstances[difficulty]; }
 
         // FG: evil hacks
-        void BroadcastGroupUpdate(void);
+        void BroadcastGroupUpdate();
 
     protected:
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);

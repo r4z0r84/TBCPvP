@@ -911,6 +911,13 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype);
                 pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, spellProto->Id);
             }
+
+            // Shadow Word: Death Hackfix
+            if (spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && spellProto->SpellFamilyFlags & 0x0000000200000000LL)
+            {
+                uint32 backfireDamage = damage > 0 ? damage : 1;
+                SetBackfireDamage(backfireDamage);
+            }
         }
         else
         {
@@ -1057,27 +1064,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         if (damagetype != DOT)
         {
             if (!getVictim())
-            /*{
-                // if have target and damage pVictim just call AI reaction
-                if (pVictim != getVictim() && pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsAIEnabled)
-                    pVictim->ToCreature()->AI()->AttackedBy(this);
-            }
-            else*/
-            {
-                // if not have main target then attack state with target (including AI call)
-                //start melee attacks only after melee hit
                 Attack(pVictim, (damagetype == DIRECT_DAMAGE));
-            }
         }
 
         if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
-        {
-            //TODO: This is from procflag, I do not know which spell needs this
-            //Maim?
-            //if (!spellProto || !(spellProto->AuraInterruptFlags&AURA_INTERRUPT_FLAG_DIRECT_DAMAGE))
-                pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
+            pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto ? spellProto->Id : 0);
 
-        }
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
             if (spellProto && IsDamageToThreatSpell(spellProto))

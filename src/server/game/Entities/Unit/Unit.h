@@ -1328,6 +1328,9 @@ class Unit : public WorldObject
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
 
+        uint32 GetBackfireDamage() { return m_backfireDamage; }
+        void SetBackfireDamage(uint32 damage) { m_backfireDamage = damage; }
+
         // Event handler
         EventProcessor m_Events;
 
@@ -1631,6 +1634,8 @@ class Unit : public WorldObject
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
         uint32 m_lastManaUse;                               // msecs
+
+        uint32 m_backfireDamage;
 
         uint32 m_damageTakenCounter[TOTAL_AURAS];
 

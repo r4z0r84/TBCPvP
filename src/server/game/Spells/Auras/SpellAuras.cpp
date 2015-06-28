@@ -6086,10 +6086,6 @@ void Aura::PeriodicTick()
             if (!pCaster)
                 return;
 
-            // heal for caster damage (must be alive)
-            if (m_target != pCaster && GetSpellProto()->SpellVisual == 163 && !pCaster->isAlive())
-                return;
-
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 amount = GetModifierValuePerStack() > 0 ? GetModifierValuePerStack() : 0;
 
@@ -6109,20 +6105,6 @@ void Aura::PeriodicTick()
 
             pdamage *= EffectModifier;
             pdamage *= GetStackAmount();
-
-            if (pCaster->getClass() == CLASS_HUNTER)    //Improved Mend pet periodic dispell
-            {
-                if (GetSpellProto()->SpellVisual == 652)
-                {
-                    int chance = 0;
-                    if (pCaster->HasSpell(19572))
-                        chance += 25;
-                    else if (pCaster->HasSpell(19573))
-                        chance += 50;
-                    if (roll_chance_i(chance))
-                        pCaster->CastSpell(m_target, 24406, true, NULL, this);
-                }
-            }
 
             sLog->outDetail("PeriodicTick: %u (TypeId: %u) heal of %u (TypeId: %u) for %u health inflicted by %u",
                 GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId());

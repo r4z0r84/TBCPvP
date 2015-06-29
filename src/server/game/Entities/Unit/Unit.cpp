@@ -6616,9 +6616,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         {
             if (!isAlive() || !pVictim->isAlive())
                 return false;
-            // Prohibit proc from Health Funnel
-            if (procSpell->AttributesEx2 & SPELL_ATTR_EX2_HEALTH_FUNNEL)
-                return false;
+
             break;
         }
     }
@@ -11262,7 +11260,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit * pTarget, uint32 procFlag,
     for (AuraMap::const_iterator itr = GetAuras().begin(); itr != GetAuras().end(); ++itr)
     {
         SpellProcEventEntry const* spellProcEvent = NULL;
-        bool active = (damage > 0) || (procExtra & PROC_EX_ABSORB && isVictim);
+        bool active = (damage > 0) || (procExtra & PROC_EX_ABSORB && isVictim) || procExtra & PROC_EX_INTERNAL_AURA_APPLY;
         if (!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, active, spellProcEvent))
            continue;
 

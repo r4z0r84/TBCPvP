@@ -614,7 +614,8 @@ enum ProcFlagsEx
     PROC_EX_EX_TRIGGER_ALWAYS   = 0x0010000,                 // If set trigger always ( no matter another flags) used for drop charges
     PROC_EX_EX_ONE_TIME_TRIGGER = 0x0020000,                 // If set trigger always but only one time (not used)
     PROC_EX_INTERNAL_HOT        = 0x1000000,                 // Only for internal use
-    PROC_EX_INTERNAL_DOT        = 0x2000000                  // Only for internal use
+    PROC_EX_INTERNAL_DOT        = 0x2000000,                 // Only for internal use
+    PROC_EX_INTERNAL_AURA_APPLY = 0x4000000                  // Only for internal use
 };
 
 struct SpellProcEventEntry

@@ -902,7 +902,10 @@ void Aura::_AddAura()
             break;
         case SPELL_AURA_PERIODIC_HEAL:
             if (caster)
+            {
                 m_modifier.m_amount = caster->SpellHealingBonus(m_spellProto, m_modifier.m_amount, DOT, m_target);
+                caster->ProcDamageAndSpell(m_target, PROC_FLAG_SUCCESSFUL_POSITIVE_SPELL, PROC_FLAG_TAKEN_POSITIVE_SPELL, PROC_EX_INTERNAL_AURA_APPLY, m_modifier.m_amount, BASE_ATTACK, m_spellProto);
+            }
             break;
         case SPELL_AURA_OBS_MOD_HEALTH:
         case SPELL_AURA_OBS_MOD_MANA:

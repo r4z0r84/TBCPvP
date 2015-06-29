@@ -739,6 +739,10 @@ void Spell::prepareDataForTriggerSystem()
             case SPELLFAMILY_ROGUE: // mutilate mainhand + offhand
                 if (m_spellInfo->SpellFamilyFlags & 0x600000000LL) m_canTrigger = true;
             break;
+            case SPELLFAMILY_GENERIC:
+                if (m_spellInfo->Id == 31616) m_canTrigger = true; // Nature's Guardian
+                if (m_spellInfo->Id == 38590) m_canTrigger = true; // Earth Shield
+            break;
         }
     }
 

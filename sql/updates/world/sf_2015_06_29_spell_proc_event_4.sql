@@ -1,0 +1,1 @@
+UPDATE `spell_proc_event` SET `procEx`='67141632' WHERE (`entry`='45484');

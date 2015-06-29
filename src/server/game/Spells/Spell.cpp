@@ -735,6 +735,8 @@ void Spell::prepareDataForTriggerSystem()
             break;
             case SPELLFAMILY_PALADIN: // For Holy Shock triggers need do it
                 if (m_spellInfo->SpellFamilyFlags & 0x0001000000200000LL) m_canTrigger = true;
+                if (m_spellInfo->SpellFamilyFlags & 0x0000040000000000LL) m_canTrigger = true; // Seal of Blood
+                if (m_spellInfo->SpellFamilyFlags & 0x0000000002000000LL) m_canTrigger = true; // Seal of Command
             break;
             case SPELLFAMILY_ROGUE: // mutilate mainhand + offhand
                 if (m_spellInfo->SpellFamilyFlags & 0x600000000LL) m_canTrigger = true;

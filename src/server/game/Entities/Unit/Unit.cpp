@@ -1232,11 +1232,7 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const *spellInfo, bool triggered, 
 
     spell->m_CastItem = castItem;
 
-    // Exceptions - Seal of Blood, Seal of Command
-    if (spellInfo->Id == 31893 || spellInfo->Id == 20424)   // These spells require a triggeredAura exception to handle crit procs
-        spell->prepare(&targets, 0);                        // Do not add spells here that have no ICD
-    else
-        spell->prepare(&targets, triggeredByAura);
+    spell->prepare(&targets, triggeredByAura);
 }
 
 void Unit::CastCustomSpell(Unit* target, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem, Aura* triggeredByAura, uint64 originalCaster)

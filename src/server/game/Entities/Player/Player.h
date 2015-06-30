@@ -195,7 +195,6 @@ struct PlayerCreateInfoItem
 };
 
 typedef std::list<PlayerCreateInfoItem> PlayerCreateInfoItems;
-typedef std::list<uint32> PlayerCreateInfoSpells;
 
 struct PlayerClassLevelInfo
 {
@@ -234,7 +233,7 @@ struct PlayerInfo
     uint16 displayId_m;
     uint16 displayId_f;
     PlayerCreateInfoItems item;
-    PlayerCreateInfoSpells spell;
+    std::list<CreateSpellPair> spell;
     std::list<uint16> action[4];
 
     PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1

@@ -1096,10 +1096,8 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     }
 
-    if (sWorld->getConfig(CONFIG_START_ALL_SPELLS))
-        learnAllSpells(true);
-    else
-        learnDefaultSpells(true);
+    // original spells
+    learnDefaultSpells(true);
 
     // original action bar
     std::list<uint16>::const_iterator action_itr[4];
@@ -20959,25 +20957,6 @@ void Player::learnDefaultSpells(bool loading)
     PlayerInfo const *info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     std::list<CreateSpellPair>::const_iterator spell_itr;
     for (PlayerCreateInfoSpells::const_iterator itr = info->spell.begin(); itr != info->spell.end(); ++itr)
-    {
-        uint32 tspell = *itr;
-        if (tspell)
-        {
-            sLog->outDebug("PLAYER (Class: %u Race: %u): Adding initial spell, id = %u", uint32(getClass()), uint32(getRace()), tspell);
-            if (loading)                                    // not care about passive spells or loading case
-                addSpell(tspell, true, true, true, false);
-            else                                            // but send in normal spell in game learn case
-                learnSpell(tspell);
-        }
-    }
-}
-
-void Player::learnAllSpells(bool loading)
-{
-    // learn default race/class spells
-    PlayerInfo const *info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
-    std::list<CreateSpellPair>::const_iterator spell_itr;
-    for (PlayerCreateInfoSpells::const_iterator itr = info->spell_custom.begin(); itr != info->spell_custom.end(); ++itr)
     {
         uint32 tspell = *itr;
         if (tspell)

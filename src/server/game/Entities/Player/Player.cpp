@@ -22314,10 +22314,12 @@ void Player::UpdateCharmedAI()
 
 void Player::AddGlobalCooldown(SpellEntry const *spellInfo, Spell const *spell)
 {
-    if (!spellInfo || !spellInfo->StartRecoveryTime)
+    if (!spellInfo)
         return;
 
     uint32 cdTime = spellInfo->StartRecoveryTime;
+    if (!cdTime)
+        return;
 
     if (!(spellInfo->Attributes & (SPELL_ATTR_ABILITY|SPELL_ATTR_TRADESPELL)))
         cdTime *= GetFloatValue(UNIT_MOD_CAST_SPEED);

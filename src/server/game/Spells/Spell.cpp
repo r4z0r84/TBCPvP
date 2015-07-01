@@ -2301,7 +2301,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         m_caster->SetCurrentCastedSpell(this);
         SendSpellStart();
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER && m_casttime == 0)
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->ToPlayer()->AddGlobalCooldown(m_spellInfo, this);
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)

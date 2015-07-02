@@ -654,7 +654,7 @@ void Unit::RemoveMovementImpairingAuras()
     }
 }
 
-void Unit::RemoveSpellsCausingAura(AuraType auraType)
+void Unit::RemoveSpellsCausingAura(AuraType auraType, uint32 except)
 {
     if (auraType >= TOTAL_AURAS) return;
     AuraList::iterator iter, next;
@@ -662,6 +662,9 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType)
     {
         next = iter;
         ++next;
+
+        if ((*iter)->GetId() == except)
+            continue;
 
         if (*iter)
         {

@@ -2699,6 +2699,8 @@ void Spell::EffectHeal(uint32 /*i*/)
 
 void Spell::SpellDamageHeal(uint32 /*i*/)
 {
+    float EffectModifier = 1.0f;
+
     if (unitTarget && unitTarget->isAlive() && damage >= 0)
     {
         // Try to get original caster
@@ -2759,17 +2761,16 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
 
             addhealth += tickHeal * tickCount;
             unitTarget->RemoveAurasByCasterSpell(targetAura->GetId(), targetAura->GetCasterGUID());
+
+            float negativeMod = unitTarget->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+            if (negativeMod)
+                EffectModifier *= (100.0f + negativeMod) / 100.0f;
+            float positiveMod = unitTarget->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+            if (positiveMod)
+                EffectModifier *= (100.0f + positiveMod) / 100.0f;
         }
         else
             addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth, HEAL, unitTarget);
-
-        float EffectModifier = 1.0f;
-        float negativeMod = unitTarget->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-        if (negativeMod)
-            EffectModifier *= (100.0f + negativeMod) / 100.0f;
-        float positiveMod = unitTarget->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
-        if (positiveMod)
-            EffectModifier *= (100.0f + positiveMod) / 100.0f;
 
         addhealth *= EffectModifier;
 

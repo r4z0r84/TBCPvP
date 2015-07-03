@@ -1865,59 +1865,6 @@ CreatureAI* GetAI_npc_earth_elemental_guardian(Creature* creature)
     return new npc_earth_elemental_guardianAI(creature);
 }
 
-enum TreantGuardian
-{
-    SPELL_WRATH = 6780,
-    SPELL_HEALING_TOUCH = 5188
-};
-
-struct npc_treant_guardianAI : public ScriptedAI
-{
-    npc_treant_guardianAI(Creature *c) : ScriptedAI(c) { me->SetReactState(REACT_DEFENSIVE); }
-
-    uint32 Wrath_Timer;
-    uint32 HealingTouch_Timer;
-
-    void Reset()
-    {
-        Wrath_Timer = 5000;
-        HealingTouch_Timer = urand(5000, 10000);
-
-        me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_NATURE, true);
-    }
-
-    void UpdateAI(const uint32 uiDiff)
-    {
-        if (Wrath_Timer <= uiDiff)
-        {
-            DoCast(me->getVictim(), SPELL_WRATH);
-            Wrath_Timer = urand(10000, 15000);
-        }
-        else
-            Wrath_Timer -= uiDiff;
-
-        if (HealingTouch_Timer <= uiDiff)
-        {
-            if (Unit* pOwner = me->GetOwner())
-            {
-                if (pOwner->GetHealth() * 100 / pOwner->GetMaxHealth() < 75)
-                    DoCast(pOwner, SPELL_HEALING_TOUCH);
-            }
-
-            HealingTouch_Timer = urand(5000, 10000);
-        }
-        else
-            HealingTouch_Timer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-CreatureAI* GetAI_npc_treant_guardian(Creature* creature)
-{
-    return new npc_treant_guardianAI(creature);
-}
-
 void AddSC_npcs_special()
 {
     Script *newscript;
@@ -2022,11 +1969,6 @@ void AddSC_npcs_special()
     newscript = new Script;
     newscript->Name = "npc_earth_elemental_guardian";
     newscript->GetAI = &GetAI_npc_earth_elemental_guardian;
-    newscript->RegisterSelf();
-
-    newscript = new Script;
-    newscript->Name = "npc_treant_guardian";
-    newscript->GetAI = &GetAI_npc_treant_guardian;
     newscript->RegisterSelf();
 }
 

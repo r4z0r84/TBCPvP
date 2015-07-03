@@ -2715,6 +2715,13 @@ void SpellMgr::LoadSpellCustomAttr()
         case 43733: // Lightning Zap on others (Stormchops)
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
             break;
+        case 408: // Kidney Shot
+        case 8643:
+            spellInfo->Effect[1] = 0;
+            spellInfo->EffectApplyAuraName[1] = 0;
+            spellInfo->Effect[2] = 0;
+            spellInfo->EffectApplyAuraName[2] = 0;
+            break;
         default:
             break;
         }

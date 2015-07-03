@@ -1297,11 +1297,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
         // Increase Diminishing on unit, current informations for actually casts will use values above
         if ((type == DRTYPE_PLAYER && (unit->GetTypeId() == TYPEID_PLAYER || unit->ToCreature()->isPet() || unit->ToCreature()->isPossessedByPlayer())) || type == DRTYPE_ALL)
-        {
-            if (!(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags & 0x0000000000200000LL) && m_caster != unit) // Don't apply Kidney Shot DR to self
-                unit->IncrDiminishing(m_diminishGroup);
-        }
-            
+            unit->IncrDiminishing(m_diminishGroup);
     }
 
     for (uint32 effectNumber = 0; effectNumber < 3; effectNumber++)

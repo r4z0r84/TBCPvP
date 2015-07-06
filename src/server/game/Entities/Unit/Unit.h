@@ -1329,7 +1329,7 @@ class Unit : public WorldObject
         float m_modAttackSpeedPct[3];
 
         uint32 GetBackfireDamage() { return m_backfireDamage; }
-        void SetBackfireDamage(uint32 damage) { m_backfireDamage = (damage > 0 ? damage : 1); }
+        void SetBackfireDamage(uint32 damage) { m_backfireDamage = damage; }
 
         // Event handler
         EventProcessor m_Events;

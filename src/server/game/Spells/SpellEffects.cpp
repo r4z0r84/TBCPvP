@@ -667,10 +667,6 @@ void Spell::SpellDamageSchoolDmg(uint32 effect_idx)
         if (m_originalCaster && damage > 0 && m_spellInfo->Id != 12723) // exlude sweeping strike from extra damage
             damage = m_originalCaster->SpellDamageBonus(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
 
-        // Seal of Blood Judgement Hackfix
-        if (m_spellInfo->Id == 32220)
-            damage = m_caster->GetBackfireDamage();
-
         m_damage += damage;
     }
 }
@@ -4678,9 +4674,6 @@ void Spell::SpellDamageWeaponDmg(uint32 i)
     // Add melee damage bonuses (also check for negative)
     m_caster->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType, m_spellInfo, SPELL_DIRECT_DAMAGE);
     m_damage+= eff_damage;
-
-    if (m_spellInfo->Id == 31893) // Seal of Blood
-        m_caster->SetBackfireDamage(m_damage);
 
     // take ammo
     if (m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)

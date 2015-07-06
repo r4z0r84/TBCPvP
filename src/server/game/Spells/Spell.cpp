@@ -1140,7 +1140,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 0x0000000800000000LL && m_spellInfo->SpellIconID == 153)
         {
             int32 damagePoint  = damageInfo.damage * 33 / 100;
-            m_caster->SetBackfireDamage(damagePoint);
             m_caster->CastCustomSpell(m_caster, 32220, &damagePoint, NULL, NULL, true);
         }
         // Bloodthirst

@@ -2392,6 +2392,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 // Eye for an Eye
                 else if (spellInfo->Id == 25997)
                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Seal of Blood (Backlash damage)
+                else if (spellInfo->Id == 32221 || spellInfo->Id == 32220)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
                 break;
             }
             case SPELLFAMILY_PRIEST:

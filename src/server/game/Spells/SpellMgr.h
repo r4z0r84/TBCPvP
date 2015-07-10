@@ -1015,6 +1015,7 @@ class SpellMgr
 
         static bool IsProfessionSpell(uint32 spellId);
         static bool IsPrimaryProfessionSpell(uint32 spellId);
+        static bool IsProfessionSpecializationSpell(uint32 spellId);
         bool IsPrimaryProfessionFirstRankSpell(uint32 spellId) const;
 
         // Spell script targets

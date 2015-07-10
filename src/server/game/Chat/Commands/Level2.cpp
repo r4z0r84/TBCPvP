@@ -3638,10 +3638,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(const char* args)
 
         if (Utf8FitTo(name, wnamepart))
         {
-            uint16 maxLevel = target->GetPureMaxSkillValue(skillInfo->id);
-
-            target->learnSkillAllSpells(skillInfo->id, maxLevel);          
-            target->SetSkill(skillInfo->id, maxLevel, maxLevel);
+            target->learnSkillAllSpells(skillInfo->id);
             PSendSysMessage(LANG_COMMAND_LEARN_ALL_RECIPES, name.c_str());
             return true;
         }

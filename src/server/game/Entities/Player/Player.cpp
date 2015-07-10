@@ -21102,7 +21102,7 @@ void Player::learnSkillRewardedSpells(uint32 skill_id)
     }
 }
 
-void Player::learnSkillAllSpells(uint32 skill_id, uint32 max_skill)
+void Player::learnSkillAllSpells(uint32 skill_id, uint16 maxReceipe, uint16 setSkill, uint16 maxSkill)
 {
     uint32 classmask = getClassMask();
 
@@ -21136,16 +21136,22 @@ void Player::learnSkillAllSpells(uint32 skill_id, uint32 max_skill)
                     continue;
 
                 // skip too high value skills
-                if (skillLine->min_value > max_skill)
+                if (skillLine->min_value > maxReceipe)
+                    continue;
+
+                // skip specialization spells
+                if (sSpellMgr->IsProfessionSpecializationSpell(skillLine->spellId))
                     continue;
 
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
-                if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, m_session->GetPlayer(), false))
+                if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, this, false))
                     continue;
 
                 if (!HasSpell(spellInfo->Id))
                     learnSpell(skillLine->spellId);
             }
+
+            SetSkill(skillInfo->id, setSkill, maxSkill);
         }
     }
 }

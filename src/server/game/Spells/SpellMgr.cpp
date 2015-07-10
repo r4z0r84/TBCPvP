@@ -1737,6 +1737,34 @@ bool SpellMgr::IsPrimaryProfessionSpell(uint32 spellId)
     return IsPrimaryProfessionSkill(skill);
 }
 
+bool SpellMgr::IsProfessionSpecializationSpell(uint32 spellId)
+{
+    switch (spellId)
+    {
+        case 9787: // Weapon
+        case 9788: // Armor
+        case 17040: // Hammer
+        case 17041: // Axe
+        case 17039: // Sword
+        case 17451: // Rep Armor ?
+        case 17452: // Rep Weapon ?
+        case 10656: // Dragon
+        case 10658: // Elemental
+        case 10660: // Tribal
+        case 20222: // Goblin
+        case 20219: // Gnomish
+        case 26797: // SpellFire
+        case 26798: // MoonCloth
+        case 26801: // ShadowWeave
+        case 28672: // Transmute
+        case 28677: // Elixir
+        case 28675: // Potion
+            return true;
+    }
+
+    return false;
+}
+
 bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 {
     return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId) == 1;
@@ -2607,6 +2635,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 3600:  // Earthbind Totem
         case 1725:  // Distract
         case 36554: // Shadowstep
+        case 33206: // Pain Supression
+        case 44416: // Pain Supression
             mSpellCustomAttr[i] = SPELL_ATTR_CU_DONT_BREAK_STEALTH;
             break;
         case 43730: // Stormchops effect

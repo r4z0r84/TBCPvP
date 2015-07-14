@@ -914,13 +914,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype);
                 pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, spellProto->Id);
             }
-
-            // Shadow Word: Death Hackfix
-            if (spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && spellProto->SpellFamilyFlags & 0x0000000200000000LL)
-            {
-                uint32 backfireDamage = damage > 0 ? damage : 1;
-                SetBackfireDamage(backfireDamage);
-            }
         }
         else
         {

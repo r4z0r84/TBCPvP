@@ -22323,14 +22323,14 @@ void Player::AddGlobalCooldown(SpellEntry const *spellInfo, Spell const *spell)
     if (!spellInfo)
         return;
 
-    uint32 cdTime = spellInfo->StartRecoveryTime;
+    int32 cdTime = spellInfo->StartRecoveryTime;
     if (!cdTime)
         return;
 
-    if (!(spellInfo->Attributes & (SPELL_ATTR_ABILITY|SPELL_ATTR_TRADESPELL)))
-        cdTime *= GetFloatValue(UNIT_MOD_CAST_SPEED);
+    if (!(spellInfo->Attributes & (SPELL_ATTR_ABILITY | SPELL_ATTR_TRADESPELL)))
+        cdTime = int32(float(cdTime) * GetFloatValue(UNIT_MOD_CAST_SPEED));
     else if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
-        cdTime *= m_modAttackSpeedPct[RANGED_ATTACK];
+        cdTime = int32(float(cdTime) * m_modAttackSpeedPct[RANGED_ATTACK]);
 
     if (cdTime > 1500)
         cdTime = 1500;

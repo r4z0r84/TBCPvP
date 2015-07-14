@@ -5928,10 +5928,6 @@ void Aura::PeriodicTick()
             if (pdamage)
                 procVictim|=PROC_FLAG_TAKEN_ANY_DAMAGE;
 
-            // Shadow Word: Death (Hackfix to deal equal damage)
-            if (GetSpellProto()->Id == 32409)
-                pdamage = pCaster->GetBackfireDamage();
-
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));// we guess size
             data << m_target->GetPackGUID();
             data.appendPackGUID(GetCasterGUID());

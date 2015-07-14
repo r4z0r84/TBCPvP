@@ -793,7 +793,7 @@ void Unit::GetDispellableAuraList(Unit* caster, uint32 dispelMask, dispel_list& 
 }
 
 /* Called by DealDamage for auras that have a chance to be dispelled on damage taken. */
-void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype)
+void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype, uint32 spellId)
 {
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
     // auras can't break from self damage
@@ -804,13 +804,17 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
     if (!HasAuraType(auraType))
         return;
 
-    // don't increase damageTakenCounter when having aura that should not break on damage
+    // don't increase damageTakenCounter when having aura that should not break on damage or ...
     AuraList const& mRemoveAuraList = GetAurasByType(auraType);
     for (AuraList::const_iterator iter = mRemoveAuraList.begin(); iter != mRemoveAuraList.end(); ++iter)
     {
         if (SpellEntry const* iterSpellProto = (*iter)->GetSpellProto())
         {
             if (sSpellMgr->GetSpellCustomAttr(iterSpellProto->Id) & SPELL_ATTR_CU_DONT_BREAK_ON_DAMAGE)
+                return;
+
+            // ... damage spell is removable spell
+            if (spellId && (*iter)->GetSpellProto()->Id == spellId)
                 return;
         }
     }
@@ -910,8 +914,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             if (!(spellProto->AttributesEx4 & SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS))
             {
-                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, damagetype);
-                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype);
+                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, damagetype, spellProto->Id);
+                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype, spellProto->Id);
                 pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, spellProto->Id);
             }
         }

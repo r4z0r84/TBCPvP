@@ -999,7 +999,7 @@ class Unit : public WorldObject
         void Unmount();
 
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
-        void RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype);
+        void RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype, uint32 spellId = 0);
         uint32 DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, SpellSchoolMask damageSchoolMask = SPELL_SCHOOL_MASK_NORMAL, SpellEntry const *spellProto = NULL, bool durabilityLoss = true);
         void Kill(Unit *pVictim, bool durabilityLoss = true);
 

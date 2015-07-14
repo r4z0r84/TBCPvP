@@ -2755,6 +2755,15 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Effect[2] = 0;
             spellInfo->EffectApplyAuraName[2] = 0;
             break;
+        case 19975: // Entangling Roots (Nature's Grasp trigger) Rank 1
+        case 19974: // Entangling Roots (Nature's Grasp trigger) Rank 2
+        case 19973: // Entangling Roots (Nature's Grasp trigger) Rank 3
+        case 19972: // Entangling Roots (Nature's Grasp trigger) Rank 4
+        case 19971: // Entangling Roots (Nature's Grasp trigger) Rank 5
+        case 19970: // Entangling Roots (Nature's Grasp trigger) Rank 6
+        case 27010: // Entangling Roots (Nature's Grasp trigger) Rank 7
+            spellInfo->CastingTimeIndex = 0;
+            break;
         default:
             break;
         }

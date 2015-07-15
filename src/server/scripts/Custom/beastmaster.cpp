@@ -28,6 +28,7 @@ void CreatePet(Player* player, Creature* creature, uint32 entry)
     creatureTarget->SetHealth(0);
  
     pet->SetPower(POWER_HAPPINESS, 1048000);
+    pet->SetTP(350);
 
     // prepare visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, player->getLevel() - 1);
@@ -73,7 +74,6 @@ void CreatePet(Player* player, Creature* creature, uint32 entry)
 
     player->CLOSE_GOSSIP_MENU();
     player->GetSession()->SendAreaTriggerMessage("Pet tamed successfully.");
-    creature->MonsterWhisper("You must relog, or dismiss and resummon your pet to use your training points.", player->GetGUID());
 }
 
 bool GossipHello_beastmaster(Player* player, Creature* creature)

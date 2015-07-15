@@ -830,13 +830,14 @@ Player::Player (WorldSession *session): Unit()
     m_oldpetspell = 0;
 
     ////////////////////Rest System/////////////////////
-    time_inn_enter=0;
-    inn_pos_mapid=0;
-    inn_pos_x=0;
-    inn_pos_y=0;
-    inn_pos_z=0;
-    m_rest_bonus=0;
-    rest_type=REST_TYPE_NO;
+    time_inn_enter = 0;
+    inn_pos_mapid = 0;
+    inn_pos_x = 0.0f;
+    inn_pos_y = 0.0f;
+    inn_pos_z = 0.0f;
+    inn_pos_radius = 0.0f;
+    m_rest_bonus = 0;
+    rest_type = REST_TYPE_NO;
     ////////////////////Rest System/////////////////////
 
     m_mailsLoaded = false;
@@ -3845,12 +3846,7 @@ void Player::addTalent(uint32 spellId, uint8 spec, bool learning)
         {
             for (uint8 rank = 0; rank < MAX_TALENT_RANK; ++rank)
             {
-                // skip learning spell and no rank spell case
-                uint32 rankSpellId = talentInfo->RankID[rank];
-                if (!rankSpellId || rankSpellId == spellId)
-                    continue;
-
-                itr = m_talents[spec].find(rankSpellId);
+                itr = m_talents[spec].find(talentInfo->RankID[rank]);
                 if (itr != m_talents[spec].end())
                     itr->second->state = PLAYERSPELL_REMOVED;
             }
@@ -7964,7 +7960,7 @@ void Player::UpdateZone(uint32 newZone)
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         SetRestType(REST_TYPE_IN_CITY);
-        InnEnter(time(0), GetMapId(), 0, 0, 0);
+        InnEnter(time(0), GetMapId(), 0, 0, 0, 0);
         pvpInfo.inNoPvPArea = true;
     }
     else                                                    // anywhere else
@@ -7973,7 +7969,7 @@ void Player::UpdateZone(uint32 newZone)
         {
             if (GetRestType() == REST_TYPE_IN_TAVERN)        // has been in tavern. Is still in?
             {
-                if (GetMapId() != GetInnPosMapId() || sqrt((GetPositionX()-GetInnPosX())*(GetPositionX()-GetInnPosX())+(GetPositionY()-GetInnPosY())*(GetPositionY()-GetInnPosY())+(GetPositionZ()-GetInnPosZ())*(GetPositionZ()-GetInnPosZ()))>40)
+                if (GetMapId() != GetInnPosMapId() || GetExactDist(GetInnPosX(), GetInnPosY(), GetInnPosZ()) > (GetInnPosRadius() ? GetInnPosRadius() : 1.0f))
                 {
                     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
                     SetRestType(REST_TYPE_NO);
@@ -21082,7 +21078,7 @@ void Player::learnSkillRewardedSpells(uint32 skill_id)
     }
 }
 
-void Player::learnSkillAllSpells(uint32 skill_id, uint32 max_skill)
+void Player::learnSkillAllSpells(uint32 skill_id, uint16 maxReceipe, uint16 setSkill, uint16 maxSkill)
 {
     uint32 classmask = getClassMask();
 
@@ -21116,16 +21112,22 @@ void Player::learnSkillAllSpells(uint32 skill_id, uint32 max_skill)
                     continue;
 
                 // skip too high value skills
-                if (skillLine->min_value > max_skill)
+                if (skillLine->min_value > maxReceipe)
+                    continue;
+
+                // skip specialization spells
+                if (sSpellMgr->IsProfessionSpecializationSpell(skillLine->spellId))
                     continue;
 
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
-                if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, m_session->GetPlayer(), false))
+                if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, this, false))
                     continue;
 
                 if (!HasSpell(spellInfo->Id))
                     learnSpell(skillLine->spellId);
             }
+
+            SetSkill(skillInfo->id, setSkill, maxSkill);
         }
     }
 }
@@ -22293,15 +22295,17 @@ void Player::UpdateCharmedAI()
 
 void Player::AddGlobalCooldown(SpellEntry const *spellInfo, Spell const *spell)
 {
-    if (!spellInfo || !spellInfo->StartRecoveryTime)
+    if (!spellInfo)
         return;
 
-    uint32 cdTime = spellInfo->StartRecoveryTime;
+    int32 cdTime = spellInfo->StartRecoveryTime;
+    if (!cdTime)
+        return;
 
-    if (!(spellInfo->Attributes & (SPELL_ATTR_ABILITY|SPELL_ATTR_TRADESPELL)))
-        cdTime *= GetFloatValue(UNIT_MOD_CAST_SPEED);
+    if (!(spellInfo->Attributes & (SPELL_ATTR_ABILITY | SPELL_ATTR_TRADESPELL)))
+        cdTime = int32(float(cdTime) * GetFloatValue(UNIT_MOD_CAST_SPEED));
     else if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
-        cdTime *= m_modAttackSpeedPct[RANGED_ATTACK];
+        cdTime = int32(float(cdTime) * m_modAttackSpeedPct[RANGED_ATTACK]);
 
     if (cdTime > 1500)
         cdTime = 1500;

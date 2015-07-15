@@ -654,7 +654,7 @@ void Unit::RemoveMovementImpairingAuras()
     }
 }
 
-void Unit::RemoveSpellsCausingAura(AuraType auraType)
+void Unit::RemoveSpellsCausingAura(AuraType auraType, uint32 except)
 {
     if (auraType >= TOTAL_AURAS) return;
     AuraList::iterator iter, next;
@@ -662,6 +662,9 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType)
     {
         next = iter;
         ++next;
+
+        if ((*iter)->GetId() == except)
+            continue;
 
         if (*iter)
         {
@@ -790,7 +793,7 @@ void Unit::GetDispellableAuraList(Unit* caster, uint32 dispelMask, dispel_list& 
 }
 
 /* Called by DealDamage for auras that have a chance to be dispelled on damage taken. */
-void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype)
+void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype, uint32 spellId)
 {
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
     // auras can't break from self damage
@@ -801,13 +804,17 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
     if (!HasAuraType(auraType))
         return;
 
-    // don't increase damageTakenCounter when having aura that should not break on damage
+    // don't increase damageTakenCounter when having aura that should not break on damage or ...
     AuraList const& mRemoveAuraList = GetAurasByType(auraType);
     for (AuraList::const_iterator iter = mRemoveAuraList.begin(); iter != mRemoveAuraList.end(); ++iter)
     {
         if (SpellEntry const* iterSpellProto = (*iter)->GetSpellProto())
         {
             if (sSpellMgr->GetSpellCustomAttr(iterSpellProto->Id) & SPELL_ATTR_CU_DONT_BREAK_ON_DAMAGE)
+                return;
+
+            // ... damage spell is removable spell
+            if (spellId && (*iter)->GetSpellProto()->Id == spellId)
                 return;
         }
     }
@@ -907,14 +914,10 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             if (!(spellProto->AttributesEx4 & SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS))
             {
-                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, damagetype);
-                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype);
+                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage, damagetype, spellProto->Id);
+                pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage, damagetype, spellProto->Id);
                 pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, spellProto->Id);
             }
-
-            // Shadow Word: Death Hackfix
-            if (spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && spellProto->SpellFamilyFlags & 0x0000000200000000LL)
-                SetBackfireDamage(damage);
         }
         else
         {
@@ -2853,10 +2856,7 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
     if (IsPositiveSpell(spell->Id) && (!IsHostileTo(pVictim)) && !pVictim->hasUnitState(UNIT_STAT_ISOLATED))  //prevent from affecting enemy by "positive" spell
-        if (spell->Id == 33778)
-            sLog->outDebug("Report to robinsch: Lifebloom Final tick trys to heal while victim is Isolated!");
-        else
-            return SPELL_MISS_NONE;
+        return SPELL_MISS_NONE;
 
     // Check for immune (use charges)
     // Check if Spell cannot be immuned
@@ -5713,23 +5713,24 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
             // Seal of Blood do damage trigger
             if (dummySpell->SpellFamilyFlags & 0x0000040000000000LL)
             {
-                // Dont proc from itself
-                if (procSpell && (procSpell->Id == 31893 || procSpell->Id == 31892))
-                    return false;
-
                 switch (triggeredByAura->GetEffIndex())
                 {
                     case 0:
                         triggered_spell_id = 31893;
                         break;
+                    /*  Now handled in Unit::HandleDummyAuraProc
                     case 1:
                     {
                         // damage
-                        basepoints0 = GetBackfireDamage() * 0.1f;
+                        damage += CalculateDamage(BASE_ATTACK, false) * 10 / 100; // add spell damage from prev effect (10%)
+                        basepoints0 =  triggeredByAura->GetModifier()->m_amount * damage / 100;
+
                         target = this;
+
                         triggered_spell_id = 32221;
                         break;
                     }
+                    */
                 }
             }
 
@@ -6095,11 +6096,20 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
 
     if (basepoints0)
         CastCustomSpell(target, triggered_spell_id, &basepoints0, NULL, NULL, true, castItem, triggeredByAura, originalCaster);
-    else
+    else if (triggered_spell_id != 31893)
         CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura, originalCaster);
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER)
         ToPlayer()->AddSpellCooldown(triggered_spell_id, 0, time(NULL) + cooldown);
+
+    if (triggered_spell_id == 31893)    // Seal of Blood (must be added after cooldown is added)
+    {
+        CastSpell(pVictim, 31893, true, 0, NULL, originalCaster);
+        // Now handle reflective damage here, and prevent scaling with +damage modifiers
+        int32 baseDamage = CalculateDamage(BASE_ATTACK, false) * 10 / 100; // add spell damage from prev effect (10%)
+        baseDamage += triggeredByAura->GetModifier()->m_amount * baseDamage / 100;
+        CastCustomSpell(this, 32221, &baseDamage, NULL, NULL, true, NULL, triggeredByAura, 0);
+    }
 
     return true;
 }

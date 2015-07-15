@@ -1140,7 +1140,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 0x0000000800000000LL && m_spellInfo->SpellIconID == 153)
         {
             int32 damagePoint  = damageInfo.damage * 33 / 100;
-            m_caster->SetBackfireDamage(damagePoint);
             m_caster->CastCustomSpell(m_caster, 32220, &damagePoint, NULL, NULL, true);
         }
         // Bloodthirst
@@ -1297,11 +1296,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         DiminishingReturnsType type = GetDiminishingReturnsGroupType(m_diminishGroup);
         // Increase Diminishing on unit, current informations for actually casts will use values above
         if ((type == DRTYPE_PLAYER && (unit->GetTypeId() == TYPEID_PLAYER || unit->ToCreature()->isPet() || unit->ToCreature()->isPossessedByPlayer())) || type == DRTYPE_ALL)
-        {
-            if (!(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags & 0x0000000000200000LL) && m_caster != unit) // Don't apply Kidney Shot DR to self
-                unit->IncrDiminishing(m_diminishGroup);
-        }
-            
+            unit->IncrDiminishing(m_diminishGroup);
     }
 
     for (uint32 effectNumber = 0; effectNumber < 3; effectNumber++)
@@ -2301,7 +2296,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         m_caster->SetCurrentCastedSpell(this);
         SendSpellStart();
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER && m_casttime == 0)
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->ToPlayer()->AddGlobalCooldown(m_spellInfo, this);
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -4464,7 +4459,7 @@ uint8 Spell::CanCast(bool strict)
                         // check if dispel makes sense
                         std::vector <Aura *> dispel_list;
                         target->GetDispellableAuraList(m_caster, dispelMask, dispel_list);
-                        if (dispel_list.empty() && !hasOtherEffects)
+                        if (dispel_list.empty() && !hasOtherEffects && !m_IsTriggeredSpell)
                             return SPELL_FAILED_NOTHING_TO_DISPEL;
                     }
                 }

@@ -999,7 +999,7 @@ class Unit : public WorldObject
         void Unmount();
 
         uint16 GetMaxSkillValueForLevel(Unit const* target = NULL) const { return (target ? getLevelForTarget(target) : getLevel()) * 5; }
-        void RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype);
+        void RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffectType damagetype, uint32 spellId = 0);
         uint32 DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, SpellSchoolMask damageSchoolMask = SPELL_SCHOOL_MASK_NORMAL, SpellEntry const *spellProto = NULL, bool durabilityLoss = true);
         void Kill(Unit *pVictim, bool durabilityLoss = true);
 
@@ -1248,7 +1248,7 @@ class Unit : public WorldObject
         void RemoveAurasAtChanneledTarget(SpellEntry const* spellInfo, Unit * caster);
         void RemoveNotOwnSingleTargetAuras();
 
-        void RemoveSpellsCausingAura(AuraType auraType);
+        void RemoveSpellsCausingAura(AuraType auraType, uint32 except = 0);
         void RemoveAuraTypeByCaster(AuraType auraType, uint64 casterGUID);
         void RemoveRankAurasDueToSpell(uint32 spellId);
         bool RemoveNoStackAurasDueToAura(Aura *Aur);
@@ -1327,9 +1327,6 @@ class Unit : public WorldObject
 
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
-
-        uint32 GetBackfireDamage() { return m_backfireDamage; }
-        void SetBackfireDamage(uint32 damage) { m_backfireDamage = (damage > 0 ? damage : 1); }
 
         // Event handler
         EventProcessor m_Events;
@@ -1634,8 +1631,6 @@ class Unit : public WorldObject
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
         uint32 m_lastManaUse;                               // msecs
-
-        uint32 m_backfireDamage;
 
         uint32 m_damageTakenCounter[TOTAL_AURAS];
 

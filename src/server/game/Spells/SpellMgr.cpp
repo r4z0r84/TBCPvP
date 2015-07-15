@@ -1737,6 +1737,34 @@ bool SpellMgr::IsPrimaryProfessionSpell(uint32 spellId)
     return IsPrimaryProfessionSkill(skill);
 }
 
+bool SpellMgr::IsProfessionSpecializationSpell(uint32 spellId)
+{
+    switch (spellId)
+    {
+        case 9787: // Weapon
+        case 9788: // Armor
+        case 17040: // Hammer
+        case 17041: // Axe
+        case 17039: // Sword
+        case 17451: // Rep Armor ?
+        case 17452: // Rep Weapon ?
+        case 10656: // Dragon
+        case 10658: // Elemental
+        case 10660: // Tribal
+        case 20222: // Goblin
+        case 20219: // Gnomish
+        case 26797: // SpellFire
+        case 26798: // MoonCloth
+        case 26801: // ShadowWeave
+        case 28672: // Transmute
+        case 28677: // Elixir
+        case 28675: // Potion
+            return true;
+    }
+
+    return false;
+}
+
 bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 {
     return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId) == 1;
@@ -2392,6 +2420,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 // Eye for an Eye
                 else if (spellInfo->Id == 25997)
                     mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+                // Seal of Blood (Backlash damage)
+                else if (spellInfo->Id == 32221 || spellInfo->Id == 32220)
+                    mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
                 break;
             }
             case SPELLFAMILY_PRIEST:
@@ -2604,6 +2635,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 3600:  // Earthbind Totem
         case 1725:  // Distract
         case 36554: // Shadowstep
+        case 33206: // Pain Supression
+        case 44416: // Pain Supression
             mSpellCustomAttr[i] = SPELL_ATTR_CU_DONT_BREAK_STEALTH;
             break;
         case 43730: // Stormchops effect
@@ -2714,6 +2747,22 @@ void SpellMgr::LoadSpellCustomAttr()
         case 43731: // Lightning Zap on critters (Stormchops)
         case 43733: // Lightning Zap on others (Stormchops)
             mSpellCustomAttr[i] |= SPELL_ATTR_CU_NO_SPELL_DMG_COEFF;
+            break;
+        case 408: // Kidney Shot
+        case 8643:
+            spellInfo->Effect[1] = 0;
+            spellInfo->EffectApplyAuraName[1] = 0;
+            spellInfo->Effect[2] = 0;
+            spellInfo->EffectApplyAuraName[2] = 0;
+            break;
+        case 19975: // Entangling Roots (Nature's Grasp trigger) Rank 1
+        case 19974: // Entangling Roots (Nature's Grasp trigger) Rank 2
+        case 19973: // Entangling Roots (Nature's Grasp trigger) Rank 3
+        case 19972: // Entangling Roots (Nature's Grasp trigger) Rank 4
+        case 19971: // Entangling Roots (Nature's Grasp trigger) Rank 5
+        case 19970: // Entangling Roots (Nature's Grasp trigger) Rank 6
+        case 27010: // Entangling Roots (Nature's Grasp trigger) Rank 7
+            spellInfo->CastingTimeIndex = 0;
             break;
         default:
             break;

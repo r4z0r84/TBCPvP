@@ -288,7 +288,7 @@ void DynamicObjectUpdater::VisitHelper(Unit* target)
             return;
 
         if (IsAggressiveSpell(spellInfo, true))
-            i_check->CombatStart(target);
+            i_check->CombatStart(target, false, spellInfo->Id);
     }
     else
     {
@@ -296,7 +296,7 @@ void DynamicObjectUpdater::VisitHelper(Unit* target)
             return;
 
         if (IsAggressiveSpell(spellInfo, true))
-            i_check->CombatStart(target);
+            i_check->CombatStart(target, false, spellInfo->Id);
     }
 
     // Check target immune to spell or aura

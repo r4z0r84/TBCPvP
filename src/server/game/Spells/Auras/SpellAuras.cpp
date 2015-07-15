@@ -2340,7 +2340,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     if (GetAuraDuration() <= 0 || m_removeMode == AURA_REMOVE_BY_DISPEL)
                     {
                         // final heal
-                        if (m_target->IsInWorld())
+                        if (m_target->IsInWorld() && !m_target->hasUnitState(UNIT_STAT_ISOLATED))
                             m_target->CastCustomSpell(m_target, 33778, &m_modifier.m_amount, NULL, NULL, true, NULL, this, GetCasterGUID());
                     }
                 }
@@ -2654,7 +2654,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_MOONKIN:
             // remove movement affects
             m_target->RemoveMovementImpairingAuras();
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
+            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED, 2094);
 
             // and polymorphic affects
             if (m_target->IsPolymorphed())
@@ -5927,10 +5927,6 @@ void Aura::PeriodicTick()
             pdamage = (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist);
             if (pdamage)
                 procVictim|=PROC_FLAG_TAKEN_ANY_DAMAGE;
-
-            // Shadow Word: Death (Hackfix to deal equal damage)
-            if (GetSpellProto()->Id == 32409)
-                pdamage = pCaster->GetBackfireDamage();
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));// we guess size
             data << m_target->GetPackGUID();

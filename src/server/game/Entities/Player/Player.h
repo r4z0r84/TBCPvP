@@ -1045,12 +1045,13 @@ class Player : public Unit, public GridObject<Player>
 
         void setDeathState(DeathState s);                   // overwrite Unit::setDeathState
 
-        void InnEnter (int time, uint32 mapid, float x, float y, float z)
+        void InnEnter (int time, uint32 mapid, float x, float y, float z, float radius)
         {
             inn_pos_mapid = mapid;
             inn_pos_x = x;
             inn_pos_y = y;
             inn_pos_z = z;
+            inn_pos_radius = radius;
             time_inn_enter = time;
         }
 
@@ -1064,6 +1065,7 @@ class Player : public Unit, public GridObject<Player>
         float GetInnPosX() const { return inn_pos_x; }
         float GetInnPosY() const { return inn_pos_y; }
         float GetInnPosZ() const { return inn_pos_z; }
+        float GetInnPosRadius() const { return inn_pos_radius; }
 
         int GetTimeInnEnter() const { return time_inn_enter; }
         void UpdateInnerTime (int time) { time_inn_enter = time; }
@@ -1815,7 +1817,7 @@ class Player : public Unit, public GridObject<Player>
         bool HasSkill(uint32 skill) const;
         void learnSkillRewardedSpells(uint32 id);
         void learnSkillRewardedSpells();
-        void learnSkillAllSpells(uint32 skill_id, uint32 max_skill);
+        void learnSkillAllSpells(uint32 skill_id, uint16 maxReceipe = 375, uint16 setSkill = 375, uint16 maxSkill = 375);
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
         bool IsBeingTeleported() const { return mSemaphoreTeleport_Near || mSemaphoreTeleport_Far; }
@@ -2466,6 +2468,7 @@ class Player : public Unit, public GridObject<Player>
         float  inn_pos_x;
         float  inn_pos_y;
         float  inn_pos_z;
+        float  inn_pos_radius;
         float m_rest_bonus;
         RestType rest_type;
         ////////////////////Rest System/////////////////////

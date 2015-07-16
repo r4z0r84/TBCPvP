@@ -131,14 +131,12 @@ void WorldSession::HandleLearnTalentOpcode(WorldPacket & recv_data)
         return;
 
     // learn! (other talent ranks will unlearned at learning)
+    GetPlayer()->learnSpell(spellid);
     GetPlayer()->addTalent(spellid, GetPlayer()->GetActiveSpec(), true);
     sLog->outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
 
     // update free talent points
     GetPlayer()->SetFreeTalentPoints(CurTalentPoints - 1);
-
-    // look for higher ranks
-    GetPlayer()->AutoLearnTalentsForLevel();
 }
 
 void WorldSession::HandleTalentWipeOpcode(WorldPacket & recv_data)

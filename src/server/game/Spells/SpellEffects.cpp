@@ -3483,6 +3483,13 @@ void Spell::EffectSummonType(uint32 i)
 
     TempSummon *summon = NULL;
 
+    // Shadowsong Panther
+    if (properties->Id == 407)
+    {
+        EffectSummonCritter(i);
+        return;
+    }
+
     switch (properties->Category)
     {
         case SUMMON_CATEGORY_WILD:

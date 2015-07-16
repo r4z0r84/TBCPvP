@@ -5274,6 +5274,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 if (GetTypeId() != TYPEID_PLAYER)
                     return false;
 
+                // Only proc if target has Incanter's Regalia equiped
+                if (!HasAura(37424, 0))
+                    return false;
+
                 target = this;
                 triggered_spell_id = 37436;
                 break;

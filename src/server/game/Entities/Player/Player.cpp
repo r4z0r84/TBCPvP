@@ -22437,7 +22437,7 @@ void Player::CheckAllElderQuestsDone()
 
 void Player::ActivateSpec(uint8 spec)
 {
-    if (GetFreeTalentPoints() > 0)
+    if (GetFreeTalentPoints() > 0 && GetFreeTalentPoints() != 61)
         return;
 
     if (GetActiveSpec() == spec)

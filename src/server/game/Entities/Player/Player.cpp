@@ -22131,11 +22131,12 @@ void Player::ChangeRace(Player *player, uint32 newRace)
     player->resetSpells();
 
     std::list<CreateSpellPair>::const_iterator new_spell_itr;
-    for (new_spell_itr = info->spell.begin(); new_spell_itr != info->spell.end(); ++new_spell_itr)
+    for (PlayerCreateInfoSpells::const_iterator itr = info->spell.begin(); itr != info->spell.end(); ++itr)
     {
-        uint16 tspell = new_spell_itr->first;
+        uint32 tspell = *itr;
         if (tspell)
-            if (!player->HasSpell(tspell)) player->learnSpell(tspell);
+            if (!player->HasSpell(tspell))
+                player->learnSpell(tspell);
     }
 
     // we have new faction

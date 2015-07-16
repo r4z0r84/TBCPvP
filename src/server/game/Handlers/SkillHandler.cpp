@@ -131,7 +131,6 @@ void WorldSession::HandleLearnTalentOpcode(WorldPacket & recv_data)
         return;
 
     // learn! (other talent ranks will unlearned at learning)
-    GetPlayer()->learnSpell(spellid);
     GetPlayer()->addTalent(spellid, GetPlayer()->GetActiveSpec(), true);
     sLog->outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
 

@@ -2165,12 +2165,7 @@ void ObjectMgr::LoadPlayerInfo()
 
     // Load playercreate spells
     {
-        QueryResult_AutoPtr result = QueryResult_AutoPtr(NULL);
-        if (sWorld->getConfig(CONFIG_START_ALL_SPELLS))
-            result = WorldDatabase.Query("SELECT racemask, classmask, Spell FROM playercreateinfo_spell_custom");
-        else
-            result = WorldDatabase.Query("SELECT racemask, classmask, Spell FROM playercreateinfo_spell");
-
+        QueryResult_AutoPtr result = WorldDatabase.Query("SELECT racemask, classmask, Spell FROM playercreateinfo_spell");
         uint32 count = 0;
 
         if (!result)
@@ -2190,13 +2185,13 @@ void ObjectMgr::LoadPlayerInfo()
 
                 if (raceMask != 0 && !(raceMask & RACEMASK_ALL_PLAYABLE))
                 {
-                    sLog->outErrorDb("Wrong race mask %u in `playercreateinfo_spell_custom` table, ignoring.", raceMask);
+                    sLog->outErrorDb("Wrong race mask %u in `playercreateinfo_spell` table, ignoring.", raceMask);
                     continue;
                 }
 
                 if (classMask != 0 && !(classMask & CLASSMASK_ALL_PLAYABLE))
                 {
-                    sLog->outErrorDb("Wrong class mask %u in `playercreateinfo_spell_custom` table, ignoring.", classMask);
+                    sLog->outErrorDb("Wrong class mask %u in `playercreateinfo_spell` table, ignoring.", classMask);
                     continue;
                 }
 
@@ -2223,6 +2218,64 @@ void ObjectMgr::LoadPlayerInfo()
 
             sLog->outString();
             sLog->outString(">> Loaded %u player create spells", count);
+        }
+    }
+
+    // Load playercreate spells custom
+    {
+        QueryResult_AutoPtr result = WorldDatabase.Query("SELECT racemask, classmask, Spell FROM playercreateinfo_spell_custom");
+        uint32 count = 0;
+
+        if (!result)
+        {
+            sLog->outString();
+            sLog->outString(">> Loaded %u player create spells custom", count);
+            sLog->outErrorDb("Error loading player starting spells custom or empty table.");
+        }
+        else
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                uint32 raceMask = fields[0].GetUInt32();
+                uint32 classMask = fields[1].GetUInt32();
+                uint32 spellId = fields[2].GetUInt32();
+
+                if (raceMask != 0 && !(raceMask & RACEMASK_ALL_PLAYABLE))
+                {
+                    sLog->outErrorDb("Wrong race mask %u in `playercreateinfo_spell_custom` table, ignoring.", raceMask);
+                    continue;
+                }
+
+                if (classMask != 0 && !(classMask & CLASSMASK_ALL_PLAYABLE))
+                {
+                    sLog->outErrorDb("Wrong class mask %u in `playercreateinfo_spell_custom` table, ignoring.", classMask);
+                    continue;
+                }
+
+                for (uint32 raceIndex = RACE_HUMAN; raceIndex < MAX_RACES; ++raceIndex)
+                {
+                    if (raceMask == 0 || ((1 << (raceIndex - 1)) & raceMask))
+                    {
+                        for (uint32 classIndex = CLASS_WARRIOR; classIndex < MAX_CLASSES; ++classIndex)
+                        {
+                            if (classMask == 0 || ((1 << (classIndex - 1)) & classMask))
+                            {
+                                if (PlayerInfo* info = &playerInfo[raceIndex][classIndex])
+                                {
+                                    info->spell_custom.push_back(spellId);
+                                    ++count;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            while (result->NextRow());
+
+            sLog->outString();
+            sLog->outString(">> Loaded %u player create spells custom", count);
         }
     }
 

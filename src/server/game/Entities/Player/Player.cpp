@@ -22527,6 +22527,8 @@ void Player::ActivateSpec(uint8 spec)
 
     m_usedTalentCount = spentTalents;
     InitTalentForLevel();
+
+    GetSession()->LogoutPlayer(true);
 }
 
 std::string Player::GetSpecName(uint8 spec)

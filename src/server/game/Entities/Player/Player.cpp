@@ -3859,6 +3859,9 @@ void Player::addTalent(uint32 spellId, uint8 spec, bool learning)
         newtalent->spec = spec;
 
         (m_talents[spec])[spellId] = newtalent;
+
+        if (learning)
+            learnSpell(spellId);
     }
 }
 

@@ -20538,7 +20538,11 @@ void Player::resetSpells()
     for (PlayerSpellMap::const_iterator iter = smap.begin();iter != smap.end(); ++iter)
         removeSpell(iter->first);                           // only iter->first can be accessed, object by iter->second can be deleted already
 
-    learnDefaultSpells();
+    if (sWorld->getConfig(CONFIG_START_ALL_SPELLS))
+        learnAllSpells(true);
+    else
+        learnDefaultSpells(true);
+
     learnQuestRewardedSpells();
 }
 

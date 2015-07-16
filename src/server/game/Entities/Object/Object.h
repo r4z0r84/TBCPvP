@@ -634,27 +634,27 @@ class WorldObject : public Object, public WorldLocation
             float d = GetExactDist(obj) - (includeObjectSize ? (GetObjectSize() + obj->GetObjectSize()) : 0.0f);
             return d > 0.0f ? d : 0.0f;
         }
-        float GetDistance(const Position &pos) const
+        float GetDistance(const Position &pos, bool includeObjectSize = true) const
         {
-            float d = GetExactDist(&pos) - GetObjectSize();
+            float d = GetExactDist(&pos) - (includeObjectSize ? GetObjectSize() : 0.0f);
             return d > 0.0f ? d : 0.0f;
         }
-        float GetDistance(float x, float y, float z) const
+        float GetDistance(float x, float y, float z, bool includeObjectSize = true) const
         {
-            float d = GetExactDist(x, y, z) - GetObjectSize();
+            float d = GetExactDist(x, y, z) - (includeObjectSize ? GetObjectSize() : 0.0f);
             return d > 0.0f ? d : 0.0f;
         }
-        float GetDistance2d(const WorldObject* obj) const
+        float GetDistance2d(const WorldObject* obj, bool includeObjectSize = true) const
         {
-            float d = GetExactDist2d(obj) - GetObjectSize() - obj->GetObjectSize();
+            float d = GetExactDist2d(obj) - (includeObjectSize ? GetObjectSize() + obj->GetObjectSize() : 0.0f);
             return d > 0.0f ? d : 0.0f;
         }
-        float GetDistance2d(float x, float y) const
+        float GetDistance2d(float x, float y, bool includeObjectSize = true) const
         {
-            float d = GetExactDist2d(x, y) - GetObjectSize();
+            float d = GetExactDist2d(x, y) - (includeObjectSize ? GetObjectSize() : 0.0f);
             return d > 0.0f ? d : 0.0f;
         }
-        float GetDistanceZ(const WorldObject* obj) const;
+        float GetDistanceZ(const WorldObject* obj, bool includeObjectSize = true) const;
 
         bool IsInMap(const WorldObject* obj) const
         {
@@ -663,19 +663,19 @@ class WorldObject : public Object, public WorldLocation
             else
                 return false;
         }
-        bool IsWithinDist3d(float x, float y, float z, float dist) const
-            { return IsInDist(x, y, z, dist + GetObjectSize()); }
-        bool IsWithinDist3d(const Position *pos, float dist) const
-            { return IsInDist(pos, dist + GetObjectSize()); }
-        bool IsWithinDist2d(float x, float y, float dist) const
-            { return IsInDist2d(x, y, dist + GetObjectSize()); }
-        bool IsWithinDist2d(const Position *pos, float dist) const
-            { return IsInDist2d(pos, dist + GetObjectSize()); }
+        bool IsWithinDist3d(float x, float y, float z, float dist, bool includeObjectSize = true) const
+            { return IsInDist(x, y, z, dist + (includeObjectSize ? GetObjectSize() : 0.0f)); }
+        bool IsWithinDist3d(const Position *pos, float dist, bool includeObjectSize = true) const
+            { return IsInDist(pos, dist + (includeObjectSize ? GetObjectSize() : 0.0f)); }
+        bool IsWithinDist2d(float x, float y, float dist, bool includeObjectSize = true) const
+            { return IsInDist2d(x, y, dist + (includeObjectSize ? GetObjectSize() : 0.0f)); }
+        bool IsWithinDist2d(const Position *pos, float dist, bool includeObjectSize = true) const
+            { return IsInDist2d(pos, dist + (includeObjectSize ? GetObjectSize() : 0.0f)); }
         bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D, bool includeObjectSize = true) const;
         // use only if you will sure about placing both object at same map
-        bool IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D = true) const
+        bool IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D = true, bool includeObjectSize = true) const
         {
-            return obj && _IsWithinDist(obj, dist2compare, is3D);
+            return obj && _IsWithinDist(obj, dist2compare, is3D, includeObjectSize);
         }
         bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true, bool includeObjectSize = true) const
         {
@@ -684,9 +684,9 @@ class WorldObject : public Object, public WorldLocation
         bool IsWithinLOS(float x, float y, float z) const;
         bool IsWithinLOSInMap(const WorldObject* obj) const;
         bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
-        bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
-        bool IsInRange2d(float x, float y, float minRange, float maxRange) const;
-        bool IsInRange3d(float x, float y, float z, float minRange, float maxRange) const;
+        bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true, bool includeObjectSize = true) const;
+        bool IsInRange2d(float x, float y, float minRange, float maxRange, bool includeObjectSize = true) const;
+        bool IsInRange3d(float x, float y, float z, float minRange, float maxRange, bool includeObjectSize = true) const;
 
         virtual void CleanupsBeforeDelete();                // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 

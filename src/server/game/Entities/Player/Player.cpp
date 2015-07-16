@@ -3842,7 +3842,12 @@ void Player::addTalent(uint32 spellId, uint8 spec, bool learning)
         {
             for (uint8 rank = 0; rank < MAX_TALENT_RANK; ++rank)
             {
-                itr = m_talents[spec].find(talentInfo->RankID[rank]);
+                // skip learning spell and no rank spell case
+                uint32 rankSpellId = talentInfo->RankID[rank];
+                if (!rankSpellId || rankSpellId == spellId)
+                    continue;
+
+                itr = m_talents[spec].find(rankSpellId);
                 if (itr != m_talents[spec].end())
                     itr->second->state = PLAYERSPELL_REMOVED;
             }
@@ -3855,9 +3860,6 @@ void Player::addTalent(uint32 spellId, uint8 spec, bool learning)
         newtalent->spec = spec;
 
         (m_talents[spec])[spellId] = newtalent;
-
-        if (learning)
-            learnSpell(spellId);
     }
 }
 

@@ -2696,6 +2696,7 @@ void Spell::EffectHeal(uint32 /*i*/)
 void Spell::SpellDamageHeal(uint32 /*i*/)
 {
     float EffectModifier = 1.0f;
+    bool applyModHealingPct = false;
 
     if (unitTarget && unitTarget->isAlive() && damage >= 0)
     {
@@ -2721,6 +2722,7 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
                 m_caster->RemoveAurasDueToSpell(45062);
 
             addhealth += damageAmount;
+            applyModHealingPct = true;
         }
         // Swiftmend - consumes Regrowth or Rejuvenation
         else if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND))
@@ -2756,8 +2758,14 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
                 tickCount = 6;
 
             addhealth += tickHeal * tickCount;
+            applyModHealingPct = true;
             unitTarget->RemoveAurasByCasterSpell(targetAura->GetId(), targetAura->GetCasterGUID());
+        }
+        else
+            addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth, HEAL, unitTarget);
 
+        if (applyModHealingPct)
+        {
             float negativeMod = unitTarget->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
             if (negativeMod)
                 EffectModifier *= (100.0f + negativeMod) / 100.0f;
@@ -2765,8 +2773,6 @@ void Spell::SpellDamageHeal(uint32 /*i*/)
             if (positiveMod)
                 EffectModifier *= (100.0f + positiveMod) / 100.0f;
         }
-        else
-            addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth, HEAL, unitTarget);
 
         addhealth *= EffectModifier;
 

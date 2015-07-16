@@ -629,9 +629,9 @@ class WorldObject : public Object, public WorldLocation
 
         virtual const char* GetNameForLocaleIdx(int32 /*locale_idx*/) const { return GetName(); }
 
-        float GetDistance(const WorldObject *obj) const
+        float GetDistance(const WorldObject *obj, bool includeObjectSize = true) const
         {
-            float d = GetExactDist(obj) - GetObjectSize() - obj->GetObjectSize();
+            float d = GetExactDist(obj) - (includeObjectSize ? (GetObjectSize() + obj->GetObjectSize()) : 0.0f);
             return d > 0.0f ? d : 0.0f;
         }
         float GetDistance(const Position &pos) const
@@ -671,15 +671,15 @@ class WorldObject : public Object, public WorldLocation
             { return IsInDist2d(x, y, dist + GetObjectSize()); }
         bool IsWithinDist2d(const Position *pos, float dist) const
             { return IsInDist2d(pos, dist + GetObjectSize()); }
-        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
+        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D, bool includeObjectSize = true) const;
         // use only if you will sure about placing both object at same map
         bool IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D = true) const
         {
             return obj && _IsWithinDist(obj, dist2compare, is3D);
         }
-        bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true) const
+        bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true, bool includeObjectSize = true) const
         {
-            return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D);
+            return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D, includeObjectSize);
         }
         bool IsWithinLOS(float x, float y, float z) const;
         bool IsWithinLOSInMap(const WorldObject* obj) const;

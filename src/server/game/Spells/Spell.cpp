@@ -4931,7 +4931,7 @@ uint8 Spell::CheckRange(bool strict, bool initialCheck)
 
     if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_dstPos.GetPositionX() != 0 && m_targets.m_dstPos.GetPositionY() != 0 && m_targets.m_dstPos.GetPositionZ() != 0)
     {
-        float dist = m_caster->GetDistance(m_targets.m_dstPos);
+        float dist = m_caster->GetDistance(m_targets.m_dstPos) + m_caster->GetObjectSize();
         if (dist > max_range)
             return SPELL_FAILED_OUT_OF_RANGE;
         if (dist < min_range)

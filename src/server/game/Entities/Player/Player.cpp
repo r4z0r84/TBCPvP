@@ -20545,14 +20545,14 @@ void Player::learnDefaultSpells(bool loading)
     // learn default race/class spells
     PlayerInfo const *info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     std::list<CreateSpellPair>::const_iterator spell_itr;
-    for (spell_itr = info->spell.begin(); spell_itr != info->spell.end(); ++spell_itr)
+    for (PlayerCreateInfoSpells::const_iterator itr = info->spell.begin(); itr != info->spell.end(); ++itr)
     {
-        uint16 tspell = spell_itr->first;
+        uint32 tspell = *itr;
         if (tspell)
         {
-            sLog->outDebug("PLAYER: Adding initial spell, id = %u", tspell);
-            if (loading || !spell_itr->second)               // not care about passive spells or loading case
-                addSpell(tspell, spell_itr->second);
+            sLog->outDebug("PLAYER (Class: %u Race: %u): Adding initial spell, id = %u", uint32(getClass()), uint32(getRace()), tspell);
+            if (loading)                                    // not care about passive spells or loading case
+                addSpell(tspell, true, true, true, false);
             else                                            // but send in normal spell in game learn case
                 learnSpell(tspell);
         }

@@ -2167,9 +2167,9 @@ void ObjectMgr::LoadPlayerInfo()
     {
         QueryResult_AutoPtr result = QueryResult_AutoPtr(NULL);
         if (sWorld->getConfig(CONFIG_START_ALL_SPELLS))
-            result = WorldDatabase.Query("SELECT race, class, Spell, Active FROM playercreateinfo_spell_custom");
+            result = WorldDatabase.Query("SELECT racemask, classmask, Spell FROM playercreateinfo_spell_custom");
         else
-            result = WorldDatabase.Query("SELECT race, class, Spell, Active FROM playercreateinfo_spell");
+            result = WorldDatabase.Query("SELECT racemask, classmask, Spell FROM playercreateinfo_spell");
 
         uint32 count = 0;
 
@@ -2184,26 +2184,41 @@ void ObjectMgr::LoadPlayerInfo()
             do
             {
                 Field* fields = result->Fetch();
+                uint32 raceMask  = fields[0].GetUInt32();
+                uint32 classMask = fields[1].GetUInt32();
+                uint32 spellId   = fields[2].GetUInt32();
 
-                uint32 current_race = fields[0].GetUInt32();
-                if (current_race >= MAX_RACES)
+                if (raceMask != 0 && !(raceMask & RACEMASK_ALL_PLAYABLE))
                 {
-                    sLog->outErrorDb("Wrong race %u in playercreateinfo_spell table, ignoring.", current_race);
+                    sLog->outErrorDb("Wrong race mask %u in `playercreateinfo_spell_custom` table, ignoring.", raceMask);
                     continue;
                 }
 
-                uint32 current_class = fields[1].GetUInt32();
-                if (current_class >= MAX_CLASSES)
+                if (classMask != 0 && !(classMask & CLASSMASK_ALL_PLAYABLE))
                 {
-                    sLog->outErrorDb("Wrong class %u in playercreateinfo_spell table, ignoring.", current_class);
+                    sLog->outErrorDb("Wrong class mask %u in `playercreateinfo_spell_custom` table, ignoring.", classMask);
                     continue;
                 }
 
-                PlayerInfo* pInfo = &playerInfo[current_race][current_class];
-                pInfo->spell.push_back(CreateSpellPair(fields[2].GetUInt16(), fields[3].GetUInt8()));
-
-                ++count;
+                for (uint32 raceIndex = RACE_HUMAN; raceIndex < MAX_RACES; ++raceIndex)
+                {
+                    if (raceMask == 0 || ((1 << (raceIndex - 1)) & raceMask))
+                    {
+                        for (uint32 classIndex = CLASS_WARRIOR; classIndex < MAX_CLASSES; ++classIndex)
+                        {
+                            if (classMask == 0 || ((1 << (classIndex - 1)) & classMask))
+                            {
+                                if (PlayerInfo* info = &playerInfo[raceIndex][classIndex])
+                                {
+                                    info->spell.push_back(spellId);
+                                    ++count;
+                                }
+                            }
+                        }
+                    }
+                }
             }
+
             while (result->NextRow());
 
             sLog->outString();

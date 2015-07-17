@@ -195,6 +195,7 @@ struct PlayerCreateInfoItem
 };
 
 typedef std::list<PlayerCreateInfoItem> PlayerCreateInfoItems;
+typedef std::list<uint32> PlayerCreateInfoSpells;
 
 struct PlayerClassLevelInfo
 {
@@ -233,7 +234,8 @@ struct PlayerInfo
     uint16 displayId_m;
     uint16 displayId_f;
     PlayerCreateInfoItems item;
-    std::list<CreateSpellPair> spell;
+    PlayerCreateInfoSpells spell;
+    PlayerCreateInfoSpells spell_custom;
     std::list<uint16> action[4];
 
     PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1
@@ -1510,6 +1512,7 @@ class Player : public Unit, public GridObject<Player>
         void removeSpell(uint32 spell_id, bool disabled = false, bool isFromTalent = false);
         void resetSpells();
         void learnDefaultSpells(bool loading = false);
+        void learnAllSpells(bool loading = false);
         void learnQuestRewardedSpells();
         void learnQuestRewardedSpells(Quest const* quest);
         void learnSpellHighRank(uint32 spellid);

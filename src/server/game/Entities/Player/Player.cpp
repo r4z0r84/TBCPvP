@@ -4045,11 +4045,12 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
-    for (unsigned int i = 0; i < sTalentStore.GetNumRows(); ++i)
+    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
     {
-        TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
+        TalentEntry const *talentInfo = sTalentStore.LookupEntry(talentId);
 
-        if (!talentInfo) continue;
+        if (!talentInfo)
+            continue;
 
         TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
 
@@ -4062,36 +4063,36 @@ bool Player::resetTalents(bool no_cost)
         if ((getClassMask() & talentTabInfo->ClassMask) == 0)
             continue;
 
-        for (int j = 0; j < 5; ++j)
+        for (int8 rank = MAX_TALENT_RANK - 1; rank >= 0; --rank)
         {
-            for (PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();)
-            {
-                if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled)
-                {
-                    ++itr;
-                    continue;
-                }
+            // skip non-existant talent ranks
+            if (talentInfo->RankID[rank] == 0)
+                continue;
 
-                // remove learned spells (all ranks)
-                uint32 itrFirstId = sSpellMgr->GetFirstSpellInChain(itr->first);
+            const SpellEntry* _spellEntry = GetSpellStore()->LookupEntry(talentInfo->RankID[rank]);
+            if (!_spellEntry)
+                continue;
+            removeSpell(talentInfo->RankID[rank], true);
+            // skip non-existant talent ranks
+            if (talentInfo->RankID[rank] == 0)
+                continue;
 
-                // unlearn if first rank is talent or learned by talent
-                if (itrFirstId == talentInfo->RankID[j] || sSpellMgr->IsSpellLearnToSpell(talentInfo->RankID[j], itrFirstId))
-                {
-                    removeSpell(itr->first, !IsPassiveSpell(itr->first));
-                    // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
-                    PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec].find(talentInfo->RankID[j]);
-                    if (plrTalent != m_talents[m_activeSpec].end())
-                        plrTalent->second->state = PLAYERSPELL_REMOVED;
-                    itr = GetSpellMap().begin();
-                    continue;
-                }
-                else
-                    ++itr;
-            }
+            const SpellEntry* spellEntry = GetSpellStore()->LookupEntry(talentInfo->RankID[rank]);
+            if (!spellEntry)
+                continue;
+            removeSpell(talentInfo->RankID[rank], true);
+            // search for spells that the talent teaches and unlearn them
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                if (_spellEntry->EffectTriggerSpell[i] > 0 && _spellEntry->Effect[i] == SPELL_EFFECT_LEARN_SPELL)
+                    removeSpell(_spellEntry->EffectTriggerSpell[i], true);
+            // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
+            PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec].find(talentInfo->RankID[rank]);
+            if (plrTalent != m_talents[m_activeSpec].end())
+                plrTalent->second->state = PLAYERSPELL_REMOVED;
         }
     }
 
+    _ResetTalentMap(GetActiveSpec());
     _SaveTalents();
     _SaveSpells();
 
@@ -17795,6 +17796,16 @@ void Player::_SaveReputation()
             CharacterDatabase.PExecute("INSERT INTO character_reputation (guid, faction, standing, flags) VALUES ('%u', '%u', '%i', '%u')", GetGUIDLow(), itr->second.ID, itr->second.Standing, itr->second.Flags);
             itr->second.Changed = false;
         }
+    }
+}
+
+void Player::_ResetTalentMap(uint8 specEntry)
+{
+    for (PlayerTalentMap::const_iterator itr = m_talents[specEntry].begin(); itr != m_talents[specEntry].end();)
+    {
+        CharacterDatabase.PExecute("DELETE FROM character_talent WHERE guid = '%u' and spell = '%u' and spec = '%u'", GetGUIDLow(), itr->first, itr->second->spec);
+        delete itr->second;
+        m_talents[specEntry].erase(itr++);
     }
 }
 

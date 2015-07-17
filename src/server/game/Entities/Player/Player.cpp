@@ -17803,10 +17803,11 @@ void Player::_ResetTalentMap(uint8 specEntry)
 {
     for (PlayerTalentMap::const_iterator itr = m_talents[specEntry].begin(); itr != m_talents[specEntry].end();)
     {
-        CharacterDatabase.PExecute("DELETE FROM character_talent WHERE guid = '%u' and spell = '%u' and spec = '%u'", GetGUIDLow(), itr->first, itr->second->spec);
         delete itr->second;
         m_talents[specEntry].erase(itr++);
     }
+
+    CharacterDatabase.PExecute("DELETE FROM character_talent WHERE spec = '%u'", specEntry);
 }
 
 void Player::_SaveTalents()

@@ -226,8 +226,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {16466, 12962, 12963, 12867, 12712, 16494, 12292, 12785, 29889, 12668, 29859, 12294, 30330, 29838, 12856, 12838, 12322, 12323, 16492, 13048, 12328, 20505, 12677};
-            talentsCount = 23; // talent spell count from above
+            uint32 talents[] = {16466, 12962, 12963, 12867, 12712, 16494, 12292, 12785, 29889, 12668, 29859, 12294, 29838, 12856, 12838, 12322, 12323, 16492, 13048, 12328, 20505, 12677};
+            talentsCount = 22; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -265,7 +265,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {16466, 12962, 12963, 12867, 12712, 16494, 12292, 12704, 29889, 12668, 29859, 12294, 30330, 29838, 12856, 12838, 12322, 12323, 16492, 13048, 12328, 20505, 12677};
+            uint32 talents[] = {16466, 12962, 12963, 12867, 12712, 16494, 12292, 12704, 29889, 12668, 29859, 12294, 12294, 29838, 12856, 12838, 12322, 12323, 16492, 13048, 12328, 20505, 12677};
             talentsCount = 23; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -304,7 +304,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {16466, 12962, 12963, 12867, 12712, 16494, 12292, 12815, 29889, 12668, 29859, 12294, 30330, 29838, 12856, 12838, 12322, 12323, 16492, 13048, 12328, 20505, 12677};
+            uint32 talents[] = {16466, 12962, 12963, 12867, 12712, 16494, 12292, 12815, 29889, 12668, 29859, 12294, 12294, 29838, 12856, 12838, 12322, 12323, 16492, 13048, 12328, 20505, 12677};
             talentsCount = 23; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -343,8 +343,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {20261, 20209, 20224, 20239, 31821, 25836, 20215, 20216, 20361, 25829, 33072, 31830, 31833, 31841, 31842, 20137, 20175, 20146, 20217, 25898, 20470, 31845, 20256};
-            talentsCount = 23; // talent spell count from above
+            uint32 talents[] = {20261, 20209, 20224, 20239, 31821, 25836, 20215, 20216, 20361, 25829, 20473, 31830, 31833, 31841, 31842, 20137, 20175, 20146, 20217, 20470, 31845, 20256};
+            talentsCount = 22; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -382,8 +382,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {20261, 20332, 20208, 20239, 25836, 20215, 20216, 25829, 20473, 33072, 31830, 31841, 20105, 25957, 20337, 26021, 44414, 25988, 31867, 20218};
-            talentsCount = 20; // talent spell count from above
+            uint32 talents[] = {20261, 20332, 20208, 20239, 25836, 20215, 20216, 25829, 20473, 31830, 31841, 20105, 25957, 20337, 26021, 44414, 25988, 31867, 20218};
+            talentsCount = 19; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -421,8 +421,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {20105, 25957, 20337, 26021, 20121, 20375, 27170, 44414, 25988, 20113, 20218, 20059, 31878, 20066, 35397, 35395, 20137, 20193, 20175, 20143, 20217, 25898, 20470, 31845, 20489};
-            talentsCount = 25; // talent spell count from above
+            uint32 talents[] = {20105, 25957, 20337, 26021, 20121, 20375, 44414, 25988, 20113, 20218, 20059, 31878, 20066, 35397, 35395, 20137, 20193, 20175, 20143, 20217, 20470, 31845, 20489};
+            talentsCount = 23; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -460,8 +460,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {19587, 35030, 19609, 19575, 19596, 19620, 19573, 19602, 19577, 19592, 19625, 34460, 19574, 34470, 34692, 19431, 19415, 34954, 19434, 27065, 34949, 19490};
-            talentsCount = 22; // talent spell count from above
+            uint32 talents[] = {19587, 35030, 19609, 19575, 19596, 19620, 19573, 19602, 19577, 19592, 19625, 34460, 19574, 34470, 34692, 19431, 19415, 34954, 19434, 34949, 19490};
+            talentsCount = 21; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             CreatePet(player, creature, PET_RAVAGER);
@@ -500,7 +500,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },             // TABARD
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {19587, 19575, 19415, 19431, 34954, 27065, 34949, 19468, 19490, 19503, 34476, 19511, 34484, 27066, 34489, 34490, 19152, 19500, 19387, 19233, 19263};
+            uint32 talents[] = {19587, 19575, 19415, 19431, 34954, 19434, 34949, 19468, 19490, 19503, 34476, 19511, 34484, 19506, 34489, 34490, 19152, 19500, 19387, 19233, 19263};
             talentsCount = 21; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -540,8 +540,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {19431, 19415, 34954, 19434, 27065, 34949, 19490, 19503, 19152, 19500, 19388, 19233, 19259, 19263, 24283, 34496, 19373, 24297, 34497, 19386, 27068, 34503, 34839};
-            talentsCount = 23; // talent spell count from above
+            uint32 talents[] = {19431, 19415, 34954, 19434, 19434, 34949, 19490, 19503, 19152, 19500, 19388, 19233, 19259, 19263, 24283, 34496, 19373, 24297, 34497, 19386, 34503, 34839};
+            talentsCount = 22; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             CreatePet(player, creature, PET_WIND_SERPENT);
@@ -580,7 +580,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },             // TABARD
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {14142, 14161, 14159, 13866, 14179, 14137, 14117, 31209, 14177, 14176, 31245, 14195, 14983, 31242, 34413, 14075, 14094, 14065, 13980, 14066 };
+            uint32 talents[] = {14142, 14161, 14159, 13866, 14179, 14137, 14117, 31209, 14177, 14176, 31245, 14195, 14983, 31242, 1329, 14075, 14094, 14065, 13980, 14066 };
             talentsCount = 20; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -619,7 +619,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },             // TABARD
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {14142, 14161, 14159, 14179, 14137, 16719, 13973, 14094, 14064, 13980, 14278, 14066, 14173, 30895, 14185, 14083, 26864, 30906, 31230, 14183, 31220, 36554 };
+            uint32 talents[] = {14142, 14161, 14159, 14179, 14137, 16719, 13973, 14094, 14064, 13980, 14278, 14066, 14173, 30895, 14185, 14083, 16511, 30906, 31230, 14183, 31220, 36554 };
             talentsCount = 22; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -658,8 +658,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {14791, 14769, 14774, 33172, 14751, 14777, 14783, 14772, 18555, 14752, 25312, 32999, 33190, 45244, 10060, 33205, 34912, 33206, 15012, 17191, 18535, 27901, 15237, 25331, 27811};
-            talentsCount = 25; // talent spell count from above
+            uint32 talents[] = {14791, 14769, 14774, 33172, 14751, 14777, 14783, 14772, 18555, 14752, 33190, 45244, 10060, 33205, 34912, 33206, 15012, 17191, 18535, 27901, 15237, 27811};
+            talentsCount = 22; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -697,8 +697,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {14791, 14769, 14774, 33172, 14751, 14521, 14783, 15326, 15317, 15328, 15448, 15312, 15407, 25387, 17323, 15334, 15487, 15286, 27840, 33215, 15310, 15473, 33195, 34914, 34917};
-            talentsCount = 25; // talent spell count from above
+            uint32 talents[] = {14791, 14769, 14774, 33172, 14751, 14521, 14783, 15326, 15317, 15328, 15448, 15312, 15407, 17323, 15334, 15487, 15286, 27840, 33215, 15310, 15473, 33195, 34914};
+            talentsCount = 23; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -814,7 +814,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {16217, 16240, 16222, 16234, 16189, 16208, 16194, 16188, 30866, 16213, 16190, 30886, 30869, 974, 32594, 16301, 16293, 16287, 16261, 16274, 16309};
+            uint32 talents[] = {16217, 16240, 16222, 16234, 16189, 16208, 16194, 16188, 30866, 16213, 16190, 30886, 30869, 974, 974, 16301, 16293, 16287, 16261, 16274, 16309};
             talentsCount = 21; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -853,7 +853,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {12464, 12840, 12592, 29446, 12577, 28574, 12598, 12043, 12502, 15060, 31572, 31582, 12042, 35581, 31588, 12360, 12848, 12353, 11080, 33938, 18460, 12873, 33933};
+            uint32 talents[] = {12464, 12840, 12592, 29446, 12577, 28574, 12598, 12043, 12502, 15060, 31572, 31582, 12042, 35581, 31588, 12360, 12848, 12353, 11080, 11366, 18460, 12873, 11113};
             talentsCount = 23; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -892,7 +892,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {12341, 12360, 12848, 12353, 18460, 33938, 12351, 12873, 13043, 29075, 11368, 33933, 31642, 12400, 11129, 31680, 33043, 12592, 16770, 12839, 12577, 28574, 12598};
+            uint32 talents[] = {12341, 12360, 12848, 12353, 18460, 11366, 12351, 12873, 13043, 29075, 11368, 11113, 31642, 12400, 11129, 31680, 31661, 12592, 16770, 12839, 12577, 28574, 12598};
             talentsCount = 23; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -931,8 +931,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {12592, 12840, 29446, 12577, 28574, 12598, 16766, 15053, 12497, 12475, 12571, 12953, 12472, 12488, 16758, 12985, 11958, 31672, 28594, 11426, 33405, 31676, 31687};
-            talentsCount = 23; // talent spell count from above
+            uint32 talents[] = {12592, 12840, 29446, 12577, 28574, 12598, 16766, 15053, 12497, 12475, 12571, 12953, 12472, 12488, 16758, 12985, 11958, 31672, 28594, 11426, 31676, 31687};
+            talentsCount = 22; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -970,8 +970,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {17814, 18174, 18183, 17805, 18829, 17787, 18288, 18219, 18095, 32383, 32385, 18265, 30911, 18223, 18275, 30064, 30057, 30108, 30405, 18701, 18693, 18704, 17803, 17792, 17877, 30546};
-            talentsCount = 26; // talent spell count from above
+            uint32 talents[] = {17814, 18174, 18183, 17805, 18829, 17787, 18288, 18219, 18095, 32383, 32385, 18265, 18223, 18275, 30064, 30057, 30108, 18701, 18693, 18704, 17803, 17792, 17877, 17877};
+            talentsCount = 24; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -1009,8 +1009,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {17814, 18693, 18744, 18708, 18750, 30145, 18710, 18773, 18788, 30327, 23825, 30321, 19028, 35693, 30248, 30146, 17803, 17792, 17877, 30546, 18701};
-            talentsCount = 21; // talent spell count from above
+            uint32 talents[] = {17814, 18693, 18744, 18708, 18750, 30145, 18710, 18773, 18788, 30327, 23825, 30321, 19028, 35693, 30248, 30146, 17803, 17792, 17877, 18701};
+            talentsCount = 20; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -1048,7 +1048,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {18701, 18693, 18744, 18708, 18710, 18750, 30145, 18773, 18788, 23825, 30326, 30321, 19028, 17814, 18174, 18183, 17805, 18829, 17784, 18288, 18219, 18095, 32383, 32385, 18265, 30911, 18223, 35691};
+            uint32 talents[] = {18701, 18693, 18744, 18708, 18710, 18750, 30145, 18773, 18788, 23825, 30326, 30321, 19028, 17814, 18174, 18183, 17805, 18829, 17784, 18288, 18219, 18095, 32383, 32385, 18265, 18265, 18223, 35691};
             talentsCount = 28; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -1087,8 +1087,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {17814, 18701, 18693, 17782, 17792, 18183, 18134, 17877, 18136, 17918, 17836, 17959, 30302, 17958, 34939, 17962, 30912, 30546, 30296, 30292, 30296, 30414};
-            talentsCount = 22; // talent spell count from above
+            uint32 talents[] = {17814, 18701, 18693, 17782, 17792, 18183, 18134, 17877, 18136, 17918, 17836, 17959, 30302, 17958, 34939, 17962, 17877, 30296, 30292, 30296, 30283};
+            talentsCount = 21; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -1126,8 +1126,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {16818, 16689, 27009, 16920, 35364, 16822, 5570, 27013, 16820, 16913, 16924, 33591, 16880, 16847, 16901, 33956, 24858, 33607, 16862, 16941, 16931, 16979, 17061};
-            talentsCount = 23; // talent spell count from above
+            uint32 talents[] = {16818, 16689, 16689, 16920, 35364, 16822, 5570, 16820, 16913, 16924, 33591, 16880, 16847, 16901, 33956, 24858, 33607, 16862, 16941, 16931, 16979, 17061};
+            talentsCount = 22; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -1165,8 +1165,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {16938, 16941, 16931, 24866, 16979, 16944, 16968, 16975, 37117, 16999, 16857, 27011, 33873, 24894, 33853, 33957, 17007, 34300, 33869, 33917, 33983, 33987, 16689, 27009, 17061, 17073, 16835, 16864};
-            talentsCount = 28; // talent spell count from above
+            uint32 talents[] = {16938, 16941, 16931, 24866, 16979, 16944, 16968, 16975, 37117, 16999, 16857, 33873, 24894, 33853, 33957, 17007, 34300, 33869, 33917, 33876, 33878, 16689, 16689, 17061, 17073, 16835, 16864};
+            talentsCount = 27; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;
@@ -1204,7 +1204,7 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {16818, 27009, 17245, 16920, 27013, 16862, 16941, 16931, 16979, 17061, 17061, 17051, 16835, 17108, 17122, 17113, 17116, 24946, 17076, 33883, 18562, 34151, 33889 };
+            uint32 talents[] = {16818, 16689, 17245, 16920, 5570, 16862, 16941, 16931, 16979, 17061, 17061, 17051, 16835, 17108, 17122, 17113, 17116, 24946, 17076, 33883, 18562, 34151, 33889 };
             talentsCount = 23; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
@@ -1243,8 +1243,8 @@ bool GossipSelect_npc_template(Player *player, Creature *creature, uint32 sender
                 { 0, 0, 0 },
             };
             // add all talents spells (max rank which should be learned) here, no order necessary
-            uint32 talents[] = {16818, 16689, 17249, 16920, 16822, 5570, 27013, 16820, 16924, 33591, 16880, 16847, 33596, 33956, 24858, 24905, 17061, 17051, 16835, 17108, 17122, 17113, 17116, 24946};
-            talentsCount = 24; // talent spell count from above
+            uint32 talents[] = {16818, 16689, 17249, 16920, 16822, 5570, 16820, 16924, 33591, 16880, 16847, 33596, 33956, 24858, 24905, 17061, 17051, 16835, 17108, 17122, 17113, 17116, 24946};
+            talentsCount = 23; // talent spell count from above
 
             AddItemsEnchantsGemsTalents(player, items, sockets, enchants, talents, itemsCount, talentsCount);
             break;

@@ -17807,7 +17807,7 @@ void Player::_ResetTalentMap(uint8 specEntry)
         m_talents[specEntry].erase(itr++);
     }
 
-    CharacterDatabase.PExecute("DELETE FROM character_talent WHERE spec = '%u'", specEntry);
+    CharacterDatabase.PExecute("DELETE FROM character_talent WHERE guid = '%u' AND spec = '%u'", GetGUIDLow(), specEntry);
 }
 
 void Player::_SaveTalents()

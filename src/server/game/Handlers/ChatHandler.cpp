@@ -202,7 +202,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (GetPlayer()->isSpectator())
                 break;
 
-            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_MUTED))
                 break;
 
             if (!processChatmessageFurtherAfterSecurityChecks(msg, lang))
@@ -235,7 +235,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
-            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_MUTED))
                 break;
 
             if (!normalizePlayerName(to))
@@ -483,7 +483,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
-            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_MUTED))
                 break;
 
             if (GetPlayer()->SpamCheckForType(type, lang))
@@ -515,7 +515,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
-            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_MUTED))
                 break;
 
             //battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
@@ -544,7 +544,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (msg.empty())
                 break;
 
-            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+            if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_MUTED))
                 break;
 
             if (GetPlayer()->SpamCheckForType(type, lang))
@@ -645,7 +645,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recv_data)
     if (GetPlayer()->isSpectator())
         return;
 
-    if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_RUUREN))
+    if (GetPlayer()->HasAtLoginFlag(AT_LOGIN_MUTED))
         return;
 
     GetPlayer()->UpdateSpeakTime(true);

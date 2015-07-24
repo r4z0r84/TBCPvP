@@ -494,6 +494,7 @@ class ChatHandler
         bool HandleCharacterEraseCommand(const char* args);
         bool HandleCharacterRenameCommand(const char * args);
         bool HandleCharacterLockCommand(const char * args);
+        bool HandleCharacterMuteCommand(const char * args);
         bool HandleComeToMeCommand(const char *args);
         bool HandleCombatStopCommand(const char *args);
         bool HandleCharDeleteCommand(const char *args);

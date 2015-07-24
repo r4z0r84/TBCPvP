@@ -2848,3 +2848,53 @@ bool ChatHandler::HandleDrunkCommand(const char* args)
     return true;
 }
 
+// Mute the character from all public correspondence
+bool ChatHandler::HandleCharacterMuteCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    char *character_name_str = strtok((char*)args," ");
+    if (!character_name_str)
+        return false;
+
+    std::string character_name = character_name_str;
+    if (!normalizePlayerName(character_name))
+        return false;
+
+    uint64 character_guid;
+    Player *player = sObjectMgr->GetPlayer(character_name.c_str());
+    if (player)
+        player->SetAtLoginFlag(AT_LOGIN_MUTED);
+    else
+    {
+        character_guid = sObjectMgr->GetPlayerGUIDByName(character_name);
+        if (!character_guid)
+        {
+            PSendSysMessage(LANG_NO_PLAYER, character_name.c_str());
+            SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint8 at_login = 0;
+        QueryResult_AutoPtr resultChar = CharacterDatabase.PQuery("SELECT at_login FROM characters WHERE guid = '%u'", GUID_LOPART(character_guid));
+        if (resultChar)
+        {
+            Field *fields = resultChar->Fetch();
+            at_login = fields[0].GetUInt8();
+        }
+        if (at_login & AT_LOGIN_MUTED) // Character already muted, remove it
+        {
+            at_login &= ~ AT_LOGIN_MUTED;
+            PSendSysMessage(LANG_UNMUTE_CHAR, character_name.c_str());
+        }
+        else
+        {
+            at_login |= AT_LOGIN_MUTED;
+            PSendSysMessage(LANG_MUTE_CHAR, character_name.c_str());
+        }
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = '%u' WHERE guid = '%u'", at_login, GUID_LOPART(character_guid));
+
+    }
+    return true;
+}

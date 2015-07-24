@@ -723,7 +723,10 @@ enum SkyFireStrings
     LANG_BAN_CHAR                       = 816,
     LANG_UNBAN_CHAR                     = 817,
 
-    // Room for in-game strings           818-999 not used
+    LANG_MUTE_CHAR                      = 818,
+    LANG_UNMUTE_CHAR                    = 819,
+
+    // Room for in-game strings           820-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,

@@ -211,6 +211,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "rename",        SEC_GAMEMASTER,     true,  &ChatHandler::HandleCharacterRenameCommand,     "", NULL },
         { "titles",        SEC_GAMEMASTER,     true,  &ChatHandler::HandleCharacterTitlesCommand,     "", NULL },
         { "lock",          SEC_GAMEMASTER,     true,  &ChatHandler::HandleCharacterLockCommand,       "", NULL },
+        { "mute",          SEC_MODERATOR,      true,  &ChatHandler::HandleCharacterMuteCommand,       "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 

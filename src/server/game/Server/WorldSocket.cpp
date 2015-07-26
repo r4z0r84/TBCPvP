@@ -813,7 +813,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
             WorldPacket Packet (SMSG_AUTH_RESPONSE, 1);
             Packet << uint8 (AUTH_UNAVAILABLE);
 
-            SendPacket (packet);
+            SendPacket(packet);
 
             return -1;
         }

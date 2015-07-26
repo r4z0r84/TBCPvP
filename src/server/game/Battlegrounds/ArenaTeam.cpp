@@ -81,8 +81,8 @@ bool ArenaTeam::Create(uint64 captainGuid, uint32 type, std::string arenaTeamNam
     CharacterDatabase.BeginTransaction();
     // CharacterDatabase.PExecute("DELETE FROM arena_team WHERE arenateamid='%u'", m_TeamId); - MAX(arenateam)+1 not exist
     CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid='%u'", m_TeamId);
-    CharacterDatabase.PExecute("INSERT INTO arena_team (arenateamid, name, captainguid, type, BackgroundColor, EmblemStyle, EmblemColor, BorderStyle, BorderColor) "
-        "VALUES('%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+    CharacterDatabase.PExecute("INSERT INTO arena_team (arenateamid, name, captainguid, type, BackgroundColor, EmblemStyle, EmblemColor, BorderStyle, BorderColor, qualified) "
+        "VALUES('%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
         m_TeamId, arenaTeamName.c_str(), GUID_LOPART(m_CaptainGuid), m_Type, m_BackgroundColor, m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor, m_Qualified);
     CharacterDatabase.PExecute("INSERT INTO arena_team_stats (arenateamid, rating, games, wins, played, wins2, rank) VALUES "
         "('%u', '%u', '%u', '%u', '%u', '%u', '%u')", m_TeamId, m_stats.rating, m_stats.games_week, m_stats.wins_week, m_stats.games_season, m_stats.wins_season, m_stats.rank);
@@ -180,7 +180,7 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult_AutoPtr arenaTeamDataResult)
     m_EmblemColor        = fields[6].GetUInt32();
     m_BorderStyle        = fields[7].GetUInt32();
     m_BorderColor        = fields[8].GetUInt32();
-    m_Qualified          = fields[9].GetBool();
+    m_Qualified          = fields[9].GetUInt32();
     // load team stats
     m_stats.rating       = fields[10].GetUInt32();
     m_stats.games_week   = fields[11].GetUInt32();
@@ -278,7 +278,7 @@ void ArenaTeam::DelMember(uint64 guid)
     // Must be called before loop below to properly delete account from tournament access
     if (IsQualified())
         if (GetMembersSize() <= 2) // one is about to leave
-            QualifyTeam(false);
+            QualifyTeam(false, MSG_NOT_ENOUGH_MEMBERS);
 
     for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (itr->guid == guid)
@@ -307,7 +307,7 @@ void ArenaTeam::Disband(WorldSession *session)
         BroadcastEvent(ERR_ARENA_TEAM_DISBANDED_S, session->GetPlayerName(), GetName().c_str());
 
     if (IsQualified())
-        QualifyTeam(false);
+        QualifyTeam(false, MSG_TEAM_DISBANDED);
 
     while (!m_members.empty())
         // Removing from members is done in DelMember.
@@ -655,7 +655,7 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating, uint32 SoloQueueRating)
 
     if (IsQualified())
         if (m_stats.rating < 1850)
-            QualifyTeam(false);
+            QualifyTeam(false, MSG_TEAM_BELOW_RATING);
 
     // SOLOQUEUE - Don't track stats for lost games
     if (GetType() < ARENA_TEAM_5v5)
@@ -704,7 +704,7 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
             if (IsQualified())
                 if (itr->personal_rating < 1850)
                     if (!HasEnoughQualifiedMembers())
-                        QualifyTeam(false);
+                        QualifyTeam(false, MSG_PLAYER_BELOW_RATING);
 
             // SOLOQUEUE - Don't track stats for lost games
             if (GetType() < ARENA_TEAM_5v5)
@@ -743,7 +743,7 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstRating)
             if (IsQualified())
                 if (itr->personal_rating < 1850)
                     if (!HasEnoughQualifiedMembers())
-                        QualifyTeam(false, false);
+                        QualifyTeam(false, MSG_PLAYER_BELOW_RATING);
 
             // update personal played stats
             // SOLOQUEUE - Don't track stats for lost games
@@ -877,41 +877,51 @@ bool ArenaTeam::IsFighting() const
     return false;
 }
 
-void ArenaTeam::QualifyTeam(bool qualified, bool notify)
+void ArenaTeam::QualifyTeam(bool qualified, uint8 msg_id)
 {
-    if (!GetType() == ARENA_TEAM_2v2)
+    if (GetType() != ARENA_TEAM_2v2)
         return;
 
     m_Qualified = qualified;
     CharacterDatabase.PExecute("UPDATE arena_team SET qualified = '%u' WHERE arenateamid = '%u'", m_Qualified, GetId());
 
-    if (qualified)
+    std::string messageStr = "";
+    std::stringstream ss;
+    ss << "Your team is ";
+    ss << (!qualified ? "un" : "");
+    ss << "registered for the tournament";
+    std::string query = qualified ? "INSERT INTO tournament_access (id) VALUES ('%u')" : "DELETE FROM tournament_access WHERE id='%u'";
+
+    switch (msg_id)
     {
-        for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        {
-            LoginDatabase.PExecute("INSERT INTO tournament_access (id) VALUES ('%u')", sObjectMgr->GetPlayerAccountIdByGUID(itr->guid));
-            Player *player = sObjectMgr->GetPlayer(itr->guid);
-            if (player) // is online?
-            {
-                player->GetSession()->SendAreaTriggerMessage("Your team is registered for the tournament");
-                ChatHandler(player).SendSysMessage("Your team has registered for the end-of-month tournament. It is extremely important you show up at the designated time to avoid issues in scheduling. If for any reason you can no longer attend, please un-register from the event at the arena master NPC.");
-            }
-        }
+        case MSG_TEAM_UNREGISTRED:
+            messageStr = "A teammate has unregistered the team from the tournament.";
+            break;
+        case MSG_TEAM_BELOW_RATING:
+            messageStr = "Due to falling below 1850 rating, your team is no longer qualified for the tournament and has been removed.";
+            break;
+        case MSG_PLAYER_BELOW_RATING:
+            messageStr = "Your team is no longer registered for the tournament due to insufficient players above 1850 rating.";
+            break;
+        case MSG_NOT_ENOUGH_MEMBERS:
+            messageStr = "Your team was unregistered from the tournament due to insufficient team members.";
+            break;
+        case MSG_TEAM_DISBANDED:
+            messageStr = "Due to disbanding your team, you are no longer registered for the tournament.";
+            break;
+        default: // Just registered
+            messageStr = "Your team has registered for the end-of-month tournament. It is extremely important you show up at the designated time to avoid issues in scheduling. If for any reason you can no longer attend, please un-register from the event at the arena master NPC.";
+            break;
     }
-    else
+
+    for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
-        for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        LoginDatabase.PExecute(qualified ? "INSERT INTO tournament_access (id) VALUES ('%u')" : "DELETE FROM tournament_access WHERE id='%u'", sObjectMgr->GetPlayerAccountIdByGUID(itr->guid));
+
+        if (Player *player = sObjectMgr->GetPlayer(itr->guid)) // is online?
         {
-            LoginDatabase.PExecute("DELETE FROM tournament_access WHERE id='%u'", sObjectMgr->GetPlayerAccountIdByGUID(itr->guid));
-            if (notify)
-            {
-                Player *player = sObjectMgr->GetPlayer(itr->guid);
-                if (player) // is online?
-                {
-                    player->GetSession()->SendAreaTriggerMessage("Your team has unregistered from the tournament");
-                    ChatHandler(player).SendSysMessage("Your team is no longer registered for the tournament.");
-                }
-            }
+            player->GetSession()->SendAreaTriggerMessage(ss.str().c_str());
+            ChatHandler(player).SendSysMessage(messageStr.c_str());
         }
     }
 }
@@ -921,7 +931,7 @@ bool ArenaTeam::HasEnoughQualifiedMembers()
     uint8 membersQualified = 0;
     for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (itr->personal_rating >= 1850)
-            membersQualified++;
+            ++membersQualified;
 
-    return membersQualified >= 2 ? true : false;
+    return membersQualified >= 2;
 }

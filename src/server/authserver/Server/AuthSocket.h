@@ -86,6 +86,7 @@ private:
     uint16 _build;
     uint8 _expversion;
     AccountTypes _accountSecurityLevel;
+    uint8 _accountTournamentAccess;
 };
 
 #endif

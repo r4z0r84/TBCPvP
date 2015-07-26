@@ -21,6 +21,7 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 #include "ArenaTeam.h"
+#include "Chat.h"
 
 void ArenaTeamMember::ModifyPersonalRating(Player* plr, int32 mod, uint32 slot)
 {
@@ -43,6 +44,7 @@ ArenaTeam::ArenaTeam()
     m_EmblemColor         = 0;                              // icon color
     m_BorderStyle         = 0;                              // border
     m_BorderColor         = 0;                              // border color
+    m_Qualified           = false;
     m_stats.games_week    = 0;
     m_stats.games_season  = 0;
     m_stats.rank          = 0;
@@ -81,7 +83,7 @@ bool ArenaTeam::Create(uint64 captainGuid, uint32 type, std::string arenaTeamNam
     CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid='%u'", m_TeamId);
     CharacterDatabase.PExecute("INSERT INTO arena_team (arenateamid, name, captainguid, type, BackgroundColor, EmblemStyle, EmblemColor, BorderStyle, BorderColor) "
         "VALUES('%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
-        m_TeamId, arenaTeamName.c_str(), GUID_LOPART(m_CaptainGuid), m_Type, m_BackgroundColor, m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor);
+        m_TeamId, arenaTeamName.c_str(), GUID_LOPART(m_CaptainGuid), m_Type, m_BackgroundColor, m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor, m_Qualified);
     CharacterDatabase.PExecute("INSERT INTO arena_team_stats (arenateamid, rating, games, wins, played, wins2, rank) VALUES "
         "('%u', '%u', '%u', '%u', '%u', '%u', '%u')", m_TeamId, m_stats.rating, m_stats.games_week, m_stats.wins_week, m_stats.games_season, m_stats.wins_season, m_stats.rank);
 
@@ -178,13 +180,14 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult_AutoPtr arenaTeamDataResult)
     m_EmblemColor        = fields[6].GetUInt32();
     m_BorderStyle        = fields[7].GetUInt32();
     m_BorderColor        = fields[8].GetUInt32();
+    m_Qualified          = fields[9].GetBool();
     // load team stats
-    m_stats.rating       = fields[9].GetUInt32();
-    m_stats.games_week   = fields[10].GetUInt32();
-    m_stats.wins_week    = fields[11].GetUInt32();
-    m_stats.games_season = fields[12].GetUInt32();
-    m_stats.wins_season  = fields[13].GetUInt32();
-    m_stats.rank         = fields[14].GetUInt32();
+    m_stats.rating       = fields[10].GetUInt32();
+    m_stats.games_week   = fields[11].GetUInt32();
+    m_stats.wins_week    = fields[12].GetUInt32();
+    m_stats.games_season = fields[13].GetUInt32();
+    m_stats.wins_season  = fields[14].GetUInt32();
+    m_stats.rank         = fields[15].GetUInt32();
 
     return true;
 }
@@ -272,6 +275,11 @@ void ArenaTeam::SetCaptain(const uint64& guid)
 
 void ArenaTeam::DelMember(uint64 guid)
 {
+    // Must be called before loop below to properly delete account from tournament access
+    if (IsQualified())
+        if (GetMembersSize() <= 2) // one is about to leave
+            QualifyTeam(false);
+
     for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (itr->guid == guid)
         {
@@ -297,6 +305,9 @@ void ArenaTeam::Disband(WorldSession *session)
     // event
     if (session)
         BroadcastEvent(ERR_ARENA_TEAM_DISBANDED_S, session->GetPlayerName(), GetName().c_str());
+
+    if (IsQualified())
+        QualifyTeam(false);
 
     while (!m_members.empty())
         // Removing from members is done in DelMember.
@@ -642,6 +653,10 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating, uint32 SoloQueueRating)
     else
         m_stats.rating += mod;
 
+    if (IsQualified())
+        if (m_stats.rating < 1850)
+            QualifyTeam(false);
+
     // SOLOQUEUE - Don't track stats for lost games
     if (GetType() < ARENA_TEAM_5v5)
     {
@@ -686,6 +701,11 @@ void ArenaTeam::MemberLost(Player * plr, uint32 againstRating)
 
             itr->ModifyPersonalRating(plr, mod, GetSlot());
 
+            if (IsQualified())
+                if (itr->personal_rating < 1850)
+                    if (!HasEnoughQualifiedMembers())
+                        QualifyTeam(false);
+
             // SOLOQUEUE - Don't track stats for lost games
             if (GetType() < ARENA_TEAM_5v5)
             {
@@ -719,6 +739,11 @@ void ArenaTeam::OfflineMemberLost(uint64 guid, uint32 againstRating)
 
             int32 rating = int32(itr->personal_rating) + mod;
             itr->personal_rating = rating < 0 ? 0 : rating;
+
+            if (IsQualified())
+                if (itr->personal_rating < 1850)
+                    if (!HasEnoughQualifiedMembers())
+                        QualifyTeam(false, false);
 
             // update personal played stats
             // SOLOQUEUE - Don't track stats for lost games
@@ -852,3 +877,51 @@ bool ArenaTeam::IsFighting() const
     return false;
 }
 
+void ArenaTeam::QualifyTeam(bool qualified, bool notify)
+{
+    if (!GetType() == ARENA_TEAM_2v2)
+        return;
+
+    m_Qualified = qualified;
+    CharacterDatabase.PExecute("UPDATE arena_team SET qualified = '%u' WHERE arenateamid = '%u'", m_Qualified, GetId());
+
+    if (qualified)
+    {
+        for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        {
+            LoginDatabase.PExecute("INSERT INTO tournament_access (id) VALUES ('%u')", sObjectMgr->GetPlayerAccountIdByGUID(itr->guid));
+            Player *player = sObjectMgr->GetPlayer(itr->guid);
+            if (player) // is online?
+            {
+                player->GetSession()->SendAreaTriggerMessage("Your team is registered for the tournament");
+                ChatHandler(player).SendSysMessage("Your team has registered for the end-of-month tournament. It is extremely important you show up at the designated time to avoid issues in scheduling. If for any reason you can no longer attend, please un-register from the event at the arena master NPC.");
+            }
+        }
+    }
+    else
+    {
+        for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        {
+            LoginDatabase.PExecute("DELETE FROM tournament_access WHERE id='%u'", sObjectMgr->GetPlayerAccountIdByGUID(itr->guid));
+            if (notify)
+            {
+                Player *player = sObjectMgr->GetPlayer(itr->guid);
+                if (player) // is online?
+                {
+                    player->GetSession()->SendAreaTriggerMessage("Your team has unregistered from the tournament");
+                    ChatHandler(player).SendSysMessage("Your team is no longer registered for the tournament.");
+                }
+            }
+        }
+    }
+}
+
+bool ArenaTeam::HasEnoughQualifiedMembers()
+{
+    uint8 membersQualified = 0;
+    for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+        if (itr->personal_rating >= 1850)
+            membersQualified++;
+
+    return membersQualified >= 2 ? true : false;
+}

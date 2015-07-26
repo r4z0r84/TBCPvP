@@ -805,6 +805,20 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
         return -1;
     }
 
+    if (sWorld->getConfig(CONFIG_REALM_ZONE) == REALM_ZONE_TOURNAMENT_25)
+    {
+        result = LoginDatabase.PQuery("SELECT * FROM tournament_access WHERE id = '%d'", id);
+        if (!result && !security)
+        {
+            WorldPacket Packet (SMSG_AUTH_RESPONSE, 1);
+            Packet << uint8 (AUTH_UNAVAILABLE);
+
+            SendPacket (packet);
+
+            return -1;
+        }
+    }
+
     // Check that Key and account name are the same on client and server
     SHA1Hash sha;
 

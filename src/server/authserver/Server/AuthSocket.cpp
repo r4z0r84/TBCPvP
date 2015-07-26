@@ -202,6 +202,7 @@ AuthSocket::AuthSocket(RealmSocket& socket) : socket_(socket)
     g.SetDword(7);
     _authed = false;
     _accountSecurityLevel = SEC_PLAYER;
+    _accountTournamentAccess = 0;
 }
 
 // Close patch file descriptor before leaving
@@ -368,11 +369,13 @@ bool AuthSocket::_HandleLogonChallenge()
         // Get the account details from the account table
         // No SQL injection (prepared statement)
 
-        result = LoginDatabase.PQuery("SELECT a.sha_pass_hash,a.id,a.locked,a.last_ip,aa.gmlevel,a.v,a.s "
+        result = LoginDatabase.PQuery("SELECT a.sha_pass_hash, a.id, a.locked, a.last_ip, aa.gmlevel, a.v, a.s "
             "FROM account a "
             "LEFT JOIN account_access aa "
             "ON (a.id = aa.id) "
-            "WHERE a.username = '%s'",_login.c_str ());
+            "LEFT JOIN tournament_access ta "
+            "ON (a.id = ta.id) "
+            "WHERE a.username = '%s'", _login.c_str());
 
         if (result)
         {
@@ -482,6 +485,9 @@ bool AuthSocket::_HandleLogonChallenge()
 
                     uint8 secLevel = (*result)[4].GetUInt8();
                     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
+
+                    uint8 tournamentAccess = (*result)[7].GetUInt8();
+                    _accountTournamentAccess = tournamentAccess;
 
                     _localizationName.resize(4);
                     for (int i = 0; i < 4; ++i)
@@ -720,7 +726,7 @@ bool AuthSocket::_HandleReconnectChallenge()
 
     _login = (const char*)ch->I;
 
-    QueryResult_AutoPtr result = LoginDatabase.PQuery ("SELECT sessionkey FROM account WHERE username = '%s'", _login.c_str ());
+    QueryResult_AutoPtr result = LoginDatabase.PQuery("SELECT a.sessionkey, a.id, aa.gmlevel, ta.id  FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) LEFT JOIN tournament_access ta ON (a.id = ta.id) WHERE username = '%s'", _login.c_str());
 
     // Stop if the account is not found
     if (!result)
@@ -744,6 +750,9 @@ bool AuthSocket::_HandleReconnectChallenge()
     Field* fields = result->Fetch();
     uint8 secLevel = fields[2].GetUInt8();
     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
+
+    uint8 tournamentAccess = fields[3].GetUInt8();
+    _accountTournamentAccess = tournamentAccess;
 
     K.SetHexStr (fields[0].GetString ());
 
@@ -852,6 +861,10 @@ bool AuthSocket::_HandleRealmList()
             AmountOfCharacters = 0;
 
         uint8 lock = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
+
+        if (i->second.timezone == 25)
+            if (!_accountTournamentAccess && !_accountSecurityLevel)
+                lock = 1;
 
         pkt << i->second.icon;                                       // realm type
         if (_expversion & (POST_BC_EXP_FLAG | POST_WOTLK_EXP_FLAG))  // 2.x, 3.x, and 4.x clients

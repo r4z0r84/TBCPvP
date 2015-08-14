@@ -1841,6 +1841,10 @@ void ObjectMgr::LoadItemPrototypes()
                         sLog->outErrorDb("Item (Entry: %u) has broken spell in spellid_%d (%u)", i, j+1, proto->Spells[j].SpellId);
                         const_cast<ItemPrototype*>(proto)->Spells[j].SpellId = 0;
                     }
+
+                    // load item spell category cooldowns
+                    if (spellInfo && proto->Spells[j].SpellCategory)
+                        sSpellCategoryStore[proto->Spells[j].SpellCategory].insert(proto->Spells[j].SpellId).second;
                 }
             }
         }

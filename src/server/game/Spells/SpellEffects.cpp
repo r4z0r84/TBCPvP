@@ -973,6 +973,16 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster, spell_id, true, NULL);
                     return;
                 }
+                case 17770:                                 // Wolfshead Helm Energy
+                {
+                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        uint32 curEnergy = unitTarget->GetPower(POWER_ENERGY);
+                        unitTarget->SetPower(POWER_ENERGY, curEnergy + 20);
+                    }
+
+                    return;
+                }
                 case 20577:                                 // Cannibalize
                 {
                     if (unitTarget)

@@ -6059,9 +6059,11 @@ void Aura::PeriodicTick()
             uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;
             uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;
             uint32 procEx = PROC_EX_INTERNAL_DOT | PROC_EX_NORMAL_HIT;
+
             pdamage = (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist);
             if (pdamage)
                 procVictim|=PROC_FLAG_TAKEN_ANY_DAMAGE;
+
             pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, pdamage, BASE_ATTACK, spellProto);
             int32 new_damage = pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
 
@@ -6074,7 +6076,14 @@ void Aura::PeriodicTick()
             if (Player *modOwner = pCaster->GetSpellModOwner())
                 modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-            uint32 heal = pCaster->SpellHealingBonus(spellProto, uint32(new_damage * multiplier), DOT, pCaster);
+            uint32 heal = new_damage * multiplier;
+            // Apply healingPct values
+            float minval = pCaster->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+            if (minval)
+                heal *= (100.0f + minval) / 100.0f;
+            float maxval = pCaster->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+            if (maxval)
+                heal *= (100.0f + maxval) / 100.0f;
 
             int32 gain = pCaster->ModifyHealth(heal);
             pCaster->getHostileRefManager().threatAssist(pCaster, gain * 0.5f, spellProto);

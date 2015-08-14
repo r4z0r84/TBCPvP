@@ -2292,8 +2292,15 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim, WeaponAttackT
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance, bool SpellCasted) const
 {
-    if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->ToCreature()->IsInEvadeMode())
-        return MELEE_HIT_EVADE;
+    // special cases for units
+    if (pVictim->GetTypeId() == TYPEID_UNIT)
+    {
+        if (pVictim->ToCreature()->IsInEvadeMode())
+            return MELEE_HIT_EVADE;
+
+        if (pVictim->ToCreature()->isTotem())
+            return MELEE_HIT_NORMAL;
+    }
 
     int32 attackerMaxSkillValueForLevel = GetMaxSkillValueForLevel(pVictim);
     int32 victimMaxSkillValueForLevel = pVictim->GetMaxSkillValueForLevel(this);

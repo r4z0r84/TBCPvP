@@ -6686,14 +6686,19 @@ void Aura::HandlePreventFleeing(bool apply, bool Real)
     if (!Real)
         return;
 
-    Unit::AuraList const& fearAuras = m_target->GetAurasByType(SPELL_AURA_MOD_FEAR);
-    if (!fearAuras.empty())
+    m_target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);
+
+    if (!apply)
     {
-        m_target->SetControlled(!apply, UNIT_STAT_FLEEING);
-        /*if (apply)
-            m_target->SetFeared(false, fearAuras.front()->GetCasterGUID());
-        else
-            m_target->SetFeared(true);*/
+        Unit::AuraList mAuras = m_target->GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY);
+        for (Unit::AuraList::iterator iter = mAuras.begin(); iter != mAuras.end(); ++iter)
+        {
+            if ((*iter)->GetMiscValue() == GetMiscValue())
+            {
+                m_target->ApplySpellImmune((*iter)->GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, true);
+                break;
+            }
+        }
     }
 }
 

@@ -9199,10 +9199,6 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 spellId)
         {
             if (Unit* owner = GetCharmerOrOwnerPlayerOrPlayerItself())
                 owner->SetInCombatState(PvP);
-
-            UpdateSpeed(MOVE_RUN, true, 1.125f);
-            UpdateSpeed(MOVE_SWIM, true);
-            UpdateSpeed(MOVE_FLIGHT, true);
         }
     }
 
@@ -9552,10 +9548,10 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             return;
     }
 
-    float bonus = non_stack_bonus > stack_bonus ? non_stack_bonus : stack_bonus;
-
     // now we ready for speed calculation
-    float speed  = main_speed_mod ? bonus*(100.0f + main_speed_mod)/100.0f : bonus;
+    float speed = std::max(non_stack_bonus, stack_bonus);
+    if (main_speed_mod)
+        ApplyPct(speed, main_speed_mod);
 
     switch (mtype)
     {
@@ -9563,10 +9559,39 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         case MOVE_SWIM:
         case MOVE_FLIGHT:
         {
+            // Set creature speed rate
+            if (GetTypeId() == TYPEID_UNIT)
+            {
+                Unit* pOwner = GetCharmerOrOwner();
+                if (ToCreature()->isPet() && !isInCombat() && pOwner) // Must check for owner or crash on "Tame Beast"
+                {
+                    // For every yard over 5, increase speed by 0.01
+                    //  to help prevent pet from lagging behind and despawning
+                    float dist = GetDistance(pOwner);
+                    float base_rate = 1.00f; // base speed is 100% of owner speed
+
+                    if (dist < 5)
+                        dist = 5;
+
+                    float mult = base_rate + ((dist - 5) * 0.01f);
+
+                    speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
+                }
+                else
+                    speed *= ToCreature()->GetCreatureTemplate()->speed;    // at this point, MOVE_WALK is never reached
+            }
+
             // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
             // TODO: possible affect only on MOVE_RUN
             if (int32 normalization = GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
             {
+                if (Creature* creature = ToCreature())
+                {
+                    uint32 immuneMask = creature->GetCreatureTemplate()->MechanicImmuneMask;
+                    if (immuneMask & (1 << MECHANIC_SNARE) || immuneMask & (1 << MECHANIC_DAZE))
+                        break;
+                }
+
                 // Use speed from aura
                 float max_speed = normalization / baseMoveSpeed[mtype];
                 if (speed > max_speed)
@@ -9578,12 +9603,18 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             break;
     }
 
+    // for creature case, we check explicit if mob searched for assistance
+    if (GetTypeId() == TYPEID_UNIT)
+    {
+        if (ToCreature()->HasSearchedAssistance())
+            speed *= 0.66f;                                 // best guessed value, so this will be 33% reduction. Based off initial speed, mob can then "run", "walk fast" or "walk".
+    }
+
     // Apply strongest slow aura mod to speed
     int32 slow = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
-    int32 slow_non_stack = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_SPEED_NOT_STACK);
-    slow = slow < slow_non_stack ? slow : slow_non_stack;
     if (slow)
-        speed *=(100.0f + slow)/100.0f;
+        AddPct(speed, slow);
+
     SetSpeed(mtype, speed * ratio, forced);
 }
 

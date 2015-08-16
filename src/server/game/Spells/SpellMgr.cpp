@@ -2589,6 +2589,8 @@ void SpellMgr::LoadSpellCustomAttr()
         case 5171: // Slice and Dice (Rank 1)
         case 6774: // Slice and Dice (Rank 2)
         case 13810: // Frost Trap
+        case 34919: // Vampiric Touch (Energize)
+        case 15290: // Vampiric Embrace (Healing)
             spellInfo->AttributesEx3 |= SPELL_ATTR_EX3_NO_INITIAL_AGGRO;
             break;
         case 1543: // Flare

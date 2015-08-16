@@ -9199,6 +9199,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 spellId)
         {
             if (Unit* owner = GetCharmerOrOwnerPlayerOrPlayerItself())
                 owner->SetInCombatState(PvP);
+
+            UpdateSpeed(MOVE_RUN, true);
+            UpdateSpeed(MOVE_SWIM, true);
+            UpdateSpeed(MOVE_FLIGHT, true);
         }
     }
 
@@ -9563,7 +9567,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             if (GetTypeId() == TYPEID_UNIT)
             {
                 Unit* pOwner = GetCharmerOrOwner();
-                if (ToCreature()->isPet() && !isInCombat() && pOwner) // Must check for owner or crash on "Tame Beast"
+                if (ToCreature()->isPet() && pOwner && (!isInCombat() && !pOwner->isInCombat())) // Must check for owner or crash on "Tame Beast"
                 {
                     // For every yard over 5, increase speed by 0.01
                     //  to help prevent pet from lagging behind and despawning
@@ -9639,6 +9643,10 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
     // Send speed change packet only for player
     if (GetTypeId() != TYPEID_PLAYER)
         return;
+
+    if (!isInCombat())
+        if (Pet* pet = ToPlayer()->GetPet())
+            pet->SetSpeed(mtype, m_speed_rate[mtype], forced);
 
     WorldPacket data;
     if (!forced)

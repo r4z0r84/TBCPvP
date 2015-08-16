@@ -269,6 +269,13 @@ void TargetedMovementGenerator<T>::Initialize(T &owner)
         owner.RemoveUnitMovementFlag(MOVEFLAG_WALK_MODE);
 
     _setTargetLocation(owner);
+
+    if (owner.ToCreature()->isPet())
+    {
+        owner.UpdateSpeed(MOVE_RUN, true);
+        owner.UpdateSpeed(MOVE_WALK, true);
+        owner.UpdateSpeed(MOVE_SWIM, true);
+    }
 }
 
 template<class T>

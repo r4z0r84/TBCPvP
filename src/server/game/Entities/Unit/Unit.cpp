@@ -9494,9 +9494,9 @@ void Unit::SetVisibility(UnitVisibility x)
 
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
 {
-    int32 main_speed_mod  = 0;
-    float stack_bonus     = 1.0f;
-    float non_stack_bonus = 1.0f;
+    int32 mainSpeedBonus = 0;
+    float stackBonus     = 1.0f;
+    float nonStackBonus  = 1.0f;
 
     switch (mtype)
     {
@@ -9511,36 +9511,36 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         {
             if (IsMounted()) // Use on mount auras
             {
-                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
-                stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
-                non_stack_bonus = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK))/100.0f;
+                mainSpeedBonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+                stackBonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
+                nonStackBonus  = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK))/100.0f;
             }
             else
             {
-                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SPEED);
-                stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_SPEED_ALWAYS);
-                non_stack_bonus = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_NOT_STACK))/100.0f;
+                mainSpeedBonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SPEED);
+                stackBonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_SPEED_ALWAYS);
+                nonStackBonus  = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_NOT_STACK))/100.0f;
             }
             break;
         }
         case MOVE_SWIM:
         {
-            main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SWIM_SPEED);
+            mainSpeedBonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SWIM_SPEED);
             break;
         }
         case MOVE_FLIGHT:
         {
             if (IsMounted()) // Use on mount auras
             {
-                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED);
-                stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED_STACKING);
-                non_stack_bonus = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED_NOT_STACKING))/100.0f;
+                mainSpeedBonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED);
+                stackBonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED_STACKING);
+                nonStackBonus  = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED_NOT_STACKING))/100.0f;
             }
             else             // Use not mount (shapeshift for example) auras (should stack)
             {
-                main_speed_mod  = GetTotalAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED);
-                stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_FLIGHT_SPEED_STACKING);
-                non_stack_bonus = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACKING))/100.0f;
+                mainSpeedBonus = GetTotalAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED);
+                stackBonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_FLIGHT_SPEED_STACKING);
+                nonStackBonus  = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACKING))/100.0f;
             }
             break;
         }
@@ -9550,9 +9550,9 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
     }
 
     // now we ready for speed calculation
-    float speed = std::max(non_stack_bonus, stack_bonus);
-    if (main_speed_mod)
-        AddPct(speed, main_speed_mod);
+    float speed = std::max(nonStackBonus, stackBonus);
+    if (mainSpeedBonus)
+        AddPct(speed, mainSpeedBonus);
 
     switch (mtype)
     {
@@ -9569,12 +9569,12 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
                     // For every yard over 5, increase speed by 0.01
                     //  to help prevent pet from lagging behind and despawning
                     float dist = GetDistance(pOwner);
-                    float base_rate = 1.00f; // base speed is 100% of owner speed
+                    float baseRate = 1.00f; // base speed is 100% of owner speed
 
                     if (dist < 5)
                         dist = 5;
 
-                    float mult = base_rate + ((dist - 5) * 0.01f);
+                    float mult = baseRate + ((dist - 5) * 0.01f);
 
                     speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
                 }
@@ -9594,9 +9594,9 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
                 }
 
                 // Use speed from aura
-                float max_speed = normalization / baseMoveSpeed[mtype];
-                if (speed > max_speed)
-                    speed = max_speed;
+                float maxSpeed = normalization / baseMoveSpeed[mtype];
+                if (speed > maxSpeed)
+                    speed = maxSpeed;
             }
             break;
         }

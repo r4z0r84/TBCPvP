@@ -1565,7 +1565,7 @@ class Unit : public WorldObject
         bool m_ControlledByPlayer;
 
         uint32 GetDamageTakenWithActiveAuraType(AuraType auraType) const { return m_damageTakenCounter[auraType]; }
-        uint32 SetDamageTakenWithActiveAuraType(AuraType auraType, uint32 damageAmount) { m_damageTakenCounter[auraType] = damageAmount; }
+        void SetDamageTakenWithActiveAuraType(AuraType auraType, uint32 damageAmount) { m_damageTakenCounter[auraType] = damageAmount; }
     protected:
         explicit Unit ();
 

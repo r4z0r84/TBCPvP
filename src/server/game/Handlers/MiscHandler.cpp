@@ -524,7 +524,7 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleStandStateChangeOpcode(WorldPacket & recv_data)
 {
-    if (!_player->CanFreeMove())
+    if (_player->isCharmed())
         return;
 
     // sLog->outDebug("WORLD: Received CMSG_STANDSTATECHANGE"); -- too many spam in log at lags/debug stop

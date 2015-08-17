@@ -819,8 +819,9 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
         }
     }
 
+    uint32 currentDamage = GetDamageTakenWithActiveAuraType(auraType);
     uint32 damageMultiplier = damage *= (damagetype == DIRECT_DAMAGE ? 1.5f : 1.0f);
-    m_damageTakenCounter[auraType] += damageMultiplier;
+    SetDamageTakenWithActiveAuraType(SPELL_AURA_MOD_FEAR, currentDamage + damageMultiplier);
 
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
     uint32 calcDmg = getLevel() > 8 ? 25 * getLevel() + 150 : 50;
@@ -830,22 +831,18 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
 
     switch (auraType)
     {
-    case SPELL_AURA_MOD_FEAR:
-    case SPELL_AURA_MOD_ROOT:
-        if (damagetype == DOT && m_damageTakenCounter[auraType] <= minDmg)
-            canBreak = false;
-        break;
-    default:
-        break;
+        case SPELL_AURA_MOD_FEAR:
+        case SPELL_AURA_MOD_ROOT:
+            if (damagetype == DOT && GetDamageTakenWithActiveAuraType(auraType) <= minDmg)
+                canBreak = false;
+            break;
+        default:
+            break;
     }
 
     float chance = float(damage) / calcDmg * 100.0f;
-
-    if (canBreak && (roll_chance_f(chance) || m_damageTakenCounter[auraType] >= maxDmg))
-    {
-        m_damageTakenCounter[auraType] = 0;
+    if (canBreak && (roll_chance_f(chance) || GetDamageTakenWithActiveAuraType(auraType) >= maxDmg))
         RemoveSpellsCausingAura(auraType);
-    }
 }
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)

@@ -3207,6 +3207,9 @@ void Aura::HandleModFear(bool apply, bool Real)
     if (!Real)
         return;
 
+    if (!apply)
+        m_target->SetDamageTakenWithActiveAuraType(SPELL_AURA_MOD_FEAR, 0);
+
     //m_target->SetFeared(apply, GetCasterGUID(), GetId());
     m_target->SetControlled(apply, UNIT_STAT_FLEEING);
 }
@@ -3467,6 +3470,9 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     // only at real add/remove aura
     if (!Real)
         return;
+
+    if (!apply)
+        m_target->SetDamageTakenWithActiveAuraType(SPELL_AURA_MOD_ROOT, 0);
 
     m_target->SetControlled(apply, UNIT_STAT_ROOT);
 }

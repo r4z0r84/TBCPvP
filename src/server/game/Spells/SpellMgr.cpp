@@ -2471,6 +2471,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
         }
 
+        // Spells that require to be behind the target cant be dodged
+        if (spellInfo->AttributesEx2 == 0x100000 && spellInfo->AttributesEx & 0x200
+            && (spellInfo->SpellFamilyName != SPELLFAMILY_DRUID || spellInfo->SpellFamilyFlags != 0x0000000000020000LL))
+            mSpellCustomAttr[i] |= SPELL_ATTR_CU_REQ_CASTER_BEHIND_TARGET;
+
         switch (i)
         {
         case 41635: // Prayer of Mending

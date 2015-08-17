@@ -3889,15 +3889,14 @@ uint8 Spell::CanCast(bool strict)
         }
 
         //Must be behind the target.
-        if (m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI*0.825f, m_caster)
-            && (m_spellInfo->SpellFamilyName != SPELLFAMILY_DRUID || m_spellInfo->SpellFamilyFlags != 0x0000000000020000LL))
+        if ((sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
         {
             SendInterrupted(2);
             return SPELL_FAILED_NOT_BEHIND;
         }
 
         //Target must be facing you.
-        if ((m_spellInfo->Attributes == 0x150010) && !target->HasInArc(M_PI, m_caster))
+        if ((m_spellInfo->Attributes == 0x150010) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
         {
             SendInterrupted(2);
             return SPELL_FAILED_NOT_INFRONT;

@@ -2666,7 +2666,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell, 
     bool isCasting = pVictim->IsNonMeleeSpellCasted(false);
     bool lostControl = pVictim->hasUnitState(UNIT_STAT_LOST_CONTROL);
 
-    bool canDodge = !isCasting && !lostControl;
+    bool canDodge = !isCasting && !lostControl && !(sSpellMgr->GetSpellCustomAttr(spell->Id) & SPELL_ATTR_CU_REQ_CASTER_BEHIND_TARGET);
     bool canParry = !isCasting && !lostControl;
     bool canBlock = !isCasting && !lostControl && spell->AttributesEx3 & SPELL_ATTR_EX3_MELEE;
     //We use SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY until right Attribute was found

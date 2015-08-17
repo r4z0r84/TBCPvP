@@ -2317,6 +2317,27 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     }
 }
 
+bool AuraAddTargetTriggerSpecialCase(const SpellEntry* castedSpell, const SpellEntry* auraSpellInfo, uint32 auraSpellIdx)
+{
+    // this function is for special cases where castedSpell should trigger auraSpellInfo
+    // but can't because of not splitted spell_affect masks
+
+    switch (castedSpell->SpellFamilyName)
+    {
+    case SPELLFAMILY_PRIEST:
+        if ((castedSpell->Id == 32379 || castedSpell->Id == 32996) && // Shadow Word: Death
+            (auraSpellInfo->Id == 15257 ||                            // Shadow Weaving (Rank 1)
+            auraSpellInfo->Id == 15331 ||                             // Shadow Weaving (Rank 2)
+            auraSpellInfo->Id == 15332 ||                             // Shadow Weaving (Rank 3)
+            auraSpellInfo->Id == 15333 ||                             // Shadow Weaving (Rank 4)
+            auraSpellInfo->Id == 15334))                              // Shadow Weaving (Rank 5)
+            return true;
+        break;
+    }
+
+    return false;
+}
+
 void Spell::cancel()
 {
     if (m_spellState == SPELL_STATE_FINISHED)
@@ -2518,7 +2539,7 @@ void Spell::cast(bool skipCheck)
     {
         SpellEntry const *auraSpellInfo = (*i)->GetSpellProto();
         uint32 auraSpellIdx = (*i)->GetEffIndex();
-        if (IsAffectedBy(auraSpellInfo, auraSpellIdx))
+        if (IsAffectedBy(auraSpellInfo, auraSpellIdx) || AuraAddTargetTriggerSpecialCase(this->m_spellInfo, auraSpellInfo, auraSpellIdx))
         {
             if (SpellEntry const *spellInfo = sSpellStore.LookupEntry(auraSpellInfo->EffectTriggerSpell[auraSpellIdx]))
             {

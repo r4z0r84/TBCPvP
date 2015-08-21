@@ -5741,7 +5741,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                 uint32 talentId = caster->GetMaxRankSpellFromArray(impPWS, 2);
 
                 if (Aura* spellModAura = caster->GetAura(talentId, 0))
-                    m_modifier.m_amount *= (spellModAura->GetSpellProto()->EffectBasePoints[0] + 100.0f) / 100.0f;
+                    m_modifier.m_amount *= (spellModAura->GetSpellProto()->EffectBasePoints[0] + 101.0f) / 100.0f; // basePoints = 14
             }
         }
     }

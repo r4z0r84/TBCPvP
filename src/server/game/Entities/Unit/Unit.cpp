@@ -2244,25 +2244,26 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool ex
         return;                                             // ignore ranged case
 
     // melee attack spell casted at main hand attack only
-    if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL])
-    {
+    if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra)
         m_currentSpells[CURRENT_MELEE_SPELL]->cast();
-        return;
-    }
-
-    CalcDamageInfo damageInfo;
-    CalculateMeleeDamage(pVictim, 0, &damageInfo, attType);
-    // Send log damage message to client
-    SendAttackStateUpdate(&damageInfo);
-    DealMeleeDamage(&damageInfo, true);
-    ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
-
-    if (GetTypeId() == TYPEID_PLAYER)
-        sLog->outDebug("AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
-            GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
     else
-        sLog->outDebug("AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
+    {
+        pVictim = GetMeleeHitRedirectTarget(pVictim);
+
+        CalcDamageInfo damageInfo;
+        CalculateMeleeDamage(pVictim, 0, &damageInfo, attType);
+        // Send log damage message to client
+        SendAttackStateUpdate(&damageInfo);
+        DealMeleeDamage(&damageInfo, true);
+        ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
+
+        if (GetTypeId() == TYPEID_PLAYER)
+            sLog->outDebug("AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
             GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+        else
+            sLog->outDebug("AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
+            GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+    }
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim, WeaponAttackType attType) const
@@ -5800,8 +5801,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         return false;
 
                     // heal amount
-                    basepoints0 = damage * 0.1; // 10% of the healing amount
+                    basepoints0 = triggeredByAura->GetModifierValue() * std::min(damage, GetMaxHealth() - GetHealth()) / 100;
                     target = this;
+
+                    sLog->outError("mod: %i", triggeredByAura->GetModifierValue());
+                    sLog->outError("damage: %u", damage);
+                    sLog->outError("basepoints0: %u", basepoints0);
 
                     if (basepoints0)
                         triggered_spell_id = 31786;
@@ -6257,15 +6262,16 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     Unit::AuraList const& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
                     for (Unit::AuraList::const_iterator i = mAddFlatModifier.begin(); i != mAddFlatModifier.end(); ++i)
                     {
+                        // Improved Drain Soul
                         if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
                         {
                             int32 value2 = CalculateSpellDamage((*i)->GetSpellProto(), 2, (*i)->GetSpellProto()->EffectBasePoints[2], this);
                             basepoints0 = value2 * GetMaxPower(POWER_MANA) / 100;
                         }
                     }
-                    if (basepoints0 == 0)
-                        return false;
-                    trigger_spell_id = 18371;
+
+                    if (basepoints0)
+                        trigger_spell_id = 18371;
                 }
                 break;
             }
@@ -13078,6 +13084,27 @@ void Unit::SendHealthUpdateDueToCharm(Player* charmer)
         charmer->SetGroupUpdateFlag(GROUP_UPDATE_PET);
         group->UpdatePlayerOutOfRange(charmer);
     }
+}
+
+Unit* Unit::GetMeleeHitRedirectTarget(Unit* victim, SpellEntry const* spellInfo)
+{
+    float maxRange = NOMINAL_MELEE_RANGE;
+    if (spellInfo)
+        maxRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
+
+    Unit::AuraList const& hitTriggerAuras = victim->GetAurasByType(SPELL_AURA_ADD_CASTER_HIT_TRIGGER);
+    for (Unit::AuraList::const_iterator i = hitTriggerAuras.begin(); i != hitTriggerAuras.end(); ++i)
+    {
+        if (Unit* magnet = (*i)->GetCaster())
+        {
+            if (magnet->IsWithinLOSInMap(this) && magnet->IsWithinDistInMap(this, maxRange) && (*i)->m_procCharges > 0)
+            {
+                victim->RemoveAurasDueToSpell((*i)->GetId());
+                return magnet;
+            }
+        }
+    }
+    return victim;
 }
 
 void CharmInfo::SetIsCommandAttack(bool val)

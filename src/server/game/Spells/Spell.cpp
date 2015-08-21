@@ -1701,12 +1701,8 @@ void Spell::SetTargetMap(uint32 i, uint32 cur)
             {
                 case TARGET_UNIT_TARGET_ENEMY:
                     if (((m_spellInfo->AttributesEx & (0x8 | 0x80)) == 0 ) || (m_spellInfo->SpellIconID == 225 && m_spellInfo->SpellVisual == 262))
-                    {
-                        // try to select magnet target first
-                        if (SelectMagnetTarget() == m_targets.getUnitTarget())
-                            // if not found (target is not changed) search for SPELL_AURA_ADD_CASTER_HIT_TRIGGER
-                            HandleHitTriggerAura();
-                    }
+                        AddUnitTarget(m_caster->GetMeleeHitRedirectTarget(target), i);
+                    break;
                 case TARGET_UNIT_CHAINHEAL:
                     pushType = PUSH_CHAIN;
                     break;
@@ -5649,31 +5645,6 @@ Unit* Spell::SelectMagnetTarget()
             ((Totem*)target)->UnSummon();
     }
     return target;
-}
-
-void Spell::HandleHitTriggerAura()
-{
-    Unit* target = m_targets.getUnitTarget();
-
-    if (target && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MAGIC && target->HasAuraType(SPELL_AURA_ADD_CASTER_HIT_TRIGGER))
-    {
-        Unit::AuraList const& hitTriggerAuras = target->GetAurasByType(SPELL_AURA_ADD_CASTER_HIT_TRIGGER);
-        for (Unit::AuraList::const_iterator itr = hitTriggerAuras.begin(); itr != hitTriggerAuras.end(); ++itr)
-        {
-            if (Unit* hitTarget = (*itr)->GetCaster())
-            {
-                if ((*itr)->m_procCharges>0)
-                {
-                    (*itr)->SetAuraProcCharges((*itr)->m_procCharges-1);
-                    target = hitTarget;
-                    m_targets.setUnitTarget(target);
-                    AddUnitTarget(target, 0);
-                    uint64 targetGUID = target->GetGUID();
-                    return;
-                }
-            }
-        }
-    }
 }
 
 bool Spell::IsNeedSendToClient() const

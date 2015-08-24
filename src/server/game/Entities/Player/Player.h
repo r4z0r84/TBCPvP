@@ -2289,6 +2289,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetCustomTitleMask() { return m_customTitleKnown; }
         void SetCustomTitleMask(uint32 titleEntry) { m_customTitleKnown = titleEntry; }
 
+        Unit* getSelectedUnit();
+
     protected:
 
         uint32 m_contestedPvPTimer;

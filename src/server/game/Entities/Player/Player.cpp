@@ -22034,6 +22034,19 @@ void Player::SetMap(Map * map)
     m_mapRef.link(map, this);
 }
 
+Unit* Player::getSelectedUnit()
+{
+    if (!GetSession())
+        return NULL;
+
+    uint64 guid = GetSession()->GetPlayer()->GetSelection();
+
+    if (guid == 0)
+        return GetSession()->GetPlayer();
+
+    return ObjectAccessor::GetUnit(*GetSession()->GetPlayer(), guid);
+}
+
 uint32 Player::SuitableForTransmogrification(Item* oldItem, Item* newItem)
 {
     // not possibly the best structure here, but atleast I got my head around this

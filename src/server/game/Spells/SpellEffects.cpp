@@ -6195,8 +6195,12 @@ void Spell::EffectCharge(uint32 /*i*/)
         m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ + target->GetObjectSize());
 
     // not all charge effects used in negative spells
-    if (!IsPositiveSpell(m_spellInfo->Id) && m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_caster->Attack(target, true);
+    if (Player* playerCaster = m_caster->ToPlayer())
+    {
+        // Check for selected unit - this will fix a bug with following macro: /cast [target=focus, exists] Intercept
+        if (!IsPositiveSpell(m_spellInfo->Id) && (playerCaster->getSelectedUnit() == target || !playerCaster->hasUnitState(UNIT_STAT_MELEE_ATTACKING)))
+            m_caster->Attack(target, true);
+    }
 }
 
 void Spell::EffectKnockBack(uint32 i)

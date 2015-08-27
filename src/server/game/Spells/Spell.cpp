@@ -4948,6 +4948,19 @@ uint8 Spell::CheckRange(bool strict, bool initialCheck)
         }
     }
 
+    // for some spells with TARGET_UNIT_PET first target is m_caster and above code will not be called
+    // we need to check every spell effect for TARGET_UNIT_PET and detect if pet is within range
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (m_spellInfo->EffectImplicitTargetA[i] == TARGET_UNIT_PET || m_spellInfo->EffectImplicitTargetB[i] == TARGET_UNIT_PET)
+            if (Player* playerCaster = m_caster->ToPlayer())
+            {
+                if (Pet* pet = playerCaster->GetPet())
+                {
+                    if (!m_caster->IsWithinCombatRange(pet, max_range + range_mod))
+                        return SPELL_FAILED_OUT_OF_RANGE;
+                }
+            }
+
     if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_dstPos.GetPositionX() != 0 && m_targets.m_dstPos.GetPositionY() != 0 && m_targets.m_dstPos.GetPositionZ() != 0)
     {
         float dist = m_caster->GetDistance(m_targets.m_dstPos) + m_caster->GetObjectSize();

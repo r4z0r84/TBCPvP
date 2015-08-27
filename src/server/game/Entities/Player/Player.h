@@ -2291,6 +2291,12 @@ class Player : public Unit, public GridObject<Player>
 
         Unit* getSelectedUnit();
 
+        uint32 GetVisibilityUpdateTimer() { return m_visibilityUpdateTimer; }
+        void SetVisibilityUpdateTimer(uint32 updateTime) { m_visibilityUpdateTimer = updateTime; }
+
+        uint32 GetCombatImmuneTime() { return m_combatImmuneTimer; }
+        void SetCombatImmuneTime(uint32 time) { m_combatImmuneTimer = time; }
+
     protected:
 
         uint32 m_contestedPvPTimer;
@@ -2401,6 +2407,9 @@ class Player : public Unit, public GridObject<Player>
 
         uint64 m_comboTarget;
         int8 m_comboPoints;
+
+        uint32 m_visibilityUpdateTimer;
+        uint32 m_combatImmuneTimer;
 
         QuestStatusMap mQuestStatus;
 

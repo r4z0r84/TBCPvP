@@ -736,6 +736,9 @@ Player::Player (WorldSession *session): Unit()
     m_comboTarget = 0;
     m_comboPoints = 0;
 
+    m_visibilityUpdateTimer = 0;
+    m_combatImmuneTimer = 0;
+
     m_usedTalentCount = 0;
 
     m_regenTimer = 0;
@@ -1730,6 +1733,25 @@ void Player::Update(uint32 p_time)
         }
         else
             m_zoneUpdateTimer -= p_time;
+    }
+
+    if (m_visibilityUpdateTimer > 0)
+    {
+        if (p_time >= m_visibilityUpdateTimer)
+        {
+            SetVisibility(VISIBILITY_GROUP_STEALTH);
+            m_visibilityUpdateTimer = 0;
+        }
+        else
+            m_visibilityUpdateTimer -= p_time;
+    }
+
+    if (m_combatImmuneTimer > 0)
+    {
+        if (p_time >= m_combatImmuneTimer)
+            m_combatImmuneTimer = 0;
+        else
+            m_combatImmuneTimer -= p_time;
     }
 
     if (m_timeSyncTimer > 0)

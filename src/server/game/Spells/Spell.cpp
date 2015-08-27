@@ -1237,18 +1237,21 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         }
         if (!m_caster->IsFriendlyTo(unit))
         {
-            // reset damage to 0 if target has Invisibility or Vanish aura (_only_ vanish, not stealth) and isn't visible for caster
-            bool isVisibleForHit = ((unit->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) || unit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE , SPELLFAMILYFLAG_ROGUE_VANISH)) && !unit->isVisibleForOrDetect(m_caster, true)) ? false : true;
-
-            // for delayed spells ignore not visible explicit target
-            if (m_delayMoment && unit == m_targets.getUnitTarget() && !isVisibleForHit)
+            if (Player* plrHitUnit = unit->ToPlayer())
             {
-                // Remove vanish when vanishing instant spells
-                if (shouldRemoveVanish())
-                    unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                // reset damage to 0 if target has Invisibility or Vanish aura (_only_ vanish, not stealth) and isn't visible for caster
+                bool isVisibleForHit = (plrHitUnit->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) || (plrHitUnit->GetVisibilityUpdateTimer() && plrHitUnit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE, SPELLFAMILYFLAG_ROGUE_VANISH)) || (plrHitUnit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE, SPELLFAMILYFLAG_ROGUE_VANISH) && !plrHitUnit->isVisibleForOrDetect(m_caster, true))) ? false : true;
 
-                m_damage = 0;
-                return SPELL_MISS_EVADE;
+                // for delayed spells ignore not visible explicit target
+                if (m_delayMoment && unit == m_targets.getUnitTarget() && !isVisibleForHit)
+                {
+                    // Remove vanish when vanishing instant spells
+                    if (shouldRemoveVanish())
+                        unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+                    m_damage = 0;
+                    return SPELL_MISS_EVADE;
+                }
             }
 
             // Distract should not remove vanish

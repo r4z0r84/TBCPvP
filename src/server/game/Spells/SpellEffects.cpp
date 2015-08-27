@@ -2170,6 +2170,9 @@ void Spell::EffectTriggerSpell(uint32 i)
             if (m_caster->GetTypeId() != TYPEID_PLAYER)
                 return;
 
+            // Allow to make immune against custom delayed spells
+            m_caster->ToPlayer()->SetCombatImmuneTime(300);
+
             // get highest rank of the Stealth spell
             bool found = false;
             SpellEntry const *spellInfo;

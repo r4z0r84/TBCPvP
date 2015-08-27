@@ -9137,6 +9137,16 @@ void Unit::CombatStart(Unit* target, bool initialAggro, uint32 spellId)
         }
 
         SetInCombatWith(target);
+
+        // Special case for players
+        if (Player* plrTarget = target->ToPlayer())
+        {
+            if (plrTarget->GetVisibilityUpdateTimer() || (plrTarget->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) || plrTarget->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE, SPELLFAMILYFLAG_ROGUE_VANISH)) && !plrTarget->isVisibleForOrDetect(this, true))
+                return;
+
+            if (plrTarget->GetCombatImmuneTime())
+                return;
+        }
         target->SetInCombatWith(this);
     }
     Unit *who = target->GetCharmerOrOwnerOrSelf();

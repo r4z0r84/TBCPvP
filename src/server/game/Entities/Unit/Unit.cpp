@@ -820,7 +820,7 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage, DamageEffe
     }
 
     uint32 currentDamage = GetDamageTakenWithActiveAuraType(auraType);
-    uint32 damageMultiplier = damage *= (damagetype == DIRECT_DAMAGE ? 1.5f : 1.0f);
+    uint32 damageMultiplier = damage * (damagetype == DIRECT_DAMAGE ? 1.5f : 1.0f);
     SetDamageTakenWithActiveAuraType(SPELL_AURA_MOD_FEAR, currentDamage + damageMultiplier);
 
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.

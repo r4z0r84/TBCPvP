@@ -32,9 +32,6 @@
 
 #define ChunkSize 2048
 
-// RealmZone from World.h
-#define REALM_ZONE_TOURNAMENT_25 25
-
 enum eAuthCmd
 {
     AUTH_LOGON_CHALLENGE                         = 0x00,
@@ -205,7 +202,6 @@ AuthSocket::AuthSocket(RealmSocket& socket) : socket_(socket)
     g.SetDword(7);
     _authed = false;
     _accountSecurityLevel = SEC_PLAYER;
-    _accountTournamentAccess = 0;
 }
 
 // Close patch file descriptor before leaving
@@ -489,8 +485,6 @@ bool AuthSocket::_HandleLogonChallenge()
                     uint8 secLevel = (*result)[4].GetUInt8();
                     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
-                    _accountTournamentAccess = (*result)[7].GetUInt8();
-
                     _localizationName.resize(4);
                     for (int i = 0; i < 4; ++i)
                         _localizationName[i] = ch->country[4-i-1];
@@ -753,8 +747,6 @@ bool AuthSocket::_HandleReconnectChallenge()
     uint8 secLevel = fields[2].GetUInt8();
     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
-    _accountTournamentAccess = fields[3].GetUInt8();
-
     K.SetHexStr (fields[0].GetString ());
 
     // Sending response
@@ -862,10 +854,6 @@ bool AuthSocket::_HandleRealmList()
             AmountOfCharacters = 0;
 
         uint8 lock = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
-
-        if (i->second.timezone == REALM_ZONE_TOURNAMENT_25)
-            if (!_accountTournamentAccess && !_accountSecurityLevel)
-                lock = 1;
 
         pkt << i->second.icon;                                       // realm type
         if (_expversion & (POST_BC_EXP_FLAG | POST_WOTLK_EXP_FLAG))  // 2.x, 3.x, and 4.x clients

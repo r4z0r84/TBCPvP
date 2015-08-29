@@ -3002,10 +3002,19 @@ void Spell::EffectEnergize(uint32 i)
 {
     if (!unitTarget)
         return;
+
     if (!unitTarget->isAlive())
         return;
 
     if (m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
+        return;
+
+    Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
+
+    if (unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->getPowerType() != power)
+        return;
+
+    if (unitTarget->GetMaxPower(power) == 0)
         return;
 
     // Some level depends spells
@@ -3033,11 +3042,6 @@ void Spell::EffectEnergize(uint32 i)
         damage -= multiplier * level_diff;
 
     if (damage < 0)
-        return;
-
-    Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
-
-    if (unitTarget->GetMaxPower(power) == 0)
         return;
 
     unitTarget->ModifyPower(power, damage);

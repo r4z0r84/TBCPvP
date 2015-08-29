@@ -24,7 +24,7 @@
 
 //custom
 void AddSC_beastmaster();
-void AddSC_npc_template();
+void AddSC_npc_gossipgear();
 void AddSC_npc_spirit_of_competition();
 void AddSC_custom_dualspec();
 
@@ -400,7 +400,7 @@ void AddScripts()
 {
 #ifdef SCRIPTS
     AddSC_beastmaster();
-    AddSC_npc_template();
+    AddSC_npc_gossipgear();
     AddSC_npc_spirit_of_competition();
     AddSC_custom_dualspec();
 

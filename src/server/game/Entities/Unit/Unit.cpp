@@ -13215,7 +13215,7 @@ void Unit::SendHealthUpdateDueToCharm(Player* charmer)
 Unit* Unit::GetMeleeHitRedirectTarget(Unit* victim, SpellEntry const* spellInfo)
 {
     float maxRange = NOMINAL_MELEE_RANGE;
-    if (spellInfo)
+    if (spellInfo && spellInfo->rangeIndex)
         maxRange = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellInfo->rangeIndex));
 
     Unit::AuraList const& hitTriggerAuras = victim->GetAurasByType(SPELL_AURA_ADD_CASTER_HIT_TRIGGER);

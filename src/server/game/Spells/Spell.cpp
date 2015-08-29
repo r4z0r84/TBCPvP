@@ -1704,8 +1704,7 @@ void Spell::SetTargetMap(uint32 i, uint32 cur)
             {
                 case TARGET_UNIT_TARGET_ENEMY:
                     if (((m_spellInfo->AttributesEx & (0x8 | 0x80)) == 0 ) || (m_spellInfo->SpellIconID == 225 && m_spellInfo->SpellVisual == 262))
-                        AddUnitTarget(m_caster->GetMeleeHitRedirectTarget(target), i);
-                    break;
+                        AddUnitTarget(m_caster->GetMeleeHitRedirectTarget(target, m_spellInfo), i);
                 case TARGET_UNIT_CHAINHEAL:
                     pushType = PUSH_CHAIN;
                     break;

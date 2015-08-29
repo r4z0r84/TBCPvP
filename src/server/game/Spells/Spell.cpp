@@ -2585,6 +2585,10 @@ void Spell::cast(bool skipCheck)
                     m_caster->CastSpell(m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster, *i, true);
     }
 
+    // Deadly Throw Interrupt
+    if (m_spellInfo->Id == 26679 && m_caster->HasAura(32748, 0))
+        m_caster->CastSpell(m_targets.getUnitTarget(), 32747, true);
+
     SetExecutedCurrently(false);
 }
 

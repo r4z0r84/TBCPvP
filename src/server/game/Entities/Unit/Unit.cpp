@@ -5735,7 +5735,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
         }
         case SPELLFAMILY_ROGUE:
         {
-            switch (dummySpell->Id)
+            // Should be casted before projectile hits target
+            /*switch (dummySpell->Id)
             {
                 // Deadly Throw Interrupt
                 case 32748:
@@ -5747,7 +5748,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     triggered_spell_id = 32747;
                     break;
                 }
-            }
+            }*/
             // Quick Recovery
             if (dummySpell->SpellIconID == 2116)
             {

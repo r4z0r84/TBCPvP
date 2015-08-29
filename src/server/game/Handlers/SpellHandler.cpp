@@ -400,6 +400,15 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
         return;
+
+    // FIX ME PLEASE :-(
+    switch (spellInfo->Id)
+    {
+        case 1787: // Remove Stealth 
+            _player->RemoveAurasDueToSpellByCancel(26888); // Remove Vanish
+            break;
+    }
+
     /*
     // not allow remove non positive spells and spells with attr SPELL_ATTR_CANT_CANCEL
     if (!IsPositiveSpell(spellId) || (spellInfo->Attributes & SPELL_ATTR_CANT_CANCEL))

@@ -906,6 +906,7 @@ class Unit : public WorldObject
 
         void addUnitState(uint32 f) { m_state |= f; }
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
+        uint32 GetUnitState() const { return m_state; }
         void clearUnitState(uint32 f) { m_state &= ~f; }
         bool CanFreeMove() const
         {
@@ -1257,6 +1258,8 @@ class Unit : public WorldObject
         void RemoveAurasWithDispelType(DispelType type);
         void RemoveMovementImpairingAuras();
 
+        bool CheckNoStackAurasDueToSpell(SpellEntry const* SpellInfo, uint32 effIndex, uint64 CasterGuid);
+
         void RemoveAllAuras();
         void RemoveAllAurasButPermanent();
         void RemoveArenaAuras(bool onleave = false);
@@ -1514,9 +1517,9 @@ class Unit : public WorldObject
         uint32 GetUnitMovementFlags() const { return m_unit_movement_flags; }
         void SetUnitMovementFlags(uint32 f) { m_unit_movement_flags = f; }
 
-        void SetControlled(bool apply, UnitState state);
+        void SetControlled(bool apply, UnitState state, bool waitForFinalize = true);
         void SetFeared(bool apply/*, uint64 casterGUID = 0, uint32 spellID = 0*/);
-        void SetConfused(bool apply/*, uint64 casterGUID = 0, uint32 spellID = 0*/);
+        void SetConfused(bool apply, bool waitForFinalize = true);
         void SetStunned(bool apply);
         void SetRooted(bool apply);
 

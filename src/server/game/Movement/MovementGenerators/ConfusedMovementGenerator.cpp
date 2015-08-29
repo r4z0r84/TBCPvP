@@ -136,7 +136,16 @@ bool ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
         Traveller<T> traveller(unit);
         if (i_destinationHolder.UpdateTraveller(traveller, diff))
         {
-            if (i_destinationHolder.HasArrived())
+            if (!i_waitForFinalize)
+            {
+                // arrived, stop and wait a bit
+                unit.clearUnitState(UNIT_STAT_MOVE);
+                unit.StopMoving();
+
+                i_nextMove = urand(1, MAX_CONF_WAYPOINTS);
+                i_nextMoveTime.Reset(urand(200, 500));     // TODO: check the minimum reset time, should be probably higher
+            }
+            else if (i_destinationHolder.HasArrived())
             {
                 // arrived, stop and wait a bit
                 unit.clearUnitState(UNIT_STAT_MOVE);

@@ -3803,6 +3803,20 @@ uint8 Spell::CanCast(bool strict)
     Unit *target = m_targets.getUnitTarget();
     if (target)
     {
+        // Check if spell is good to go due to stronger auras
+        if (!(m_customAttr & SPELL_ATTR_CU_DIRECT_DAMAGE))
+        {
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; i++)
+            {
+                if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA)
+                {
+                    if (!target->CheckNoStackAurasDueToSpell(m_spellInfo, i, m_caster->GetGUID()))
+                        return SPELL_FAILED_AURA_BOUNCED;
+                    break;
+                }
+            }
+        }
+
         // target state requirements (not allowed state), apply to self also
         if (m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
             return SPELL_FAILED_TARGET_AURASTATE;
@@ -3899,6 +3913,16 @@ uint8 Spell::CanCast(bool strict)
         {
             SendInterrupted(2);
             return SPELL_FAILED_NOT_INFRONT;
+        }
+
+        // Sap - recheck for stronger aura
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags & 0x80 && target->HasAura(11297, 0))
+        {
+            if (Aura* aura = target->GetAura(11297, 0))
+            {
+                if (aura->GetId() == 11297 && (aura->GetAuraDuration() > (aura->GetAuraMaxDuration() / 2)))
+                    return SPELL_FAILED_AURA_BOUNCED;
+            }
         }
 
         // check if target is in combat
@@ -5723,6 +5747,8 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
     if (m_Spell->getState() != SPELL_STATE_FINISHED)
         m_Spell->update(p_time);
 
+    const SpellEntry* spellInfo = m_Spell->m_spellInfo;
+
     // check spell state to process
     switch (m_Spell->getState())
     {
@@ -5730,7 +5756,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
         {
             // no, we aren't, do the typical update
             // check, if we have channeled spell on our hands
-            if (IsChanneledSpell(m_Spell->m_spellInfo))
+            if (IsChanneledSpell(spellInfo))
             {
                 // evented channeled spell is processed separately, casted once after delay, and not destroyed till finish
                 // check, if we have casting anything else except this channeled spell and autorepeat
@@ -5742,6 +5768,19 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 // Check if target of channeled spell still in range
                 else if (m_Spell->CheckRange(false, false))
                     m_Spell->cancel();
+                
+                // for some spells with TARGET_UNIT_PET first target is m_caster and above code will not be called
+                // we need to check every spell effect for TARGET_UNIT_PET and detect if pet is isolated
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    if (spellInfo->EffectImplicitTargetA[i] == TARGET_UNIT_PET || spellInfo->EffectImplicitTargetB[i] == TARGET_UNIT_PET)
+                        if (Player* playerCaster = m_Spell->GetCaster()->ToPlayer())
+                        {
+                            if (Pet* pet = playerCaster->GetPet())
+                            {
+                                if (pet->hasUnitState(UNIT_STAT_ISOLATED))
+                                    m_Spell->cancel();
+                            }
+                        }
             }
             break;
         }

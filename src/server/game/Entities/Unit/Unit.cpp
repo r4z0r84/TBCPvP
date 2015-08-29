@@ -3882,6 +3882,113 @@ bool Unit::AddAura(Aura *Aur)
     return true;
 }
 
+bool Unit::CheckNoStackAurasDueToSpell(SpellEntry const* SpellInfo, uint32 effIndex, uint64 CasterGuid)
+{
+    if (!SpellInfo)
+        return false;
+
+    uint32 spellId = SpellInfo->Id;
+    AuraMap::iterator i, next;
+    for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
+    {
+        next = i;
+        ++next;
+        if (!(*i).second)
+            continue;
+
+        SpellEntry const* spellProto = (*i).second->GetSpellProto();
+        if (!spellProto)
+            continue;
+
+        uint32 spellId = spellProto->Id;
+
+        if (spellId == spellId)
+            continue;
+
+        uint32 i_effIndex = (*i).second->GetEffIndex();
+
+        bool triggeredBySpell = false;
+        // prevent triggered aura of removing aura that triggered it
+        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            if (spellProto->EffectTriggerSpell[j] == SpellInfo->Id)
+                triggeredBySpell = true;
+        if (triggeredBySpell)
+            continue;
+
+        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+        {
+            // prevent remove dummy triggered spells at next effect aura add
+            switch (SpellInfo->Effect[j])                   // main spell auras added added after triggered spell
+            {
+                case SPELL_EFFECT_DUMMY:
+                    switch (spellId)
+                    {
+                        case 5420:
+                            if (spellId == 34123)
+                                triggeredBySpell = true;
+                            break;
+                    }
+                    break;
+            }
+
+            if (triggeredBySpell)
+                break;
+
+            // prevent remove form main spell by triggered passive spells
+            switch (spellProto->EffectApplyAuraName[j])    // main aura added before triggered spell
+            {
+                case SPELL_AURA_MOD_SHAPESHIFT:
+                    switch (spellId)
+                    {
+                        case 24858:
+                            if (spellId == 24905)
+                                triggeredBySpell = true;
+                            break;
+                        case 33891:
+                            if (spellId == 5420 || spellId == 34123)
+                                triggeredBySpell = true;
+                            break;
+                        case 34551:
+                            if (spellId == 22688)
+                                triggeredBySpell = true;
+                            break;
+                            // stealth && shadowmeld should work together
+                            // Shadowmeld: Stealth Rank 1-4
+                        case 20508:
+                            if (spellId == 1784 || spellId == 1785 || spellId == 1786 || spellId == 1787)
+                                triggeredBySpell = true;
+                            break;
+                            // Stealth: Shadowmeld
+                        case 1784:
+                        case 1785:
+                        case 1786:
+                        case 1787:
+                            if (spellId == 20508)
+                                triggeredBySpell = true; break;
+                    }
+                    break;
+            }
+        }
+
+        if (!triggeredBySpell)
+        {
+            bool sameCaster = CasterGuid == (*i).second->GetCasterGUID();
+            Unit* caster = GetUnit(*this, CasterGuid);
+            if (caster && sSpellMgr->IsNoStackSpellDueToSpell(spellId, spellId, sameCaster))
+            {
+                int32 aur1Rank = caster->CalculateSpellDamage(SpellInfo, effIndex, SpellInfo->EffectBasePoints[effIndex], this);
+                int32 aur2Rank = (*i).second->GetModifierValue();
+                // Check if effect is "better"
+                if (!sameCaster && (abs(aur1Rank) - abs(aur2Rank)) < 0)
+                    return false;
+                // TODO - store auras to be removed so we can safe some time
+            }
+        }
+    }
+    return true;
+}
+
+
 void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -12487,7 +12594,7 @@ void Unit::Kill(Unit *pVictim, bool durabilityLoss)
     }
 }
 
-void Unit::SetControlled(bool apply, UnitState state)
+void Unit::SetControlled(bool apply, UnitState state, bool waitForFinalize)
 {
     if (apply)
     {
@@ -12508,7 +12615,7 @@ void Unit::SetControlled(bool apply, UnitState state)
             case UNIT_STAT_CONFUSED:
                 if (!hasUnitState(UNIT_STAT_STUNNED))
                 {
-                    SetConfused(true);
+                    SetConfused(true, waitForFinalize);
                     CastStop();
                 }
                 break;
@@ -12548,7 +12655,7 @@ void Unit::SetControlled(bool apply, UnitState state)
                 SetRooted(true);
 
             if (hasUnitState(UNIT_STAT_CONFUSED))
-                SetConfused(true);
+                SetConfused(true, waitForFinalize);
             else if (hasUnitState(UNIT_STAT_FLEEING))
                 SetFeared(true);
         }
@@ -12662,12 +12769,10 @@ void Unit::SetFeared(bool apply)
         ToPlayer()->SetClientControl(this, !apply);
 }
 
-void Unit::SetConfused(bool apply)
+void Unit::SetConfused(bool apply, bool waitForFinalize)
 {
     if (apply)
-    {
-        GetMotionMaster()->MoveConfused();
-    }
+        GetMotionMaster()->MoveConfused(waitForFinalize);
     else
     {
         if (isAlive() && GetMotionMaster()->GetCurrentMovementGeneratorType() == CONFUSED_MOTION_TYPE)

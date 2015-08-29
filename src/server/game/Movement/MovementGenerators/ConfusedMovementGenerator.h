@@ -32,7 +32,7 @@ class ConfusedMovementGenerator
 : public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
 {
     public:
-        explicit ConfusedMovementGenerator() : i_nextMoveTime(0) {}
+        explicit ConfusedMovementGenerator(bool waitForFinalize) : i_waitForFinalize(waitForFinalize), i_nextMoveTime(0) {}
 
         void Initialize(T &);
         void Finalize(T &);
@@ -53,6 +53,7 @@ class ConfusedMovementGenerator
         float i_waypoints[MAX_CONF_WAYPOINTS+1][3];
         DestinationHolder< Traveller<T> > i_destinationHolder;
         uint32 i_nextMove;
+        bool i_waitForFinalize;
 };
 #endif
 

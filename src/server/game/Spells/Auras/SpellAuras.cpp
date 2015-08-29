@@ -3198,8 +3198,13 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if (!Real)
         return;
 
+    bool waitForFinalize = true;
+    // Spells with SPELL_AURA_MOD_CONFUSE and BasePoints == 1 (or higher) should skip finalized check in movement function
+    // This will effect Scatter Shot and Blind movementgen
+    if ((GetSpellProto()->EffectBasePoints[m_effIndex] + 1) > 0)
+        waitForFinalize = false;
     //m_target->SetConfused(apply, GetCasterGUID(), GetId());
-    m_target->SetControlled(apply, UNIT_STAT_CONFUSED);
+    m_target->SetControlled(apply, UNIT_STAT_CONFUSED, waitForFinalize);
 }
 
 void Aura::HandleModFear(bool apply, bool Real)

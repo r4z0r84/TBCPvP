@@ -2771,6 +2771,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 27010: // Entangling Roots (Nature's Grasp trigger) Rank 7
             spellInfo->CastingTimeIndex = 0;
             break;
+        case 32747: // Deadly Throw Interupt
+            spellInfo->speed = 0.0f;
+            break;
         default:
             break;
         }

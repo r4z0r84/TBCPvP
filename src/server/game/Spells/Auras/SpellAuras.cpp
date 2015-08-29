@@ -3363,7 +3363,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
                     if (GetId() == 20580)
                         plrTarget->SetVisibility(VISIBILITY_GROUP_STEALTH);
                     else
-                        plrTarget->SetVisibilityUpdateTimer(100);
+                        plrTarget->SetVisibilityUpdateTimer(250);
                 }
             }
 

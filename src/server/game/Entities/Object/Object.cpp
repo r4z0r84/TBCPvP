@@ -1697,7 +1697,8 @@ TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropert
             return NULL;
     }
 
-    if (!summon->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), this, summoner->GetPhaseMask(), entry, team, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
+    uint32 phase = summon ? summon->GetPhaseMask() : PHASEMASK_NORMAL;
+    if (!summon->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), this, phase, entry, team, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
     {
         delete summon;
         return NULL;

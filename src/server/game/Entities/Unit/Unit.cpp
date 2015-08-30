@@ -9196,6 +9196,9 @@ void Unit::Unmount()
 void Unit::SetInCombatWith(Unit* enemy, uint32 spellId)
 {
     Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();
+    if (!InSamePhase(enemy))
+        return;
+
     if (eOwner->IsPvP())
     {
         SetInCombatState(true, enemy, spellId);
@@ -11898,7 +11901,7 @@ Unit* Unit::SelectNearbyTarget(float dist) const
 {
     std::list<Unit *> targets;
     Trinity::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, dist);
-    Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+    Trinity::UnitListSearcher<Trinity::AnyUnfriendlyUnitInObjectRangeCheck> searcher(this, targets, u_check);
     VisitNearbyObject(dist, searcher);
 
     // remove current target
@@ -13305,4 +13308,65 @@ uint32 Unit::GetMaxRankSpellFromArray(uint32 array[], uint8 count)
     // no spell found, return no rank
     return 0;
 }
+
+void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
+{
+    if (newPhaseMask == GetPhaseMask())
+        return;
+
+    if (IsInWorld())
+    {
+        // modify hostile references for new phasemask, some special cases deal with hostile references themselves
+        if (GetTypeId() == TYPEID_UNIT || (!ToPlayer()->isGameMaster() && !ToPlayer()->GetSession()->PlayerLogout()))
+        {
+            HostileRefManager& refManager = getHostileRefManager();
+            HostileReference* ref = refManager.getFirst();
+
+            while (ref)
+            {
+                if (Unit* unit = ref->getSource()->getOwner())
+                    if (Creature *creature = unit->ToCreature())
+                        refManager.setOnlineOfflineState(creature, creature->InSamePhase(newPhaseMask));
+
+                ref = ref->next();
+            }
+
+            // modify threat lists for new phasemask
+            if (GetTypeId() != TYPEID_PLAYER)
+            {
+                std::list<HostileReference*> threatList = getThreatManager().getThreatList();
+                std::list<HostileReference*> offlineThreatList = getThreatManager().getOfflieThreatList();
+
+                // merge expects sorted lists
+                threatList.sort();
+                offlineThreatList.sort();
+                threatList.merge(offlineThreatList);
+
+                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                    if (Unit* unit = (*itr)->getTarget())
+                        unit->getHostileRefManager().setOnlineOfflineState(ToCreature(), unit->InSamePhase(newPhaseMask));
+            }
+        }
+    }
+
+    // Phase player, dont update
+    WorldObject::SetPhaseMask(newPhaseMask, false);
+
+    // Phase pets and summons
+    if (IsInWorld())
+    {
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            if (Guardian* pet = ToPlayer()->GetGuardianPet())
+                pet->SetPhaseMask(newPhaseMask, true);
+        }
+
+        RemoveNotOwnSingleTargetAuras(); // we can lost access to caster or target
+    }
+
+    // Update visibility after phasing pets and summons so they wont despawn
+    if (update)
+        UpdateObjectVisibility();
+}
+
 

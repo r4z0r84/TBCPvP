@@ -1537,7 +1537,7 @@ struct npc_giant_spotlightAI : public ScriptedAI
     {
         std::list<Player*> targets;
         Trinity::AnyPlayerInObjectRangeCheck check(me, 5.0f);
-        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(targets, check);
+        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, targets, check);
         me->VisitNearbyWorldObject(5.0f, searcher);
         for (std::list<Player*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
         {

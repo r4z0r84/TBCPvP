@@ -854,6 +854,9 @@ enum SkyFireStrings
     LANG_COMMAND_TICKETLISTADDCOMMENT   = 2024,
     LANG_COMMAND_TICKETLISTAGECREATE    = 2025,
 
+    LANG_COMMAND_ME_CHANGEDPHASE        = 2026,
+    LANG_COMMAND_YOU_CHANGEDPHASE       = 2027,
+
     // Trinity strings                     5000-9999
     LANG_COMMAND_FREEZE                 = 5000,
     LANG_COMMAND_FREEZE_ERROR           = 5001,

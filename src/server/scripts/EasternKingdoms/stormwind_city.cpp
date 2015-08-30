@@ -449,7 +449,7 @@ struct npc_lord_gregor_lescovarAI : public npc_escortAI
         cell.SetNoCreate();
 
         Trinity::AllCreaturesOfEntryInRange check(me, NPC_STORMWIND_ROYAL, 10);
-        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(lCreatureList, check);
+        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, lCreatureList, check);
         TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, GridTypeMapContainer> cSearcher(searcher);
         cell.Visit(pair, cSearcher, *(me->GetMap()));
 
@@ -673,7 +673,7 @@ struct npc_tyrion_spybotAI : public npc_escortAI
         cell.SetNoCreate();
 
         Trinity::AllCreaturesOfEntryInRange check(me, NPC_STORMWIND_ROYAL, 10);
-        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(lCreatureList, check);
+        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, lCreatureList, check);
         TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, GridTypeMapContainer> cSearcher(searcher);
         cell.Visit(pair, cSearcher, *(me->GetMap()));
 

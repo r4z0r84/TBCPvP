@@ -106,6 +106,12 @@ enum MovementFlags
     MOVEFLAG_TURN_LEFT | MOVEFLAG_TURN_RIGHT,
 };
 
+enum PhaseMasks
+{
+    PHASEMASK_NORMAL   = 0x00000001,
+    PHASEMASK_ANYWHERE = 0xFFFFFFFF
+};
+
 // used in SMSG_MONSTER_MOVE
 // only some values known as correct for 2.4.3
 enum SplineFlags
@@ -565,7 +571,7 @@ class WorldObject : public Object, public WorldLocation
 
         virtual void Update (uint32 /*time_diff*/) { }
 
-        void _Create(uint32 guidlow, HighGuid guidhigh);
+        void _Create(uint32 guidlow, HighGuid guidhigh, uint32 phaseMask);
 
         void GetNearPoint2D(float &x, float &y, float distance, float absAngle) const;
         void GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle) const;
@@ -613,6 +619,11 @@ class WorldObject : public Object, public WorldLocation
         }
 
         uint32 GetInstanceId() const { return m_InstanceId; }
+
+        virtual void SetPhaseMask(uint32 newPhaseMask, bool update);
+        uint32 GetPhaseMask() const { return m_phaseMask; }
+        bool InSamePhase(WorldObject const* obj) const;
+        bool InSamePhase(uint32 phasemask) const { return (GetPhaseMask() & phasemask) != 0; }
 
         float GetDistanceSqr(float x, float y, float z) const;
         bool HasInArc(float arcangle, const Position *pos) const;
@@ -775,6 +786,8 @@ class WorldObject : public Object, public WorldLocation
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint64 lootingGroupLeaderGUID;                      // used to find group which is looting corpse
 
+        bool canNeverSee(Unit const* u) const;
+
         bool m_isWorldObject;
 
         MovementInfo m_movementInfo;
@@ -796,6 +809,7 @@ class WorldObject : public Object, public WorldLocation
 
         //uint32 m_mapId;                                     // object at map with map_id
         uint32 m_InstanceId;                                // in map copy with instance id
+        uint32 m_phaseMask;
 
         uint16 m_notifyflags;
         uint16 m_executed_notifies;

@@ -490,7 +490,7 @@ struct boss_felmystAI : public ScriptedAI
         cell.SetNoCreate();
 
         Trinity::AllCreaturesOfEntryInRange check(me, entry, 100);
-        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(templist, check);
+        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, templist, check);
         TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, GridTypeMapContainer> cSearcher(searcher);
         cell.Visit(pair, cSearcher, *(me->GetMap()));
 

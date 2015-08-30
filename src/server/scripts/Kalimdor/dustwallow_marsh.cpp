@@ -861,7 +861,7 @@ struct npc_private_hendelAI : public ScriptedAI
         cell.SetNoCreate();
 
         Trinity::AllCreaturesOfEntryInRange check(me, NPC_SENTRY, 20);
-        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(lCreatureList, check);
+        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, lCreatureList, check);
         TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, GridTypeMapContainer> cSearcher(searcher);
         cell.Visit(pair, cSearcher, *(me->GetMap()));
 

@@ -1013,8 +1013,8 @@ void ObjectMgr::LoadCreatures()
     QueryResult_AutoPtr result = WorldDatabase.Query("SELECT creature.guid, id, map, modelid, "
     //   4             5           6           7           8            9              10         11
         "equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint, "
-    //   12         13       14          15            16         17     18
-        "curhealth, curmana, DeathState, MovementType, spawnMask, event, pool_entry "
+    //   12         13       14          15            16         17     18         19
+        "curhealth, curmana, DeathState, MovementType, spawnMask, phaseMask, event, pool_entry "
         "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid "
         "LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid");
 
@@ -1064,8 +1064,9 @@ void ObjectMgr::LoadCreatures()
         data.is_dead        = fields[14].GetBool();
         data.movementType   = fields[15].GetUInt8();
         data.spawnMask      = fields[16].GetUInt8();
-        int16 gameEvent     = fields[17].GetInt16();
-        int16 PoolId        = fields[18].GetInt16();
+        data.phaseMask      = fields[17].GetUInt32();
+        int16 gameEvent     = fields[18].GetInt16();
+        int16 PoolId        = fields[19].GetInt16();
 
         if (heroicCreatures.find(data.id) != heroicCreatures.end())
         {
@@ -1114,6 +1115,12 @@ void ObjectMgr::LoadCreatures()
                 sLog->outErrorDb("Table creature has creature (GUID: %u Entry: %u) with MovementType=0 (idle) has spawndist<>0, set to 0.", guid, data.id);
                 data.spawndist = 0.0f;
             }
+        }
+
+        if (data.phaseMask == 0)
+        {
+            sLog->outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `phaseMask`=0 (not visible for anyone), set to 1.", guid, data.id);
+            data.phaseMask = PHASEMASK_NORMAL;
         }
 
         if (gameEvent == 0 && PoolId == 0)                      // if not this is to be managed by GameEvent System or Pool system
@@ -1260,8 +1267,8 @@ void ObjectMgr::LoadGameobjects()
 
     //                                                       0                1   2    3           4           5           6
     QueryResult_AutoPtr result = WorldDatabase.Query("SELECT gameobject.guid, id, map, position_x, position_y, position_z, orientation, "
-    //   7          8          9          10         11             12            13     14         15     16
-        "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnMask, event, pool_entry "
+    //   7          8          9          10         11             12            13     14         15         16     17
+        "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnMask, phaseMask, event, pool_entry "
         "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid "
         "LEFT OUTER JOIN pool_gameobject ON gameobject.guid = pool_gameobject.guid");
 
@@ -1311,8 +1318,9 @@ void ObjectMgr::LoadGameobjects()
         data.go_state       = GOState(go_state);
 
         data.spawnMask      = fields[14].GetUInt8();
-        int16 gameEvent     = fields[15].GetInt16();
-        int16 PoolId        = fields[16].GetInt16();
+        data.phaseMask      = fields[15].GetUInt32();
+        int16 gameEvent     = fields[16].GetInt16();
+        int16 PoolId        = fields[17].GetInt16();
 
         if (data.rotation2 < -1.0f || data.rotation2 > 1.0f)
         {

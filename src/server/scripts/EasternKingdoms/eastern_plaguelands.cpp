@@ -337,7 +337,7 @@ struct npc_priest_epic_quest_callerAI : public NullCreatureAI
         cell.SetNoCreate();
 
         Trinity::AllCreaturesOfEntryInRange check(me, entry, 100);
-        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(tempList, check);
+        Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange> searcher(me, tempList, check);
         TypeContainerVisitor<Trinity::CreatureListSearcher<Trinity::AllCreaturesOfEntryInRange>, GridTypeMapContainer> cSearcher(searcher);
         cell.Visit(pair, cSearcher, *(me->GetMap()));
 

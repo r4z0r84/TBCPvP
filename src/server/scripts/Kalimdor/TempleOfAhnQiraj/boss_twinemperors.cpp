@@ -342,7 +342,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         std::list<Creature*> unitList;
 
         AnyBugCheck u_check(me, 150);
-        Trinity::CreatureListSearcher<AnyBugCheck> searcher(unitList, u_check);
+        Trinity::CreatureListSearcher<AnyBugCheck> searcher(me, unitList, u_check);
         TypeContainerVisitor<Trinity::CreatureListSearcher<AnyBugCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
         cell.Visit(p, grid_creature_searcher, *(me->GetMap()));
 

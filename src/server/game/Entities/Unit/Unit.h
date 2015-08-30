@@ -1378,6 +1378,8 @@ class Unit : public WorldObject
         bool canDetectStealthOf(Unit const* u, float distance) const;
         void UpdateObjectVisibility(bool forced = true);
 
+        void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
+
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
         // function for low level grid visibility checks in player/creature cases

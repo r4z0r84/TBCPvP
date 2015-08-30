@@ -95,7 +95,7 @@ bool Corpse::Create(uint32 guidlow, Player *owner, uint32 mapid, float x, float 
     //in other way we will get a crash in Corpse::SaveToDB()
     SetMap(owner->GetMap());
 
-    WorldObject::_Create(guidlow, HIGHGUID_CORPSE);
+    WorldObject::_Create(guidlow, HIGHGUID_CORPSE, owner->GetPhaseMask());
 
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1);
     SetFloatValue(CORPSE_FIELD_POS_X, x);
@@ -176,7 +176,7 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
     uint32 mapid    = fields[4].GetUInt32();
 
     // Initialize the datastores for this object
-    WorldObject::_Create(guid, HIGHGUID_CORPSE);
+    WorldObject::_Create(guid, HIGHGUID_CORPSE, PHASEMASK_NORMAL);
 
     SetUInt32Value(CORPSE_FIELD_DISPLAY_ID, fields[5].GetUInt32());
     _LoadIntoDataField(fields[6].GetString(), CORPSE_FIELD_ITEM, EQUIPMENT_SLOT_END);

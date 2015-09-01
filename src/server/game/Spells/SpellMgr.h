@@ -404,6 +404,7 @@ inline bool IsDeathPersistentSpell(SpellEntry const *spellInfo)
         case 40214:                                     // Dragonmaw Illusion
         case 35480: case 35481: case 35482:             // Human Illusion
         case 35483: case 39824:                         // Human Illusion
+        case 46273:                                     // Multiphase Goggles (Item: Multiphase Spectrographic Goggles)
             return true;
     }
 

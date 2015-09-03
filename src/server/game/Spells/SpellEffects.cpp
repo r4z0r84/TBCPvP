@@ -3325,6 +3325,13 @@ void Spell::EffectOpenLock(uint32 /*i*/)
         uint32 SkillValue = player->GetPureSkillValue(SkillId);
         if (SkillValue)                                      // non only item base skill
         {
+            // chance for failure in orange gather / lockpick (gathering skill can't fail at maxskill)
+            if ((SkillValue < sWorld->GetConfigMaxSkillValue()) && reqSkillValue > irand(SkillValue - 25, SkillValue + 37))
+            {
+                SendCastResult(SPELL_FAILED_TRY_AGAIN);
+                return;
+            }
+
             if (gameObjTarget)
             {
                 // Allow one skill-up until respawned
@@ -6168,18 +6175,28 @@ void Spell::EffectSkinning(uint32 /*i*/)
 
     Creature* creature = unitTarget->ToCreature();
     int32 targetLevel = creature->getLevel();
-
     uint32 skill = creature->GetCreatureTemplate()->GetRequiredLootSkill();
+    int32 skillValue = m_caster->ToPlayer()->GetSkillValue(skill);
+    int32 ReqValue = (skillValue < 100 ? (targetLevel - 10) * 10 : targetLevel * 5);
+
+    // chance for fail at orange skinning attempt
+    if ((m_selfContainer && (*m_selfContainer) == this) &&
+        skillValue < sWorld->GetConfigMaxSkillValue() &&
+        (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
+    {
+        SendCastResult(SPELL_FAILED_TRY_AGAIN);
+        return;
+    }
 
     m_caster->ToPlayer()->SendLoot(creature->GetGUID(), LOOT_SKINNING);
     creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
     int32 reqValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel-10)*10 : targetLevel*5;
 
-    int32 skillValue = m_caster->ToPlayer()->GetPureSkillValue(skill);
+    int32 pureSkillValue = m_caster->ToPlayer()->GetPureSkillValue(skill);
 
     // Double chances for elites
-    m_caster->ToPlayer()->UpdateGatherSkill(skill, skillValue, reqValue, creature->isElite() ? 2 : 1);
+    m_caster->ToPlayer()->UpdateGatherSkill(skill, pureSkillValue, reqValue, creature->isElite() ? 2 : 1);
 }
 
 void Spell::EffectCharge(uint32 /*i*/)

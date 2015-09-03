@@ -4189,12 +4189,6 @@ uint8 Spell::CanCast(bool strict)
                 if (ReqValue > skillValue)
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
-                // chance for fail at orange skinning attempt
-                if ((m_selfContainer && (*m_selfContainer) == this) &&
-                    skillValue < sWorld->GetConfigMaxSkillValue() &&
-                    (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
-                    return SPELL_FAILED_TRY_AGAIN;
-
                 break;
             }
             case SPELL_EFFECT_OPEN_LOCK_ITEM:
@@ -4285,19 +4279,18 @@ uint8 Spell::CanCast(bool strict)
 
                 // get the skill value of the player
                 int32 SkillValue = 0;
-                bool canFailAtMax = true;
-                if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_HERBALISM)
+                switch (m_spellInfo->EffectMiscValue[i])
                 {
-                    SkillValue = m_caster->ToPlayer()->GetSkillValue(SKILL_HERBALISM);
-                    canFailAtMax = false;
+                    case LOCKTYPE_HERBALISM:
+                        SkillValue = m_caster->ToPlayer()->GetSkillValue(SKILL_HERBALISM);
+                        break;
+                    case LOCKTYPE_MINING:
+                        SkillValue = m_caster->ToPlayer()->GetSkillValue(SKILL_MINING);
+                        break;
+                    case LOCKTYPE_PICKLOCK:
+                        SkillValue = m_caster->ToPlayer()->GetSkillValue(SKILL_LOCKPICKING);
+                        break;
                 }
-                else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_MINING)
-                {
-                    SkillValue = m_caster->ToPlayer()->GetSkillValue(SKILL_MINING);
-                    canFailAtMax = false;
-                }
-                else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
-                    SkillValue = m_caster->ToPlayer()->GetSkillValue(SKILL_LOCKPICKING);
 
                 // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
                 if (m_CastItem)
@@ -4334,10 +4327,6 @@ uint8 Spell::CanCast(bool strict)
                 // skill doesn't meet the required value
                 if (ReqValue > SkillValue)
                     return SPELL_FAILED_LOW_CASTLEVEL;
-
-                // chance for failure in orange gather / lockpick (gathering skill can't fail at maxskill)
-                if ((canFailAtMax || SkillValue < sWorld->GetConfigMaxSkillValue()) && ReqValue > irand(SkillValue-25, SkillValue+37))
-                    return SPELL_FAILED_TRY_AGAIN;
 
                 break;
             }

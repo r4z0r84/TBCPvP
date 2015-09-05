@@ -19,8 +19,8 @@
 
 /* ScriptData
 SDName: Boss_Terestian_Illhoof
-SD%Complete: 95
-SDComment: Complete! Needs adjustments to use spell though.
+SD%Complete: 100
+SDComment:
 SDCategory: Karazhan
 EndScriptData */
 
@@ -43,6 +43,11 @@ enum TerestianIllhoof
     // SAY_SUMMON
     SAY_SUMMON1                 = -1532071,
     SAY_SUMMON2                 = -1532072
+};
+
+enum Kilrek
+{
+    EMOTE_DEATH                 = -1532115
 };
 
 enum Spells
@@ -72,49 +77,17 @@ enum Creatues
     NPC_KILREK                  = 17229
 };
 
-struct mob_kilrekAI : public ScriptedAI
+enum Defines
 {
-    mob_kilrekAI(Creature *c) : ScriptedAI(c)
-    {
-        instance = c->GetInstanceScript();
-    }
-
-    ScriptedInstance* instance;
-
-    uint32 AmplifyTimer;
-
-    void Reset()
-    {
-        AmplifyTimer = 2000;
-    }
-
-    void JustDied(Unit* /*Killer*/)
-    {
-        Unit* Terestian = Unit::GetUnit((*me), instance->GetData64(DATA_TERESTIAN));
-        if (Terestian && Terestian->isAlive())
-            DoCast(Terestian, SPELL_BROKEN_PACT, true);
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        // Return since we have no target
-        if (!UpdateVictim())
-            return;
-
-        if (AmplifyTimer <= diff)
-        {
-            me->InterruptNonMeleeSpells(false);
-            DoCast(me->getVictim(), SPELL_AMPLIFY_FLAMES);
-
-            AmplifyTimer = urand(10000, 20000);
-        }
-        else AmplifyTimer -= diff;
-
-        DoMeleeAttackIfReady();
-    }
+    MAX_COUNT_IMP               = 20,
+    MAX_COUNT_PORTALS           = 2
 };
 
-float KilrekLocation = {};
+float PortalLocations[2][2] =
+{
+    { -11252.0205, -1703.97009 },
+    { -11241.5742, -1717.40063 },
+};
 
 struct mob_demon_chainAI : public ScriptedAI
 {
@@ -173,63 +146,30 @@ struct mob_fiendish_portalAI : public PassiveAI
     }
 };
 
-struct mob_fiendish_impAI : public ScriptedAI
-{
-    mob_fiendish_impAI(Creature *c) : ScriptedAI(c)
-    {
-        Initialize();
-    }
-
-    void Initialize()
-    {
-        FireboltTimer = 2000;
-    }
-
-    uint32 FireboltTimer;
-
-    void Reset()
-    {
-        Initialize();
-
-        me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
-    }
-
-    void EnterCombat(Unit * /*who*/) {}
-
-    void UpdateAI(const uint32 diff)
-    {
-        //Return since we have no target
-        if (!UpdateVictim())
-            return;
-
-        if (FireboltTimer <= diff)
-        {
-            DoCast(me->getVictim(), SPELL_FIREBOLT);
-            FireboltTimer = 2200;
-        }
-        else FireboltTimer -= diff;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
 struct boss_terestianAI : public ScriptedAI
 {
     boss_terestianAI(Creature *c) : ScriptedAI(c)
     {
         instance = c->GetInstanceScript();
         Initialize();
+        me->GetPosition(&pos);
     }
 
     void Initialize()
     {
         PortalsCount = 0;
+        ImpCount = 0;
         SacrificeTimer = 30000;
-        ShadowboltTimer = 5000;
-        SummonTimer = 10000;
+        ShadowboltTimer = 100;
+        PortalTimer = 10000;
+        SummonPortalTimer = 0;
+        SummonImpTimer = 0;
+        SummonKilrekTimer = 5000;
         BerserkTimer = 600000;
+        CheckTimer = 3000;
 
         SummonedPortals = false;
+        KilrekSummoned = false;
         Berserk = false;
     }
 
@@ -237,13 +177,21 @@ struct boss_terestianAI : public ScriptedAI
 
     uint64 PortalGUID[2];
     uint8 PortalsCount;
+    uint8 ImpCount;
 
     uint32 SacrificeTimer;
     uint32 ShadowboltTimer;
-    uint32 SummonTimer;
+    uint32 PortalTimer;
+    uint32 SummonPortalTimer;
+    uint32 SummonImpTimer;
+    uint32 SummonKilrekTimer;
     uint32 BerserkTimer;
+    uint32 CheckTimer;
+
+    Position pos;
 
     bool SummonedPortals;
+    bool KilrekSummoned;
     bool Berserk;
 
     void Reset()
@@ -267,17 +215,17 @@ struct boss_terestianAI : public ScriptedAI
         instance->SetData(TYPE_TERESTIAN, NOT_STARTED);
 
         me->RemoveAurasDueToSpell(SPELL_BROKEN_PACT);
+    }
 
-        if (Minion* Kilrek = me->GetFirstMinion())
+    void EnterEvadeMode()
+    {
+        if (Creature* Kilrek = Unit::GetUnit((*me), instance->GetData64(DATA_KILREK))->ToCreature())
         {
-            if (!Kilrek->isAlive())
-            {
-                Kilrek->UnSummon();
-                DoCast(me, SPELL_SUMMON_IMP, true);
-            }
+            if (Kilrek->isAlive())
+                Kilrek->ForcedDespawn();
         }
-        else
-            DoCast(me, SPELL_SUMMON_IMP, true);
+
+        ScriptedAI::EnterEvadeMode();
     }
 
     void EnterCombat(Unit* /*who*/)
@@ -328,6 +276,18 @@ struct boss_terestianAI : public ScriptedAI
         if (!UpdateVictim())
             return;
 
+        if (CheckTimer < diff)
+        {
+            if (!me->IsWithinDist3d(&pos, 35.0f))
+                EnterEvadeMode();
+            else
+                DoZoneInCombat();
+
+            CheckTimer = 3000;
+        }
+        else
+            CheckTimer -= diff;
+
         if (SacrificeTimer <= diff)
         {
             Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, GetSpellMaxRange(SPELL_SACRIFICE), true);
@@ -345,30 +305,78 @@ struct boss_terestianAI : public ScriptedAI
                 }
             }
         }
-        else SacrificeTimer -= diff;
+        else
+            SacrificeTimer -= diff;
+
+        if (SummonKilrekTimer && SummonKilrekTimer <= diff)
+        {
+            DoCast(me, SPELL_SUMMON_IMP, true);
+            SummonKilrekTimer = 0;
+        }
+        else
+            SummonKilrekTimer -= diff;
 
         if (ShadowboltTimer <= diff)
         {
             DoCast(SelectUnit(SELECT_TARGET_TOPAGGRO, 0), SPELL_SHADOW_BOLT);
             ShadowboltTimer = 10000;
         }
-        else ShadowboltTimer -= diff;
+        else
+            ShadowboltTimer -= diff;
 
-        if (SummonTimer <= diff)
+        if (!SummonedPortals)
         {
-            if (!PortalGUID[0])
-                DoCast(me->getVictim(), SPELL_FIENDISH_PORTAL, false);
+            if (PortalTimer && PortalTimer <= diff)
+            {
+                DoScriptText(RAND(SAY_SUMMON1, SAY_SUMMON2), me);
+                DoCast(me, SPELL_FIENDISH_PORTAL, false); // Effect removed in SpellMgr.cpp
+                SummonPortalTimer = 2000;
+                PortalTimer = 0;
+            }
+            else
+                PortalTimer -= diff;
 
-            if (!PortalGUID[1])
-                DoCast(me->getVictim(), SPELL_FIENDISH_PORTAL_1, false);
+            if (SummonPortalTimer && SummonPortalTimer <= diff)
+            {
+                /* Should be fixed in Spell::EffectSummonType to use data from spell_target_position
+                if (!PortalGUID[0])
+                DoCast(me, SPELL_FIENDISH_PORTAL, false);
 
+                if (!PortalGUID[1])
+                DoCast(me, SPELL_FIENDISH_PORTAL_1, false);
+                */
+
+                for (uint8 i = 0; i < MAX_COUNT_PORTALS; ++i)
+                {
+                    if (PortalsCount <= MAX_COUNT_PORTALS)
+                        me->SummonCreature(NPC_PORTAL, PortalLocations[i][0], PortalLocations[i][1], me->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_DESPAWN);
+                }
+
+                SummonImpTimer = 5000; // CastingTime (Id 5) = 2.00 + 5000
+                SummonedPortals = true;
+            }
+            else
+                SummonPortalTimer -= diff;
+        }
+
+        if (SummonImpTimer && SummonImpTimer <= diff)
+        {
             if (PortalGUID[0] && PortalGUID[1])
             {
-                if (Creature* pPortal = Unit::GetCreature(*me, PortalGUID[urand(0, 1)]))
-                    pPortal->CastSpell(me->getVictim(), SPELL_SUMMON_FIENDISIMP, false);
-                SummonTimer = 5000;
+                if (ImpCount < MAX_COUNT_IMP)
+                {
+                    if (Creature* pPortal = Unit::GetCreature(*me, PortalGUID[urand(0, 1)]))
+                    {
+                        pPortal->CastSpell(me->getVictim(), SPELL_SUMMON_FIENDISIMP, false);
+                        ++ImpCount;
+                    }
+                }
+
+                SummonImpTimer = urand(2000, 7000);
             }
-        } else SummonTimer -= diff;
+        }
+        else
+            SummonImpTimer -= diff;
 
         if (!Berserk)
         {
@@ -376,8 +384,107 @@ struct boss_terestianAI : public ScriptedAI
             {
                 DoCast(me, SPELL_BERSERK);
                 Berserk = true;
-            } else BerserkTimer -= diff;
+            }
+            else
+                BerserkTimer -= diff;
         }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+struct mob_fiendish_impAI : public ScriptedAI
+{
+    mob_fiendish_impAI(Creature *c) : ScriptedAI(c)
+    {
+        instance = c->GetInstanceScript();
+        Initialize();
+    }
+
+    ScriptedInstance *instance;
+
+    void Initialize()
+    {
+        FireboltTimer = 2000;
+    }
+
+    uint32 FireboltTimer;
+
+    void Reset()
+    {
+        Initialize();
+
+        me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
+    }
+
+    void JustDied(Unit * /*killer*/)
+    {
+        Creature* Terestian = Unit::GetUnit((*me), instance->GetData64(DATA_TERESTIAN))->ToCreature();
+        if (Terestian && Terestian->isAlive())
+            CAST_AI(boss_terestianAI, Terestian->AI())->ImpCount--;
+    }
+
+    void EnterCombat(Unit * /*who*/) {}
+
+    void UpdateAI(const uint32 diff)
+    {
+        //Return since we have no target
+        if (!UpdateVictim())
+            return;
+
+        if (FireboltTimer <= diff)
+        {
+            DoCast(me->getVictim(), SPELL_FIREBOLT);
+            FireboltTimer = 2200;
+        }
+        else FireboltTimer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+struct mob_kilrekAI : public ScriptedAI
+{
+    mob_kilrekAI(Creature *c) : ScriptedAI(c)
+    {
+        instance = c->GetInstanceScript();
+    }
+
+    ScriptedInstance* instance;
+
+    uint32 AmplifyTimer;
+
+    void Reset()
+    {
+        AmplifyTimer = 2000;
+    }
+
+    void JustDied(Unit* /*Killer*/)
+    {
+        Creature* Terestian = Unit::GetUnit((*me), instance->GetData64(DATA_TERESTIAN))->ToCreature();
+        if (Terestian && Terestian->isAlive())
+        {
+            DoScriptText(EMOTE_DEATH, me);
+            CAST_AI(boss_terestianAI, Terestian->AI())->SummonKilrekTimer = 45000;
+            DoCast(Terestian, SPELL_BROKEN_PACT, true);
+            me->ForcedDespawn(15000);
+        }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        // Return since we have no target
+        if (!UpdateVictim())
+            return;
+
+        if (AmplifyTimer <= diff)
+        {
+            me->InterruptNonMeleeSpells(false);
+            DoCast(me->getVictim(), SPELL_AMPLIFY_FLAMES);
+
+            AmplifyTimer = urand(10000, 20000);
+        }
+        else AmplifyTimer -= diff;
 
         DoMeleeAttackIfReady();
     }

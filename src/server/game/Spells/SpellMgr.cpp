@@ -2774,6 +2774,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 32747: // Deadly Throw Interupt
             spellInfo->speed = 0.0f;
             break;
+        case 30171: // Fiendish Portal - Should be fixed in Spell::EffectSummonType to use data from spell_target_position
+            spellInfo->Effect[0] = 0;
+            break;
         default:
             break;
         }

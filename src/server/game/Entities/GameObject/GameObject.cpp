@@ -1255,11 +1255,13 @@ void GameObject::Use(Unit* user)
             AddUniqueUse(player);
 
             if (info->summoningRitual.animSpell)
-            {
                 player->CastSpell(player, info->summoningRitual.animSpell, true);
-
-                // for this case, summoningRitual.spellId is always triggered
-                triggered = true;
+            else
+            {
+                if (m_spellId == 29893)
+                    player->CastSpell(player, 43897, false);
+                else
+                    player->CastSpell(player, 32783, false);
             }
 
             // full amount unique participants including original summoner

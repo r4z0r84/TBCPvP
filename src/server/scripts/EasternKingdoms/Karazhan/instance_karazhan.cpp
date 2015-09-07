@@ -70,6 +70,7 @@ struct instance_karazhan : public ScriptedInstance
     uint64 m_uiServantsAccessDoor;                              // Door to Brocken Stair
     uint64 MastersTerraceDoor[2];
     uint64 ImageGUID;
+    uint64 m_uiShadeOfAranGUID;
 
     void Initialize()
     {
@@ -87,6 +88,7 @@ struct instance_karazhan : public ScriptedInstance
         m_uiTerestianGUID   = 0;
         m_uiMoroesGUID      = 0;
         m_uiNightBaneGUID   = 0;
+        m_uiShadeOfAranGUID = 0;
 
         m_uiLibraryDoor         = 0;
         m_uiMassiveDoor         = 0;
@@ -116,6 +118,7 @@ struct instance_karazhan : public ScriptedInstance
             case 17229:   m_uiKilrekGUID = creature->GetGUID();      break;
             case 15688:   m_uiTerestianGUID = creature->GetGUID();   break;
             case 15687:   m_uiMoroesGUID = creature->GetGUID();      break;
+            case 16524:   m_uiShadeOfAranGUID = creature->GetGUID(); break;
         }
     }
 
@@ -301,6 +304,7 @@ struct instance_karazhan : public ScriptedInstance
             case DATA_MASTERS_TERRACE_DOOR_1:   return MastersTerraceDoor[0];
             case DATA_MASTERS_TERRACE_DOOR_2:   return MastersTerraceDoor[1];
             case DATA_NIGHTBANE:                return m_uiNightBaneGUID;
+            case DATA_SHADE_OF_ARAN:            return m_uiShadeOfAranGUID;
         }
 
         return 0;

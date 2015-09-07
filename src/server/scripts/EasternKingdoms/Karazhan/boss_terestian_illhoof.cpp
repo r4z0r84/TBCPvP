@@ -66,7 +66,7 @@ enum Spells
 
     SPELL_FIREBOLT              = 30050,                   // Blasts a target for 150 Fire damage.
     SPELL_BROKEN_PACT           = 30065,                   // All damage taken increased by 25%.
-    SPELL_AMPLIFY_FLAMES        = 30053,                   // Increases the Fire damage taken by an enemy by 500 for 25 sec.
+    SPELL_AMPLIFY_FLAMES        = 30053                    // Increases the Fire damage taken by an enemy by 500 for 25 sec.
 };
 
 enum Creatues
@@ -169,7 +169,6 @@ struct boss_terestianAI : public ScriptedAI
         CheckTimer = 3000;
 
         SummonedPortals = false;
-        KilrekSummoned = false;
         Berserk = false;
     }
 
@@ -191,7 +190,6 @@ struct boss_terestianAI : public ScriptedAI
     Position pos;
 
     bool SummonedPortals;
-    bool KilrekSummoned;
     bool Berserk;
 
     void Reset()
@@ -311,6 +309,7 @@ struct boss_terestianAI : public ScriptedAI
         if (SummonKilrekTimer && SummonKilrekTimer <= diff)
         {
             DoCast(me, SPELL_SUMMON_IMP, true);
+            me->RemoveAurasDueToSpellByCancel(SPELL_BROKEN_PACT);
             SummonKilrekTimer = 0;
         }
         else
@@ -492,22 +491,22 @@ struct mob_kilrekAI : public ScriptedAI
 
 CreatureAI* GetAI_mob_kilrek(Creature* creature)
 {
-    return new mob_kilrekAI (creature);
+    return new mob_kilrekAI(creature);
 }
 
 CreatureAI* GetAI_mob_fiendish_imp(Creature* creature)
 {
-    return new mob_fiendish_impAI (creature);
+    return new mob_fiendish_impAI(creature);
 }
 
 CreatureAI* GetAI_mob_fiendish_portal(Creature* creature)
 {
-    return new mob_fiendish_portalAI (creature);
+    return new mob_fiendish_portalAI(creature);
 }
 
 CreatureAI* GetAI_boss_terestian_illhoof(Creature* creature)
 {
-    return new boss_terestianAI (creature);
+    return new boss_terestianAI(creature);
 }
 
 CreatureAI* GetAI_mob_demon_chain(Creature* creature)
@@ -529,7 +528,7 @@ void AddSC_boss_terestian_illhoof()
     newscript->RegisterSelf();
 
     newscript = new Script;
-    newscript->Name= "mob_fiendish_portal";
+    newscript->Name = "mob_fiendish_portal";
     newscript->GetAI = &GetAI_mob_fiendish_portal;
     newscript->RegisterSelf();
 
@@ -543,4 +542,3 @@ void AddSC_boss_terestian_illhoof()
     newscript->GetAI = &GetAI_mob_demon_chain;
     newscript->RegisterSelf();
 }
-

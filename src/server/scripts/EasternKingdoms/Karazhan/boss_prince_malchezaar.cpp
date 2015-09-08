@@ -88,7 +88,6 @@ static InfernalPoint InfernalPoints[] =
 #define SPELL_THRASH_AURA           3417                        //Passive proc chance for thrash
 #define SPELL_EQUIP_AXES            30857                       //Visual for axe equiping
 #define SPELL_AMPLIFY_DAMAGE        12738                       //Amplifiy during phase 3
-#define SPELL_CLEAVE                30131                       //Same as Nightbane.
 #define SPELL_HELLFIRE              30859                       //Infenals' hellfire aura
 #define NETHERSPITE_INFERNAL        17646                       //The netherspite infernal creature
 #define MALCHEZARS_AXE              17650                       //Malchezar's axes (creatures), summoned during phase 3
@@ -96,14 +95,20 @@ static InfernalPoint InfernalPoints[] =
 #define INFERNAL_MODEL_INVISIBLE    11686                      //Infernal Effects
 #define SPELL_INFERNAL_RELAY        30834
 
-#define AXE_EQUIP_MODEL              40066                      //Axes info
-#define AXE_EQUIP_INFO               33448898
+#define AXE_EQUIP_MODEL             40066                      //Axes info
+#define AXE_EQUIP_INFO              33448898
+
+#define NPC_INFERNAL_RELAY          17645
 
 //---------Infernal code first
 struct netherspite_infernalAI : public ScriptedAI
 {
-    netherspite_infernalAI(Creature *c) : ScriptedAI(c) ,
-        malchezaar(0), HellfireTimer(0), CleanupTimer(0), point(NULL) {}
+    netherspite_infernalAI(Creature *c) : ScriptedAI(c),
+        malchezaar(0), HellfireTimer(0), CleanupTimer(0), point(NULL)
+    {
+        // Disable rotate
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+    }
 
     uint32 HellfireTimer;
     uint32 CleanupTimer;
@@ -173,7 +178,6 @@ struct boss_malchezaarAI : public ScriptedAI
     uint32 SWPainTimer;
     uint32 SunderArmorTimer;
     uint32 AmplifyDamageTimer;
-    uint32 Cleave_Timer;
     uint32 InfernalTimer;
     uint32 AxesTargetSwitchTimer;
     uint32 InfernalCleanupTimer;
@@ -189,6 +193,8 @@ struct boss_malchezaarAI : public ScriptedAI
 
     void Reset()
     {
+        me->AddUnitMovementFlag(MOVEFLAG_WALK_MODE);
+
         AxesCleanup();
         ClearWeapons();
         InfernalCleanup();
@@ -205,8 +211,7 @@ struct boss_malchezaarAI : public ScriptedAI
         ShadowNovaTimer = 35500;
         SWPainTimer = 20000;
         AmplifyDamageTimer = 5000;
-        Cleave_Timer = 8000;
-        InfernalTimer = 45000;
+        InfernalTimer = 44500;
         InfernalCleanupTimer = 47000;
         AxesTargetSwitchTimer = urand(7500, 20000);
         SunderArmorTimer = urand(5000, 10000);
@@ -239,6 +244,8 @@ struct boss_malchezaarAI : public ScriptedAI
 
     void EnterCombat(Unit * /*who*/)
     {
+        me->SetSpeed(MOVE_RUN, 2.0f);
+        me->RemoveUnitMovementFlag(MOVEFLAG_WALK_MODE);
         DoScriptText(SAY_AGGRO, me);
 
         if (instance)
@@ -348,8 +355,9 @@ struct boss_malchezaarAI : public ScriptedAI
         }
 
         Creature *Infernal = me->SummonCreature(NETHERSPITE_INFERNAL, pos, TEMPSUMMON_TIMED_DESPAWN, 180000);
+        Creature* infernalRelay = Infernal->FindNearestCreature(NPC_INFERNAL_RELAY, 200.0f);
 
-        if (Infernal)
+        if (Infernal && infernalRelay)
         {
             Infernal->SetDisplayId(INFERNAL_MODEL_INVISIBLE);
             Infernal->setFaction(me->getFaction());
@@ -358,7 +366,7 @@ struct boss_malchezaarAI : public ScriptedAI
             CAST_AI(netherspite_infernalAI, Infernal->AI())->malchezaar=me->GetGUID();
 
             infernals.push_back(Infernal->GetGUID());
-            DoCast(Infernal, SPELL_INFERNAL_RELAY);
+            infernalRelay->CastSpell(Infernal, SPELL_INFERNAL_RELAY, true);
         }
 
         DoScriptText(RAND(SAY_SUMMON1, SAY_SUMMON2), me);
@@ -468,12 +476,6 @@ struct boss_malchezaarAI : public ScriptedAI
                 DoCast(me->getVictim(), SPELL_SUNDER_ARMOR);
                 SunderArmorTimer = urand(10000, 18000);
             } else SunderArmorTimer -= diff;
-
-            if (Cleave_Timer <= diff)
-            {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
-                Cleave_Timer = urand(6000, 12000);
-            } else Cleave_Timer -= diff;
         }
         else
         {

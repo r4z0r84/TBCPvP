@@ -89,6 +89,9 @@ float PortalLocations[2][2] =
     { -11241.5742, -1717.40063 },
 };
 
+// Set to true to nerf this encounter
+bool applyNerf = true;
+
 struct mob_demon_chainAI : public ScriptedAI
 {
     mob_demon_chainAI(Creature *c) : ScriptedAI(c)
@@ -288,7 +291,10 @@ struct boss_terestianAI : public ScriptedAI
 
         if (SacrificeTimer <= diff)
         {
-            Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 1, GetSpellMaxRange(SPELL_SACRIFICE), true);
+            // Sacrifice can no longer target the Tank in nerfed version
+            uint8 targetPos = applyNerf ? 1 : 0;
+
+            Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, targetPos, GetSpellMaxRange(SPELL_SACRIFICE), true);
             if (pTarget && pTarget->isAlive())
             {
                 DoCast(pTarget, SPELL_SACRIFICE, true);
@@ -404,6 +410,12 @@ struct mob_fiendish_impAI : public ScriptedAI
 
     void Initialize()
     {
+        if (applyNerf)
+        {
+            me->SetHealth(me->GetHealth() - 500);
+            me->SetMaxHealth(me->GetMaxHealth() - 500);
+        }
+
         FireboltTimer = 2000;
     }
 
@@ -464,7 +476,7 @@ struct mob_kilrekAI : public ScriptedAI
         if (Terestian && Terestian->isAlive())
         {
             DoScriptText(EMOTE_DEATH, me);
-            CAST_AI(boss_terestianAI, Terestian->AI())->SummonKilrekTimer = 45000;
+            CAST_AI(boss_terestianAI, Terestian->AI())->SummonKilrekTimer = applyNerf ? 45000 : 30000;
             DoCast(Terestian, SPELL_BROKEN_PACT, true);
             me->ForcedDespawn(15000);
         }

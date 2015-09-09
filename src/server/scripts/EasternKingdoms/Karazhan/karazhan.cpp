@@ -446,27 +446,186 @@ enum eBerthold
     SPELL_TELEPORT           = 39567
 };
 
+#define GOSSIP_ITEM_PLACE        "What is this place?"
+#define GOSSIP_ITEM_MEDIVH       "Where is Medivh?"
+#define GOSSIP_ITEM_TOWER        "How do you navigate the tower?"
 #define GOSSIP_ITEM_TELEPORT    "Teleport me to the Guardian's Library"
+
+struct npc_bertholdAI : public ScriptedAI
+{
+    npc_bertholdAI(Creature* c) : ScriptedAI(c)
+    {
+        BowTimer = 0;
+        canBow = false;
+    }
+
+    uint32 BowTimer;
+    bool canBow;
+
+    void SetBowTimer()
+    {
+        if (canBow)
+            return;
+
+        canBow = true;
+        BowTimer = 250;
+        me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (!canBow)
+            return;
+
+        if (BowTimer < diff)
+        {
+            me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);
+            BowTimer = 0;
+            canBow = false;
+        }
+        else
+            BowTimer -= diff;
+    }
+};
+
+CreatureAI* GetAI_npc_berthold(Creature *creature)
+{
+    return new npc_bertholdAI(creature);
+}
 
 bool GossipHello_npc_berthold(Player* player, Creature* creature)
 {
+    bool aranDone = false;
     if (ScriptedInstance* instance = creature->GetInstanceScript())
     {
         // Check if Shade of Aran event is done
         if (instance->GetData(TYPE_ARAN) == DONE)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            aranDone = true;
     }
 
-    player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+    CAST_AI(npc_bertholdAI, creature->AI())->SetBowTimer();
+
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_PLACE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MEDIVH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TOWER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+    if (aranDone)
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+
+    if (aranDone)
+        player->SEND_GOSSIP_MENU(25044, creature->GetGUID());
+    else
+        player->SEND_GOSSIP_MENU(25035, creature->GetGUID());
+
     return true;
 }
 
-bool GossipSelect_npc_berthold(Player* player, Creature* /*creature*/, uint32 /*uiSender*/, uint32 uiAction)
+bool GossipSelect_npc_berthold(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-        player->CastSpell(player, SPELL_TELEPORT, true);
+    switch (uiAction)
+    {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            player->SEND_GOSSIP_MENU(25036, creature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 2:
+            player->SEND_GOSSIP_MENU(25037, creature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 3:
+            player->SEND_GOSSIP_MENU(25038, creature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 4:
+            player->CastSpell(player, SPELL_TELEPORT, true);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+    }
 
-    player->CLOSE_GOSSIP_MENU();
+    return true;
+}
+
+/*###
+# npc_calliard
+####*/
+
+#define GOSSIP_ITEM_MIDNIGHT    "Who is Midnight?"
+
+#define CALLIARD_SAY1           "Who goes there?"
+#define CALLIARD_SAY2           "All quiet."
+#define CALLIARD_SAY3           "Am I hearing things?"
+
+struct npc_calliardAI : public ScriptedAI
+{
+    npc_calliardAI(Creature* c) : ScriptedAI(c) {}
+
+    uint32 Timer;
+
+    void Reset()
+    {
+        Timer = 60000;
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (Timer < diff)
+        {
+            me->Say(RAND<const char*>(CALLIARD_SAY1, CALLIARD_SAY2, CALLIARD_SAY3), 0, 0);
+            Timer = urand(60000, 180000);
+        } 
+        else
+            Timer -= diff;
+
+    }    
+};
+
+CreatureAI* GetAI_npc_calliard(Creature *creature)
+{
+    return new npc_calliardAI(creature);
+}
+
+bool GossipHello_npc_calliard(Player* player, Creature* creature)
+{
+    player->ADD_GOSSIP_ITEM(0, GOSSIP_ITEM_MIDNIGHT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    player->SEND_GOSSIP_MENU(25042, creature->GetGUID());
+    
+    return true;
+}
+
+bool GossipSelect_npc_calliard(Player* player, Creature* creature, uint32 sender, uint32 action)
+{
+    switch (action)
+    {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            player->SEND_GOSSIP_MENU(25043, creature->GetGUID());
+            break;
+    }
+    return true;
+}
+
+/*###
+# npc_hastings
+####*/
+
+#define GOSSIP_ITEM_HELP    "Help you with what situation?"
+#define GOSSIP_ITEM_BIG     "Big ones?"
+
+bool GossipHello_npc_hastings(Player* player, Creature* creature)
+{
+    player->ADD_GOSSIP_ITEM(0, GOSSIP_ITEM_HELP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    player->SEND_GOSSIP_MENU(25039, creature->GetGUID());
+    
+    return true;
+}
+
+bool GossipSelect_npc_hastings(Player* player, Creature* creature, uint32 sender, uint32 action)
+{
+    switch (action)
+    {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            player->ADD_GOSSIP_ITEM(0, GOSSIP_ITEM_BIG, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            player->SEND_GOSSIP_MENU(25040, creature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 2:
+            player->SEND_GOSSIP_MENU(25041, creature->GetGUID());
+            break;
+    }
     return true;
 }
 
@@ -681,8 +840,22 @@ void AddSC_karazhan()
 
     newscript = new Script;
     newscript->Name = "npc_berthold";
+    newscript->GetAI = &GetAI_npc_berthold;
     newscript->pGossipHello = &GossipHello_npc_berthold;
     newscript->pGossipSelect = &GossipSelect_npc_berthold;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_calliard";
+    newscript->GetAI = &GetAI_npc_calliard;
+    newscript->pGossipHello = &GossipHello_npc_calliard;
+    newscript->pGossipSelect = &GossipSelect_npc_calliard;
+    newscript->RegisterSelf();
+
+    newscript = new Script;
+    newscript->Name = "npc_hastings";
+    newscript->pGossipHello = &GossipHello_npc_hastings;
+    newscript->pGossipSelect = &GossipSelect_npc_hastings;
     newscript->RegisterSelf();
 
     newscript = new Script;

@@ -28,20 +28,7 @@ EndScriptData */
 #include "ScriptPCH.h"
 #include "karazhan.h"
 
-#define SAY_AGGRO           -1532091
-#define SAY_AXE_TOSS1       -1532092
-#define SAY_AXE_TOSS2       -1532093
-#define SAY_SPECIAL1        -1532094
-#define SAY_SPECIAL2        -1532095
-#define SAY_SPECIAL3        -1532096
-#define SAY_SLAY1           -1532097
-#define SAY_SLAY2           -1532098
-#define SAY_SLAY3           -1532099
-#define SAY_SUMMON1         -1532100
-#define SAY_SUMMON2         -1532101
-#define SAY_DEATH           -1532102
-
-// 19 Coordinates for Infernal spawns
+// 18 Coordinates for Infernal spawns
 struct InfernalPoint
 {
     float x, y;
@@ -51,54 +38,77 @@ struct InfernalPoint
 
 static InfernalPoint InfernalPoints[] =
 {
-    {-10922.8f, -1985.2f},
-    {-10916.2f, -1996.2f},
-    {-10932.2f, -2008.1f},
-    {-10948.8f, -2022.1f},
-    {-10958.7f, -1997.7f},
-    {-10971.5f, -1997.5f},
-    {-10990.8f, -1995.1f},
-    {-10989.8f, -1976.5f},
-    {-10971.6f, -1973.0f},
-    {-10955.5f, -1974.0f},
-    {-10939.6f, -1969.8f},
-    {-10958.0f, -1952.2f},
-    {-10941.7f, -1954.8f},
-    {-10943.1f, -1988.5f},
-    {-10948.8f, -2005.1f},
-    {-10984.0f, -2019.3f},
-    {-10932.8f, -1979.6f},
-    {-10932.8f, -1979.6f},
-    {-10935.7f, -1996.0f}
+    { -10922.8f, -1985.2f },
+    { -10916.2f, -1996.2f },
+    { -10932.2f, -2008.1f },
+    { -10948.8f, -2022.1f },
+    { -10958.7f, -1997.7f },
+    { -10971.5f, -1997.5f },
+    { -10990.8f, -1995.1f },
+    { -10989.8f, -1976.5f },
+    { -10971.6f, -1973.0f },
+    { -10955.5f, -1974.0f },
+    { -10939.6f, -1969.8f },
+    { -10958.0f, -1952.2f },
+    { -10941.7f, -1954.8f },
+    { -10943.1f, -1988.5f },
+    { -10948.8f, -2005.1f },
+    { -10984.0f, -2019.3f },
+    { -10932.8f, -1979.6f },
+    { -10935.7f, -1996.0f }
 };
-
-#define TOTAL_INFERNAL_POINTS 19
 
 //Enfeeble is supposed to reduce hp to 1 and then heal player back to full when it ends
 //Along with reducing healing and regen while enfeebled to 0%
 //This spell effect will only reduce healing
+enum PrinceMalchezaar
+{
+    SAY_AGGRO                  = -1532091,
 
-#define SPELL_ENFEEBLE              30843                       //Enfeeble during phase 1 and 2
-#define SPELL_ENFEEBLE_EFFECT       41624
+    // SAY_AXE_TOSS
+    SAY_AXE_TOSS1              = -1532092,
+    SAY_AXE_TOSS2              = -1532093,
 
-#define SPELL_SHADOWNOVA            30852                       //Shadownova used during all phases
-#define SPELL_SW_PAIN               30854                       //Shadow word pain during phase 1 and 3 (different targeting rules though)
-#define SPELL_THRASH_PASSIVE        12787                       //Extra attack chance during phase 2
-#define SPELL_SUNDER_ARMOR          30901                       //Sunder armor during phase 2
-#define SPELL_THRASH_AURA           3417                        //Passive proc chance for thrash
-#define SPELL_EQUIP_AXES            30857                       //Visual for axe equiping
-#define SPELL_AMPLIFY_DAMAGE        12738                       //Amplifiy during phase 3
-#define SPELL_HELLFIRE              30859                       //Infenals' hellfire aura
-#define NETHERSPITE_INFERNAL        17646                       //The netherspite infernal creature
-#define MALCHEZARS_AXE              17650                       //Malchezar's axes (creatures), summoned during phase 3
+    // SAY_SPECIAL
+    SAY_SPECIAL1               = -1532094,
+    SAY_SPECIAL2               = -1532095,
+    SAY_SPECIAL3               = -1532096,
 
-#define INFERNAL_MODEL_INVISIBLE    11686                      //Infernal Effects
-#define SPELL_INFERNAL_RELAY        30834
+    // SAY_SLAY
+    SAY_SLAY1                  = -1532097,
+    SAY_SLAY2                  = -1532098,
+    SAY_SLAY3                  = -1532099,
 
-#define AXE_EQUIP_MODEL             40066                      //Axes info
-#define AXE_EQUIP_INFO              33448898
+    // SAY_SUMMON
+    SAY_SUMMON1                = -1532100,
+    SAY_SUMMON2                = -1532101,
 
-#define NPC_INFERNAL_RELAY          17645
+    SAY_DEATH                  = -1532102,
+
+    TOTAL_INFERNAL_POINTS      = 18,
+
+    SPELL_ENFEEBLE             = 30843,      // Enfeeble during phase 1 and 2
+    SPELL_ENFEEBLE_EFFECT      = 41624,
+
+    SPELL_SHADOWNOVA           = 30852,      // Shadownova used during all phases
+    SPELL_SW_PAIN              = 30854,      // Shadow word pain during phase 1 and 3 (different targeting rules though)
+    SPELL_THRASH_PASSIVE       = 12787,      // Extra attack chance during phase 2
+    SPELL_SUNDER_ARMOR         = 30901,      // Sunder armor during phase 2
+    SPELL_THRASH_AURA          =  3417,      // Passive proc chance for thrash
+    SPELL_EQUIP_AXES           = 30857,      // Visual for axe equiping
+    SPELL_AMPLIFY_DAMAGE       = 39095,      // Amplifiy during phase 3
+    SPELL_HELLFIRE             = 30859,      // Infenals' hellfire aura
+    NETHERSPITE_INFERNAL       = 17646,      // The netherspite infernal creature
+    MALCHEZARS_AXE             = 17650,      // Malchezar's axes (creatures), summoned during phase 3
+
+    INFERNAL_MODEL_INVISIBLE   = 11686,      // Infernal Effects
+    SPELL_INFERNAL_RELAY       = 30834,
+
+    AXE_EQUIP_MODEL            = 40066,      // Axes info
+    AXE_EQUIP_INFO             = 3348898,
+
+    NPC_INFERNAL_RELAY         = 17645
+};
 
 //---------Infernal code first
 struct netherspite_infernalAI : public ScriptedAI
@@ -108,6 +118,10 @@ struct netherspite_infernalAI : public ScriptedAI
     {
         // Disable rotate
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CASTING_SPEED, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
     }
 
     uint32 HellfireTimer;
@@ -168,7 +182,28 @@ struct boss_malchezaarAI : public ScriptedAI
 {
     boss_malchezaarAI(Creature *c) : ScriptedAI(c)
     {
+        Initialize();
         instance = c->GetInstanceScript();
+    }
+
+    void Initialize()
+    {
+        EnfeebleTimer = 30000;
+        EnfeebleResetTimer = 38000;
+        ShadowNovaTimer = 35000;
+        SWPainTimer = 20000;
+        AmplifyDamageTimer = 5000;
+        InfernalTimer = 44500;
+        InfernalCleanupTimer = 47000;
+        AxesTargetSwitchTimer = urand(7500, 20000);
+        SunderArmorTimer = urand(5000, 10000);
+        phase = 1;
+
+        for (uint8 i = 0; i < 5; ++i)
+        {
+            enfeeble_targets[i] = 0;
+            enfeeble_health[i] = 0;
+        }
     }
 
     ScriptedInstance *instance;
@@ -185,7 +220,7 @@ struct boss_malchezaarAI : public ScriptedAI
     std::vector<uint64> infernals;
     std::vector<InfernalPoint*> positions;
 
-    uint64 axes[2];
+    uint64 axeGUID;
     uint64 enfeeble_targets[5];
     uint64 enfeeble_health[5];
 
@@ -195,30 +230,17 @@ struct boss_malchezaarAI : public ScriptedAI
     {
         me->AddUnitMovementFlag(MOVEFLAG_WALK_MODE);
 
-        AxesCleanup();
+        AxeCleanup();
         ClearWeapons();
         InfernalCleanup();
         positions.clear();
 
-        for (uint8 i = 0; i < 5; ++i)
-            enfeeble_targets[i] = 0;
+        Initialize();
 
         for (uint8 i = 0; i < TOTAL_INFERNAL_POINTS; ++i)
             positions.push_back(&InfernalPoints[i]);
 
-        EnfeebleTimer = 30000;
-        EnfeebleResetTimer = 38000;
-        ShadowNovaTimer = 35500;
-        SWPainTimer = 20000;
-        AmplifyDamageTimer = 5000;
-        InfernalTimer = 44500;
-        InfernalCleanupTimer = 47000;
-        AxesTargetSwitchTimer = urand(7500, 20000);
-        SunderArmorTimer = urand(5000, 10000);
-        phase = 1;
-
-        if (instance)
-            instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), true);
+        instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), true);
     }
 
     void KilledUnit(Unit * /*victim*/)
@@ -230,7 +252,7 @@ struct boss_malchezaarAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, me);
 
-        AxesCleanup();
+        AxeCleanup();
         ClearWeapons();
         InfernalCleanup();
         positions.clear();
@@ -238,8 +260,7 @@ struct boss_malchezaarAI : public ScriptedAI
         for (uint8 i = 0; i < TOTAL_INFERNAL_POINTS; ++i)
             positions.push_back(&InfernalPoints[i]);
 
-        if (instance)
-            instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), true);
+        instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), true);
     }
 
     void EnterCombat(Unit * /*who*/)
@@ -248,8 +269,7 @@ struct boss_malchezaarAI : public ScriptedAI
         me->RemoveUnitMovementFlag(MOVEFLAG_WALK_MODE);
         DoScriptText(SAY_AGGRO, me);
 
-        if (instance)
-            instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), false); // Open the door leading further in
+        instance->HandleGameObject(instance->GetData64(DATA_GO_NETHER_DOOR), false); // Open the door leading further in
     }
 
     void InfernalCleanup()
@@ -266,24 +286,25 @@ struct boss_malchezaarAI : public ScriptedAI
         infernals.clear();
     }
 
-    void AxesCleanup()
+    void AxeCleanup()
     {
-        for (uint8 i = 0; i < 2; ++i)
-        {
-            Unit *axe = Unit::GetUnit(*me, axes[i]);
-            if (axe && axe->isAlive())
-                axe->Kill(axe);
-            axes[i] = 0;
-        }
+        Unit *axe = Unit::GetUnit(*me, axeGUID);
+        if (axe && axe->isAlive())
+            axe->Kill(axe);
+        axeGUID = 0;
     }
 
     void ClearWeapons()
     {
+        me->SetCanDualWield(false);
+
         me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, 0);
         me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, 0);
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 1, 0);
 
-        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 0);
-        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO+2, 0);
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1, 0);
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2, 0);
+        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 3, 0);
 
         //damage
         const CreatureTemplate *cinfo = me->GetCreatureTemplate();
@@ -391,7 +412,7 @@ struct boss_malchezaarAI : public ScriptedAI
 
         if (phase == 1)
         {
-            if ((me->GetHealth()*100) / me->GetMaxHealth() < 60)
+            if (HealthBelowPct(60))
             {
                 me->InterruptNonMeleeSpells(false);
 
@@ -406,12 +427,16 @@ struct boss_malchezaarAI : public ScriptedAI
                 //passive thrash aura
                 DoCast(me, SPELL_THRASH_AURA, true);
 
+                me->SetCanDualWield(true);
+
                 //models
                 me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, AXE_EQUIP_MODEL);
                 me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, AXE_EQUIP_INFO);
+                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 1, SHEATH_SLOTINFO_ON_BACK);
 
-                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, AXE_EQUIP_MODEL);
-                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO+2, AXE_EQUIP_INFO);
+                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1, AXE_EQUIP_MODEL);
+                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2, AXE_EQUIP_INFO);
+                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 3, SHEATH_SLOTINFO_ON_BACK);
 
                 //damage
                 const CreatureTemplate *cinfo = me->GetCreatureTemplate();
@@ -425,12 +450,12 @@ struct boss_malchezaarAI : public ScriptedAI
                 me->SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, cinfo->mindmg);
                 me->SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, cinfo->maxdmg);
 
-                me->SetAttackTime(OFF_ATTACK, (me->GetAttackTime(BASE_ATTACK)*150)/100);
+                me->SetAttackTime(OFF_ATTACK, (me->GetAttackTime(BASE_ATTACK) * 150) / 100);
             }
         }
         else if (phase == 2)
         {
-            if ((me->GetHealth()*100) / me->GetMaxHealth() < 30)
+            if (HealthBelowPct(30))
             {
                 InfernalTimer = 15000;
 
@@ -441,27 +466,30 @@ struct boss_malchezaarAI : public ScriptedAI
                 //remove thrash
                 me->RemoveAurasDueToSpell(SPELL_THRASH_AURA);
 
-                DoScriptText(SAY_AXE_TOSS2, me);
+                DoScriptText(SAY_SPECIAL3, me);
 
                 Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
-                for (uint8 i = 0; i < 2; ++i)
-                {
-                    Creature *axe = me->SummonCreature(MALCHEZARS_AXE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
-                    if (axe)
-                    {
-                        axe->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, AXE_EQUIP_MODEL);
-                        axe->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, AXE_EQUIP_INFO);
 
-                        axe->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        axe->setFaction(me->getFaction());
-                        axes[i] = axe->GetGUID();
-                        if (pTarget)
-                        {
-                            axe->AI()->AttackStart(pTarget);
-                            //axe->getThreatManager().tauntApply(pTarget); //Taunt Apply and fade out does not work properly
-                                                            // So we'll use a hack to add a lot of threat to our target
-                            axe->AddThreat(pTarget, 10000000.0f);
-                        }
+                if (Creature *axe = me->SummonCreature(MALCHEZARS_AXE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000))
+                {
+                    axe->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, AXE_EQUIP_MODEL);
+                    axe->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, AXE_EQUIP_INFO);
+                    axe->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 1, SHEATH_SLOTINFO_ON_BACK);
+
+                    axe->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1, AXE_EQUIP_MODEL);
+                    axe->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2, AXE_EQUIP_INFO);
+                    axe->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 3, SHEATH_SLOTINFO_ON_BACK);
+
+                    axe->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    axe->setFaction(me->getFaction());
+                    axe->SetCanDualWield(true);
+                    axeGUID = axe->GetGUID();
+                    if (pTarget)
+                    {
+                        axe->AI()->AttackStart(pTarget);
+                        //axe->getThreatManager().tauntApply(pTarget); //Taunt Apply and fade out does not work properly
+                        // So we'll use a hack to add a lot of threat to our target
+                        axe->AddThreat(pTarget, 10000000.0f);
                     }
                 }
 
@@ -485,17 +513,12 @@ struct boss_malchezaarAI : public ScriptedAI
 
                 if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                 {
-                    for (uint8 i = 0; i < 2; ++i)
+                    if (Unit *axe = Unit::GetUnit(*me, axeGUID))
                     {
-                        if (Unit *axe = Unit::GetUnit(*me, axes[i]))
-                        {
-                            if (axe->getVictim())
-                                DoModifyThreatPercent(axe->getVictim(), -100);
-                            if (pTarget)
-                                axe->AddThreat(pTarget, 1000000.0f);
-                            //axe->getThreatManager().tauntFadeOut(axe->getVictim());
-                            //axe->getThreatManager().tauntApply(pTarget);
-                        }
+                        if (axe->getVictim())
+                            DoModifyThreatPercent(axe->getVictim(), -100);
+                        if (pTarget)
+                            axe->AddThreat(pTarget, 1000000.0f);
                     }
                 }
             } else AxesTargetSwitchTimer -= diff;

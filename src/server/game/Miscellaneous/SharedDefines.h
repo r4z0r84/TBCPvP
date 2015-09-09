@@ -2355,6 +2355,12 @@ enum SpamMessageType
     SPAM_MESSAGE_TYPE_CHAT      = 1
 };
 
+enum SheathSlotInfo
+{
+    SHEATH_SLOTINFO_ON_BACK            = 273,
+    SHEATH_SLOTINFO_ON_BACK_UPSIDEDOWN = 529
+};
+
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
 // will only support WoW and WoW:TBC 2.4.3 client build 8606...

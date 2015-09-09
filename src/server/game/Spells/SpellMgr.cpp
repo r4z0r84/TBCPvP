@@ -2777,6 +2777,9 @@ void SpellMgr::LoadSpellCustomAttr()
         case 30171: // Fiendish Portal - Should be fixed in Spell::EffectSummonType to use data from spell_target_position
             spellInfo->Effect[0] = 0;
             break;
+        case 30834: // Infernal Relay
+            spellInfo->AttributesEx2 |= SPELL_ATTR_EX2_IGNORE_LOS;
+            break;
         default:
             break;
         }

@@ -44,6 +44,7 @@ class Bag : public Item
         void RemoveItem(uint8 slot, bool update);
 
         Item* GetItemByPos(uint8 slot) const;
+        Item* GetItemByEntry(uint32 itemEntry) const;
         uint32 GetItemCount(uint32 item, Item* eItem = NULL) const;
 
         uint8 GetSlotByItemGUID(uint64 guid) const;

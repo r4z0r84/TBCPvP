@@ -44,6 +44,7 @@ file(GLOB_RECURSE sources_Scripting Scripting/*.cpp Scripting/*.h)
 file(GLOB_RECURSE sources_Server Server/*.cpp Server/*.h)
 file(GLOB_RECURSE sources_Skills Skills/*.cpp Skills/*.h)
 file(GLOB_RECURSE sources_Spells Spells/*.cpp Spells/*.h)
+file(GLOB_RECURSE sources_Storage TemplateMgr/*.cpp TemplateMgr/*.h)
 file(GLOB_RECURSE sources_Tools Tools/*.cpp Tools/*.h)
 file(GLOB_RECURSE sources_Tickets Tickets/*.cpp Tickets/*.h)
 file(GLOB_RECURSE sources_Warden Warden/*.cpp Warden/*.h)
@@ -83,6 +84,7 @@ source_group(Scripting FILES ${sources_Scripting})
 source_group(Server FILES ${sources_Server})
 source_group(Skills FILES ${sources_Skills})
 source_group(Spells FILES ${sources_Spells})
+source_group(Storage FILES ${sources_Storage})
 source_group(Tools FILES ${sources_Tools})
 source_group(Tickets FILES ${sources_Tickets})
 source_group(Warden FILES ${sources_Warden})
@@ -131,6 +133,7 @@ set(game_STAT_SRCS
   ${sources_Server}
   ${sources_Skills}
   ${sources_Spells}
+  ${sources_Storage}
   ${sources_Tools}
   ${sources_Tickets}
   ${sources_Warden}  
@@ -218,6 +221,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Skills
   ${CMAKE_CURRENT_SOURCE_DIR}/Spells
   ${CMAKE_CURRENT_SOURCE_DIR}/Spells/Auras
+  ${CMAKE_CURRENT_SOURCE_DIR}/Storage
   ${CMAKE_CURRENT_SOURCE_DIR}/Tools
   ${CMAKE_CURRENT_SOURCE_DIR}/Tickets
   ${CMAKE_CURRENT_SOURCE_DIR}/Warden  

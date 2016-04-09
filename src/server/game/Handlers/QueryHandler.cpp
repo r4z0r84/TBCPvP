@@ -42,7 +42,7 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     std::stringstream nameData;
     if (!p->GetUInt32Value(PLAYER_CHOSEN_TITLE)) // Only add if no real title selected
     {
-        uint32 titleEntry = log2(p->GetActiveCustomTitle());
+        uint32 titleEntry = 0;
         if (titleTable[titleEntry].isPrefixTitle)
         {
             nameData << titleTable[titleEntry].titleName;
@@ -109,7 +109,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult_AutoPtr result,
     std::string name = fields[1].GetCppString();
     uint32 field     = 0;
     if (name == "")
-        name         = session->GetSkyFireString(LANG_NON_EXIST_CHARACTER);
+        name         = session->GetTrinityString(LANG_NON_EXIST_CHARACTER);
     else
         field        = fields[2].GetUInt32();
 

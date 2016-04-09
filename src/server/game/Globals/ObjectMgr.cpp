@@ -6406,7 +6406,7 @@ bool ObjectMgr::LoadSkyFireStrings(DatabaseType& db, char const* table, int32 mi
     if (!result)
     {
         sLog->outString();
-        if (min_value == MIN_SKYFIRE_STRING_ID)              // error only in case internal strings
+        if (min_value == MIN_TRINITY_STRING_ID)              // error only in case internal strings
             sLog->outErrorDb(">> Loaded 0 Trinity strings. DB table %s is empty. Cannot continue.", table);
         else
             sLog->outString(">> Loaded 0 string templates. DB table %s is empty.", table);
@@ -6465,7 +6465,7 @@ bool ObjectMgr::LoadSkyFireStrings(DatabaseType& db, char const* table, int32 mi
     } while (result->NextRow());
 
     sLog->outString();
-    if (min_value == MIN_SKYFIRE_STRING_ID)
+    if (min_value == MIN_TRINITY_STRING_ID)
         sLog->outString(">> Loaded %u Trinity strings from table %s", count, table);
     else
         sLog->outString(">> Loaded %u string templates from %s", count, table);
@@ -6473,11 +6473,11 @@ bool ObjectMgr::LoadSkyFireStrings(DatabaseType& db, char const* table, int32 mi
     return true;
 }
 
-const char *ObjectMgr::GetSkyFireString(int32 entry, int locale_idx) const
+const char *ObjectMgr::GetTrinityString(int32 entry, int locale_idx) const
 {
     // locale_idx == -1 -> default, locale_idx >= 0 in to idx+1
     // Content[0] always exist if exist SkyFireStringLocale
-    if (SkyFireStringLocale const *msl = GetSkyFireStringLocale(entry))
+    if (SkyFireStringLocale const *msl = GetTrinityStringLocale(entry))
     {
         if (msl->Content.size() > locale_idx+1 && !msl->Content[locale_idx+1].empty())
             return msl->Content[locale_idx+1].c_str();
@@ -6486,7 +6486,7 @@ const char *ObjectMgr::GetSkyFireString(int32 entry, int locale_idx) const
     }
 
     if (entry > 0)
-        sLog->outErrorDb("Entry %i not found in skyfire_string table.", entry);
+        sLog->outErrorDb("Entry %i not found in trinity_string table.", entry);
     else
         sLog->outErrorDb("Trinity string entry %i not found in DB.", entry);
     return "<error>";
@@ -7484,7 +7484,7 @@ void ObjectMgr::CheckScripts(ScriptsType type, std::set<int32>& ids)
             {
                 case SCRIPT_COMMAND_TALK:
                 {
-                    if (!GetSkyFireStringLocale (itrM->second.Talk.TextID))
+                    if (!GetTrinityStringLocale (itrM->second.Talk.TextID))
                         sLog->outErrorDb("Table `db_script_string` not has string id  %u used db script (ID: %u)", itrM->second.Talk.TextID, itrMM->first);
 
                     if (ids.find(itrM->second.Talk.TextID) != ids.end())
@@ -7504,7 +7504,7 @@ void ObjectMgr::LoadDbScriptStrings()
     std::set<int32> ids;
 
     for (int32 i = MIN_DB_SCRIPT_STRING_ID; i < MAX_DB_SCRIPT_STRING_ID; ++i)
-        if (GetSkyFireStringLocale(i))
+        if (GetTrinityStringLocale(i))
             ids.insert(i);
 
     for (int type = SCRIPTS_FIRST; type < SCRIPTS_LAST; ++type)

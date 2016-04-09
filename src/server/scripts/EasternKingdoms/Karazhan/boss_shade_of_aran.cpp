@@ -725,6 +725,11 @@ CreatureAI* GetAI_boss_aran(Creature* creature)
     return new boss_aranAI (creature);
 }
 
+CreatureAI* GetAI_shadow_of_aran(Creature* creature)
+{
+    return new shadow_of_aranAI (creature);
+}
+
 CreatureAI* GetAI_water_elemental(Creature* creature)
 {
     return new water_elementalAI (creature);

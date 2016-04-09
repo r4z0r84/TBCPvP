@@ -78,7 +78,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
 
     HandleReloadCommandCommand("");
     HandleReloadReservedNameCommand("");
-    HandleReloadSkyFireStringCommand("");
+    HandleReloadTrinityStringCommand("");
     HandleReloadGameTeleCommand("");
     HandleReloadAutobroadcastCommand("");
     return true;
@@ -387,11 +387,11 @@ bool ChatHandler::HandleReloadLootTemplatesSkinningCommand(const char*)
     return true;
 }
 
-bool ChatHandler::HandleReloadSkyFireStringCommand(const char*)
+bool ChatHandler::HandleReloadTrinityStringCommand(const char*)
 {
-    sLog->outString("Re-Loading skyfire_string Table!");
-    sObjectMgr->LoadSkyFireStrings();
-    SendGlobalGMSysMessage("DB table skyfire_string reloaded.");
+    sLog->outString("Re-Loading trinity_string Table!");
+    sObjectMgr->LoadTrinityStrings();
+    SendGlobalGMSysMessage("DB table trinity_string reloaded.");
     return true;
 }
 
@@ -1165,13 +1165,13 @@ bool ChatHandler::HandleCooldownCommand(const char *args)
 
         if (!sSpellStore.LookupEntry(spell_id))
         {
-            PSendSysMessage(LANG_UNKNOWN_SPELL, target == m_session->GetPlayer() ? GetSkyFireString(LANG_YOU) : target->GetName());
+            PSendSysMessage(LANG_UNKNOWN_SPELL, target == m_session->GetPlayer() ? GetTrinityString(LANG_YOU) : target->GetName());
             SetSentErrorMessage(true);
             return false;
         }
 
         target->RemoveSpellCooldown(spell_id, true);
-        PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target == m_session->GetPlayer() ? GetSkyFireString(LANG_YOU) : target->GetName());
+        PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target == m_session->GetPlayer() ? GetTrinityString(LANG_YOU) : target->GetName());
     }
     return true;
 }
@@ -2111,7 +2111,7 @@ bool ChatHandler::HandleAddItemCommand(const char *args)
     if (!plTarget)
         plTarget = pl;
 
-    sLog->outDetail(GetSkyFireString(LANG_ADDITEM), itemId, count);
+    sLog->outDetail(GetTrinityString(LANG_ADDITEM), itemId, count);
 
     ItemPrototype const *pProto = sObjectMgr->GetItemPrototype(itemId);
     if (!pProto)
@@ -2197,7 +2197,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char *args)
     if (!plTarget)
         plTarget = pl;
 
-    sLog->outDetail(GetSkyFireString(LANG_ADDITEMSET), itemsetId);
+    sLog->outDetail(GetTrinityString(LANG_ADDITEMSET), itemsetId);
 
     bool found = false;
     for (uint32 id = 0; id < sItemStorage.MaxEntry; id++)
@@ -2844,7 +2844,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char *args)
             {
                 char const* knownStr = "";
                 if (target && target->HasSkill(id))
-                    knownStr = GetSkyFireString(LANG_KNOWN);
+                    knownStr = GetTrinityString(LANG_KNOWN);
 
                 // send skill in "id - [namedlink locale]" format
                 if (m_session)
@@ -2933,7 +2933,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char *args)
 
                 // include rank in link name
                 if (rank)
-                    ss << GetSkyFireString(LANG_SPELL_RANK) << rank;
+                    ss << GetTrinityString(LANG_SPELL_RANK) << rank;
 
                 if (m_session)
                     ss << " " << localeNames[loc] << "]|h|r";
@@ -2941,15 +2941,15 @@ bool ChatHandler::HandleLookupSpellCommand(const char *args)
                     ss << " " << localeNames[loc];
 
                 if (talent)
-                    ss << GetSkyFireString(LANG_TALENT);
+                    ss << GetTrinityString(LANG_TALENT);
                 if (passive)
-                    ss << GetSkyFireString(LANG_PASSIVE);
+                    ss << GetTrinityString(LANG_PASSIVE);
                 if (learn)
-                    ss << GetSkyFireString(LANG_LEARN);
+                    ss << GetTrinityString(LANG_LEARN);
                 if (known)
-                    ss << GetSkyFireString(LANG_KNOWN);
+                    ss << GetTrinityString(LANG_KNOWN);
                 if (active)
-                    ss << GetSkyFireString(LANG_ACTIVE);
+                    ss << GetTrinityString(LANG_ACTIVE);
 
                 SendSysMessage(ss.str().c_str());
 
@@ -3008,12 +3008,12 @@ bool ChatHandler::HandleLookupQuestCommand(const char *args)
                             if (status == QUEST_STATUS_COMPLETE)
                             {
                                 if (target->GetQuestRewardStatus(qinfo->GetQuestId()))
-                                    statusStr = GetSkyFireString(LANG_COMMAND_QUEST_REWARDED);
+                                    statusStr = GetTrinityString(LANG_COMMAND_QUEST_REWARDED);
                                 else
-                                    statusStr = GetSkyFireString(LANG_COMMAND_QUEST_COMPLETE);
+                                    statusStr = GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
                             }
                             else if (status == QUEST_STATUS_INCOMPLETE)
-                                statusStr = GetSkyFireString(LANG_COMMAND_QUEST_ACTIVE);
+                                statusStr = GetTrinityString(LANG_COMMAND_QUEST_ACTIVE);
                         }
 
                         if (m_session)
@@ -3045,12 +3045,12 @@ bool ChatHandler::HandleLookupQuestCommand(const char *args)
                 if (status == QUEST_STATUS_COMPLETE)
                 {
                     if (target->GetQuestRewardStatus(qinfo->GetQuestId()))
-                        statusStr = GetSkyFireString(LANG_COMMAND_QUEST_REWARDED);
+                        statusStr = GetTrinityString(LANG_COMMAND_QUEST_REWARDED);
                     else
-                        statusStr = GetSkyFireString(LANG_COMMAND_QUEST_COMPLETE);
+                        statusStr = GetTrinityString(LANG_COMMAND_QUEST_COMPLETE);
                 }
                 else if (status == QUEST_STATUS_INCOMPLETE)
-                    statusStr = GetSkyFireString(LANG_COMMAND_QUEST_ACTIVE);
+                    statusStr = GetTrinityString(LANG_COMMAND_QUEST_ACTIVE);
             }
 
             if (m_session)
@@ -3808,14 +3808,14 @@ bool ChatHandler::HandleNearGraveCommand(const char *args)
 
         g_team = data->team;
 
-        std::string team_name = GetSkyFireString(LANG_COMMAND_GRAVEYARD_NOTEAM);
+        std::string team_name = GetTrinityString(LANG_COMMAND_GRAVEYARD_NOTEAM);
 
         if (g_team == 0)
-            team_name = GetSkyFireString(LANG_COMMAND_GRAVEYARD_ANY);
+            team_name = GetTrinityString(LANG_COMMAND_GRAVEYARD_ANY);
         else if (g_team == HORDE)
-            team_name = GetSkyFireString(LANG_COMMAND_GRAVEYARD_HORDE);
+            team_name = GetTrinityString(LANG_COMMAND_GRAVEYARD_HORDE);
         else if (g_team == ALLIANCE)
-            team_name = GetSkyFireString(LANG_COMMAND_GRAVEYARD_ALLIANCE);
+            team_name = GetTrinityString(LANG_COMMAND_GRAVEYARD_ALLIANCE);
 
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNEAREST, g_id, team_name.c_str(), player->GetZoneId());
     }
@@ -3824,11 +3824,11 @@ bool ChatHandler::HandleNearGraveCommand(const char *args)
         std::string team_name;
 
         if (g_team == 0)
-            team_name = GetSkyFireString(LANG_COMMAND_GRAVEYARD_ANY);
+            team_name = GetTrinityString(LANG_COMMAND_GRAVEYARD_ANY);
         else if (g_team == HORDE)
-            team_name = GetSkyFireString(LANG_COMMAND_GRAVEYARD_HORDE);
+            team_name = GetTrinityString(LANG_COMMAND_GRAVEYARD_HORDE);
         else if (g_team == ALLIANCE)
-            team_name = GetSkyFireString(LANG_COMMAND_GRAVEYARD_ALLIANCE);
+            team_name = GetTrinityString(LANG_COMMAND_GRAVEYARD_ALLIANCE);
 
         if (g_team == ~uint32(0))
             PSendSysMessage(LANG_COMMAND_ZONENOGRAVEYARDS, player->GetZoneId());
@@ -4298,14 +4298,14 @@ bool ChatHandler::HandleSetValue(const char *args)
     if (isint32)
     {
         iValue = (uint32)atoi(py);
-        sLog->outDebug(GetSkyFireString(LANG_SET_UINT), GUID_LOPART(guid), Opcode, iValue);
+        sLog->outDebug(GetTrinityString(LANG_SET_UINT), GUID_LOPART(guid), Opcode, iValue);
         target->SetUInt32Value(Opcode , iValue);
         PSendSysMessage(LANG_SET_UINT_FIELD, GUID_LOPART(guid), Opcode, iValue);
     }
     else
     {
         fValue = (float)atof(py);
-        sLog->outDebug(GetSkyFireString(LANG_SET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
+        sLog->outDebug(GetTrinityString(LANG_SET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
         target->SetFloatValue(Opcode , fValue);
         PSendSysMessage(LANG_SET_FLOAT_FIELD, GUID_LOPART(guid), Opcode, fValue);
     }
@@ -4349,13 +4349,13 @@ bool ChatHandler::HandleGetValue(const char *args)
     if (isint32)
     {
         iValue = target->GetUInt32Value(Opcode);
-        sLog->outDebug(GetSkyFireString(LANG_GET_UINT), GUID_LOPART(guid), Opcode, iValue);
+        sLog->outDebug(GetTrinityString(LANG_GET_UINT), GUID_LOPART(guid), Opcode, iValue);
         PSendSysMessage(LANG_GET_UINT_FIELD, GUID_LOPART(guid), Opcode,    iValue);
     }
     else
     {
         fValue = target->GetFloatValue(Opcode);
-        sLog->outDebug(GetSkyFireString(LANG_GET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
+        sLog->outDebug(GetTrinityString(LANG_GET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
         PSendSysMessage(LANG_GET_FLOAT_FIELD, GUID_LOPART(guid), Opcode, fValue);
     }
 
@@ -4378,7 +4378,7 @@ bool ChatHandler::HandleSet32Bit(const char *args)
     if (Value > 32)                                         //uint32 = 32 bits
         return false;
 
-    sLog->outDebug(GetSkyFireString(LANG_SET_32BIT), Opcode, Value);
+    sLog->outDebug(GetTrinityString(LANG_SET_32BIT), Opcode, Value);
 
     m_session->GetPlayer()->SetUInt32Value(Opcode , 2^Value);
 
@@ -4406,7 +4406,7 @@ bool ChatHandler::HandleMod32Value(const char *args)
         return false;
     }
 
-    sLog->outDebug(GetSkyFireString(LANG_CHANGE_32BIT), Opcode, Value);
+    sLog->outDebug(GetTrinityString(LANG_CHANGE_32BIT), Opcode, Value);
 
     int CurrentValue = (int)m_session->GetPlayer()->GetUInt32Value(Opcode);
 
@@ -4552,8 +4552,8 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         return false;
     }
 
-    char const* talentStr = GetSkyFireString(LANG_TALENT);
-    char const* passiveStr = GetSkyFireString(LANG_PASSIVE);
+    char const* talentStr = GetTrinityString(LANG_TALENT);
+    char const* passiveStr = GetTrinityString(LANG_PASSIVE);
 
     Unit::AuraMap const& uAuras = unit->GetAuras();
     PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
@@ -5469,9 +5469,9 @@ bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
         if (fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||unbandate >= time(NULL)))
             active = true;
         bool permanent = (fields[1].GetUInt64() == (uint64)0);
-        std::string bantime = permanent?GetSkyFireString(LANG_BANINFO_INFINITE):secsToTimeString(fields[1].GetUInt64(), true);
+        std::string bantime = permanent?GetTrinityString(LANG_BANINFO_INFINITE):secsToTimeString(fields[1].GetUInt64(), true);
         PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
-            fields[0].GetString(), bantime.c_str(), active ? GetSkyFireString(LANG_BANINFO_YES):GetSkyFireString(LANG_BANINFO_NO), fields[4].GetString(), fields[5].GetString());
+            fields[0].GetString(), bantime.c_str(), active ? GetTrinityString(LANG_BANINFO_YES):GetTrinityString(LANG_BANINFO_NO), fields[4].GetString(), fields[5].GetString());
     }while (result->NextRow());
 
     return true;
@@ -5502,8 +5502,8 @@ bool ChatHandler::HandleBanInfoIPCommand(const char *args)
     Field *fields = result->Fetch();
     bool permanent = !fields[6].GetUInt64();
     PSendSysMessage(LANG_BANINFO_IPENTRY,
-        fields[0].GetString(), fields[1].GetString(), permanent ? GetSkyFireString(LANG_BANINFO_NEVER):fields[2].GetString(),
-        permanent ? GetSkyFireString(LANG_BANINFO_INFINITE):secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
+        fields[0].GetString(), fields[1].GetString(), permanent ? GetTrinityString(LANG_BANINFO_NEVER):fields[2].GetString(),
+        permanent ? GetTrinityString(LANG_BANINFO_INFINITE):secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
 
     return true;
 }

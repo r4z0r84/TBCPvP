@@ -547,7 +547,7 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug("WORLD: Received CMSG_ADD_FRIEND");
 
-    std::string friendName = GetSkyFireString(LANG_FRIEND_IGNORE_UNKNOWN);
+    std::string friendName = GetTrinityString(LANG_FRIEND_IGNORE_UNKNOWN);
     std::string friendNote;
 
     recv_data >> friendName;
@@ -638,7 +638,7 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket & recv_data)
 {
     sLog->outDebug("WORLD: Received CMSG_ADD_IGNORE");
 
-    std::string IgnoreName = GetSkyFireString(LANG_FRIEND_IGNORE_UNKNOWN);
+    std::string IgnoreName = GetTrinityString(LANG_FRIEND_IGNORE_UNKNOWN);
 
     recv_data >> IgnoreName;
 

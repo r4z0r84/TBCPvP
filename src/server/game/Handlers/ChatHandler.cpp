@@ -165,7 +165,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         if (!_player->CanSpeak())
         {
             std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
-            SendNotification(GetSkyFireString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+            SendNotification(GetTrinityString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
             return;
         }
 
@@ -179,7 +179,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
         recv_data >> msg;
         if (ChatHandler(this).ParseCommands(msg.c_str()) == 0)
         {
-            SendNotification(GetSkyFireString(LANG_GM_SILENCE), GetPlayer()->GetName());
+            SendNotification(GetTrinityString(LANG_GM_SILENCE), GetPlayer()->GetName());
             return;
         }
     }
@@ -270,7 +270,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
 
             if (GetPlayer()->HasAura(1852, 0) && !player->isGameMaster())
             {
-                SendNotification(GetSkyFireString(LANG_GM_SILENCE), GetPlayer()->GetName());
+                SendNotification(GetTrinityString(LANG_GM_SILENCE), GetPlayer()->GetName());
                 return;
             }
 
@@ -581,7 +581,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
                 if (!msg.empty() || !_player->isAFK())
                 {
                     if (msg.empty())
-                        _player->afkMsg = GetSkyFireString(LANG_PLAYER_AFK_DEFAULT);
+                        _player->afkMsg = GetTrinityString(LANG_PLAYER_AFK_DEFAULT);
                     else
                         _player->afkMsg = msg;
                 }
@@ -602,7 +602,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recv_data)
             if (!msg.empty() || !_player->isDND())
             {
                 if (msg.empty())
-                    _player->dndMsg = GetSkyFireString(LANG_PLAYER_DND_DEFAULT);
+                    _player->dndMsg = GetTrinityString(LANG_PLAYER_DND_DEFAULT);
                 else
                     _player->dndMsg = msg;
             }
@@ -638,7 +638,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket & recv_data)
     if (!GetPlayer()->CanSpeak())
     {
         std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
-        SendNotification(GetSkyFireString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
+        SendNotification(GetTrinityString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
         return;
     }
 

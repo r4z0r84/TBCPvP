@@ -516,7 +516,7 @@ void WorldSession::SendNotification(const char *format, ...)
 
 void WorldSession::SendNotification(int32 string_id, ...)
 {
-    char const* format = GetSkyFireString(string_id);
+    char const* format = GetTrinityString(string_id);
     if (format)
     {
         va_list ap;
@@ -532,9 +532,9 @@ void WorldSession::SendNotification(int32 string_id, ...)
     }
 }
 
-const char * WorldSession::GetSkyFireString(int32 entry) const
+const char * WorldSession::GetTrinityString(int32 entry) const
 {
-    return sObjectMgr->GetSkyFireString(entry, GetSessionDbLocaleIndex());
+    return sObjectMgr->GetTrinityString(entry, GetSessionDbLocaleIndex());
 }
 
 void WorldSession::Handle_NULL(WorldPacket& recvPacket)

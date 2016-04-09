@@ -29,6 +29,7 @@
 #include "SocialMgr.h"
 #include "Util.h"
 #include "Language.h"
+#include "MapManager.h"
 
 Guild::Guild()
 {
@@ -114,11 +115,11 @@ void Guild::CreateDefaultGuildRanks(int locale_idx)
     CharacterDatabase.PExecute("DELETE FROM guild_rank WHERE guildid='%u'", m_Id);
     CharacterDatabase.PExecute("DELETE FROM guild_bank_right WHERE guildid = '%u'", m_Id);
 
-    CreateRank(sObjectMgr->GetSkyFireString(LANG_GUILD_MASTER, locale_idx),  GR_RIGHT_ALL);
-    CreateRank(sObjectMgr->GetSkyFireString(LANG_GUILD_OFFICER, locale_idx), GR_RIGHT_ALL);
-    CreateRank(sObjectMgr->GetSkyFireString(LANG_GUILD_VETERAN, locale_idx), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
-    CreateRank(sObjectMgr->GetSkyFireString(LANG_GUILD_MEMBER, locale_idx),  GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
-    CreateRank(sObjectMgr->GetSkyFireString(LANG_GUILD_INITIATE, locale_idx), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_MASTER, locale_idx),  GR_RIGHT_ALL);
+    CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_OFFICER, locale_idx), GR_RIGHT_ALL);
+    CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_VETERAN, locale_idx), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_MEMBER, locale_idx),  GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
+    CreateRank(sObjectMgr->GetTrinityString(LANG_GUILD_INITIATE, locale_idx), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 }
 
 bool Guild::AddMember(uint64 plGuid, uint32 plRank)

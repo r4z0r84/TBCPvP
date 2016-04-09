@@ -1187,8 +1187,8 @@ void World::SetInitialWorldSettings()
 
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
     sLog->outString();
-    sLog->outString("Loading SkyFire strings...");
-    if (!sObjectMgr->LoadSkyFireStrings())
+    sLog->outString("Loading Trinity strings...");
+    if (!sObjectMgr->LoadTrinityStrings())
         exit(1);                                            // Error message displayed in function already
 
     // Update the realm entry in the database with the realm type from the config file
@@ -1919,7 +1919,7 @@ void World::SendWorldText(int32 string_id, ...)
 
             data_list = &data_cache[cache_idx];
 
-            char const* text = sObjectMgr->GetSkyFireString(string_id, loc_idx);
+            char const* text = sObjectMgr->GetTrinityString(string_id, loc_idx);
 
             char buf[1000];
 
@@ -1972,7 +1972,7 @@ void World::SendGMText(int32 string_id, ...)
 
             data_list = &data_cache[cache_idx];
 
-            char const* text = sObjectMgr->GetSkyFireString(string_id, loc_idx);
+            char const* text = sObjectMgr->GetTrinityString(string_id, loc_idx);
 
             char buf[1000];
 

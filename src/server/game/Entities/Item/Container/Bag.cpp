@@ -195,7 +195,7 @@ bool Bag::IsEmpty() const
 Item* Bag::GetItemByEntry(uint32 itemEntry) const
 {
     for (uint32 i = 0; i < GetBagSize(); ++i)
-        if (m_bagslot[i] && m_bagslot[i]->GetEntry() == item)
+        if (m_bagslot[i] && m_bagslot[i]->GetEntry() == itemEntry)
             return m_bagslot[i];
 
     return nullptr;

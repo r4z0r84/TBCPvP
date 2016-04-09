@@ -27,6 +27,7 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "Util.h"
+#include "MapManager.h"
 
 PlayerSocial::PlayerSocial()
 {

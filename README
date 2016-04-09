@@ -1,4 +1,4 @@
-= SkyFireONE 2.4.3 -- General information =
+= TBCPvP 2.4.3 -- General information =
 
 Copyright (C) SkyFireEMU  (http://www.projectskyfire.org)
 Copyright (C) Oregon      (http://www.oregoncore.com)
@@ -6,7 +6,7 @@ Copyright (C) TrinityCore (http://www.trinitycore.org)
 Copyright (C) MaNGOS      (http://www.getmangos.com)
 
 
-  SkyFireEMU is free software; you can redistribute it and/or modify
+  TBCPvP is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
@@ -20,8 +20,8 @@ Copyright (C) MaNGOS      (http://www.getmangos.com)
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  In addition, as a special exception, the SkyFireEMU project
-  gives permission to link the code of its release of SkyFireEMU with
+  In addition, as a special exception, the TBCPvP project
+  gives permission to link the code of its release of TBCPvP with
   the OpenSSL project's "OpenSSL" library (or with modified versions of
   it that use the same license as the "OpenSSL" library), and distribute
   the linked executables.  You must obey the GNU General Public License
@@ -30,14 +30,20 @@ Copyright (C) MaNGOS      (http://www.getmangos.com)
   file, but you are not obligated to do so.  If you do not wish to do
   so, delete this exception statement from your version.
 
-SkyFireONE is a MMORPG Framework based mostly on C++. It is completely 
+TBCPvP is a MMORPG Framework based mostly on C++. It is completely 
 open source, and is community supported. It is derived
-from OregonCore, TrinityCore, and MaNGOS, the Massive Network Game Object Servers, 
+from SkyfireONE, OregonCore, TrinityCore, and MaNGOS, the Massive Network Game Object Servers, 
 and is based on the code of there projects with extensive changes over time to optimize, 
 improve and cleanup the codebase at the same time as improving the ingame mechanics
 and functionality. If you wish to contribute ideas or code please visit 
 our site linked below or make pull requests to our github repo at 
-https://github.com/ProjectSkyfire/SkyFire_one
+https://github.com/robinsch/TBCPvP
+
+For further information on Smolderforge, please visit our
+project website at http://www.smolderforge.com/
+
+For further information on Hellground, please visit our
+project website at http://www.hellground.pl/
 
 For further information on the Project SkyFireEMU, please visit our
 project website at http://www.projectskyfire.org/
@@ -56,4 +62,4 @@ to update your database from an older revision/version can be found in the
 database/updates directory.
 
 Our Bug Tracker is located here.
-<Disabled...core is in development, this will open when we're given public support>.
+https://github.com/robinsch/TBCPvP/issues
